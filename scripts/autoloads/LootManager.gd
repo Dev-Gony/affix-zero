@@ -20,6 +20,19 @@ func try_drop() -> Dictionary:
 	return item
 
 
+func drop_boss_reward() -> Dictionary:
+	var item: Dictionary = _generator.generate_item(GameManager.floor + 3, GameManager.rebirth_count + 1)
+	if not item.is_empty():
+		item["boss_reward"] = true
+		item["sell_value"] = maxi(int(item.get("sell_value", 0)), GameManager.floor * 10)
+		if GameManager.add_inventory_item(item):
+			item_dropped.emit(item)
+			return item
+	var fallback_gold: int = maxi(50, GameManager.floor * 25)
+	GameManager.add_gold(fallback_gold)
+	return {"name": "%dG" % fallback_gold, "fallback_gold": fallback_gold}
+
+
 func migrate_save_data(data: Dictionary) -> void:
 	var inventory: Array = data.get("inventory", [])
 	for item_value: Variant in inventory:
