@@ -51,6 +51,13 @@ func generate_item(current_floor: int, rebirth_count: int) -> Dictionary:
 	}
 
 
+func icon_index_for_base(base_id: String) -> int:
+	for item_base: ItemBaseData in _item_bases:
+		if item_base.id == base_id:
+			return item_base.icon_index
+	return -1
+
+
 func _roll_rarity(current_floor: int, rebirth_count: int) -> RarityData:
 	var boost: float = (current_floor - 1) * 0.015 + rebirth_count * 0.08
 	var adjusted_weights: Array[float] = []

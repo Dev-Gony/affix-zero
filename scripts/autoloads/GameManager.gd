@@ -336,7 +336,7 @@ func reset_run_progress() -> void:
 
 func to_save_dict() -> Dictionary:
 	return {
-		"version": 1,
+		"version": 2,
 		"hp": hp,
 		"mp": mp,
 		"level": level,

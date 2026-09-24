@@ -49,6 +49,7 @@ func load_game() -> Dictionary:
 	var parsed_data: Variant = JSON.parse_string(save_file.get_as_text())
 	if parsed_data is Dictionary:
 		var data: Dictionary = parsed_data as Dictionary
+		LootManager.migrate_save_data(data)
 		GameManager.apply_save_dict(data)
 		RebirthManager.sync_unlocked_classes()
 		load_completed.emit(true)

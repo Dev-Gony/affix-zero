@@ -90,6 +90,12 @@ func _run() -> void:
 	_check(LootManager._generator._rarities.size() == 5, "All five rarities load")
 	_check(not generated_item.is_empty(), "Item generator creates an item")
 	_check(generated_item.has("affixes") and generated_item.has("base_stats") and generated_item.has("icon_index"), "Generated item is fully serializable")
+	var legacy_item: Dictionary = generated_item.duplicate(true)
+	legacy_item.erase("icon_index")
+	var legacy_save: Dictionary = {"version": 1, "inventory": [legacy_item], "equipment": {}}
+	LootManager.migrate_save_data(legacy_save)
+	var migrated_inventory: Array = legacy_save.get("inventory", [])
+	_check(int(legacy_save.get("version", 0)) == 2 and not migrated_inventory.is_empty() and (migrated_inventory[0] as Dictionary).has("icon_index"), "Legacy saves migrate base-item icons without losing inventory")
 	GameManager.inventory.clear()
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")

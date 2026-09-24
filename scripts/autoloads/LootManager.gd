@@ -18,3 +18,24 @@ func try_drop() -> Dictionary:
 		return {}
 	item_dropped.emit(item)
 	return item
+
+
+func migrate_save_data(data: Dictionary) -> void:
+	var inventory: Array = data.get("inventory", [])
+	for item_value: Variant in inventory:
+		if item_value is Dictionary:
+			_ensure_item_icon(item_value as Dictionary)
+	var equipment: Dictionary = data.get("equipment", {})
+	for slot: Variant in equipment.keys():
+		var item_value: Variant = equipment[slot]
+		if item_value is Dictionary and not (item_value as Dictionary).is_empty():
+			_ensure_item_icon(item_value as Dictionary)
+	data["version"] = 2
+
+
+func _ensure_item_icon(item: Dictionary) -> void:
+	if item.has("icon_index"):
+		return
+	var icon_index: int = _generator.icon_index_for_base(String(item.get("base_id", "")))
+	if icon_index >= 0:
+		item["icon_index"] = icon_index
