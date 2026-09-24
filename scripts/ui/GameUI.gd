@@ -48,6 +48,7 @@ var _inventory_detail: Label
 var _inventory_equip_button: Button
 var _inventory_sell_button: Button
 var _inventory_lock_button: Button
+var _loot_filter_option: OptionButton
 var _inventory_selected_id: String = ""
 var _skills_list: VBoxContainer
 var _rebirth_content: VBoxContainer
@@ -332,6 +333,13 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inventory_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_inventory_count)
+	_loot_filter_option = OptionButton.new()
+	_loot_filter_option.custom_minimum_size = Vector2(90, 21)
+	_loot_filter_option.tooltip_text = "이 등급 이상만 자동 획득"
+	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설만"]:
+		_loot_filter_option.add_item(rarity_name)
+	_loot_filter_option.item_selected.connect(_on_loot_filter_selected)
+	header.add_child(_loot_filter_option)
 	var sell_all := Button.new()
 	sell_all.text = "일반 판매"
 	sell_all.custom_minimum_size = Vector2(76, 21)
@@ -421,17 +429,41 @@ func _build_rebirth_tab(tabs: TabContainer) -> void:
 
 
 func _build_stats_tab(tabs: TabContainer) -> void:
-	var tab := MarginContainer.new()
+	var tab := VBoxContainer.new()
 	tab.name = "정보"
-	tab.add_theme_constant_override("margin_left", 8)
-	tab.add_theme_constant_override("margin_right", 8)
-	tab.add_theme_constant_override("margin_top", 7)
+	tab.add_theme_constant_override("separation", 6)
 	tabs.add_child(tab)
 	_stats_label = Label.new()
 	_stats_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
 	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_stats_label.add_theme_font_size_override("font_size", 9)
+	_stats_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	tab.add_child(_stats_label)
+
+	var save_row := HBoxContainer.new()
+	save_row.add_theme_constant_override("separation", 4)
+	tab.add_child(save_row)
+	var save_button := Button.new()
+	save_button.text = "저장"
+	save_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	save_button.pressed.connect(_manual_save)
+	save_row.add_child(save_button)
+	var load_button := Button.new()
+	load_button.text = "불러오기"
+	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	load_button.pressed.connect(_manual_load)
+	save_row.add_child(load_button)
+	var quit_button := Button.new()
+	quit_button.text = "저장 후 종료"
+	quit_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	quit_button.pressed.connect(_save_and_quit)
+	save_row.add_child(quit_button)
+
+	var save_hint := Label.new()
+	save_hint.text = "자동 저장: 30초마다 · 창 종료 시 자동 저장"
+	save_hint.add_theme_font_size_override("font_size", 6)
+	save_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	tab.add_child(save_hint)
 
 
 func _build_notification() -> void:
@@ -469,6 +501,8 @@ func _connect_signals() -> void:
 func _refresh_all() -> void:
 	_refresh_hud()
 	_refresh_speed_buttons(GameManager.speed_multiplier)
+	if _loot_filter_option != null:
+		_loot_filter_option.select(GameManager.loot_min_rarity_index)
 	_refresh_equipment()
 	_refresh_inventory()
 	_refresh_skills()
@@ -994,6 +1028,33 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 	if _management_window != null:
 		_management_window.visible = show_game_ui and _management_open
 	_sync_dock_buttons()
+
+
+func _on_loot_filter_selected(index: int) -> void:
+	GameManager.set_loot_min_rarity(index)
+	SaveManager.save_game()
+
+
+func _manual_save() -> void:
+	var err: Error = SaveManager.save_game()
+	if err == OK:
+		_show_notification("게임 저장 완료", COLOR_GREEN)
+	else:
+		_show_notification("저장 실패", Color("ff6b6b"))
+
+
+func _manual_load() -> void:
+	var data: Dictionary = SaveManager.load_game()
+	if data.is_empty():
+		_show_notification("불러올 저장 데이터가 없습니다.", Color("ffb86b"))
+	else:
+		_refresh_all()
+		_show_notification("저장 데이터 불러오기 완료", COLOR_GREEN)
+
+
+func _save_and_quit() -> void:
+	SaveManager.save_game()
+	get_tree().quit()
 
 
 func _set_speed(multiplier: float) -> void:
