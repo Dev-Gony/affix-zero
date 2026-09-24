@@ -62,3 +62,5 @@ godot --headless --path . res://tests/smoke_test.tscn
 ```
 
 The test exercises automatic combat and floor progression, all six class skills, loot generation, equipment, JSON state serialization, rebirth, and UI loading.
+
+Pull requests and pushes to `main` run the same smoke test through `.github/workflows/godot-smoke-test.yml` using Godot 4.3.
