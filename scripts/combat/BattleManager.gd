@@ -2,9 +2,18 @@ extends Node2D
 class_name BattleManager
 
 const BATTLE_RECT := Rect2(22, 54, 596, 294)
-const PLAYER_POSITION := Vector2(300, 198)
-const ENEMY_RESOURCE_DIRECTORY: String = "res://resources/enemies/"
+const PLAYER_POSITION := Vector2(320, 200)
 const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
+const ENEMY_RESOURCE_PATHS: Array[String] = [
+	"res://resources/enemies/slime.tres",
+	"res://resources/enemies/bat.tres",
+	"res://resources/enemies/skeleton.tres",
+	"res://resources/enemies/goblin.tres",
+	"res://resources/enemies/dark_knight.tres",
+	"res://resources/enemies/lich.tres",
+	"res://resources/enemies/dragon.tres",
+	"res://resources/enemies/demon_lord.tres",
+]
 
 @onready var player: PlayerAvatar = $Player
 @onready var enemies_root: Node2D = $Enemies
@@ -326,12 +335,13 @@ func _configure_player_visual() -> void:
 
 
 func _load_enemy_resources() -> void:
-	for file_name: String in DirAccess.get_files_at(ENEMY_RESOURCE_DIRECTORY):
-		if not file_name.ends_with(".tres"):
-			continue
-		var resource: Resource = load(ENEMY_RESOURCE_DIRECTORY + file_name)
+	_enemy_resources.clear()
+	for resource_path: String in ENEMY_RESOURCE_PATHS:
+		var resource: Resource = load(resource_path)
 		if resource is EnemyData:
 			_enemy_resources.append(resource as EnemyData)
+	if _enemy_resources.size() != ENEMY_RESOURCE_PATHS.size():
+		push_error("Enemy resource catalog incomplete: loaded %d/%d" % [_enemy_resources.size(), ENEMY_RESOURCE_PATHS.size()])
 	_enemy_resources.sort_custom(func(a: EnemyData, b: EnemyData) -> bool: return a.unlock_floor < b.unlock_floor)
 
 

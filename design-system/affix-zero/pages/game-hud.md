@@ -9,7 +9,7 @@ This page override adapts the project-wide pixel-art direction to the Godot 4.3 
 - Management is progressive disclosure: open one focused window at a time over the right side of the arena; clicking its dock button again or pressing Escape closes it.
 - Hide the runtime HUD, dock, and management windows while class selection is open.
 - Equipment uses a three-by-three paper-doll layout with the class portrait at its center and all seven slots visible without scrolling.
-- Inventory uses a five-by-four grid. Keep selected-item comparison and equip/sell actions visible below the grid.
+- Inventory holds 60 items in a six-column scrollable grid, matching the density of a loot-heavy ARPG. Keep selected-item comparison and equip/sell actions fixed below the grid.
 - Skills, rebirth, and statistics use dedicated windows rather than sharing permanent vertical space with combat.
 
 ## Visual language

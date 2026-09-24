@@ -341,13 +341,21 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	grid_panel.custom_minimum_size = Vector2(0, 184)
 	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0910"), Color("352b38"), 1, 0))
 	tab.add_child(grid_panel)
-	var grid_center := CenterContainer.new()
-	grid_panel.add_child(grid_center)
+	var grid_scroll := ScrollContainer.new()
+	grid_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	grid_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	grid_panel.add_child(grid_scroll)
+	var grid_margin := MarginContainer.new()
+	grid_margin.add_theme_constant_override("margin_left", 3)
+	grid_margin.add_theme_constant_override("margin_right", 3)
+	grid_margin.add_theme_constant_override("margin_top", 3)
+	grid_margin.add_theme_constant_override("margin_bottom", 3)
+	grid_scroll.add_child(grid_margin)
 	_inventory_grid = GridContainer.new()
-	_inventory_grid.columns = 5
+	_inventory_grid.columns = 6
 	_inventory_grid.add_theme_constant_override("h_separation", 2)
 	_inventory_grid.add_theme_constant_override("v_separation", 2)
-	grid_center.add_child(_inventory_grid)
+	grid_margin.add_child(_inventory_grid)
 	var detail_panel := PanelContainer.new()
 	detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	detail_panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("69432f"), 1, 0))
@@ -600,7 +608,7 @@ func _class_portrait_icon() -> AtlasTexture:
 
 
 func _refresh_inventory() -> void:
-	_inventory_count.text = "가방  %d/%d" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
+	_inventory_count.text = "가방  %d/%d · 6열 보관함" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
 	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
 	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -617,7 +625,7 @@ func _refresh_inventory() -> void:
 			var item: Dictionary = sorted_items[index]
 			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 			var slot_button := Button.new()
-			slot_button.custom_minimum_size = Vector2(44, 42)
+			slot_button.custom_minimum_size = Vector2(42, 42)
 			slot_button.icon = _item_icon(item)
 			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
@@ -634,7 +642,7 @@ func _refresh_inventory() -> void:
 			_inventory_grid.add_child(slot_button)
 		else:
 			var empty_slot := Panel.new()
-			empty_slot.custom_minimum_size = Vector2(44, 42)
+			empty_slot.custom_minimum_size = Vector2(42, 42)
 			empty_slot.add_theme_stylebox_override("panel", _style_box(Color("0d0b11"), Color("2e2938"), 1, 0))
 			_inventory_grid.add_child(empty_slot)
 	_refresh_inventory_detail(sorted_items)

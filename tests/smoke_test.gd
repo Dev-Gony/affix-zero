@@ -34,12 +34,15 @@ func _run() -> void:
 	var warrior: ClassData = load("res://resources/classes/warrior.tres")
 	GameManager.select_class(warrior)
 	await get_tree().process_frame
+	_check(battle.player.position == Vector2(320, 200), "Player remains fixed at the exact center of the 640x400 viewport")
 	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
 	for spawned_enemy: EnemyAI in battle._enemies:
 		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
 	var animation_target: EnemyAI = battle._nearest_enemy()
 	battle._perform_auto_attack()
 	_check(battle.player._motion_kind == "attack", "Automatic attacks trigger the player combat animation")
+	var expected_facing: Vector2 = battle.player.global_position.direction_to(animation_target.global_position)
+	_check(battle.player._facing.dot(expected_facing) > 0.99, "Player attack motion faces the selected enemy")
 	_check(animation_target._hit_flash_left > 0.0, "Enemy hits trigger readable impact feedback")
 	var contact_enemy: EnemyAI = battle._enemies[0] if battle._enemies[0] != animation_target else battle._enemies[1]
 	contact_enemy.global_position = battle.player.global_position + Vector2(contact_enemy.radius + 8.0, 0)
@@ -108,7 +111,9 @@ func _run() -> void:
 	GameManager.inventory.clear()
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
-	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders a stable twenty-slot loot grid")
+	_check(GameManager.INVENTORY_CAPACITY == 60, "Loot-heavy progression provides a sixty-slot inventory")
+	_check(game_ui._inventory_grid.columns == 6, "Inventory uses a readable six-column scrollable grid")
+	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders every available loot slot")
 	_check(game_ui._inventory_grid.get_child(0).get_child_count() >= 2, "Loot slots show text rarity and item-level badges")
 	var rendered_icon: AtlasTexture = (game_ui._inventory_grid.get_child(0) as Button).icon as AtlasTexture
 	_check(rendered_icon != null and rendered_icon.atlas == GameUI.ITEM_BASE_ATLAS, "Inventory renders the generated base-item icon atlas")

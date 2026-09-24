@@ -31,6 +31,15 @@ jobs:
       - name: Run gameplay smoke test
         run: godot --headless --path . res://tests/smoke_test.tscn
 
+      - name: Verify exported runtime resources
+        shell: bash
+        run: |
+          mkdir -p build/runtime-smoke
+          godot --headless --path . --export-pack "Windows Desktop" build/runtime-smoke/AFFIX_ZERO.pck
+          set -o pipefail
+          godot --headless --main-pack build/runtime-smoke/AFFIX_ZERO.pck --quit-after 8 2>&1 | tee build/runtime-smoke/runtime.log
+          ! grep -E "SCRIPT ERROR|Enemy resource catalog incomplete|Loot resource catalog incomplete" build/runtime-smoke/runtime.log
+
       - name: Export Windows build
         run: |
           mkdir -p build/windows

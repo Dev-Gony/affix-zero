@@ -1,7 +1,56 @@
 extends RefCounted
 class_name ItemGenerator
 
-const ITEM_RESOURCE_DIRECTORY: String = "res://resources/items/"
+const ITEM_BASE_RESOURCE_PATHS: Array[String] = [
+	"res://resources/items/weapon_dagger.tres",
+	"res://resources/items/weapon_longsword.tres",
+	"res://resources/items/weapon_axe.tres",
+	"res://resources/items/weapon_magic_sword.tres",
+	"res://resources/items/weapon_divine_sword.tres",
+	"res://resources/items/helmet_leather_hat.tres",
+	"res://resources/items/helmet_iron_helm.tres",
+	"res://resources/items/helmet_mithril_helm.tres",
+	"res://resources/items/helmet_dragon_helm.tres",
+	"res://resources/items/armor_cloth.tres",
+	"res://resources/items/armor_leather.tres",
+	"res://resources/items/armor_plate.tres",
+	"res://resources/items/armor_dragonscale.tres",
+	"res://resources/items/gloves_cloth.tres",
+	"res://resources/items/gloves_leather.tres",
+	"res://resources/items/gloves_battle.tres",
+	"res://resources/items/gloves_dragon.tres",
+	"res://resources/items/boots_sandals.tres",
+	"res://resources/items/boots_leather.tres",
+	"res://resources/items/boots_swift.tres",
+	"res://resources/items/boots_gale.tres",
+	"res://resources/items/ring_copper.tres",
+	"res://resources/items/ring_silver.tres",
+	"res://resources/items/ring_gold.tres",
+	"res://resources/items/ring_diamond.tres",
+	"res://resources/items/amulet_bone.tres",
+	"res://resources/items/amulet_crystal.tres",
+	"res://resources/items/amulet_ruby.tres",
+	"res://resources/items/amulet_dragon_tear.tres",
+]
+const AFFIX_RESOURCE_PATHS: Array[String] = [
+	"res://resources/items/affix_atk.tres",
+	"res://resources/items/affix_def.tres",
+	"res://resources/items/affix_hp.tres",
+	"res://resources/items/affix_mp.tres",
+	"res://resources/items/affix_spd.tres",
+	"res://resources/items/affix_crit.tres",
+	"res://resources/items/affix_vamp.tres",
+	"res://resources/items/affix_xp.tres",
+	"res://resources/items/affix_gold.tres",
+	"res://resources/items/affix_pen.tres",
+]
+const RARITY_RESOURCE_PATHS: Array[String] = [
+	"res://resources/items/rarity_normal.tres",
+	"res://resources/items/rarity_magic.tres",
+	"res://resources/items/rarity_rare.tres",
+	"res://resources/items/rarity_unique.tres",
+	"res://resources/items/rarity_legend.tres",
+]
 
 var _item_bases: Array[ItemBaseData] = []
 var _affixes: Array[AffixData] = []
@@ -102,14 +151,23 @@ func _roll_affixes(max_affixes: int, current_floor: int) -> Array[Dictionary]:
 
 
 func _load_balance_resources() -> void:
-	for file_name: String in DirAccess.get_files_at(ITEM_RESOURCE_DIRECTORY):
-		if not file_name.ends_with(".tres"):
-			continue
-		var resource: Resource = load(ITEM_RESOURCE_DIRECTORY + file_name)
+	_item_bases.clear()
+	_affixes.clear()
+	_rarities.clear()
+	for resource_path: String in ITEM_BASE_RESOURCE_PATHS:
+		var resource: Resource = load(resource_path)
 		if resource is ItemBaseData:
 			_item_bases.append(resource as ItemBaseData)
-		elif resource is AffixData:
+	for resource_path: String in AFFIX_RESOURCE_PATHS:
+		var resource: Resource = load(resource_path)
+		if resource is AffixData:
 			_affixes.append(resource as AffixData)
-		elif resource is RarityData:
+	for resource_path: String in RARITY_RESOURCE_PATHS:
+		var resource: Resource = load(resource_path)
+		if resource is RarityData:
 			_rarities.append(resource as RarityData)
+	if _item_bases.size() != ITEM_BASE_RESOURCE_PATHS.size() or _affixes.size() != AFFIX_RESOURCE_PATHS.size() or _rarities.size() != RARITY_RESOURCE_PATHS.size():
+		push_error("Loot resource catalog incomplete: bases %d/%d, affixes %d/%d, rarities %d/%d" % [
+			_item_bases.size(), ITEM_BASE_RESOURCE_PATHS.size(), _affixes.size(), AFFIX_RESOURCE_PATHS.size(), _rarities.size(), RARITY_RESOURCE_PATHS.size()
+		])
 	_rarities.sort_custom(func(a: RarityData, b: RarityData) -> bool: return a.index < b.index)

@@ -22,7 +22,7 @@ const AVAILABLE_SPEED_MULTIPLIERS: Array[float] = [1.0, 2.0, 5.0]
 const EQUIPMENT_SLOTS: Array[String] = [
 	"weapon", "helmet", "armor", "gloves", "boots", "ring", "amulet"
 ]
-const INVENTORY_CAPACITY: int = 20
+const INVENTORY_CAPACITY: int = 60
 
 var hp: int = 0
 var max_hp: int = 100

@@ -23,7 +23,7 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 - Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
 - Six classes with distinct stats, unlock requirements, and skill visuals
 - Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
-- Diablo-style 3x3 equipment paper doll, 20-slot loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
+- Diablo-style 3x3 equipment paper doll, 60-slot scrollable loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
 - Compact five-button management dock with focused right-side windows so combat remains visible while managing a build
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
 - Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake

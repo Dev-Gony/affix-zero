@@ -100,6 +100,7 @@ func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
 	var direction: Vector2 = from.direction_to(to)
 	var tangent := Vector2(-direction.y, direction.x)
 	var color := Color("ffd84d") if critical else Color("dbeafe")
+	_lines.append({"points": PackedVector2Array([from + tangent * 6.0, from + direction * 17.0, from + direction * 25.0 - tangent * 7.0]), "color": color, "life": 0.16, "duration": 0.16, "width": 2.0})
 	_lines.append({"points": PackedVector2Array([to - direction * 14.0 - tangent * 5.0, to + direction * 7.0 + tangent * 5.0]), "color": color, "life": 0.13, "duration": 0.13, "width": 2.5})
 	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
 
