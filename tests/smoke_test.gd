@@ -35,12 +35,14 @@ func _run() -> void:
 	GameManager.select_class(warrior)
 	await get_tree().process_frame
 	_check(BattleManager.WORLD_RECT.has_point(battle.player.position), "Player begins inside the scrolling hunt world")
+	_check(battle.camera != null and battle.camera.enabled, "Player-follow camera is active")
+	_check(battle._combat_rect.has_point(battle.player.position), "Player begins inside the current room walk area")
 	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
 	var player_start: Vector2 = battle.player.position
 	await get_tree().create_timer(0.35).timeout
 	_check(battle.player.position.distance_to(player_start) > 0.5, "Auto-hunt moves the player toward enemies")
 	for spawned_enemy: EnemyAI in battle._enemies:
-		_check(BattleManager.WORLD_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the scrolling world bounds")
+		_check(battle._combat_rect.has_point(spawned_enemy.global_position), "Spawned enemies remain inside the active room walk area")
 	var animation_target: EnemyAI = battle._nearest_enemy()
 	animation_target.global_position = battle.player.global_position + Vector2(30, 0)
 	battle._perform_auto_attack()
@@ -63,6 +65,8 @@ func _run() -> void:
 	_check(battle._enemy_resources.size() == 8, "All eight enemy resources load")
 	_check(battle._boss_resource != null and battle._boss_resource.behavior == "boss", "Boss enemy resource is registered")
 	_check(not battle.is_boss_floor(9) and battle.is_boss_floor(10) and battle.is_boss_floor(20), "Every tenth floor is a boss milestone")
+	_check(WorldLayout.room_index_for_floor(1) != WorldLayout.room_index_for_floor(2), "Floor progression moves between connected rooms")
+	_check(not WorldLayout.travel_waypoints(WorldLayout.room_index_for_floor(1), WorldLayout.room_index_for_floor(2)).is_empty(), "Adjacent floor rooms expose a corridor travel route")
 	var enemy_behaviors: Dictionary = {}
 	for enemy_resource: EnemyData in battle._enemy_resources:
 		enemy_behaviors[enemy_resource.behavior] = true
