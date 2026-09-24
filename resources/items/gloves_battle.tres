@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ItemBaseData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://resources/items/ItemBaseData.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "battle_gloves"
+display_name = "전투 장갑"
+slot = "gloves"
+tier = 11
+base_stats = {"ATK": 6.0, "DEF": 4.0}

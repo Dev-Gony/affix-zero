@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "skeleton"
+display_name = "스켈레톤"
+unlock_floor = 7
+base_hp = 35.0
+base_atk = 9.0
+base_def = 3.0
+move_speed = 22.0
+attack_cooldown = 1.1
+xp_reward = 13
+gold_reward = 7
+radius = 8.0
+color = Color(0.82, 0.82, 0.72, 1)

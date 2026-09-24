@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="AffixData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://resources/items/AffixData.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "fatal"
+display_name = "치명의"
+stat = "CRIT"
+min_value = 1.0
+max_value = 15.0

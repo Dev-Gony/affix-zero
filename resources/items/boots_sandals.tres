@@ -1,0 +1,9 @@
+[gd_resource type="Resource" script_class="ItemBaseData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://resources/items/ItemBaseData.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "sandals"
+display_name = "샌들"
+slot = "boots"
+tier = 1
+base_stats = {"SPD": 0.05}

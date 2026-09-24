@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ClassData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/classes/ClassData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "warrior"
+display_name = "전사"
+description = "튼튼한 근접 전투원 · 회전참"
+skill_type = "melee_spin"
+base_hp = 120
+base_mp = 30
+base_atk = 15
+base_def = 8
+base_spd = 1.0
+base_crit = 5.0
+unlock_rebirths = 0
+color = Color(0.86, 0.24, 0.20, 1)

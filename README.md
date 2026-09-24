@@ -1,16 +1,29 @@
 # AFFIX: ZERO
 
-AFFIX: ZERO is a Godot 4.3 idle hack-and-slash game inspired by the top-down action of Hero Siege and the randomized loot progression of Diablo. The project is currently a foundation only: it contains the initial scene, global state placeholders, save-file access, and directories for future systems.
+AFFIX: ZERO is a complete Godot 4.3 idle hack-and-slash prototype. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
 
-## Project setup
+## Run the game
 
-- Engine: Godot 4.3
-- Base resolution: 640x360
-- Stretch mode: `canvas_items`
-- Rendering: compatibility renderer with nearest-neighbor texture filtering for pixel art
-- Main scene: `res://scenes/main.tscn`
+1. Open `project.godot` in Godot 4.3.
+2. Press **F6/F5** to run `scenes/main.tscn`.
+3. Select Warrior or Mage. The remaining four classes unlock through rebirths.
 
-Open `project.godot` in Godot 4.3 and run the project. The main scene contains a `BattleArea` for the upper combat region and a `UILayer` whose origin begins at the lower part of the viewport.
+The internal pixel-art resolution is 640x360 and the default desktop window is 1280x720. The compatibility renderer keeps the project suitable for desktop and web exports.
+
+## Implemented systems
+
+- Fixed-center automatic combat with nearest-target attacks and 3-second class skills
+- Floor-scaled waves, eight enemy families, death, immediate revival, and floor retreat
+- Six classes with distinct stats, unlock requirements, and skill visuals
+- Five loot rarities, seven equipment slots, 29 item bases, and ten non-duplicating affixes
+- 20-slot inventory, equipment, selling, bulk-selling, passive skills, stats, and rebirth UI
+- Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
+- Damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
+- x1/x2/x5 combat speed control
+- Complete JSON save/load state with a real-time 30-second autosave interval
+- Three BGM channels and fourteen SFX channels prepared as `AudioStreamPlayer2D` placeholders
+
+Audio playback becomes active when matching `.ogg` files are placed in `assets/bgm/` and `assets/sfx/`. The expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
 
 ## Project structure
 
@@ -23,28 +36,29 @@ affix-zero/
 |   |-- ui/
 |   `-- effects/
 |-- scripts/
-|   |-- autoloads/
-|   |   |-- GameManager.gd
-|   |   |-- SaveManager.gd
-|   |   `-- LootManager.gd
-|   |-- combat/
-|   |-- loot/
-|   |-- progression/
-|   `-- ui/
+|   |-- autoloads/       # State, save, loot, and audio managers
+|   |-- combat/          # Battle loop, enemies, damage, projectiles, effects
+|   |-- loot/            # Resource-driven item generation
+|   |-- progression/     # Level and rebirth systems
+|   `-- ui/              # HUD, tabs, inventory, and class selection
 |-- resources/
-|   |-- items/
-|   |-- enemies/
-|   `-- classes/
-`-- assets/
-    |-- sprites/
-    |-- sfx/
-    `-- bgm/
+|   |-- items/           # Item bases, rarities, and affixes
+|   |-- enemies/         # Eight enemy balance resources
+|   `-- classes/         # Six class balance resources
+|-- assets/
+|   |-- sprites/
+|   |-- sfx/
+|   `-- bgm/
+`-- tests/
+    `-- smoke_test.tscn
 ```
 
-## Autoloads
+## Validation
 
-- `GameManager`: stores the initial player stats, game state, floor, currencies, and the selected x1/x2/x5 speed multiplier.
-- `SaveManager`: provides JSON save and load helpers backed by `user://save.json`.
-- `LootManager`: reserved for future item generation.
+Run the automated Godot smoke test from a terminal:
 
-Gameplay, combat, loot generation, progression, and UI behavior are intentionally not implemented yet.
+```powershell
+godot --headless --path . res://tests/smoke_test.tscn
+```
+
+The test exercises automatic combat and floor progression, all six class skills, loot generation, equipment, JSON state serialization, rebirth, and UI loading.

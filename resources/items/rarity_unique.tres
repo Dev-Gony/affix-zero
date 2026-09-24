@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RarityData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://resources/items/RarityData.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "unique"
+display_name = "유니크"
+index = 3
+color = Color(1, 0.549, 0, 1)
+max_affixes = 4
+stat_multiplier = 2.2
+drop_weight = 4.0

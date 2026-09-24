@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ClassData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/classes/ClassData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "mage"
+display_name = "마법사"
+description = "강력한 원거리 마법 · 화염구"
+skill_type = "fireball"
+base_hp = 70
+base_mp = 100
+base_atk = 20
+base_def = 4
+base_spd = 0.8
+base_crit = 8.0
+unlock_rebirths = 0
+color = Color(0.27, 0.43, 1, 1)

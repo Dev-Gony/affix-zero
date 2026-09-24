@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="ClassData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/classes/ClassData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "knight"
+display_name = "기사"
+description = "철벽 방어와 돌진 · 방패 돌진"
+skill_type = "shield_charge"
+base_hp = 180
+base_mp = 40
+base_atk = 18
+base_def = 14
+base_spd = 0.7
+base_crit = 4.0
+unlock_rebirths = 2
+color = Color(0.42, 0.72, 0.82, 1)

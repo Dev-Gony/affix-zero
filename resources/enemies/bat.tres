@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "bat"
+display_name = "박쥐"
+unlock_floor = 4
+base_hp = 16.0
+base_atk = 6.0
+base_def = 0.0
+move_speed = 38.0
+attack_cooldown = 0.9
+xp_reward = 10
+gold_reward = 5
+radius = 6.0
+color = Color(0.61, 0.39, 0.76, 1)

@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "dragon"
+display_name = "드래곤"
+unlock_floor = 19
+base_hp = 150.0
+base_atk = 30.0
+base_def = 12.0
+move_speed = 16.0
+attack_cooldown = 1.6
+xp_reward = 48
+gold_reward = 32
+radius = 14.0
+color = Color(0.92, 0.30, 0.18, 1)

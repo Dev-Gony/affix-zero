@@ -1,0 +1,18 @@
+[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/enemies/EnemyData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "goblin"
+display_name = "고블린"
+unlock_floor = 10
+base_hp = 45.0
+base_atk = 12.0
+base_def = 4.0
+move_speed = 28.0
+attack_cooldown = 0.9
+xp_reward = 17
+gold_reward = 10
+radius = 8.0
+color = Color(0.53, 0.72, 0.22, 1)
