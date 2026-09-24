@@ -17,6 +17,12 @@ script = ExtResource("1_battle")
 [node name="Player" type="Node2D" parent="BattleArea"]
 script = ExtResource("2_player")
 
+[node name="Camera2D" type="Camera2D" parent="BattleArea/Player"]
+position_smoothing_enabled = true
+position_smoothing_speed = 7.0
+limit_smoothed = true
+enabled = true
+
 [node name="Effects" type="Node2D" parent="BattleArea"]
 script = ExtResource("3_effects")
 
