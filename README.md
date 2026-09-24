@@ -1,6 +1,6 @@
 # AFFIX: ZERO
 
-AFFIX: ZERO is a complete Godot 4.3 idle hack-and-slash prototype. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
+AFFIX: ZERO is a playable Godot 4.3 idle hack-and-slash prototype under active development. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
 
 ## Run the game
 
@@ -10,7 +10,7 @@ AFFIX: ZERO is a complete Godot 4.3 idle hack-and-slash prototype. It combines f
 
 The internal pixel-art resolution is 640x360 and the default desktop window is 1280x720. The compatibility renderer keeps the project suitable for desktop and web exports.
 
-Keyboard shortcuts: `1`-`5` switch the management tabs, while `Z` / `X` / `C` select x1 / x2 / x5 combat speed. Class cards and all buttons support keyboard focus and activation.
+Keyboard shortcuts: `1`-`5` switch the management tabs, while `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
 
 Every pull request CI run also publishes two downloadable playable artifacts:
 
@@ -20,14 +20,14 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 ## Implemented systems
 
 - Fixed-center automatic combat with nearest-target attacks and 3-second class skills
-- Floor-scaled waves, eight enemy families, death, immediate revival, and floor retreat
+- Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
 - Six classes with distinct stats, unlock requirements, and skill visuals
 - Five loot rarities, seven equipment slots, 29 item bases, and ten non-duplicating affixes
 - 20-slot loot grid, icon-based equipment overview, item comparison, selling, passive skills, stats, and rebirth UI
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
-- Damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
+- Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
 - Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
-- Visible edge-spawn telegraphs and equipment comparison deltas in the selected-item detail panel
+- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, and equipment comparison deltas
 - x1/x2/x5 combat speed control
 - Complete JSON save/load state with a real-time 30-second autosave interval
 - Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
@@ -59,8 +59,7 @@ affix-zero/
 |   |-- sprites/
 |   |-- sfx/
 |   `-- bgm/
-`-- tests/
-    `-- smoke_test.tscn
+`-- tests/              # Automated smoke test and visual-QA capture scenes
 ```
 
 ## Validation
