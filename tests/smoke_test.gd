@@ -57,6 +57,8 @@ func _run() -> void:
 
 	_check(battle != null, "BattleManager scene is available")
 	_check(battle._enemy_resources.size() == 8, "All eight enemy resources load")
+	_check(battle._boss_resource != null and battle._boss_resource.behavior == "boss", "Boss enemy resource is registered")
+	_check(not battle.is_boss_floor(9) and battle.is_boss_floor(10) and battle.is_boss_floor(20), "Every tenth floor is a boss milestone")
 	var enemy_behaviors: Dictionary = {}
 	for enemy_resource: EnemyData in battle._enemy_resources:
 		enemy_behaviors[enemy_resource.behavior] = true
@@ -115,6 +117,12 @@ func _run() -> void:
 	_check(game_ui._inventory_grid.columns == 6, "Inventory uses a readable six-column scrollable grid")
 	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders every available loot slot")
 	_check(game_ui._inventory_grid.get_child(0).get_child_count() >= 2, "Loot slots show text rarity and item-level badges")
+	GameManager.inventory.clear()
+	var boss_reward: Dictionary = LootManager.drop_boss_reward()
+	_check(not boss_reward.is_empty(), "Boss clear always grants an item or fallback gold reward")
+	if bool(boss_reward.get("boss_reward", false)):
+		_check(GameManager.inventory.size() == 1, "Boss item reward enters inventory")
+		_check(int(boss_reward.get("item_level", 0)) >= GameManager.floor, "Boss reward is generated above the current floor baseline")
 	var rendered_icon: AtlasTexture = (game_ui._inventory_grid.get_child(0) as Button).icon as AtlasTexture
 	_check(rendered_icon != null and rendered_icon.atlas == GameUI.ITEM_BASE_ATLAS, "Inventory renders the generated base-item icon atlas")
 	battle.effects.clear_effects()
