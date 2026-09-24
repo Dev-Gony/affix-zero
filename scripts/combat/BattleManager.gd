@@ -219,7 +219,7 @@ func _perform_auto_attack() -> void:
 		return
 	if player.global_position.distance_to(target.global_position) > _attack_range():
 		return
-	var attack_power: float = GameManager.atk * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
+	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
 	player.play_attack(target.global_position)
 	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
@@ -405,7 +405,7 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var skill_level: int = 1 + floori(float(GameManager.level - 1) / 5.0)
-	var attack_power: float = GameManager.atk * power_scale * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
+	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, GameManager.crit, true)
 	enemy.take_hit(result)
 	if bool(result.get("critical", false)):
