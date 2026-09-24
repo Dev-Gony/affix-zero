@@ -5,6 +5,7 @@ const WORLD_RECT := Rect2(0, 0, 1920, 1200)
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
 const PLAYER_BASE_MOVE_SPEED: float = 54.0
+const PLAYER_ACCELERATION: float = 360.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
@@ -51,6 +52,7 @@ var _traveling: bool = false
 var _travel_target_room: int = 4
 var _travel_waypoints: Array[Vector2] = []
 var _travel_index: int = 0
+var _player_velocity: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -156,6 +158,7 @@ func _start_battle() -> void:
 	_combat_rect = WorldLayout.walk_rect(_current_room)
 	player.visible = true
 	player.position = WorldLayout.room_center(_current_room)
+	_player_velocity = Vector2.ZERO
 	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
 	_attack_time_left = 0.15
@@ -238,7 +241,7 @@ func _update_auto_hunt(delta: float) -> void:
 		if distance > desired_range:
 			_move_player_toward(target.global_position, delta)
 		else:
-			player.set_move_direction(Vector2.ZERO)
+			_slow_player(delta)
 		return
 
 	_wander_time_left -= delta
@@ -254,15 +257,22 @@ func _update_auto_hunt(delta: float) -> void:
 func _move_player_toward(world_target: Vector2, delta: float) -> void:
 	var direction: Vector2 = player.global_position.direction_to(world_target)
 	if direction.is_zero_approx():
-		player.set_move_direction(Vector2.ZERO)
+		_slow_player(delta)
 		return
 	var move_speed: float = PLAYER_BASE_MOVE_SPEED * clampf(GameManager.spd, 0.75, 2.2)
-	var next_position: Vector2 = player.global_position + direction * move_speed * delta
+	var desired_velocity: Vector2 = direction * move_speed
+	_player_velocity = _player_velocity.move_toward(desired_velocity, PLAYER_ACCELERATION * delta)
+	var next_position: Vector2 = player.global_position + _player_velocity * delta
 	player.global_position = Vector2(
 		clampf(next_position.x, _combat_rect.position.x + 14.0, _combat_rect.end.x - 14.0),
 		clampf(next_position.y, _combat_rect.position.y + 16.0, _combat_rect.end.y - 14.0)
 	)
-	player.set_move_direction(direction)
+	player.set_move_direction(_player_velocity.normalized())
+
+
+func _slow_player(delta: float) -> void:
+	_player_velocity = _player_velocity.move_toward(Vector2.ZERO, PLAYER_ACCELERATION * 1.35 * delta)
+	player.set_move_direction(_player_velocity.normalized() if _player_velocity.length() > 1.0 else Vector2.ZERO)
 
 
 func _begin_room_travel(from_room: int, to_room: int) -> void:
@@ -295,8 +305,14 @@ func _update_room_travel(delta: float) -> void:
 		return
 	var direction: Vector2 = player.global_position.direction_to(waypoint)
 	var move_speed: float = PLAYER_BASE_MOVE_SPEED * 1.45 * clampf(GameManager.spd, 0.8, 2.0)
-	player.global_position += direction * minf(move_speed * delta, distance)
-	player.set_move_direction(direction)
+	var desired_velocity: Vector2 = direction * move_speed
+	_player_velocity = _player_velocity.move_toward(desired_velocity, PLAYER_ACCELERATION * delta)
+	var step: Vector2 = _player_velocity * delta
+	if step.length() >= distance:
+		player.global_position = waypoint
+	else:
+		player.global_position += step
+	player.set_move_direction(_player_velocity.normalized())
 
 
 func _finish_room_travel() -> void:
@@ -304,6 +320,7 @@ func _finish_room_travel() -> void:
 	_current_room = _travel_target_room
 	_combat_rect = WorldLayout.walk_rect(_current_room)
 	player.position = WorldLayout.room_center(_current_room)
+	_player_velocity = Vector2.ZERO
 	player.set_move_direction(Vector2.ZERO)
 	_wander_time_left = 0.0
 	_spawn_wave()
