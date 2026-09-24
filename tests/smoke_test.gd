@@ -34,13 +34,13 @@ func _run() -> void:
 	var warrior: ClassData = load("res://resources/classes/warrior.tres")
 	GameManager.select_class(warrior)
 	await get_tree().process_frame
-	_check(BattleManager.BATTLE_RECT.has_point(battle.player.position), "Player begins inside the active hunt arena")
+	_check(BattleManager.WORLD_RECT.has_point(battle.player.position), "Player begins inside the scrolling hunt world")
 	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
 	var player_start: Vector2 = battle.player.position
 	await get_tree().create_timer(0.35).timeout
 	_check(battle.player.position.distance_to(player_start) > 0.5, "Auto-hunt moves the player toward enemies")
 	for spawned_enemy: EnemyAI in battle._enemies:
-		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
+		_check(BattleManager.WORLD_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the scrolling world bounds")
 	var animation_target: EnemyAI = battle._nearest_enemy()
 	animation_target.global_position = battle.player.global_position + Vector2(30, 0)
 	battle._perform_auto_attack()
