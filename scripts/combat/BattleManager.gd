@@ -8,7 +8,10 @@ const PLAYER_BASE_MOVE_SPEED: float = 54.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
-const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
+const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
+const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
+const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
+const RUBBLE_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/rubble.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
 	"res://resources/enemies/bat.tres",
@@ -87,21 +90,44 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var base_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
+	draw_rect(WORLD_RECT, Color("17131c"), true)
 	for room_index in 9:
 		var room := WorldLayout.room_rect(room_index)
-		var room_tint := base_tint.lightened(float((room_index % 3) - 1) * 0.035)
-		draw_texture_rect(DUNGEON_TEXTURE, room, false, room_tint)
 		var walk := WorldLayout.walk_rect(room_index)
-		draw_rect(walk, Color(0.08, 0.045, 0.05, 0.08), true)
-		draw_arc(walk.get_center(), 44.0 + float(room_index % 2) * 7.0, 0.0, TAU, 32, Color(0.45, 0.18, 0.16, 0.13), 2.0)
+		_draw_tiled_rect(room, FLOOR_TILE, Color("5b3c3c") if room_index % 2 == 0 else Color("4a3438"))
+		_draw_tiled_rect(walk, BRICK_TILE, Color("8a6f75"))
+		_draw_room_walls(walk)
+		if room_index % 2 == 0:
+			draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(44, 38), Vector2(28, 28)), false, Color("b9a39d"))
+		if room_index % 3 == 0:
+			draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(78, 66), Vector2(24, 24)), false, Color("8f7f7a"))
+		draw_arc(walk.get_center(), 40.0 + float(room_index % 2) * 8.0, 0.0, TAU, 32, Color(0.55, 0.16, 0.17, 0.18), 2.0)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
 		if corridor.size.is_zero_approx():
 			continue
-		draw_rect(corridor, Color("2a2020"), true)
-		draw_rect(corridor.grow(-3.0), Color("4a3430"), true)
-	draw_rect(WORLD_RECT, Color(0.02, 0.015, 0.025, 0.07), true)
+		_draw_tiled_rect(corridor, BRICK_TILE, Color("7a6066"))
+	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.12), true)
+
+
+func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
+	var tile_size := Vector2(16, 16)
+	var y: float = area.position.y
+	while y < area.end.y:
+		var x: float = area.position.x
+		while x < area.end.x:
+			var size := Vector2(minf(tile_size.x, area.end.x - x), minf(tile_size.y, area.end.y - y))
+			draw_texture_rect(texture, Rect2(Vector2(x, y), size), false, modulate)
+			x += tile_size.x
+		y += tile_size.y
+
+
+func _draw_room_walls(walk: Rect2) -> void:
+	var wall := 16.0
+	_draw_tiled_rect(Rect2(walk.position - Vector2(wall, wall), Vector2(walk.size.x + wall * 2.0, wall)), WALL_TILE, Color("a2a8b3"))
+	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.end.y), Vector2(walk.size.x + wall * 2.0, wall)), WALL_TILE, Color("737986"))
+	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.position.y), Vector2(wall, walk.size.y)), WALL_TILE, Color("8e95a0"))
+	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), WALL_TILE, Color("8e95a0"))
 
 
 func _start_battle() -> void:
