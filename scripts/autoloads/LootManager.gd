@@ -14,7 +14,11 @@ func try_drop() -> Dictionary:
 	if randf() * 100.0 >= drop_chance:
 		return {}
 	var item: Dictionary = _generator.generate_item(GameManager.floor, GameManager.rebirth_count)
-	if item.is_empty() or not GameManager.add_inventory_item(item):
+	if item.is_empty():
+		return {}
+	if int(item.get("rarity_index", 0)) < GameManager.loot_min_rarity_index:
+		return {}
+	if not GameManager.add_inventory_item(item):
 		return {}
 	item_dropped.emit(item)
 	return item
