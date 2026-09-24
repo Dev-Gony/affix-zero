@@ -13,3 +13,5 @@ Prompt summaries:
 - Seven equipment silhouettes in a 4x2 atlas: weapon, helmet, armor, gloves, boots, ring, and amulet, with one empty cell.
 
 Generated checkerboard previews were background-extracted into true alpha atlases while preserving outlined sprite interiors; only the production alpha files are kept in the repository.
+
+`item_base_atlas_v2.png` is a true-alpha 6x5 atlas containing individual artwork for all 29 equipment bases. Its source prompt requested a strict cell order for five weapons, four helmets, four armors, four gloves, four boots, four rings, and four amulets, with one deliberately empty cell. The existing equipment atlas was supplied only as a style reference for palette, outline weight, and small-size readability; every base-item design is original. A built-in image edit removed only the generated checkerboard backdrop while preserving the item silhouettes and grid positions.

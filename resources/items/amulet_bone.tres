@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "bone_necklace"
 display_name = "뼈 목걸이"
 slot = "amulet"
+icon_index = 26
 tier = 1
 base_stats = {"MP": 8.0}

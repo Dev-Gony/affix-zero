@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "dragonscale"
 display_name = "용린 갑옷"
 slot = "armor"
+icon_index = 13
 tier = 18
 base_stats = {"DEF": 20.0}

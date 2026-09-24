@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "swift_boots"
 display_name = "신속 장화"
 slot = "boots"
+icon_index = 20
 tier = 11
 base_stats = {"SPD": 0.22}

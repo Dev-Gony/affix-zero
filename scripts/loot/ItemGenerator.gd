@@ -37,6 +37,7 @@ func generate_item(current_floor: int, rebirth_count: int) -> Dictionary:
 		"id": "%d-%d" % [Time.get_ticks_usec(), randi()],
 		"base_id": item_base.id,
 		"base_name": item_base.display_name,
+		"icon_index": item_base.icon_index,
 		"name": item_name,
 		"slot": item_base.slot,
 		"item_level": current_floor,

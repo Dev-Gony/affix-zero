@@ -22,12 +22,12 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 - Fixed-center automatic combat with nearest-target attacks and 3-second class skills
 - Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
 - Six classes with distinct stats, unlock requirements, and skill visuals
-- Five loot rarities, seven equipment slots, 29 item bases, and ten non-duplicating affixes
+- Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
 - 20-slot loot grid, icon-based equipment overview, item comparison, selling, passive skills, stats, and rebirth UI
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
 - Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
 - Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
-- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, and equipment comparison deltas
+- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, individual loot icons, and equipment comparison deltas
 - x1/x2/x5 combat speed control
 - Complete JSON save/load state with a real-time 30-second autosave interval
 - Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks

@@ -1,10 +1,13 @@
 extends Node2D
 class_name EffectLayer
 
+const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
+
 var _particles: Array[Dictionary] = []
 var _texts: Array[Dictionary] = []
 var _rings: Array[Dictionary] = []
 var _lines: Array[Dictionary] = []
+var _loot_icons: Array[Dictionary] = []
 var _flash_alpha: float = 0.0
 
 
@@ -33,6 +36,11 @@ func _process(delta: float) -> void:
 	for index: int in range(_lines.size() - 1, -1, -1):
 		if float(_lines[index]["life"]) <= 0.0:
 			_lines.remove_at(index)
+	for loot_icon: Dictionary in _loot_icons:
+		loot_icon["life"] = float(loot_icon["life"]) - delta
+	for index: int in range(_loot_icons.size() - 1, -1, -1):
+		if float(_loot_icons[index]["life"]) <= 0.0:
+			_loot_icons.remove_at(index)
 	_flash_alpha = maxf(0.0, _flash_alpha - delta * 1.8)
 	queue_redraw()
 
@@ -69,6 +77,15 @@ func show_gold(world_position: Vector2, amount: int) -> void:
 func show_drop(world_position: Vector2, item: Dictionary) -> void:
 	var color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 	_texts.append({"position": world_position + Vector2(-30, -18), "text": String(item.get("name", "아이템")), "color": color, "life": 1.4, "duration": 1.4, "size": 11})
+	var icon_index: int = int(item.get("icon_index", -1))
+	if icon_index >= 0 and icon_index < 30:
+		_loot_icons.append({
+			"position": world_position,
+			"icon_index": icon_index,
+			"color": color,
+			"life": 1.2,
+			"duration": 1.2,
+		})
 	if String(item.get("rarity_id", "")) == "legend":
 		_flash_alpha = 0.58
 		spawn_fragments(Vector2(320, 105), Color("ffd700"), 28, 105.0)
@@ -131,6 +148,7 @@ func clear_effects() -> void:
 	_texts.clear()
 	_rings.clear()
 	_lines.clear()
+	_loot_icons.clear()
 	_flash_alpha = 0.0
 	queue_redraw()
 
@@ -154,6 +172,21 @@ func _draw() -> void:
 		var color: Color = line_data["color"]
 		color.a *= alpha
 		draw_polyline(PackedVector2Array(line_data["points"]), color, float(line_data["width"]), true)
+	for loot_icon: Dictionary in _loot_icons:
+		var life: float = float(loot_icon["life"])
+		var duration: float = float(loot_icon["duration"])
+		var alpha: float = clampf(life / duration, 0.0, 1.0)
+		var progress: float = 1.0 - alpha
+		var position: Vector2 = Vector2(loot_icon["position"]) + Vector2(0, -6.0 - sin(progress * PI) * 7.0)
+		var rarity_color: Color = loot_icon["color"]
+		rarity_color.a = alpha * 0.45
+		draw_rect(Rect2(position + Vector2(-1, -29), Vector2(2, 31)), rarity_color, true)
+		draw_circle(position, 11.0, Color(rarity_color, alpha * 0.16))
+		var icon_index: int = int(loot_icon["icon_index"])
+		var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
+		var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
+		var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+		draw_texture_rect_region(ITEM_BASE_ATLAS, Rect2(position - Vector2(9, 9), Vector2(18, 18)), source, Color(1, 1, 1, alpha))
 	for text_data: Dictionary in _texts:
 		var alpha: float = clampf(float(text_data["life"]) / float(text_data["duration"]), 0.0, 1.0)
 		var color: Color = text_data["color"]

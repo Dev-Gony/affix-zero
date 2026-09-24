@@ -82,15 +82,24 @@ func _run() -> void:
 
 	var generated_item: Dictionary = LootManager._generator.generate_item(20, 3)
 	_check(LootManager._generator._item_bases.size() == 29, "All 29 item bases load")
+	var item_icon_indices: Dictionary = {}
+	for item_base: ItemBaseData in LootManager._generator._item_bases:
+		item_icon_indices[item_base.icon_index] = true
+	_check(item_icon_indices.size() == 29 and not item_icon_indices.has(5), "All item bases map to distinct atlas cells while preserving the empty cell")
 	_check(LootManager._generator._affixes.size() == 10, "All ten affixes load")
 	_check(LootManager._generator._rarities.size() == 5, "All five rarities load")
 	_check(not generated_item.is_empty(), "Item generator creates an item")
-	_check(generated_item.has("affixes") and generated_item.has("base_stats"), "Generated item is fully serializable")
+	_check(generated_item.has("affixes") and generated_item.has("base_stats") and generated_item.has("icon_index"), "Generated item is fully serializable")
 	GameManager.inventory.clear()
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
 	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders a stable twenty-slot loot grid")
 	_check(game_ui._inventory_grid.get_child(0).get_child_count() >= 2, "Loot slots show text rarity and item-level badges")
+	var rendered_icon: AtlasTexture = (game_ui._inventory_grid.get_child(0) as Button).icon as AtlasTexture
+	_check(rendered_icon != null and rendered_icon.atlas == GameUI.ITEM_BASE_ATLAS, "Inventory renders the generated base-item icon atlas")
+	battle.effects.clear_effects()
+	battle.effects.show_drop(battle.player.global_position, generated_item)
+	_check(battle.effects._loot_icons.size() == 1, "Loot drops display their base-item icon in the arena")
 	var equip_event := InputEventMouseButton.new()
 	equip_event.button_index = MOUSE_BUTTON_LEFT
 	equip_event.pressed = true

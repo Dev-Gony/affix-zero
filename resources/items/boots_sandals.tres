@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "sandals"
 display_name = "샌들"
 slot = "boots"
+icon_index = 18
 tier = 1
 base_stats = {"SPD": 0.05}

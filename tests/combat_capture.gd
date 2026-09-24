@@ -21,3 +21,5 @@ func _prepare_combat() -> void:
 		var angle: float = TAU * float(index) / float(maxi(1, battle._enemies.size()))
 		battle._enemies[index].global_position = battle.player.global_position + Vector2(75.0, 36.0).rotated(angle)
 		battle._enemies[index]._spawn_reveal_left = 0.0
+	var showcase_item: Dictionary = LootManager._generator.generate_item(20, 3)
+	battle.effects.show_drop(battle.player.global_position + Vector2(92, 18), showcase_item)

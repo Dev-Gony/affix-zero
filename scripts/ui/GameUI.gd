@@ -11,6 +11,7 @@ const COLOR_ACCENT := Color("dc3d33")
 const COLOR_GREEN := Color("4fd675")
 const COLOR_GOLD := Color("d9a441")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
+const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
 const EQUIPMENT_REGIONS: Dictionary = {
 	"weapon": Vector2i(0, 0), "helmet": Vector2i(1, 0), "armor": Vector2i(2, 0), "gloves": Vector2i(3, 0),
 	"boots": Vector2i(0, 1), "ring": Vector2i(1, 1), "amulet": Vector2i(2, 1),
@@ -429,7 +430,7 @@ func _refresh_equipment() -> void:
 		slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 		content.add_child(slot_label)
 		var icon := TextureRect.new()
-		icon.texture = _equipment_icon(slot)
+		icon.texture = _item_icon(item) if not item.is_empty() else _equipment_icon(slot)
 		icon.custom_minimum_size = Vector2(0, 22)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
@@ -486,7 +487,7 @@ func _refresh_inventory() -> void:
 			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 			var slot_button := Button.new()
 			slot_button.custom_minimum_size = Vector2(42, 42)
-			slot_button.icon = _equipment_icon(String(item.get("slot", "")))
+			slot_button.icon = _item_icon(item)
 			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
 			slot_button.add_theme_stylebox_override("normal", _style_box(Color("151018"), item_color, 1, 0))
@@ -602,6 +603,18 @@ func _equipment_icon(slot: String) -> AtlasTexture:
 	var cell_size := Vector2(float(EQUIPMENT_ATLAS.get_width()) / 4.0, float(EQUIPMENT_ATLAS.get_height()) / 2.0)
 	var icon := AtlasTexture.new()
 	icon.atlas = EQUIPMENT_ATLAS
+	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+	return icon
+
+
+func _item_icon(item: Dictionary) -> AtlasTexture:
+	var icon_index: int = int(item.get("icon_index", -1))
+	if icon_index < 0 or icon_index >= 30:
+		return _equipment_icon(String(item.get("slot", "weapon")))
+	var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
+	var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
+	var icon := AtlasTexture.new()
+	icon.atlas = ITEM_BASE_ATLAS
 	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
 	return icon
 

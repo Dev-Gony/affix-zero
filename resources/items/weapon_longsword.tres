@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "longsword"
 display_name = "장검"
 slot = "weapon"
+icon_index = 1
 tier = 4
 base_stats = {"ATK": 8.0}

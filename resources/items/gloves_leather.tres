@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "leather_gloves"
 display_name = "가죽 장갑"
 slot = "gloves"
+icon_index = 15
 tier = 5
 base_stats = {"ATK": 3.0, "DEF": 2.0}

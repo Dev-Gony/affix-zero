@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "copper_ring"
 display_name = "구리 반지"
 slot = "ring"
+icon_index = 22
 tier = 1
 base_stats = {"HP": 10.0}

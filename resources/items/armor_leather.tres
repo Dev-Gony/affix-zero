@@ -5,5 +5,6 @@ script = ExtResource("1")
 id = "leather_armor"
 display_name = "가죽 갑옷"
 slot = "armor"
+icon_index = 11
 tier = 5
 base_stats = {"DEF": 7.0}
