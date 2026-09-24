@@ -30,7 +30,8 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 - Equipped-item comparison deltas directly in the inventory list
 - x1/x2/x5 combat speed control
 - Complete JSON save/load state with a real-time 30-second autosave interval
-- Three BGM channels and fourteen SFX channels prepared as `AudioStreamPlayer2D` placeholders
+- Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
+- Drop-in OGG overrides under `assets/bgm/` and `assets/sfx/` automatically replace procedural audio
 
 Audio playback becomes active when matching `.ogg` files are placed in `assets/bgm/` and `assets/sfx/`. The expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
 

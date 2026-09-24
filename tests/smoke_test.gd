@@ -43,6 +43,7 @@ func _run() -> void:
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
 	_check(GameManager.floor > 1, "Kill target advances the floor")
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
+	_check(AudioManager.has_complete_audio_bank(), "Authored or procedural audio covers every BGM and SFX channel")
 	var game_ui: GameUI = main.get_node("UILayer/GameUI")
 	_check(game_ui._class_selection._grid.get_child_count() == 6, "Class selection renders all six cards")
 	_check(game_ui._equipment_row.get_child_count() == 7, "Equipment overview renders all seven slots")
@@ -100,7 +101,7 @@ func _run() -> void:
 	main.queue_free()
 	await get_tree().process_frame
 	if _failures.is_empty():
-		print("SMOKE TEST PASSED: combat, loot, equipment, save serialization, rebirth, and UI")
+		print("SMOKE TEST PASSED: combat, loot, equipment, save serialization, rebirth, UI, and audio")
 		get_tree().quit(0)
 	else:
 		print("SMOKE TEST FAILED: %d assertion(s)" % _failures.size())
