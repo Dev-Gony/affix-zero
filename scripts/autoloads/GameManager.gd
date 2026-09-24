@@ -56,10 +56,41 @@ var class_base_stats: Dictionary = {
 
 var inventory: Array[Dictionary] = []
 var equipment: Dictionary = {}
-var skill_levels: Dictionary = {
-	"attack_boost": 0,
-	"defense_boost": 0,
-	"life_steal": 0,
+const CLASS_SKILL_DEFINITIONS: Dictionary = {
+	"warrior": [
+		{"id": "warrior_fury", "name": "격노", "description": "모든 피해 +8% / Lv", "effect": "damage", "value": 0.08, "base_cost": 100, "cost_step": 80},
+		{"id": "warrior_iron_skin", "name": "강철 피부", "description": "받는 피해 -5% / Lv", "effect": "reduction", "value": 0.05, "base_cost": 120, "cost_step": 90},
+		{"id": "warrior_bloodlust", "name": "피의 갈증", "description": "처치 시 최대 HP 2% / Lv 회복", "effect": "heal_on_kill", "value": 2.0, "base_cost": 150, "cost_step": 100},
+	],
+	"mage": [
+		{"id": "mage_spell_power", "name": "주문 증폭", "description": "모든 피해 +10% / Lv", "effect": "damage", "value": 0.10, "base_cost": 110, "cost_step": 85},
+		{"id": "mage_arcane_focus", "name": "비전 집중", "description": "치명타 +2.5% / Lv", "effect": "crit", "value": 2.5, "base_cost": 130, "cost_step": 95},
+		{"id": "mage_quick_cast", "name": "고속 시전", "description": "공격 속도 +0.05 / Lv", "effect": "speed", "value": 0.05, "base_cost": 150, "cost_step": 105},
+	],
+	"knight": [
+		{"id": "knight_bulwark", "name": "철벽", "description": "받는 피해 -7% / Lv", "effect": "reduction", "value": 0.07, "base_cost": 120, "cost_step": 90},
+		{"id": "knight_fortitude", "name": "불굴", "description": "최대 HP +6% / Lv", "effect": "max_hp", "value": 0.06, "base_cost": 140, "cost_step": 100},
+		{"id": "knight_smite", "name": "심판의 일격", "description": "모든 피해 +6% / Lv", "effect": "damage", "value": 0.06, "base_cost": 160, "cost_step": 110},
+	],
+	"sage": [
+		{"id": "sage_overload", "name": "마력 과부하", "description": "모든 피해 +9% / Lv", "effect": "damage", "value": 0.09, "base_cost": 130, "cost_step": 95},
+		{"id": "sage_insight", "name": "통찰", "description": "치명타 +3% / Lv", "effect": "crit", "value": 3.0, "base_cost": 150, "cost_step": 105},
+		{"id": "sage_flow", "name": "마력 순환", "description": "공격 속도 +0.04 / Lv", "effect": "speed", "value": 0.04, "base_cost": 170, "cost_step": 115},
+	],
+	"assassin": [
+		{"id": "assassin_lethality", "name": "치명 숙련", "description": "치명타 +4% / Lv", "effect": "crit", "value": 4.0, "base_cost": 130, "cost_step": 95},
+		{"id": "assassin_execution", "name": "처형", "description": "모든 피해 +8% / Lv", "effect": "damage", "value": 0.08, "base_cost": 150, "cost_step": 105},
+		{"id": "assassin_momentum", "name": "가속", "description": "공격 속도 +0.07 / Lv", "effect": "speed", "value": 0.07, "base_cost": 170, "cost_step": 115},
+	],
+	"saint": [
+		{"id": "saint_blessing", "name": "수호의 축복", "description": "받는 피해 -4% / Lv", "effect": "reduction", "value": 0.04, "base_cost": 130, "cost_step": 95},
+		{"id": "saint_grace", "name": "은총", "description": "최대 HP +5% / Lv", "effect": "max_hp", "value": 0.05, "base_cost": 150, "cost_step": 105},
+		{"id": "saint_recovery", "name": "성스러운 회복", "description": "처치 시 최대 HP 2.5% / Lv 회복", "effect": "heal_on_kill", "value": 2.5, "base_cost": 170, "cost_step": 115},
+	],
+}
+
+var class_skill_levels: Dictionary = {
+	"warrior": {}, "mage": {}, "knight": {}, "sage": {}, "assassin": {}, "saint": {},
 }
 
 var rebirth_count: int = 0
@@ -153,11 +184,15 @@ func recalculate_stats(preserve_current: bool = true) -> void:
 	atk = int(class_base_stats.get("atk", 10)) + ((level - 1) * 2) + int(permanent_upgrades.get("atk", 0)) * 2
 	def = int(class_base_stats.get("def", 5)) + (level - 1) + int(permanent_upgrades.get("def", 0)) * 2
 	spd = float(class_base_stats.get("spd", 1.0)) + float(permanent_upgrades.get("spd", 0)) * 0.05
-	crit = float(class_base_stats.get("crit", 5.0))
+	crit = float(class_base_stats.get("crit", 5.0)) + class_skill_effect("crit")
+	spd += class_skill_effect("speed")
 	vamp = 0.0
 	xp_bonus = 0.0
 	gold_bonus = 0.0
 	penetration = 0.0
+
+	var hp_skill_multiplier: float = 1.0 + class_skill_effect("max_hp")
+	max_hp = maxi(1, roundi(max_hp * hp_skill_multiplier))
 
 	for slot: String in EQUIPMENT_SLOTS:
 		var item: Dictionary = equipment.get(slot, {})
@@ -199,7 +234,7 @@ func _add_stat(stat_name: String, value: float) -> void:
 
 
 func take_damage(raw_damage: float) -> int:
-	var defense_reduction: float = clampf(float(skill_levels.get("defense_boost", 0)) * 0.05, 0.0, 0.8)
+	var defense_reduction: float = clampf(class_skill_effect("reduction"), 0.0, 0.8)
 	var damage: int = maxi(1, int(round(maxf(1.0, raw_damage - def) * (1.0 - defense_reduction))))
 	hp = maxi(0, hp - damage)
 	stats_changed.emit()
@@ -209,7 +244,7 @@ func take_damage(raw_damage: float) -> int:
 
 
 func heal_after_kill() -> void:
-	var heal_percent: float = vamp + float(skill_levels.get("life_steal", 0)) * 3.0
+	var heal_percent: float = vamp + class_skill_effect("heal_on_kill")
 	if heal_percent <= 0.0:
 		return
 	hp = mini(max_hp, hp + int(round(max_hp * heal_percent * 0.01)))
@@ -356,12 +391,40 @@ func sell_all_normal() -> void:
 	inventory_changed.emit()
 
 
+func class_skill_definitions(class_id: String = selected_class) -> Array:
+	return Array(CLASS_SKILL_DEFINITIONS.get(class_id, []))
+
+
+func class_skill_level(skill_id: String, class_id: String = selected_class) -> int:
+	var levels: Dictionary = Dictionary(class_skill_levels.get(class_id, {}))
+	return int(levels.get(skill_id, 0))
+
+
+func class_skill_effect(effect_name: String, class_id: String = selected_class) -> float:
+	var total: float = 0.0
+	for definition_value: Variant in class_skill_definitions(class_id):
+		var definition: Dictionary = definition_value
+		if String(definition.get("effect", "")) != effect_name:
+			continue
+		total += class_skill_level(String(definition.get("id", "")), class_id) * float(definition.get("value", 0.0))
+	return total
+
+
+func skill_damage_multiplier() -> float:
+	return 1.0 + class_skill_effect("damage")
+
+
 func buy_skill(skill_id: String, base_cost: int, cost_step: int) -> bool:
-	var current_level: int = int(skill_levels.get(skill_id, 0))
+	if selected_class.is_empty():
+		return false
+	var levels: Dictionary = Dictionary(class_skill_levels.get(selected_class, {})).duplicate(true)
+	var current_level: int = int(levels.get(skill_id, 0))
 	var cost: int = base_cost + current_level * cost_step
 	if not spend_gold(cost):
 		return false
-	skill_levels[skill_id] = current_level + 1
+	levels[skill_id] = current_level + 1
+	class_skill_levels[selected_class] = levels
+	recalculate_stats()
 	skills_changed.emit()
 	return true
 
@@ -398,9 +461,26 @@ func reset_run_progress() -> void:
 	selected_skill_type = ""
 	inventory.clear()
 	_ensure_equipment_slots(true)
-	skill_levels = {"attack_boost": 0, "defense_boost": 0, "life_steal": 0}
+	class_skill_levels = {"warrior": {}, "mage": {}, "knight": {}, "sage": {}, "assassin": {}, "saint": {}}
 	set_speed_multiplier(1.0)
 	set_game_state(GameState.CLASS_SELECTION)
+	inventory_changed.emit()
+	equipment_changed.emit()
+	skills_changed.emit()
+	floor_changed.emit(floor)
+
+
+func reset_for_rebirth() -> void:
+	level = 1
+	xp = 0
+	floor = 1
+	kills_on_floor = 0
+	selected_class = ""
+	selected_class_name = ""
+	selected_skill_type = ""
+	set_speed_multiplier(1.0)
+	set_game_state(GameState.CLASS_SELECTION)
+	stats_changed.emit()
 	inventory_changed.emit()
 	equipment_changed.emit()
 	skills_changed.emit()
@@ -423,7 +503,7 @@ func to_save_dict() -> Dictionary:
 		"class_base_stats": class_base_stats.duplicate(true),
 		"inventory": inventory.duplicate(true),
 		"equipment": equipment.duplicate(true),
-		"skill_levels": skill_levels.duplicate(true),
+		"class_skill_levels": class_skill_levels.duplicate(true),
 		"rebirth_count": rebirth_count,
 		"rebirth_points": rebirth_points,
 		"permanent_upgrades": permanent_upgrades.duplicate(true),
@@ -454,7 +534,10 @@ func apply_save_dict(data: Dictionary) -> void:
 			item["locked"] = false
 	equipment = Dictionary(data.get("equipment", {})).duplicate(true)
 	_ensure_equipment_slots()
-	skill_levels = Dictionary(data.get("skill_levels", skill_levels)).duplicate(true)
+	class_skill_levels = Dictionary(data.get("class_skill_levels", class_skill_levels)).duplicate(true)
+	for class_id: String in CLASS_SKILL_DEFINITIONS.keys():
+		if not class_skill_levels.has(class_id):
+			class_skill_levels[class_id] = {}
 	rebirth_count = maxi(0, int(data.get("rebirth_count", 0)))
 	rebirth_points = maxi(0, int(data.get("rebirth_points", 0)))
 	permanent_upgrades = Dictionary(data.get("permanent_upgrades", permanent_upgrades)).duplicate(true)
