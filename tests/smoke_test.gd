@@ -86,7 +86,12 @@ func _run() -> void:
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
 	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders a stable twenty-slot loot grid")
-	GameManager.equip_item(String(generated_item.get("id", "")))
+	_check(game_ui._inventory_grid.get_child(0).get_child_count() >= 2, "Loot slots show text rarity and item-level badges")
+	var equip_event := InputEventMouseButton.new()
+	equip_event.button_index = MOUSE_BUTTON_LEFT
+	equip_event.pressed = true
+	equip_event.double_click = true
+	game_ui._on_inventory_slot_input(equip_event, String(generated_item.get("id", "")))
 	_check(not Dictionary(GameManager.equipment.get(String(generated_item.get("slot", "")), {})).is_empty(), "Equipment flow equips an item")
 	var comparison_item: Dictionary = generated_item.duplicate(true)
 	var comparison_stats: Dictionary = comparison_item.get("base_stats", {})

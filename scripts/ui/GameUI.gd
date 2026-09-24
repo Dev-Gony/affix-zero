@@ -24,6 +24,9 @@ const STAT_NAMES: Dictionary = {
 	"ATK": "공격", "DEF": "방어", "HP": "체력", "MP": "마나", "SPD": "속도",
 	"CRIT": "치명", "VAMP": "흡혈", "XP_BONUS": "경험", "GOLD_BONUS": "골드", "PEN": "관통",
 }
+const RARITY_BADGES: Dictionary = {
+	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설",
+}
 
 var _hp_bar: ProgressBar
 var _mp_bar: ProgressBar
@@ -214,6 +217,9 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		KEY_Z: _set_speed(1.0)
 		KEY_X: _set_speed(2.0)
 		KEY_C: _set_speed(5.0)
+		KEY_E:
+			if _main_tabs.current_tab == 1:
+				_equip_selected_inventory()
 
 
 func _build_equipment_tab(tabs: TabContainer) -> void:
@@ -245,6 +251,12 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inventory_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_inventory_count)
+	var shortcut_hint := Label.new()
+	shortcut_hint.text = "더블클릭 / E 장착"
+	shortcut_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	shortcut_hint.add_theme_font_size_override("font_size", 7)
+	shortcut_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	header.add_child(shortcut_hint)
 	var sell_all := Button.new()
 	sell_all.text = "일반 일괄 판매"
 	sell_all.custom_minimum_size = Vector2(105, 21)
@@ -459,7 +471,13 @@ func _refresh_inventory() -> void:
 	_inventory_count.text = "가방  %d/%d" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
 	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
-	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.get("rarity_index", 0)) > int(b.get("rarity_index", 0)))
+	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
+		var rarity_a: int = int(a.get("rarity_index", 0))
+		var rarity_b: int = int(b.get("rarity_index", 0))
+		if rarity_a != rarity_b:
+			return rarity_a > rarity_b
+		return int(a.get("item_level", 1)) > int(b.get("item_level", 1))
+	)
 	if not sorted_items.any(func(item: Dictionary) -> bool: return String(item.get("id", "")) == _inventory_selected_id):
 		_inventory_selected_id = String(sorted_items[0].get("id", "")) if not sorted_items.is_empty() else ""
 	for index: int in GameManager.INVENTORY_CAPACITY:
@@ -470,12 +488,17 @@ func _refresh_inventory() -> void:
 			slot_button.custom_minimum_size = Vector2(42, 42)
 			slot_button.icon = _equipment_icon(String(item.get("slot", "")))
 			slot_button.expand_icon = true
-			slot_button.tooltip_text = _format_item_details(item)
+			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
 			slot_button.add_theme_stylebox_override("normal", _style_box(Color("151018"), item_color, 1, 0))
 			slot_button.add_theme_stylebox_override("hover", _style_box(Color("2b1b25"), item_color.lightened(0.2), 2, 0))
+			slot_button.add_theme_stylebox_override("pressed", _style_box(Color("4b1f28"), item_color.lightened(0.25), 2, 0))
 			if String(item.get("id", "")) == _inventory_selected_id:
 				slot_button.add_theme_stylebox_override("normal", _style_box(Color("3b2028"), COLOR_GOLD, 2, 0))
+				slot_button.add_theme_stylebox_override("hover", _style_box(Color("4b2730"), COLOR_GOLD.lightened(0.18), 2, 0))
 			slot_button.pressed.connect(_select_inventory_item.bind(String(item.get("id", ""))))
+			slot_button.focus_entered.connect(_focus_inventory_item.bind(String(item.get("id", ""))))
+			slot_button.gui_input.connect(_on_inventory_slot_input.bind(String(item.get("id", ""))))
+			_add_inventory_slot_labels(slot_button, item, String(item.get("id", "")) == _inventory_selected_id)
 			_inventory_grid.add_child(slot_button)
 		else:
 			var empty_slot := Panel.new()
@@ -515,6 +538,51 @@ func _select_inventory_item(item_id: String) -> void:
 	AudioManager.play_sfx("ui_click")
 	_inventory_selected_id = item_id
 	_refresh_inventory()
+
+
+func _focus_inventory_item(item_id: String) -> void:
+	if _inventory_selected_id == item_id:
+		return
+	_inventory_selected_id = item_id
+	_refresh_inventory_detail(GameManager.inventory)
+
+
+func _on_inventory_slot_input(event: InputEvent, item_id: String) -> void:
+	if event is InputEventMouseButton:
+		var mouse_event := event as InputEventMouseButton
+		if mouse_event.button_index == MOUSE_BUTTON_LEFT and mouse_event.pressed and mouse_event.double_click:
+			_inventory_selected_id = item_id
+			_equip_selected_inventory()
+			get_viewport().set_input_as_handled()
+
+
+func _add_inventory_slot_labels(button: Button, item: Dictionary, selected: bool) -> void:
+	var rarity_badge := Label.new()
+	rarity_badge.position = Vector2(2, 1)
+	rarity_badge.size = Vector2(38, 10)
+	rarity_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	rarity_badge.text = String(RARITY_BADGES.get(String(item.get("rarity_id", "normal")), "일반"))
+	rarity_badge.add_theme_font_size_override("font_size", 5)
+	rarity_badge.add_theme_color_override("font_color", Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
+	button.add_child(rarity_badge)
+	var level_badge := Label.new()
+	level_badge.position = Vector2(20, 29)
+	level_badge.size = Vector2(20, 10)
+	level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	level_badge.text = "i%d" % int(item.get("item_level", 1))
+	level_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	level_badge.add_theme_font_size_override("font_size", 5)
+	level_badge.add_theme_color_override("font_color", COLOR_MUTED)
+	button.add_child(level_badge)
+	if selected:
+		var selected_badge := Label.new()
+		selected_badge.position = Vector2(2, 29)
+		selected_badge.size = Vector2(18, 10)
+		selected_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		selected_badge.text = "선택"
+		selected_badge.add_theme_font_size_override("font_size", 5)
+		selected_badge.add_theme_color_override("font_color", COLOR_GOLD)
+		button.add_child(selected_badge)
 
 
 func _equip_selected_inventory() -> void:
