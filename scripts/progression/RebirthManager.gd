@@ -3,14 +3,7 @@ extends Node
 signal rebirth_completed(new_count: int)
 signal permanent_upgrade_purchased(stat_name: String)
 
-const CLASS_UNLOCKS: Dictionary = {
-	"warrior": 0,
-	"mage": 0,
-	"knight": 2,
-	"sage": 4,
-	"assassin": 6,
-	"saint": 10,
-}
+const CLASS_RESOURCE_DIRECTORY: String = "res://resources/classes/"
 
 
 func required_level() -> int:
@@ -31,7 +24,7 @@ func rebirth() -> bool:
 	var reward: int = reward_points()
 	GameManager.rebirth_count += 1
 	GameManager.rebirth_points += reward
-	_update_unlocked_classes()
+	sync_unlocked_classes()
 	GameManager.reset_run_progress()
 	GameManager.recalculate_stats(false)
 	rebirth_completed.emit(GameManager.rebirth_count)
@@ -55,7 +48,13 @@ func gold_multiplier() -> float:
 	return pow(1.1, GameManager.rebirth_count)
 
 
-func _update_unlocked_classes() -> void:
-	for class_id: String in CLASS_UNLOCKS:
-		if GameManager.rebirth_count >= int(CLASS_UNLOCKS[class_id]) and not GameManager.unlocked_classes.has(class_id):
-			GameManager.unlocked_classes.append(class_id)
+func sync_unlocked_classes() -> void:
+	for file_name: String in DirAccess.get_files_at(CLASS_RESOURCE_DIRECTORY):
+		if not file_name.ends_with(".tres"):
+			continue
+		var resource: Resource = load(CLASS_RESOURCE_DIRECTORY + file_name)
+		if not resource is ClassData:
+			continue
+		var class_data := resource as ClassData
+		if GameManager.rebirth_count >= class_data.unlock_rebirths and not GameManager.unlocked_classes.has(class_data.id):
+			GameManager.unlocked_classes.append(class_data.id)

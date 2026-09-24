@@ -7,6 +7,7 @@ const SAVE_PATH: String = "user://save.json"
 const AUTOSAVE_INTERVAL: float = 30.0
 
 var _last_autosave_msec: int = 0
+var persistence_enabled: bool = true
 
 
 func _ready() -> void:
@@ -23,6 +24,8 @@ func _process(_delta: float) -> void:
 
 
 func save_game(data: Dictionary = {}) -> Error:
+	if not persistence_enabled:
+		return OK
 	var save_data: Dictionary = data if not data.is_empty() else GameManager.to_save_dict()
 	var save_file := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if save_file == null:
@@ -47,6 +50,7 @@ func load_game() -> Dictionary:
 	if parsed_data is Dictionary:
 		var data: Dictionary = parsed_data as Dictionary
 		GameManager.apply_save_dict(data)
+		RebirthManager.sync_unlocked_classes()
 		load_completed.emit(true)
 		return data
 
@@ -58,3 +62,8 @@ func load_game() -> Dictionary:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_game()
+
+
+func set_persistence_enabled(enabled: bool) -> void:
+	persistence_enabled = enabled
+	_last_autosave_msec = Time.get_ticks_msec()

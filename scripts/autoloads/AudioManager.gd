@@ -36,6 +36,8 @@ func _ready() -> void:
 		var path: String = BGM_PATHS[track_name]
 		if ResourceLoader.exists(path):
 			player.stream = load(path)
+			if player.stream is AudioStreamOggVorbis:
+				(player.stream as AudioStreamOggVorbis).loop = true
 		add_child(player)
 		_bgm_players[track_name] = player
 	for effect_name: String in SFX_PATHS:

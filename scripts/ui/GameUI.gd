@@ -317,12 +317,20 @@ func _refresh_equipment() -> void:
 	for slot: String in GameManager.EQUIPMENT_SLOTS:
 		var item: Dictionary = GameManager.equipment.get(slot, {})
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(83, 92)
+		card.custom_minimum_size = Vector2(128, 92)
 		var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 		card.add_theme_stylebox_override("panel", _style_box(Color("121220"), border_color, 1, 2))
+		var card_row := HBoxContainer.new()
+		card_row.add_theme_constant_override("separation", 3)
+		card.add_child(card_row)
+		var equipped_marker := ColorRect.new()
+		equipped_marker.custom_minimum_size = Vector2(3, 0)
+		equipped_marker.color = COLOR_GREEN if not item.is_empty() else Color(0, 0, 0, 0)
+		card_row.add_child(equipped_marker)
 		var content := VBoxContainer.new()
+		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		content.add_theme_constant_override("separation", 2)
-		card.add_child(content)
+		card_row.add_child(content)
 		var slot_label := Label.new()
 		slot_label.text = String(SLOT_NAMES.get(slot, slot))
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -334,12 +342,15 @@ func _refresh_equipment() -> void:
 		item_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		item_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		item_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		item_label.add_theme_font_size_override("font_size", 8)
+		item_label.add_theme_font_size_override("font_size", 7)
 		if item.is_empty():
 			item_label.text = "— 비어있음 —"
 			item_label.add_theme_color_override("font_color", Color("70708a"))
 		else:
-			item_label.text = "%s\niLv.%d\n%s" % [String(item.get("name", "")), int(item.get("item_level", 1)), _compact_stats(item)]
+			item_label.text = "[%s] %s\n%s · iLv.%d\n%s" % [
+				String(item.get("rarity_name", "")), String(item.get("name", "")),
+				String(SLOT_NAMES.get(slot, slot)), int(item.get("item_level", 1)), _compact_stats(item, true)
+			]
 			item_label.tooltip_text = _format_item_details(item)
 			item_label.add_theme_color_override("font_color", border_color)
 		content.add_child(item_label)

@@ -4,6 +4,9 @@ var _failures: Array[String] = []
 
 
 func _ready() -> void:
+	# Rebirth saves immediately in normal play. Disable persistence so this test never
+	# overwrites a developer's real user://save.json file.
+	SaveManager.set_persistence_enabled(false)
 	call_deferred("_run")
 
 
@@ -14,6 +17,7 @@ func _check(condition: bool, message: String) -> void:
 
 
 func _run() -> void:
+	seed(20260924)
 	var main_scene: PackedScene = load("res://scenes/main.tscn")
 	var main: Node = main_scene.instantiate()
 	get_tree().root.add_child(main)
@@ -35,21 +39,28 @@ func _run() -> void:
 
 	var battle: BattleManager = main.get_node("BattleArea")
 	_check(battle != null, "BattleManager scene is available")
+	_check(battle._enemy_resources.size() == 8, "All eight enemy resources load")
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
 	_check(GameManager.floor > 1, "Kill target advances the floor")
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
 
 	for class_id: String in ["warrior", "mage", "knight", "sage", "assassin", "saint"]:
 		var class_data: ClassData = load("res://resources/classes/%s.tres" % class_id)
+		_check(class_data != null, "%s class resource loads" % class_id)
 		GameManager.select_class(class_data)
 		GameManager.class_base_stats["atk"] = 999
 		GameManager.recalculate_stats()
 		await get_tree().process_frame
+		var visuals_before: int = battle.effects._rings.size() + battle.effects._lines.size() + battle.projectiles_root.get_child_count()
 		battle._perform_auto_skill()
-		await get_tree().create_timer(0.8).timeout
-	_check(true, "All six class skills execute")
+		var visuals_after: int = battle.effects._rings.size() + battle.effects._lines.size() + battle.projectiles_root.get_child_count()
+		_check(visuals_after > visuals_before, "%s skill creates a visual effect" % class_id)
+		await get_tree().create_timer(0.2).timeout
 
 	var generated_item: Dictionary = LootManager._generator.generate_item(20, 3)
+	_check(LootManager._generator._item_bases.size() == 29, "All 29 item bases load")
+	_check(LootManager._generator._affixes.size() == 10, "All ten affixes load")
+	_check(LootManager._generator._rarities.size() == 5, "All five rarities load")
 	_check(not generated_item.is_empty(), "Item generator creates an item")
 	_check(generated_item.has("affixes") and generated_item.has("base_stats"), "Generated item is fully serializable")
 	GameManager.inventory.clear()
@@ -70,6 +81,11 @@ func _run() -> void:
 	_check(RebirthManager.rebirth(), "Eligible character can rebirth")
 	_check(GameManager.rebirth_count == previous_rebirths + 1, "Rebirth count increases")
 	_check(GameManager.game_state == GameManager.GameState.CLASS_SELECTION, "Rebirth returns to class selection")
+
+	GameManager.rebirth_count = 10
+	GameManager.unlocked_classes = ["warrior", "mage"]
+	RebirthManager.sync_unlocked_classes()
+	_check(GameManager.unlocked_classes.size() == 6, "Class resources drive all rebirth unlocks")
 
 	GameManager.set_speed_multiplier(1.0)
 	if _failures.is_empty():
