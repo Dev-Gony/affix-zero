@@ -42,6 +42,7 @@ func _run() -> void:
 	for spawned_enemy: EnemyAI in battle._enemies:
 		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
 	var animation_target: EnemyAI = battle._nearest_enemy()
+	animation_target.global_position = battle.player.global_position + Vector2(30, 0)
 	battle._perform_auto_attack()
 	_check(battle.player._motion_kind == "attack", "Automatic attacks trigger the player combat animation")
 	var expected_facing: Vector2 = battle.player.global_position.direction_to(animation_target.global_position)
