@@ -47,6 +47,7 @@ var _inventory_count: Label
 var _inventory_detail: Label
 var _inventory_equip_button: Button
 var _inventory_sell_button: Button
+var _inventory_lock_button: Button
 var _inventory_selected_id: String = ""
 var _skills_list: VBoxContainer
 var _rebirth_content: VBoxContainer
@@ -381,6 +382,12 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_equip_button.custom_minimum_size.y = 22
 	_inventory_equip_button.pressed.connect(_equip_selected_inventory)
 	actions.add_child(_inventory_equip_button)
+	_inventory_lock_button = Button.new()
+	_inventory_lock_button.text = "잠금"
+	_inventory_lock_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inventory_lock_button.custom_minimum_size.y = 22
+	_inventory_lock_button.pressed.connect(_toggle_selected_inventory_lock)
+	actions.add_child(_inventory_lock_button)
 	_inventory_sell_button = Button.new()
 	_inventory_sell_button.text = "판매"
 	_inventory_sell_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -658,6 +665,8 @@ func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
 		_inventory_detail.text = "아이템을 획득하면 이곳에서\n능력치 비교 후 장착할 수 있습니다."
 		_inventory_detail.add_theme_color_override("font_color", COLOR_MUTED)
 		_inventory_equip_button.disabled = true
+		_inventory_lock_button.disabled = true
+		_inventory_lock_button.text = "잠금"
 		_inventory_sell_button.disabled = true
 		_inventory_sell_button.text = "판매"
 		return
@@ -670,8 +679,10 @@ func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
 	_inventory_detail.tooltip_text = _format_item_details(selected)
 	_inventory_detail.add_theme_color_override("font_color", item_color)
 	_inventory_equip_button.disabled = false
-	_inventory_sell_button.disabled = false
-	_inventory_sell_button.text = "판매 %dG" % int(selected.get("sell_value", 0))
+	_inventory_lock_button.disabled = false
+	_inventory_lock_button.text = "잠금 해제" if bool(selected.get("locked", false)) else "잠금"
+	_inventory_sell_button.disabled = bool(selected.get("locked", false))
+	_inventory_sell_button.text = "잠금됨" if bool(selected.get("locked", false)) else "판매 %dG" % int(selected.get("sell_value", 0))
 
 
 func _select_inventory_item(item_id: String) -> void:
@@ -714,6 +725,15 @@ func _add_inventory_slot_labels(button: Button, item: Dictionary, selected: bool
 	level_badge.add_theme_font_size_override("font_size", 5)
 	level_badge.add_theme_color_override("font_color", COLOR_MUTED)
 	button.add_child(level_badge)
+	if bool(item.get("locked", false)):
+		var lock_badge := Label.new()
+		lock_badge.position = Vector2(2, 19)
+		lock_badge.size = Vector2(20, 9)
+		lock_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		lock_badge.text = "잠금"
+		lock_badge.add_theme_font_size_override("font_size", 5)
+		lock_badge.add_theme_color_override("font_color", COLOR_GOLD)
+		button.add_child(lock_badge)
 	if selected:
 		var selected_badge := Label.new()
 		selected_badge.position = Vector2(2, 29)
@@ -735,6 +755,13 @@ func _sell_selected_inventory() -> void:
 	if _inventory_selected_id.is_empty():
 		return
 	_sell(_inventory_selected_id)
+
+
+func _toggle_selected_inventory_lock() -> void:
+	if _inventory_selected_id.is_empty():
+		return
+	AudioManager.play_sfx("ui_click")
+	GameManager.toggle_item_lock(_inventory_selected_id)
 
 
 func _equipment_icon(slot: String) -> AtlasTexture:
@@ -891,7 +918,7 @@ func _format_item_details(item: Dictionary) -> String:
 				String(affix_data.get("name", "")), String(STAT_NAMES.get(String(affix_data.get("stat", "")), affix_data.get("stat", ""))),
 				_format_value(String(affix_data.get("stat", "")), float(affix_data.get("value", 0.0)))
 			])
-	lines.append("판매가: %dG" % int(item.get("sell_value", 0)))
+	lines.append("판매가: %dG%s" % [int(item.get("sell_value", 0)), " · 잠금" if bool(item.get("locked", false)) else ""])
 	lines.append("장착 비교: %s" % _comparison_text(item))
 	return "\n".join(lines)
 
