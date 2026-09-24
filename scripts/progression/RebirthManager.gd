@@ -25,7 +25,7 @@ func rebirth() -> bool:
 	GameManager.rebirth_count += 1
 	GameManager.rebirth_points += reward
 	sync_unlocked_classes()
-	GameManager.reset_run_progress()
+	GameManager.reset_for_rebirth()
 	GameManager.recalculate_stats(false)
 	rebirth_completed.emit(GameManager.rebirth_count)
 	GameManager.notification_requested.emit("환생 완료! 영구 포인트 +%d" % reward, Color("ffd166"))
