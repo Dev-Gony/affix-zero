@@ -80,6 +80,7 @@ var statistics: Dictionary = {
 
 var game_state: GameState = GameState.CLASS_SELECTION
 var speed_multiplier: float = 1.0
+var loot_min_rarity_index: int = 0
 
 
 func _ready() -> void:
@@ -111,6 +112,11 @@ func select_class(class_data: ClassData) -> void:
 func set_game_state(next_state: GameState) -> void:
 	game_state = next_state
 	game_state_changed.emit(game_state)
+
+
+func set_loot_min_rarity(index: int) -> void:
+	loot_min_rarity_index = clampi(index, 0, 4)
+	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설"][loot_min_rarity_index], Color("d9a441"))
 
 
 func set_speed_multiplier(multiplier: float) -> void:
@@ -380,6 +386,7 @@ func to_save_dict() -> Dictionary:
 		"unlocked_classes": unlocked_classes.duplicate(),
 		"statistics": statistics.duplicate(true),
 		"speed_multiplier": speed_multiplier,
+		"loot_min_rarity_index": loot_min_rarity_index,
 		"saved_at": Time.get_unix_time_from_system(),
 	}
 
@@ -414,6 +421,7 @@ func apply_save_dict(data: Dictionary) -> void:
 	hp = clampi(int(data.get("hp", max_hp)), 0, max_hp)
 	mp = clampi(int(data.get("mp", max_mp)), 0, max_mp)
 	set_speed_multiplier(float(data.get("speed_multiplier", 1.0)))
+	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 4)
 	set_game_state(GameState.RUNNING if not selected_class.is_empty() else GameState.CLASS_SELECTION)
 	stats_changed.emit()
 	inventory_changed.emit()
