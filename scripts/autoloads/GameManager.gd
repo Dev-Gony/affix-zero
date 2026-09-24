@@ -291,6 +291,32 @@ func toggle_item_lock(item_id: String) -> bool:
 	return locked
 
 
+func sell_inventory_below_rarity(min_rarity_index: int) -> Dictionary:
+	var kept_items: Array[Dictionary] = []
+	var sale_total: int = 0
+	var sold_count: int = 0
+	var protected_count: int = 0
+	for item: Dictionary in inventory:
+		var below_filter: bool = int(item.get("rarity_index", 0)) < min_rarity_index
+		if below_filter and not bool(item.get("locked", false)):
+			sale_total += int(item.get("sell_value", 0))
+			sold_count += 1
+		else:
+			if below_filter and bool(item.get("locked", false)):
+				protected_count += 1
+			kept_items.append(item)
+	inventory = kept_items
+	if sale_total > 0:
+		add_gold(sale_total)
+	if sold_count > 0 or protected_count > 0:
+		inventory_changed.emit()
+	return {
+		"sold_count": sold_count,
+		"sale_total": sale_total,
+		"protected_count": protected_count,
+	}
+
+
 func sell_all_normal() -> void:
 	var kept_items: Array[Dictionary] = []
 	var sale_total: int = 0
