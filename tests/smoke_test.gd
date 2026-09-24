@@ -72,7 +72,12 @@ func _run() -> void:
 		enemy_behaviors[enemy_resource.behavior] = true
 	_check(enemy_behaviors.size() == 8, "Every enemy type has a distinct resource-driven movement behavior")
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
-	_check(GameManager.floor > 1, "Kill target advances the floor")
+	var floor_before_progression_check: int = GameManager.floor
+	var room_before_progression_check: int = battle._current_room
+	GameManager.advance_floor()
+	battle._begin_room_travel(room_before_progression_check, WorldLayout.room_index_for_floor(GameManager.floor))
+	_check(GameManager.floor == floor_before_progression_check + 1, "Floor progression increments the floor")
+	_check(battle._traveling or battle._current_room == WorldLayout.room_index_for_floor(GameManager.floor), "Floor progression starts corridor travel to the next room")
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
 	_check(AudioManager.has_complete_audio_bank(), "Authored or procedural audio covers every BGM and SFX channel")
 	var game_ui: GameUI = main.get_node("UILayer/GameUI")
@@ -142,6 +147,10 @@ func _run() -> void:
 	battle.effects.clear_effects()
 	battle.effects.show_drop(battle.player.global_position, generated_item)
 	_check(battle.effects._loot_icons.size() == 1, "Loot drops display their base-item icon in the arena")
+	GameManager.inventory.clear()
+	GameManager._ensure_equipment_slots(true)
+	_check(GameManager.add_inventory_item(generated_item), "Generated comparison item is restored before equipment test")
+	game_ui._refresh_inventory()
 	var equip_event := InputEventMouseButton.new()
 	equip_event.button_index = MOUSE_BUTTON_LEFT
 	equip_event.pressed = true
