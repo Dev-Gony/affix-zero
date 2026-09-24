@@ -16,6 +16,7 @@ var _motion_duration: float = 0.0
 var _facing: Vector2 = Vector2.RIGHT
 var _visual_facing: Vector2 = Vector2.RIGHT
 var _skill_color: Color = Color("ffd166")
+var _move_direction: Vector2 = Vector2.ZERO
 
 
 func configure(next_class_id: String, color: Color) -> void:
@@ -27,6 +28,8 @@ func configure(next_class_id: String, color: Color) -> void:
 
 func _process(delta: float) -> void:
 	pulse += delta
+	if not _move_direction.is_zero_approx() and _motion_kind == "idle":
+		_facing = _move_direction
 	var facing_blend: float = 1.0 - exp(-delta * 20.0)
 	var blended_facing: Vector2 = _visual_facing.lerp(_facing, facing_blend)
 	if not blended_facing.is_zero_approx():
@@ -35,6 +38,13 @@ func _process(delta: float) -> void:
 		_motion_time_left = maxf(0.0, _motion_time_left - delta)
 		if is_zero_approx(_motion_time_left):
 			_motion_kind = "idle"
+	queue_redraw()
+
+
+func set_move_direction(direction: Vector2) -> void:
+	_move_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.ZERO
+	if not _move_direction.is_zero_approx():
+		_facing = _move_direction
 	queue_redraw()
 
 
@@ -67,11 +77,14 @@ func _start_motion(kind: String, duration: float) -> void:
 
 
 func _draw() -> void:
-	var bob: float = roundf(-absf(sin(pulse * TAU / 0.82)) * 1.2)
-	draw_ellipse(Vector2(0, 10), Vector2(14, 5), Color(0, 0, 0, 0.58))
-	var glow_alpha: float = 0.10 + sin(pulse * 3.0) * 0.03
-	draw_circle(Vector2.ZERO, 17.0, Color(body_color, glow_alpha))
-	draw_arc(Vector2.ZERO, 15.0, 0.15, PI - 0.15, 18, Color(body_color, 0.72), 1.0)
+	var moving: bool = not _move_direction.is_zero_approx() and _motion_kind == "idle"
+	var step_wave: float = sin(pulse * 12.0) if moving else 0.0
+	var bob: float = roundf((-absf(sin(pulse * TAU / 0.82)) * 0.6) + step_wave * 1.2)
+	draw_ellipse(Vector2(0, 8), Vector2(10, 3.5), Color(0, 0, 0, 0.46))
+	var glow_alpha: float = 0.05 + sin(pulse * 3.0) * 0.02
+	draw_circle(Vector2.ZERO, 13.0, Color(body_color, glow_alpha))
+	if moving:
+		draw_line(Vector2(-5, 11), Vector2(-2, 12 + step_wave * 2.0), Color(1, 1, 1, 0.18), 1.0)
 	var motion_progress: float = 1.0
 	if _motion_duration > 0.0 and _motion_time_left > 0.0:
 		motion_progress = 1.0 - (_motion_time_left / _motion_duration)
@@ -95,7 +108,7 @@ func _draw() -> void:
 	var source := Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
 	var horizontal_facing: float = -1.0 if _visual_facing.x < -0.08 else 1.0
 	draw_set_transform(motion_offset, motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
-	draw_texture_rect_region(CLASS_ATLAS, Rect2(-23, -29 + bob, 46, 46), source)
+	draw_texture_rect_region(CLASS_ATLAS, Rect2(-18, -23 + bob, 36, 36), source)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
