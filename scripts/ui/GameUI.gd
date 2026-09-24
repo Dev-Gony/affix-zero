@@ -131,17 +131,17 @@ func _build_hud() -> void:
 	var panel := Panel.new()
 	_hud_panel = panel
 	panel.position = Vector2.ZERO
-	panel.size = Vector2(640, 42)
-	panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.94), Color("8f5a3a"), 2, 0))
+	panel.size = Vector2(640, 34)
+	panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.74), Color("6f4934"), 1, 0))
 	add_child(panel)
 	var row := HBoxContainer.new()
-	row.position = Vector2(7, 3)
-	row.size = Vector2(626, 35)
+	row.position = Vector2(7, 2)
+	row.size = Vector2(626, 29)
 	row.add_theme_constant_override("separation", 8)
 	panel.add_child(row)
 
 	var bars := VBoxContainer.new()
-	bars.custom_minimum_size = Vector2(232, 34)
+	bars.custom_minimum_size = Vector2(214, 28)
 	bars.add_theme_constant_override("separation", 1)
 	row.add_child(bars)
 	_hp_bar = _add_bar(bars, "HP", Color("dc2626"))
@@ -149,14 +149,14 @@ func _build_hud() -> void:
 	_xp_bar = _add_bar(bars, "XP", Color("22c55e"))
 
 	_hud_info = Label.new()
-	_hud_info.custom_minimum_size = Vector2(230, 34)
+	_hud_info.custom_minimum_size = Vector2(246, 28)
 	_hud_info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hud_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hud_info.add_theme_font_size_override("font_size", 11)
+	_hud_info.add_theme_font_size_override("font_size", 9)
 	row.add_child(_hud_info)
 
 	var speed_row := HBoxContainer.new()
-	speed_row.custom_minimum_size = Vector2(146, 34)
+	speed_row.custom_minimum_size = Vector2(138, 28)
 	speed_row.alignment = BoxContainer.ALIGNMENT_END
 	speed_row.add_theme_constant_override("separation", 4)
 	row.add_child(speed_row)
@@ -168,7 +168,7 @@ func _build_hud() -> void:
 	for multiplier: float in GameManager.AVAILABLE_SPEED_MULTIPLIERS:
 		var speed_button := Button.new()
 		speed_button.text = "x%d" % int(multiplier)
-		speed_button.custom_minimum_size = Vector2(32, 28)
+		speed_button.custom_minimum_size = Vector2(30, 24)
 		speed_button.toggle_mode = true
 		speed_button.tooltip_text = "전투 속도를 x%d로 변경" % int(multiplier)
 		speed_button.pressed.connect(_set_speed.bind(multiplier))
@@ -199,14 +199,14 @@ func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> Progre
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(330, 45)
-	window.size = Vector2(306, 307)
+	window.position = Vector2(344, 38)
+	window.size = Vector2(290, 318)
 	window.z_index = 20
 	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
 	add_child(window)
 	var header := HBoxContainer.new()
 	header.position = Vector2(6, 4)
-	header.size = Vector2(294, 22)
+	header.size = Vector2(278, 22)
 	window.add_child(header)
 	_management_title = Label.new()
 	_management_title.text = MANAGEMENT_TITLES[0]
@@ -225,7 +225,7 @@ func _build_bottom_panel() -> void:
 	_main_tabs = tabs
 	tabs.name = "MainTabs"
 	tabs.position = Vector2(4, 28)
-	tabs.size = Vector2(298, 275)
+	tabs.size = Vector2(282, 286)
 	tabs.tabs_visible = false
 	window.add_child(tabs)
 
@@ -238,20 +238,20 @@ func _build_bottom_panel() -> void:
 
 	var dock := Panel.new()
 	_bottom_panel = dock
-	dock.position = Vector2(0, 356)
-	dock.size = Vector2(640, 44)
+	dock.position = Vector2(142, 366)
+	dock.size = Vector2(356, 32)
 	dock.z_index = 30
-	dock.add_theme_stylebox_override("panel", _style_box(Color("100c12"), Color("9a6240"), 2, 0))
+	dock.add_theme_stylebox_override("panel", _style_box(Color(0.04, 0.03, 0.05, 0.72), Color("6f4934"), 1, 0))
 	add_child(dock)
 	var dock_row := HBoxContainer.new()
-	dock_row.position = Vector2(78, 4)
-	dock_row.size = Vector2(484, 36)
+	dock_row.position = Vector2(6, 3)
+	dock_row.size = Vector2(344, 26)
 	dock_row.add_theme_constant_override("separation", 4)
 	dock.add_child(dock_row)
 	for index: int in MANAGEMENT_TITLES.size():
 		var dock_button := Button.new()
-		dock_button.text = "%d  %s" % [index + 1, MANAGEMENT_TITLES[index]]
-		dock_button.custom_minimum_size = Vector2(92, 34)
+		dock_button.text = "%d %s" % [index + 1, MANAGEMENT_TITLES[index]]
+		dock_button.custom_minimum_size = Vector2(65, 24)
 		dock_button.toggle_mode = true
 		dock_button.tooltip_text = "%s 창 열기/닫기 · 단축키 %d" % [MANAGEMENT_TITLES[index], index + 1]
 		dock_button.pressed.connect(_toggle_management.bind(index))
