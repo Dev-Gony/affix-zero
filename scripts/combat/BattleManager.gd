@@ -37,12 +37,20 @@ var _shake_intensity: float = 0.0
 var _last_death_position: Vector2 = PLAYER_POSITION
 var _wander_target: Vector2 = PLAYER_POSITION
 var _wander_time_left: float = 0.0
+var _current_room: int = 4
+var _combat_rect: Rect2 = Rect2()
+var _traveling: bool = false
+var _travel_target_room: int = 4
+var _travel_waypoints: Array[Vector2] = []
+var _travel_index: int = 0
 
 
 func _ready() -> void:
 	randomize()
 	_load_enemy_resources()
-	player.position = PLAYER_POSITION
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
 	camera.limit_left = int(WORLD_RECT.position.x)
 	camera.limit_top = int(WORLD_RECT.position.y)
 	camera.limit_right = int(WORLD_RECT.end.x)
@@ -63,6 +71,9 @@ func _process(delta: float) -> void:
 	_update_camera_shake(delta)
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	if _traveling:
+		_update_room_travel(delta)
+		return
 	_update_target_marker()
 	_update_auto_hunt(delta)
 	_attack_time_left -= delta
@@ -76,23 +87,30 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
-	for y in range(0, int(WORLD_RECT.size.y), 400):
-		for x in range(0, int(WORLD_RECT.size.x), 640):
-			draw_texture_rect(DUNGEON_TEXTURE, Rect2(x, y, 640, 400), false, theme_tint)
-	draw_rect(WORLD_RECT, Color(0.025, 0.02, 0.04, 0.08), true)
-	var seam_color := Color(0.20, 0.12, 0.10, 0.16)
-	for x in range(0, int(WORLD_RECT.size.x) + 1, 320):
-		draw_line(Vector2(x, 0), Vector2(x, WORLD_RECT.end.y), seam_color, 1.0)
-	for y in range(0, int(WORLD_RECT.size.y) + 1, 200):
-		draw_line(Vector2(0, y), Vector2(WORLD_RECT.end.x, y), seam_color, 1.0)
+	var base_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
+	for room_index in 9:
+		var room := WorldLayout.room_rect(room_index)
+		var room_tint := base_tint.lightened(float((room_index % 3) - 1) * 0.035)
+		draw_texture_rect(DUNGEON_TEXTURE, room, false, room_tint)
+		var walk := WorldLayout.walk_rect(room_index)
+		draw_rect(walk, Color(0.08, 0.045, 0.05, 0.08), true)
+		draw_arc(walk.get_center(), 44.0 + float(room_index % 2) * 7.0, 0.0, TAU, 32, Color(0.45, 0.18, 0.16, 0.13), 2.0)
+	for pair: Vector2i in WorldLayout.connected_room_pairs():
+		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
+		if corridor.size.is_zero_approx():
+			continue
+		draw_rect(corridor, Color("2a2020"), true)
+		draw_rect(corridor.grow(-3.0), Color("4a3430"), true)
+	draw_rect(WORLD_RECT, Color(0.02, 0.015, 0.025, 0.07), true)
 
 
 func _start_battle() -> void:
 	_respawning = false
+	_traveling = false
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
 	player.visible = true
-	if not WORLD_RECT.has_point(player.position):
-		player.position = PLAYER_POSITION
+	player.position = WorldLayout.room_center(_current_room)
 	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
 	_attack_time_left = 0.15
@@ -119,8 +137,8 @@ func _spawn_wave() -> void:
 		var enemy := EnemyAI.new()
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
 		enemies_root.add_child(enemy)
-		enemy.global_position = _random_edge_position()
-		enemy.setup(eligible.pick_random(), GameManager.floor, player, WORLD_RECT)
+		enemy.global_position = _random_spawn_position()
+		enemy.setup(eligible.pick_random(), GameManager.floor, player, _combat_rect)
 		_connect_enemy(enemy)
 		_enemies.append(enemy)
 	if wave_size > 0:
@@ -138,8 +156,8 @@ func _spawn_boss() -> void:
 	var boss := EnemyAI.new()
 	boss.name = "Boss_%d" % GameManager.floor
 	enemies_root.add_child(boss)
-	boss.global_position = _random_edge_position()
-	boss.setup(_boss_resource, GameManager.floor, player, WORLD_RECT)
+	boss.global_position = _random_spawn_position()
+	boss.setup(_boss_resource, GameManager.floor, player, _combat_rect)
 	_connect_enemy(boss)
 	_enemies.append(boss)
 	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
@@ -182,8 +200,8 @@ func _update_auto_hunt(delta: float) -> void:
 	if _wander_time_left <= 0.0 or player.global_position.distance_to(_wander_target) < 8.0:
 		_wander_time_left = WANDER_RESELECT_TIME
 		_wander_target = Vector2(
-			randf_range(WORLD_RECT.position.x + 36.0, WORLD_RECT.end.x - 36.0),
-			randf_range(WORLD_RECT.position.y + 32.0, WORLD_RECT.end.y - 32.0)
+			randf_range(_combat_rect.position.x + 24.0, _combat_rect.end.x - 24.0),
+			randf_range(_combat_rect.position.y + 24.0, _combat_rect.end.y - 24.0)
 		)
 	_move_player_toward(_wander_target, delta)
 
@@ -194,12 +212,56 @@ func _move_player_toward(world_target: Vector2, delta: float) -> void:
 		player.set_move_direction(Vector2.ZERO)
 		return
 	var move_speed: float = PLAYER_BASE_MOVE_SPEED * clampf(GameManager.spd, 0.75, 2.2)
-	player.global_position += direction * move_speed * delta
+	var next_position: Vector2 = player.global_position + direction * move_speed * delta
 	player.global_position = Vector2(
-		clampf(player.global_position.x, WORLD_RECT.position.x + 18.0, WORLD_RECT.end.x - 18.0),
-		clampf(player.global_position.y, WORLD_RECT.position.y + 20.0, WORLD_RECT.end.y - 18.0)
+		clampf(next_position.x, _combat_rect.position.x + 14.0, _combat_rect.end.x - 14.0),
+		clampf(next_position.y, _combat_rect.position.y + 16.0, _combat_rect.end.y - 14.0)
 	)
 	player.set_move_direction(direction)
+
+
+func _begin_room_travel(from_room: int, to_room: int) -> void:
+	_clear_enemies()
+	_travel_target_room = to_room
+	_travel_waypoints = WorldLayout.travel_waypoints(from_room, to_room)
+	_travel_index = 0
+	_traveling = not _travel_waypoints.is_empty()
+	player.set_move_direction(Vector2.ZERO)
+	if _traveling:
+		GameManager.notification_requested.emit("다음 구역으로 이동 중", Color("8be0f1"))
+	else:
+		_current_room = to_room
+		_combat_rect = WorldLayout.walk_rect(_current_room)
+		player.position = WorldLayout.room_center(_current_room)
+		_spawn_wave()
+
+
+func _update_room_travel(delta: float) -> void:
+	if _travel_index >= _travel_waypoints.size():
+		_finish_room_travel()
+		return
+	var waypoint: Vector2 = _travel_waypoints[_travel_index]
+	var distance: float = player.global_position.distance_to(waypoint)
+	if distance <= 5.0:
+		player.global_position = waypoint
+		_travel_index += 1
+		if _travel_index >= _travel_waypoints.size():
+			_finish_room_travel()
+		return
+	var direction: Vector2 = player.global_position.direction_to(waypoint)
+	var move_speed: float = PLAYER_BASE_MOVE_SPEED * 1.45 * clampf(GameManager.spd, 0.8, 2.0)
+	player.global_position += direction * minf(move_speed * delta, distance)
+	player.set_move_direction(direction)
+
+
+func _finish_room_travel() -> void:
+	_traveling = false
+	_current_room = _travel_target_room
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
+	player.set_move_direction(Vector2.ZERO)
+	_wander_time_left = 0.0
+	_spawn_wave()
 
 
 func _attack_range() -> float:
@@ -323,15 +385,15 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		GameManager.notification_requested.emit("보스 격파 · %s 획득" % reward_text, Color("ffd166"))
-		_clear_enemies()
+		var previous_room: int = _current_room
 		GameManager.advance_floor()
-		_spawn_wave()
+		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 		return
 	LootManager.try_drop()
 	if GameManager.kills_on_floor >= 8 + GameManager.floor:
-		_clear_enemies()
+		var previous_room: int = _current_room
 		GameManager.advance_floor()
-		_spawn_wave()
+		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 	elif _enemies.is_empty():
 		_spawn_wave()
 
@@ -363,6 +425,10 @@ func _on_player_died() -> void:
 	GameManager.retreat_floor()
 	GameManager.revive()
 	effects.clear_effects()
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
+	player.set_move_direction(Vector2.ZERO)
 	_respawning = false
 	GameManager.set_game_state(GameManager.GameState.RUNNING)
 	_spawn_wave()
@@ -449,14 +515,15 @@ func _load_enemy_resources() -> void:
 	_enemy_resources.sort_custom(func(a: EnemyData, b: EnemyData) -> bool: return a.unlock_floor < b.unlock_floor)
 
 
-func _random_edge_position() -> Vector2:
-	var angle: float = randf_range(0.0, TAU)
-	var distance: float = randf_range(220.0, 360.0)
-	var candidate: Vector2 = player.global_position + Vector2.RIGHT.rotated(angle) * distance
-	return Vector2(
-		clampf(candidate.x, WORLD_RECT.position.x + 28.0, WORLD_RECT.end.x - 28.0),
-		clampf(candidate.y, WORLD_RECT.position.y + 28.0, WORLD_RECT.end.y - 28.0)
-	)
+func _random_spawn_position() -> Vector2:
+	for _attempt in 10:
+		var candidate := Vector2(
+			randf_range(_combat_rect.position.x + 24.0, _combat_rect.end.x - 24.0),
+			randf_range(_combat_rect.position.y + 24.0, _combat_rect.end.y - 24.0)
+		)
+		if candidate.distance_to(player.global_position) >= 110.0:
+			return candidate
+	return _combat_rect.position + Vector2(36.0, 36.0)
 
 
 func _start_shake(intensity: float, duration: float) -> void:
