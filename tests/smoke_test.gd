@@ -34,8 +34,11 @@ func _run() -> void:
 	var warrior: ClassData = load("res://resources/classes/warrior.tres")
 	GameManager.select_class(warrior)
 	await get_tree().process_frame
-	_check(battle.player.position == Vector2(320, 200), "Player remains fixed at the exact center of the 640x400 viewport")
+	_check(BattleManager.BATTLE_RECT.has_point(battle.player.position), "Player begins inside the active hunt arena")
 	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
+	var player_start: Vector2 = battle.player.position
+	await get_tree().create_timer(0.35).timeout
+	_check(battle.player.position.distance_to(player_start) > 0.5, "Auto-hunt moves the player toward enemies")
 	for spawned_enemy: EnemyAI in battle._enemies:
 		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
 	var animation_target: EnemyAI = battle._nearest_enemy()
