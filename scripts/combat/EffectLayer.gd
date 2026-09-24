@@ -91,6 +91,18 @@ func show_drop(world_position: Vector2, item: Dictionary) -> void:
 		spawn_fragments(Vector2(320, 105), Color("ffd700"), 28, 105.0)
 
 
+func show_pickup(from: Vector2, to: Vector2, item: Dictionary) -> void:
+	var color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
+	_lines.append({
+		"points": PackedVector2Array([from, from.lerp(to, 0.45) + Vector2(0, -18), to]),
+		"color": Color(color, 0.85),
+		"life": 0.24,
+		"duration": 0.24,
+		"width": 2.0,
+	})
+	spawn_fragments(from, color, 5, 42.0)
+
+
 func show_level_up(world_position: Vector2) -> void:
 	_texts.append({"position": world_position + Vector2(-25, -24), "text": "LEVEL UP!", "color": Color("ffd84d"), "life": 1.5, "duration": 1.5, "size": 14})
 	spawn_fragments(world_position, Color("ffd84d"), 15, 85.0)
