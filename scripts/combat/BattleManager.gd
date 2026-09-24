@@ -1,9 +1,13 @@
 extends Node2D
 class_name BattleManager
 
-const BATTLE_RECT := Rect2(22, 54, 596, 294)
-const PLAYER_POSITION := Vector2(320, 200)
+const BATTLE_RECT := Rect2(18, 42, 604, 320)
+const PLAYER_POSITION := Vector2(320, 202)
 const BOSS_FLOOR_INTERVAL: int = 10
+const PLAYER_BASE_MOVE_SPEED: float = 54.0
+const MELEE_ATTACK_RANGE: float = 42.0
+const RANGED_ATTACK_RANGE: float = 112.0
+const WANDER_RESELECT_TIME: float = 1.8
 const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
@@ -30,6 +34,8 @@ var _respawning: bool = false
 var _shake_time_left: float = 0.0
 var _shake_intensity: float = 0.0
 var _last_death_position: Vector2 = PLAYER_POSITION
+var _wander_target: Vector2 = PLAYER_POSITION
+var _wander_time_left: float = 0.0
 
 
 func _ready() -> void:
@@ -53,6 +59,7 @@ func _process(delta: float) -> void:
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
 	_update_target_marker()
+	_update_auto_hunt(delta)
 	_attack_time_left -= delta
 	_skill_time_left -= delta
 	if _attack_time_left <= 0.0:
@@ -66,15 +73,18 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
 	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, 0, 640, 400), false, theme_tint)
-	draw_rect(Rect2(0, 0, 640, 356), Color(0.025, 0.02, 0.04, 0.16), true)
-	draw_rect(Rect2(0, 0, 640, 42), Color(0.02, 0.015, 0.025, 0.70), true)
-	draw_line(Vector2(0, 41), Vector2(640, 41), Color("8f5a3a"), 1.0)
-	draw_line(Vector2(0, 355), Vector2(640, 355), Color("9a6240"), 2.0)
+	draw_rect(Rect2(0, 0, 640, 366), Color(0.025, 0.02, 0.04, 0.10), true)
+	draw_rect(Rect2(0, 0, 640, 34), Color(0.02, 0.015, 0.025, 0.42), true)
+	draw_line(Vector2(0, 33), Vector2(640, 33), Color("6f4934"), 1.0)
+	draw_line(Vector2(0, 365), Vector2(640, 365), Color("6f4934"), 1.0)
 
 
 func _start_battle() -> void:
 	_respawning = false
 	player.visible = true
+	if not BATTLE_RECT.has_point(player.position):
+		player.position = PLAYER_POSITION
+	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
@@ -136,6 +146,8 @@ func _perform_auto_attack() -> void:
 	var target: EnemyAI = _nearest_enemy()
 	if target == null:
 		return
+	if player.global_position.distance_to(target.global_position) > _attack_range():
+		return
 	var attack_power: float = GameManager.atk * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
 	player.play_attack(target.global_position)
@@ -144,6 +156,47 @@ func _perform_auto_attack() -> void:
 	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
 	if bool(result.get("critical", false)):
 		_start_shake(2.5, 0.15)
+
+
+func _update_auto_hunt(delta: float) -> void:
+	var target: EnemyAI = _nearest_enemy()
+	if target != null:
+		var distance: float = player.global_position.distance_to(target.global_position)
+		var desired_range: float = _attack_range() * 0.82
+		if distance > desired_range:
+			_move_player_toward(target.global_position, delta)
+		else:
+			player.set_move_direction(Vector2.ZERO)
+		return
+
+	_wander_time_left -= delta
+	if _wander_time_left <= 0.0 or player.global_position.distance_to(_wander_target) < 8.0:
+		_wander_time_left = WANDER_RESELECT_TIME
+		_wander_target = Vector2(
+			randf_range(BATTLE_RECT.position.x + 36.0, BATTLE_RECT.end.x - 36.0),
+			randf_range(BATTLE_RECT.position.y + 32.0, BATTLE_RECT.end.y - 32.0)
+		)
+	_move_player_toward(_wander_target, delta)
+
+
+func _move_player_toward(world_target: Vector2, delta: float) -> void:
+	var direction: Vector2 = player.global_position.direction_to(world_target)
+	if direction.is_zero_approx():
+		player.set_move_direction(Vector2.ZERO)
+		return
+	var move_speed: float = PLAYER_BASE_MOVE_SPEED * clampf(GameManager.spd, 0.75, 2.2)
+	player.global_position += direction * move_speed * delta
+	player.global_position = Vector2(
+		clampf(player.global_position.x, BATTLE_RECT.position.x + 18.0, BATTLE_RECT.end.x - 18.0),
+		clampf(player.global_position.y, BATTLE_RECT.position.y + 20.0, BATTLE_RECT.end.y - 18.0)
+	)
+	player.set_move_direction(direction)
+
+
+func _attack_range() -> float:
+	if GameManager.selected_class in ["mage", "sage", "saint"]:
+		return RANGED_ATTACK_RANGE
+	return MELEE_ATTACK_RANGE
 
 
 func _perform_auto_skill() -> void:
