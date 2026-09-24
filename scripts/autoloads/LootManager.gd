@@ -9,18 +9,27 @@ func _ready() -> void:
 	_generator = ItemGenerator.new()
 
 
-func try_drop() -> Dictionary:
+func roll_drop() -> Dictionary:
 	var drop_chance: float = 12.0 + GameManager.floor * 0.4 + GameManager.rebirth_count * 2.0
 	if randf() * 100.0 >= drop_chance:
 		return {}
 	var item: Dictionary = _generator.generate_item(GameManager.floor, GameManager.rebirth_count)
-	if item.is_empty():
+	if item.is_empty() or not passes_loot_filter(item):
 		return {}
-	if not passes_loot_filter(item):
-		return {}
-	if not GameManager.add_inventory_item(item):
-		return {}
+	return item
+
+
+func collect_item(item: Dictionary) -> bool:
+	if item.is_empty() or not GameManager.add_inventory_item(item):
+		return false
 	item_dropped.emit(item)
+	return true
+
+
+func try_drop() -> Dictionary:
+	var item: Dictionary = roll_drop()
+	if item.is_empty() or not collect_item(item):
+		return {}
 	return item
 
 
