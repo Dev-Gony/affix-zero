@@ -12,7 +12,14 @@ const COLOR_GREEN := Color("4fd675")
 const COLOR_GOLD := Color("d9a441")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
-const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_TEXTURES := {
+	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
+	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
+	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
+	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
+	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
+	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
+}
 const EQUIPMENT_REGIONS: Dictionary = {
 	"weapon": Vector2i(0, 0), "helmet": Vector2i(1, 0), "armor": Vector2i(2, 0), "gloves": Vector2i(3, 0),
 	"boots": Vector2i(0, 1), "ring": Vector2i(1, 1), "amulet": Vector2i(2, 1),
@@ -28,10 +35,6 @@ const STAT_NAMES: Dictionary = {
 }
 const RARITY_BADGES: Dictionary = {
 	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설",
-}
-const CLASS_REGIONS: Dictionary = {
-	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
-	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
 }
 const MANAGEMENT_TITLES: Array[String] = ["장비", "가방", "스킬", "환생", "정보"]
 const EQUIPMENT_LAYOUT: Array[String] = ["amulet", "helmet", "ring", "weapon", "portrait", "gloves", "boots", "armor", "summary"]
@@ -754,12 +757,8 @@ func _build_equipment_summary() -> PanelContainer:
 	return panel
 
 
-func _class_portrait_icon() -> AtlasTexture:
-	var atlas_cell: Vector2i = CLASS_REGIONS.get(GameManager.selected_class, Vector2i.ZERO)
-	var icon := AtlasTexture.new()
-	icon.atlas = CLASS_ATLAS
-	icon.region = Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
-	return icon
+func _class_portrait_icon() -> Texture2D:
+	return CLASS_TEXTURES.get(GameManager.selected_class, CLASS_TEXTURES["warrior"])
 
 
 func _refresh_inventory() -> void:
@@ -936,17 +935,22 @@ func _item_icon(item: Dictionary) -> AtlasTexture:
 func _refresh_skills() -> void:
 	_clear_container(_skills_list)
 	var hint := Label.new()
-	hint.text = "%s의 지속 효과 · 골드로 강화" % GameManager.selected_class_name
+	hint.text = "%s 전용 패시브 · 직업별로 별도 저장" % GameManager.selected_class_name
 	hint.add_theme_font_size_override("font_size", 7)
 	hint.add_theme_color_override("font_color", COLOR_MUTED)
 	_skills_list.add_child(hint)
-	_add_skill_row("attack_boost", "ATK", "공격 강화", "모든 피해 +10% / Lv", 100, 80)
-	_add_skill_row("defense_boost", "DEF", "방어 강화", "받는 피해 -5% / Lv", 120, 90)
-	_add_skill_row("life_steal", "VAMP", "흡혈", "처치 시 최대 HP 3% / Lv 회복", 150, 100)
+	for definition_value: Variant in GameManager.class_skill_definitions():
+		var definition: Dictionary = definition_value
+		_add_skill_row(definition)
 
 
-func _add_skill_row(skill_id: String, mark: String, title: String, description: String, base_cost: int, cost_step: int) -> void:
-	var level: int = int(GameManager.skill_levels.get(skill_id, 0))
+func _add_skill_row(definition: Dictionary) -> void:
+	var skill_id: String = String(definition.get("id", ""))
+	var title: String = String(definition.get("name", "스킬"))
+	var description: String = String(definition.get("description", ""))
+	var base_cost: int = int(definition.get("base_cost", 100))
+	var cost_step: int = int(definition.get("cost_step", 80))
+	var level: int = GameManager.class_skill_level(skill_id)
 	var cost: int = base_cost + level * cost_step
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.y = 67
@@ -960,7 +964,7 @@ func _add_skill_row(skill_id: String, mark: String, title: String, description: 
 	mark_panel.add_theme_stylebox_override("panel", _style_box(Color("251722"), COLOR_GOLD.darkened(0.28), 1, 0))
 	row.add_child(mark_panel)
 	var mark_label := Label.new()
-	mark_label.text = mark
+	mark_label.text = title.substr(0, mini(2, title.length()))
 	mark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	mark_label.add_theme_font_size_override("font_size", 8)
