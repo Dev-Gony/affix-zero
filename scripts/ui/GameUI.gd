@@ -150,14 +150,14 @@ func _build_hud() -> void:
 	_xp_bar = _add_bar(bars, "XP", Color("22c55e"))
 
 	_hud_info = Label.new()
-	_hud_info.custom_minimum_size = Vector2(246, 28)
+	_hud_info.custom_minimum_size = Vector2(206, 28)
 	_hud_info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hud_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hud_info.add_theme_font_size_override("font_size", 9)
 	row.add_child(_hud_info)
 
 	var speed_row := HBoxContainer.new()
-	speed_row.custom_minimum_size = Vector2(138, 28)
+	speed_row.custom_minimum_size = Vector2(116, 28)
 	speed_row.alignment = BoxContainer.ALIGNMENT_END
 	speed_row.add_theme_constant_override("separation", 4)
 	row.add_child(speed_row)
@@ -175,6 +175,26 @@ func _build_hud() -> void:
 		speed_button.pressed.connect(_set_speed.bind(multiplier))
 		speed_row.add_child(speed_button)
 		_speed_buttons[multiplier] = speed_button
+
+	var quick_row := HBoxContainer.new()
+	quick_row.custom_minimum_size = Vector2(82, 28)
+	quick_row.alignment = BoxContainer.ALIGNMENT_END
+	quick_row.add_theme_constant_override("separation", 2)
+	row.add_child(quick_row)
+	var quick_save := Button.new()
+	quick_save.text = "저장"
+	quick_save.custom_minimum_size = Vector2(38, 24)
+	quick_save.add_theme_font_size_override("font_size", 7)
+	quick_save.tooltip_text = "즉시 저장"
+	quick_save.pressed.connect(_manual_save)
+	quick_row.add_child(quick_save)
+	var quick_quit := Button.new()
+	quick_quit.text = "종료"
+	quick_quit.custom_minimum_size = Vector2(38, 24)
+	quick_quit.add_theme_font_size_override("font_size", 7)
+	quick_quit.tooltip_text = "저장 후 게임 종료"
+	quick_quit.pressed.connect(_save_and_quit)
+	quick_row.add_child(quick_quit)
 
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
