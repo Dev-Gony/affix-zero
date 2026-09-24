@@ -3,6 +3,7 @@ class_name BattleManager
 
 const BATTLE_RECT := Rect2(22, 54, 596, 294)
 const PLAYER_POSITION := Vector2(320, 200)
+const BOSS_FLOOR_INTERVAL: int = 10
 const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
@@ -21,6 +22,7 @@ const ENEMY_RESOURCE_PATHS: Array[String] = [
 @onready var effects: EffectLayer = $Effects
 
 var _enemy_resources: Array[EnemyData] = []
+var _boss_resource: EnemyData
 var _enemies: Array[EnemyAI] = []
 var _attack_time_left: float = 0.0
 var _skill_time_left: float = 3.0
@@ -84,9 +86,12 @@ func _start_battle() -> void:
 func _spawn_wave() -> void:
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	if is_boss_floor():
+		_spawn_boss()
+		return
 	var eligible: Array[EnemyData] = []
 	for enemy_resource: EnemyData in _enemy_resources:
-		if enemy_resource.unlock_floor <= GameManager.floor:
+		if enemy_resource.behavior != "boss" and enemy_resource.unlock_floor <= GameManager.floor:
 			eligible.append(enemy_resource)
 	if eligible.is_empty():
 		return
@@ -97,12 +102,34 @@ func _spawn_wave() -> void:
 		enemies_root.add_child(enemy)
 		enemy.global_position = _random_edge_position()
 		enemy.setup(eligible.pick_random(), GameManager.floor, player, BATTLE_RECT)
-		enemy.died.connect(_on_enemy_died)
-		enemy.attacked_player.connect(_on_enemy_attack)
-		enemy.damage_received.connect(_on_enemy_damage_received)
+		_connect_enemy(enemy)
 		_enemies.append(enemy)
 	if wave_size > 0:
 		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
+
+
+func is_boss_floor(floor_number: int = GameManager.floor) -> bool:
+	return floor_number > 0 and floor_number % BOSS_FLOOR_INTERVAL == 0
+
+
+func _spawn_boss() -> void:
+	if _boss_resource == null:
+		push_error("Boss resource is not available")
+		return
+	var boss := EnemyAI.new()
+	boss.name = "Boss_%d" % GameManager.floor
+	enemies_root.add_child(boss)
+	boss.global_position = _random_edge_position()
+	boss.setup(_boss_resource, GameManager.floor, player, BATTLE_RECT)
+	_connect_enemy(boss)
+	_enemies.append(boss)
+	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
+
+
+func _connect_enemy(enemy: EnemyAI) -> void:
+	enemy.died.connect(_on_enemy_died)
+	enemy.attacked_player.connect(_on_enemy_attack)
+	enemy.damage_received.connect(_on_enemy_damage_received)
 
 
 func _perform_auto_attack() -> void:
@@ -220,6 +247,7 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int) -> void:
 	if not _enemies.has(enemy):
 		return
+	var defeated_boss: bool = enemy.behavior == "boss" and is_boss_floor()
 	_enemies.erase(enemy)
 	_last_death_position = world_position
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
@@ -229,6 +257,14 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
 	GameManager.add_gold(adjusted_gold)
 	effects.show_gold(world_position, adjusted_gold)
+	if defeated_boss:
+		var boss_reward: Dictionary = LootManager.drop_boss_reward()
+		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
+		GameManager.notification_requested.emit("보스 격파 · %s 획득" % reward_text, Color("ffd166"))
+		_clear_enemies()
+		GameManager.advance_floor()
+		_spawn_wave()
+		return
 	LootManager.try_drop()
 	if GameManager.kills_on_floor >= 8 + GameManager.floor:
 		_clear_enemies()
@@ -336,12 +372,18 @@ func _configure_player_visual() -> void:
 
 func _load_enemy_resources() -> void:
 	_enemy_resources.clear()
+	_boss_resource = null
 	for resource_path: String in ENEMY_RESOURCE_PATHS:
 		var resource: Resource = load(resource_path)
 		if resource is EnemyData:
-			_enemy_resources.append(resource as EnemyData)
+			var enemy_data := resource as EnemyData
+			_enemy_resources.append(enemy_data)
+			if enemy_data.behavior == "boss":
+				_boss_resource = enemy_data
 	if _enemy_resources.size() != ENEMY_RESOURCE_PATHS.size():
 		push_error("Enemy resource catalog incomplete: loaded %d/%d" % [_enemy_resources.size(), ENEMY_RESOURCE_PATHS.size()])
+	if _boss_resource == null:
+		push_error("Enemy resource catalog has no boss")
 	_enemy_resources.sort_custom(func(a: EnemyData, b: EnemyData) -> bool: return a.unlock_floor < b.unlock_floor)
 
 
