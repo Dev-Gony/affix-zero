@@ -1,8 +1,8 @@
 extends Node2D
 class_name BattleManager
 
-const BATTLE_RECT := Rect2(22, 58, 596, 132)
-const PLAYER_POSITION := Vector2(320, 126)
+const BATTLE_RECT := Rect2(22, 54, 596, 294)
+const PLAYER_POSITION := Vector2(300, 198)
 const ENEMY_RESOURCE_DIRECTORY: String = "res://resources/enemies/"
 const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 
@@ -54,11 +54,11 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
-	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, -54, 640, 360), false, theme_tint)
-	draw_rect(Rect2(0, 0, 640, 216), Color(0.025, 0.02, 0.04, 0.16), true)
+	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, 0, 640, 400), false, theme_tint)
+	draw_rect(Rect2(0, 0, 640, 356), Color(0.025, 0.02, 0.04, 0.16), true)
 	draw_rect(Rect2(0, 0, 640, 42), Color(0.02, 0.015, 0.025, 0.70), true)
 	draw_line(Vector2(0, 41), Vector2(640, 41), Color("8f5a3a"), 1.0)
-	draw_line(Vector2(0, 214), Vector2(640, 214), Color("9a6240"), 2.0)
+	draw_line(Vector2(0, 355), Vector2(640, 355), Color("9a6240"), 2.0)
 
 
 func _start_battle() -> void:

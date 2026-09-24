@@ -8,9 +8,9 @@ AFFIX: ZERO is a playable Godot 4.3 idle hack-and-slash prototype under active d
 2. Press **F6/F5** to run `scenes/main.tscn`.
 3. Select Warrior or Mage. The remaining four classes unlock through rebirths.
 
-The internal pixel-art resolution is 640x360 and the default desktop window is 1280x720. The compatibility renderer keeps the project suitable for desktop and web exports.
+The internal pixel-art resolution is 640x400 and the default desktop window is 1280x800. The extra vertical room preserves the battle view while the compatibility renderer keeps the project suitable for desktop and web exports.
 
-Keyboard shortcuts: `1`-`5` switch the management tabs, while `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
+Keyboard shortcuts: `1`-`5` open or close the equipment, inventory, skill, rebirth, and stats windows, while `Escape` closes the active window. `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
 
 Every pull request CI run also publishes two downloadable playable artifacts:
 
@@ -23,7 +23,8 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 - Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
 - Six classes with distinct stats, unlock requirements, and skill visuals
 - Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
-- 20-slot loot grid, icon-based equipment overview, item comparison, selling, passive skills, stats, and rebirth UI
+- Diablo-style 3x3 equipment paper doll, 20-slot loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
+- Compact five-button management dock with focused right-side windows so combat remains visible while managing a build
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
 - Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
 - Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases

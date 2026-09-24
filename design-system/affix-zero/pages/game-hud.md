@@ -4,11 +4,13 @@ This page override adapts the project-wide pixel-art direction to the Godot 4.3 
 
 ## Layout
 
-- Treat 640x360 as the source viewport and verify the default 1280x720 2x presentation.
-- Reserve y=0..41 for the combat HUD, y=42..213 for the arena, and y=214..359 for management tabs.
-- Hide the runtime HUD and management tabs while class selection is open.
-- Show all seven equipment slots at once. Do not require horizontal scrolling for the equipment overview.
-- Inventory may scroll vertically, but primary equip and sell actions must remain visible on each row.
+- Treat 640x400 as the source viewport and verify the default 1280x800 2x presentation.
+- Reserve y=0..41 for the combat HUD and y=356..399 for a compact management dock. The arena remains visible behind management windows.
+- Management is progressive disclosure: open one focused window at a time over the right side of the arena; clicking its dock button again or pressing Escape closes it.
+- Hide the runtime HUD, dock, and management windows while class selection is open.
+- Equipment uses a three-by-three paper-doll layout with the class portrait at its center and all seven slots visible without scrolling.
+- Inventory uses a five-by-four grid. Keep selected-item comparison and equip/sell actions visible below the grid.
+- Skills, rebirth, and statistics use dedicated windows rather than sharing permanent vertical space with combat.
 
 ## Visual language
 
@@ -16,11 +18,13 @@ This page override adapts the project-wide pixel-art direction to the Godot 4.3 
 - Use near-black plum surfaces, aged bronze borders, blood-red selection states, loot-grade accents, and green equipped markers.
 - Keep normal Korean text readable at the 2x presentation. Use 7px only for compact equipment metadata; use 9-11px for actions and primary information.
 - Preserve a quiet circular combat area around the fixed-center player. Props belong near the arena edges.
+- Management windows use opaque near-black surfaces so item silhouettes and Korean text remain readable over combat.
+- Combat notifications stay in the left battle column and never cover a management-window title or close action.
 
 ## Interaction
 
 - Every button needs normal, hover, pressed, disabled, and visible keyboard-focus states.
-- Number keys 1-5 switch management tabs. Z/X/C select x1/x2/x5 combat speed.
+- Number keys 1-5 open or switch management windows; pressing the active number or Escape closes it. Z/X/C select x1/x2/x5 combat speed.
 - Class selection must focus the first unlocked class for keyboard play.
 - Color cannot be the only state indicator: include grade names, arrows/signs for comparisons, and text labels for locked states.
 

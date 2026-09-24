@@ -4,7 +4,7 @@
 
 AFFIX: ZERO is an idle top-down hack-and-slash game built with Godot 4.3. Its direction combines Hero Siege-style pixel combat with Diablo-style randomized loot. Automatic combat, item affixes, progression, class selection, rebirth, effects, and the tabbed management UI are implemented.
 
-The game uses a 640x360 pixel-art viewport. Preserve crisp scaling and keep combat content in the upper region while upgrade and management UI belongs in the lower region.
+The game uses a 640x400 pixel-art viewport. Preserve crisp scaling and keep combat as the primary full-screen layer. Management UI opens as focused right-side windows from the compact bottom dock instead of permanently consuming the battle area.
 
 ## Folder structure
 
@@ -31,6 +31,6 @@ The game uses a 640x360 pixel-art viewport. Preserve crisp scaling and keep comb
 - Keep autoloads small and intentional. Do not turn them into catch-all dependency containers.
 - Add gameplay systems only within the scope of the active task.
 - Keep balance values in `.tres` resources. Code may contain resource paths and algorithms, but not duplicate resource balance tables.
-- Treat the 640x360 internal viewport as the layout source of truth. Verify both 640x360 and the default 2x desktop presentation.
+- Treat the 640x400 internal viewport as the layout source of truth. Verify both 640x400 and the default 1280x800 desktop presentation.
 - Read `design-system/affix-zero/MASTER.md` and the relevant page override before changing UI. The game HUD override is `design-system/affix-zero/pages/game-hud.md`.
 - Run `res://tests/smoke_test.tscn` headlessly after changes to combat, progression, loot, saves, or UI state.

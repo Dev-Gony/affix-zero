@@ -155,7 +155,7 @@ func clear_effects() -> void:
 
 func _draw() -> void:
 	if _flash_alpha > 0.0:
-		draw_rect(Rect2(0, 0, 640, 216), Color(1.0, 0.76, 0.15, _flash_alpha), true)
+		draw_rect(Rect2(0, 0, 640, 356), Color(1.0, 0.76, 0.15, _flash_alpha), true)
 	for particle: Dictionary in _particles:
 		var alpha: float = clampf(float(particle["life"]) / float(particle["duration"]), 0.0, 1.0)
 		var color: Color = particle["color"]

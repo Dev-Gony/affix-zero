@@ -64,8 +64,17 @@ func _run() -> void:
 	_check(AudioManager.has_complete_audio_bank(), "Authored or procedural audio covers every BGM and SFX channel")
 	var game_ui: GameUI = main.get_node("UILayer/GameUI")
 	_check(game_ui._class_selection._grid.get_child_count() == 6, "Class selection renders all six cards")
-	_check(game_ui._equipment_row.get_child_count() == 7, "Equipment overview renders all seven slots")
-	_check(game_ui._equipment_row.get_combined_minimum_size().y <= 90.0, "Equipment cards fit inside the 640x360 management panel")
+	_check(game_ui._equipment_row.get_child_count() == 9, "Equipment paper doll renders seven slots, a class portrait, and a combat summary")
+	var equipment_slot_count: int = 0
+	for equipment_cell: Node in game_ui._equipment_row.get_children():
+		if equipment_cell.has_meta("equipment_slot"):
+			equipment_slot_count += 1
+	_check(equipment_slot_count == 7, "Equipment paper doll keeps all seven functional equipment slots")
+	_check(not game_ui._management_open and not game_ui._management_window.visible, "Management windows stay closed while combat is the primary view")
+	game_ui._toggle_management(1)
+	_check(game_ui._management_open and game_ui._management_window.visible and game_ui._main_tabs.current_tab == 1, "Inventory dock button opens the focused inventory window")
+	game_ui._toggle_management(1)
+	_check(not game_ui._management_open and not game_ui._management_window.visible, "Pressing the active dock button closes the management window")
 
 	for class_id: String in ["warrior", "mage", "knight", "sage", "assassin", "saint"]:
 		var class_data: ClassData = load("res://resources/classes/%s.tres" % class_id)
