@@ -81,6 +81,9 @@ var statistics: Dictionary = {
 var game_state: GameState = GameState.CLASS_SELECTION
 var speed_multiplier: float = 1.0
 var loot_min_rarity_index: int = 0
+var master_volume: float = 1.0
+var fullscreen_enabled: bool = false
+var autosave_enabled: bool = true
 
 
 func _ready() -> void:
@@ -117,6 +120,21 @@ func set_game_state(next_state: GameState) -> void:
 func set_loot_min_rarity(index: int) -> void:
 	loot_min_rarity_index = clampi(index, 0, 4)
 	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설"][loot_min_rarity_index], Color("d9a441"))
+
+
+func set_master_volume(value: float) -> void:
+	master_volume = clampf(value, 0.0, 1.0)
+	AudioManager.set_master_volume(master_volume)
+
+
+func set_fullscreen(enabled: bool) -> void:
+	fullscreen_enabled = enabled
+	DisplayServer.window_set_mode(DisplayServer.WINDOW_MODE_FULLSCREEN if enabled else DisplayServer.WINDOW_MODE_WINDOWED)
+
+
+func set_autosave(enabled: bool) -> void:
+	autosave_enabled = enabled
+	SaveManager.set_autosave_enabled(enabled)
 
 
 func set_speed_multiplier(multiplier: float) -> void:
@@ -413,6 +431,9 @@ func to_save_dict() -> Dictionary:
 		"statistics": statistics.duplicate(true),
 		"speed_multiplier": speed_multiplier,
 		"loot_min_rarity_index": loot_min_rarity_index,
+		"master_volume": master_volume,
+		"fullscreen_enabled": fullscreen_enabled,
+		"autosave_enabled": autosave_enabled,
 		"saved_at": Time.get_unix_time_from_system(),
 	}
 
@@ -448,6 +469,9 @@ func apply_save_dict(data: Dictionary) -> void:
 	mp = clampi(int(data.get("mp", max_mp)), 0, max_mp)
 	set_speed_multiplier(float(data.get("speed_multiplier", 1.0)))
 	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 4)
+	set_master_volume(float(data.get("master_volume", 1.0)))
+	set_fullscreen(bool(data.get("fullscreen_enabled", false)))
+	set_autosave(bool(data.get("autosave_enabled", true)))
 	set_game_state(GameState.RUNNING if not selected_class.is_empty() else GameState.CLASS_SELECTION)
 	stats_changed.emit()
 	inventory_changed.emit()
