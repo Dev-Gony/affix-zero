@@ -11,10 +11,13 @@ const CLASS_PATHS: Array[String] = [
 	"res://resources/classes/assassin.tres",
 	"res://resources/classes/saint.tres",
 ]
-const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
-const CLASS_REGIONS: Dictionary = {
-	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
-	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
+const CLASS_TEXTURES := {
+	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
+	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
+	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
+	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
+	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
+	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
 }
 
 var _grid: GridContainer
@@ -133,12 +136,8 @@ func _card_style(background: Color, border: Color, width: int) -> StyleBoxFlat:
 	return style
 
 
-func _make_class_icon(class_data: ClassData) -> AtlasTexture:
-	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_data.id, Vector2i.ZERO)
-	var icon := AtlasTexture.new()
-	icon.atlas = CLASS_ATLAS
-	icon.region = Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
-	return icon
+func _make_class_icon(class_data: ClassData) -> Texture2D:
+	return CLASS_TEXTURES.get(class_data.id, CLASS_TEXTURES["warrior"])
 
 
 func _select_class(class_data: ClassData) -> void:
