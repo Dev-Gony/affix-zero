@@ -1,8 +1,8 @@
 extends Node2D
 class_name BattleManager
 
-const BATTLE_RECT := Rect2(18, 42, 604, 320)
-const PLAYER_POSITION := Vector2(320, 202)
+const WORLD_RECT := Rect2(0, 0, 1920, 1200)
+const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
 const PLAYER_BASE_MOVE_SPEED: float = 54.0
 const MELEE_ATTACK_RANGE: float = 42.0
@@ -21,6 +21,7 @@ const ENEMY_RESOURCE_PATHS: Array[String] = [
 ]
 
 @onready var player: PlayerAvatar = $Player
+@onready var camera: Camera2D = $Player/Camera2D
 @onready var enemies_root: Node2D = $Enemies
 @onready var projectiles_root: Node2D = $Projectiles
 @onready var effects: EffectLayer = $Effects
@@ -42,6 +43,10 @@ func _ready() -> void:
 	randomize()
 	_load_enemy_resources()
 	player.position = PLAYER_POSITION
+	camera.limit_left = int(WORLD_RECT.position.x)
+	camera.limit_top = int(WORLD_RECT.position.y)
+	camera.limit_right = int(WORLD_RECT.end.x)
+	camera.limit_bottom = int(WORLD_RECT.end.y)
 	player.visible = not GameManager.selected_class.is_empty()
 	GameManager.class_selected.connect(_on_class_selected)
 	GameManager.player_died.connect(_on_player_died)
@@ -72,17 +77,21 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
-	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, 0, 640, 400), false, theme_tint)
-	draw_rect(Rect2(0, 0, 640, 366), Color(0.025, 0.02, 0.04, 0.10), true)
-	draw_rect(Rect2(0, 0, 640, 34), Color(0.02, 0.015, 0.025, 0.42), true)
-	draw_line(Vector2(0, 33), Vector2(640, 33), Color("6f4934"), 1.0)
-	draw_line(Vector2(0, 365), Vector2(640, 365), Color("6f4934"), 1.0)
+	for y in range(0, int(WORLD_RECT.size.y), 400):
+		for x in range(0, int(WORLD_RECT.size.x), 640):
+			draw_texture_rect(DUNGEON_TEXTURE, Rect2(x, y, 640, 400), false, theme_tint)
+	draw_rect(WORLD_RECT, Color(0.025, 0.02, 0.04, 0.08), true)
+	var seam_color := Color(0.20, 0.12, 0.10, 0.16)
+	for x in range(0, int(WORLD_RECT.size.x) + 1, 320):
+		draw_line(Vector2(x, 0), Vector2(x, WORLD_RECT.end.y), seam_color, 1.0)
+	for y in range(0, int(WORLD_RECT.size.y) + 1, 200):
+		draw_line(Vector2(0, y), Vector2(WORLD_RECT.end.x, y), seam_color, 1.0)
 
 
 func _start_battle() -> void:
 	_respawning = false
 	player.visible = true
-	if not BATTLE_RECT.has_point(player.position):
+	if not WORLD_RECT.has_point(player.position):
 		player.position = PLAYER_POSITION
 	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
@@ -111,7 +120,7 @@ func _spawn_wave() -> void:
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
 		enemies_root.add_child(enemy)
 		enemy.global_position = _random_edge_position()
-		enemy.setup(eligible.pick_random(), GameManager.floor, player, BATTLE_RECT)
+		enemy.setup(eligible.pick_random(), GameManager.floor, player, WORLD_RECT)
 		_connect_enemy(enemy)
 		_enemies.append(enemy)
 	if wave_size > 0:
@@ -130,7 +139,7 @@ func _spawn_boss() -> void:
 	boss.name = "Boss_%d" % GameManager.floor
 	enemies_root.add_child(boss)
 	boss.global_position = _random_edge_position()
-	boss.setup(_boss_resource, GameManager.floor, player, BATTLE_RECT)
+	boss.setup(_boss_resource, GameManager.floor, player, WORLD_RECT)
 	_connect_enemy(boss)
 	_enemies.append(boss)
 	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
@@ -173,8 +182,8 @@ func _update_auto_hunt(delta: float) -> void:
 	if _wander_time_left <= 0.0 or player.global_position.distance_to(_wander_target) < 8.0:
 		_wander_time_left = WANDER_RESELECT_TIME
 		_wander_target = Vector2(
-			randf_range(BATTLE_RECT.position.x + 36.0, BATTLE_RECT.end.x - 36.0),
-			randf_range(BATTLE_RECT.position.y + 32.0, BATTLE_RECT.end.y - 32.0)
+			randf_range(WORLD_RECT.position.x + 36.0, WORLD_RECT.end.x - 36.0),
+			randf_range(WORLD_RECT.position.y + 32.0, WORLD_RECT.end.y - 32.0)
 		)
 	_move_player_toward(_wander_target, delta)
 
@@ -187,8 +196,8 @@ func _move_player_toward(world_target: Vector2, delta: float) -> void:
 	var move_speed: float = PLAYER_BASE_MOVE_SPEED * clampf(GameManager.spd, 0.75, 2.2)
 	player.global_position += direction * move_speed * delta
 	player.global_position = Vector2(
-		clampf(player.global_position.x, BATTLE_RECT.position.x + 18.0, BATTLE_RECT.end.x - 18.0),
-		clampf(player.global_position.y, BATTLE_RECT.position.y + 20.0, BATTLE_RECT.end.y - 18.0)
+		clampf(player.global_position.x, WORLD_RECT.position.x + 18.0, WORLD_RECT.end.x - 18.0),
+		clampf(player.global_position.y, WORLD_RECT.position.y + 20.0, WORLD_RECT.end.y - 18.0)
 	)
 	player.set_move_direction(direction)
 
@@ -441,13 +450,13 @@ func _load_enemy_resources() -> void:
 
 
 func _random_edge_position() -> Vector2:
-	var right: float = BATTLE_RECT.end.x - 1.0
-	var bottom: float = BATTLE_RECT.end.y - 1.0
-	match randi_range(0, 3):
-		0: return Vector2(randf_range(BATTLE_RECT.position.x, right), BATTLE_RECT.position.y)
-		1: return Vector2(right, randf_range(BATTLE_RECT.position.y, bottom))
-		2: return Vector2(randf_range(BATTLE_RECT.position.x, right), bottom)
-		_: return Vector2(BATTLE_RECT.position.x, randf_range(BATTLE_RECT.position.y, bottom))
+	var angle: float = randf_range(0.0, TAU)
+	var distance: float = randf_range(220.0, 360.0)
+	var candidate: Vector2 = player.global_position + Vector2.RIGHT.rotated(angle) * distance
+	return Vector2(
+		clampf(candidate.x, WORLD_RECT.position.x + 28.0, WORLD_RECT.end.x - 28.0),
+		clampf(candidate.y, WORLD_RECT.position.y + 28.0, WORLD_RECT.end.y - 28.0)
+	)
 
 
 func _start_shake(intensity: float, duration: float) -> void:
@@ -458,7 +467,7 @@ func _start_shake(intensity: float, duration: float) -> void:
 func _update_camera_shake(delta: float) -> void:
 	if _shake_time_left > 0.0:
 		_shake_time_left -= delta
-		position = Vector2(randf_range(-_shake_intensity, _shake_intensity), randf_range(-_shake_intensity, _shake_intensity)).round()
+		camera.offset = Vector2(randf_range(-_shake_intensity, _shake_intensity), randf_range(-_shake_intensity, _shake_intensity)).round()
 	else:
-		position = Vector2.ZERO
+		camera.offset = Vector2.ZERO
 		_shake_intensity = 0.0
