@@ -99,6 +99,7 @@ func _run() -> void:
 		var class_data: ClassData = load("res://resources/classes/%s.tres" % class_id)
 		_check(class_data != null, "%s class resource loads" % class_id)
 		GameManager.select_class(class_data)
+		_check(GameManager.class_skill_definitions().size() == 3, "%s exposes three class-specific passive skills" % class_id)
 		GameManager.class_base_stats["atk"] = 999
 		GameManager.recalculate_stats()
 		await get_tree().process_frame
@@ -178,11 +179,23 @@ func _run() -> void:
 		GameManager.apply_save_dict(parsed_save as Dictionary)
 		_check(GameManager.selected_class == String((parsed_save as Dictionary).get("selected_class", "")), "Serialized state loads back into GameManager")
 
+	GameManager.gold = 777
+	GameManager.inventory.clear()
+	GameManager._ensure_equipment_slots(true)
+	var kept_item: Dictionary = LootManager._generator.generate_item(12, 1)
+	GameManager.add_inventory_item(kept_item)
+	var kept_item_id: String = String(kept_item.get("id", ""))
+	GameManager.equip_item(kept_item_id)
+	var equipment_before_rebirth: Dictionary = GameManager.equipment.duplicate(true)
+	GameManager.class_skill_levels["warrior"] = {"warrior_fury": 2}
 	GameManager.level = RebirthManager.required_level()
 	var previous_rebirths: int = GameManager.rebirth_count
 	_check(RebirthManager.rebirth(), "Eligible character can rebirth")
 	_check(GameManager.rebirth_count == previous_rebirths + 1, "Rebirth count increases")
 	_check(GameManager.game_state == GameManager.GameState.CLASS_SELECTION, "Rebirth returns to class selection")
+	_check(GameManager.gold == 777, "Rebirth preserves gold")
+	_check(GameManager.equipment == equipment_before_rebirth, "Rebirth preserves equipped gear")
+	_check(int(Dictionary(GameManager.class_skill_levels.get("warrior", {})).get("warrior_fury", 0)) == 2, "Rebirth preserves class skill progression")
 
 	GameManager.rebirth_count = 10
 	GameManager.unlocked_classes = ["warrior", "mage"]
