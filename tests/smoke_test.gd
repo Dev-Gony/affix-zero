@@ -33,13 +33,23 @@ func _run() -> void:
 	GameManager.reset_run_progress()
 	var warrior: ClassData = load("res://resources/classes/warrior.tres")
 	GameManager.select_class(warrior)
-	GameManager.class_base_stats["atk"] = 999
-	GameManager.recalculate_stats()
-	GameManager.set_speed_multiplier(5.0)
 	await get_tree().process_frame
 	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
 	for spawned_enemy: EnemyAI in battle._enemies:
 		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
+	var animation_target: EnemyAI = battle._nearest_enemy()
+	battle._perform_auto_attack()
+	_check(battle.player._motion_kind == "attack", "Automatic attacks trigger the player combat animation")
+	_check(animation_target._hit_flash_left > 0.0, "Enemy hits trigger readable impact feedback")
+	var contact_enemy: EnemyAI = battle._enemies[0] if battle._enemies[0] != animation_target else battle._enemies[1]
+	contact_enemy.global_position = battle.player.global_position + Vector2(contact_enemy.radius + 8.0, 0)
+	contact_enemy._spawn_reveal_left = 0.0
+	contact_enemy._attack_time_left = 0.0
+	contact_enemy._process(0.01)
+	_check(contact_enemy._attack_windup_left > 0.0, "Enemy contact attacks show a warning windup")
+	GameManager.class_base_stats["atk"] = 999
+	GameManager.recalculate_stats()
+	GameManager.set_speed_multiplier(5.0)
 	await get_tree().create_timer(12.0).timeout
 
 	_check(battle != null, "BattleManager scene is available")
@@ -51,6 +61,7 @@ func _run() -> void:
 	var game_ui: GameUI = main.get_node("UILayer/GameUI")
 	_check(game_ui._class_selection._grid.get_child_count() == 6, "Class selection renders all six cards")
 	_check(game_ui._equipment_row.get_child_count() == 7, "Equipment overview renders all seven slots")
+	_check(game_ui._equipment_row.get_combined_minimum_size().y <= 90.0, "Equipment cards fit inside the 640x360 management panel")
 
 	for class_id: String in ["warrior", "mage", "knight", "sage", "assassin", "saint"]:
 		var class_data: ClassData = load("res://resources/classes/%s.tres" % class_id)

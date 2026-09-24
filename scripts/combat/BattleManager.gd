@@ -41,6 +41,7 @@ func _process(delta: float) -> void:
 	_update_camera_shake(delta)
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	_update_target_marker()
 	_attack_time_left -= delta
 	_skill_time_left -= delta
 	if _attack_time_left <= 0.0:
@@ -86,7 +87,7 @@ func _spawn_wave() -> void:
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
 		enemies_root.add_child(enemy)
 		enemy.global_position = _random_edge_position()
-		enemy.setup(eligible.pick_random(), GameManager.floor, player)
+		enemy.setup(eligible.pick_random(), GameManager.floor, player, BATTLE_RECT)
 		enemy.died.connect(_on_enemy_died)
 		enemy.attacked_player.connect(_on_enemy_attack)
 		enemy.damage_received.connect(_on_enemy_damage_received)
@@ -101,6 +102,7 @@ func _perform_auto_attack() -> void:
 		return
 	var attack_power: float = GameManager.atk * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
+	player.play_attack(target.global_position)
 	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
 	target.take_hit(result)
 	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
@@ -112,6 +114,8 @@ func _perform_auto_skill() -> void:
 	if _enemies.is_empty():
 		return
 	var skill_type: String = GameManager.selected_skill_type
+	var visual_target: EnemyAI = _nearest_enemy()
+	player.play_skill(skill_type, visual_target.global_position if visual_target != null else player.global_position + Vector2.RIGHT)
 	AudioManager.play_sfx(skill_type)
 	match skill_type:
 		"melee_spin": _cast_melee_spin()
@@ -225,9 +229,11 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		_spawn_wave()
 
 
-func _on_enemy_attack(raw_damage: float) -> void:
+func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	if _respawning:
 		return
+	player.play_hit()
+	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position)
 	var damage: int = GameManager.take_damage(raw_damage)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
 	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
@@ -285,6 +291,13 @@ func _on_item_dropped(item: Dictionary) -> void:
 func _nearest_enemy() -> EnemyAI:
 	var sorted: Array[EnemyAI] = _valid_enemies_sorted()
 	return sorted[0] if not sorted.is_empty() else null
+
+
+func _update_target_marker() -> void:
+	var nearest: EnemyAI = _nearest_enemy()
+	for enemy: EnemyAI in _enemies:
+		if is_instance_valid(enemy):
+			enemy.set_targeted(enemy == nearest)
 
 
 func _valid_enemies_sorted() -> Array[EnemyAI]:

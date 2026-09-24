@@ -80,7 +80,17 @@ func show_level_up(world_position: Vector2) -> void:
 
 
 func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
-	_lines.append({"points": PackedVector2Array([from, to]), "color": Color("ffd84d") if critical else Color("dbeafe"), "life": 0.09, "duration": 0.09, "width": 2.0})
+	var direction: Vector2 = from.direction_to(to)
+	var tangent := Vector2(-direction.y, direction.x)
+	var color := Color("ffd84d") if critical else Color("dbeafe")
+	_lines.append({"points": PackedVector2Array([to - direction * 14.0 - tangent * 5.0, to + direction * 7.0 + tangent * 5.0]), "color": color, "life": 0.13, "duration": 0.13, "width": 2.5})
+	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
+
+
+func show_enemy_attack(from: Vector2, to: Vector2) -> void:
+	var direction: Vector2 = from.direction_to(to)
+	var tangent := Vector2(-direction.y, direction.x)
+	_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
 
 
 func show_melee_spin(center: Vector2) -> void:

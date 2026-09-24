@@ -10,6 +10,11 @@ const CLASS_REGIONS: Dictionary = {
 var class_id: String = "warrior"
 var body_color: Color = Color("dc3d33")
 var pulse: float = 0.0
+var _motion_kind: String = "idle"
+var _motion_time_left: float = 0.0
+var _motion_duration: float = 0.0
+var _facing: Vector2 = Vector2.RIGHT
+var _skill_color: Color = Color("ffd166")
 
 
 func configure(next_class_id: String, color: Color) -> void:
@@ -21,18 +26,81 @@ func configure(next_class_id: String, color: Color) -> void:
 
 func _process(delta: float) -> void:
 	pulse += delta
+	if _motion_time_left > 0.0:
+		_motion_time_left = maxf(0.0, _motion_time_left - delta)
+		if is_zero_approx(_motion_time_left):
+			_motion_kind = "idle"
+	queue_redraw()
+
+
+func play_attack(world_target: Vector2) -> void:
+	_face_target(world_target)
+	_start_motion("attack", 0.18)
+
+
+func play_skill(skill_type: String, world_target: Vector2) -> void:
+	_face_target(world_target)
+	_skill_color = _skill_visual_color(skill_type)
+	_start_motion("skill", 0.34)
+
+
+func play_hit() -> void:
+	_start_motion("hit", 0.16)
+
+
+func _face_target(world_target: Vector2) -> void:
+	var direction: Vector2 = global_position.direction_to(world_target)
+	if not direction.is_zero_approx():
+		_facing = direction
+
+
+func _start_motion(kind: String, duration: float) -> void:
+	_motion_kind = kind
+	_motion_duration = duration
+	_motion_time_left = duration
 	queue_redraw()
 
 
 func _draw() -> void:
-	var bob: float = -1.0 if fmod(pulse, 0.8) < 0.4 else 0.0
+	var bob: float = roundf(-absf(sin(pulse * TAU / 0.82)) * 1.2)
 	draw_ellipse(Vector2(0, 10), Vector2(14, 5), Color(0, 0, 0, 0.58))
 	var glow_alpha: float = 0.10 + sin(pulse * 3.0) * 0.03
 	draw_circle(Vector2.ZERO, 17.0, Color(body_color, glow_alpha))
 	draw_arc(Vector2.ZERO, 15.0, 0.15, PI - 0.15, 18, Color(body_color, 0.72), 1.0)
+	var motion_progress: float = 1.0
+	if _motion_duration > 0.0 and _motion_time_left > 0.0:
+		motion_progress = 1.0 - (_motion_time_left / _motion_duration)
+	var motion_offset := Vector2.ZERO
+	var motion_rotation: float = 0.0
+	var motion_scale := Vector2.ONE
+	match _motion_kind:
+		"attack":
+			var strike: float = sin(motion_progress * PI)
+			motion_offset = (_facing * strike * 6.0).round()
+			motion_rotation = lerpf(-0.10, 0.10, motion_progress) * signf(_facing.x if not is_zero_approx(_facing.x) else 1.0)
+		"skill":
+			var charge: float = sin(motion_progress * PI)
+			motion_scale = Vector2(1.0 + charge * 0.10, 1.0 - charge * 0.07)
+			draw_arc(Vector2.ZERO, 17.0 + charge * 5.0, -PI * 0.15, PI * 1.35, 24, Color(_skill_color, 0.82 * charge), 2.0)
+		"hit":
+			motion_offset.x = -2.0 if int(pulse * 60.0) % 2 == 0 else 2.0
+			motion_scale = Vector2(1.08, 0.92)
 	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_id, Vector2i.ZERO)
 	var source := Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
+	draw_set_transform(motion_offset, motion_rotation, motion_scale)
 	draw_texture_rect_region(CLASS_ATLAS, Rect2(-23, -29 + bob, 46, 46), source)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _skill_visual_color(skill_type: String) -> Color:
+	match skill_type:
+		"melee_spin": return Color("ff8066")
+		"fireball": return Color("ff9f43")
+		"shield_charge": return Color("8be0f1")
+		"chain_lightning": return Color("c9a7ff")
+		"multi_slash": return Color("ff72b6")
+		"holy_nova": return Color("fff2a1")
+	return Color("ffd166")
 
 
 func draw_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:

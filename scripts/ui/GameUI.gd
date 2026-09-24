@@ -98,6 +98,19 @@ func _style_box(background: Color, border: Color, width: int, radius: int) -> St
 	return style
 
 
+func _compact_style_box(background: Color, border: Color, width: int = 1) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background
+	style.border_color = border
+	style.set_border_width_all(width)
+	style.anti_aliasing = false
+	style.content_margin_left = 3
+	style.content_margin_right = 3
+	style.content_margin_top = 1
+	style.content_margin_bottom = 1
+	return style
+
+
 func _build_hud() -> void:
 	var panel := Panel.new()
 	_hud_panel = panel
@@ -383,9 +396,9 @@ func _refresh_equipment() -> void:
 	for slot: String in GameManager.EQUIPMENT_SLOTS:
 		var item: Dictionary = GameManager.equipment.get(slot, {})
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(83, 92)
+		card.custom_minimum_size = Vector2(83, 84)
 		var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-		card.add_theme_stylebox_override("panel", _style_box(Color("151018"), border_color, 1, 0))
+		card.add_theme_stylebox_override("panel", _compact_style_box(Color("151018"), border_color))
 		var card_row := HBoxContainer.new()
 		card_row.add_theme_constant_override("separation", 2)
 		card.add_child(card_row)
@@ -395,17 +408,17 @@ func _refresh_equipment() -> void:
 		card_row.add_child(equipped_marker)
 		var content := VBoxContainer.new()
 		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		content.add_theme_constant_override("separation", 1)
+		content.add_theme_constant_override("separation", 0)
 		card_row.add_child(content)
 		var slot_label := Label.new()
 		slot_label.text = "◆ %s" % String(SLOT_NAMES.get(slot, slot))
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		slot_label.add_theme_font_size_override("font_size", 8)
+		slot_label.add_theme_font_size_override("font_size", 6)
 		slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 		content.add_child(slot_label)
 		var icon := TextureRect.new()
 		icon.texture = _equipment_icon(slot)
-		icon.custom_minimum_size = Vector2(0, 32)
+		icon.custom_minimum_size = Vector2(0, 22)
 		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -415,19 +428,27 @@ func _refresh_equipment() -> void:
 		item_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		item_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		item_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-		item_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-		item_label.add_theme_font_size_override("font_size", 7)
+		item_label.custom_minimum_size.y = 16
+		item_label.clip_text = true
+		item_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
+		item_label.add_theme_font_size_override("font_size", 6)
 		if item.is_empty():
 			item_label.text = "비어 있음"
 			item_label.add_theme_color_override("font_color", Color("70708a"))
 		else:
-			item_label.text = "%s\niLv.%d" % [String(item.get("name", "")), int(item.get("item_level", 1))]
+			item_label.text = "%s · %d" % [String(item.get("name", "")), int(item.get("item_level", 1))]
 			item_label.tooltip_text = _format_item_details(item)
 			item_label.add_theme_color_override("font_color", border_color)
 		content.add_child(item_label)
 		var action := Button.new()
 		action.text = "해제"
-		action.custom_minimum_size.y = 19
+		action.custom_minimum_size.y = 18
+		action.add_theme_font_size_override("font_size", 6)
+		action.add_theme_stylebox_override("normal", _compact_style_box(Color("211720"), Color("69432f")))
+		action.add_theme_stylebox_override("hover", _compact_style_box(Color("38202a"), Color("c17a43")))
+		action.add_theme_stylebox_override("pressed", _compact_style_box(Color("4b1f28"), Color("e04f46"), 2))
+		action.add_theme_stylebox_override("disabled", _compact_style_box(Color("100d13"), Color("35271f")))
+		action.add_theme_stylebox_override("focus", _compact_style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2))
 		action.disabled = item.is_empty()
 		action.pressed.connect(_unequip.bind(slot))
 		content.add_child(action)
