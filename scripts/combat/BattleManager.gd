@@ -8,6 +8,7 @@ const PLAYER_BASE_MOVE_SPEED: float = 54.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
+const LOOT_PICKUP_DELAY: float = 0.72
 const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
 const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
 const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
@@ -433,7 +434,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		GameManager.advance_floor()
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 		return
-	LootManager.try_drop()
+	_spawn_world_loot(world_position)
 	if GameManager.kills_on_floor >= 8 + GameManager.floor:
 		var previous_room: int = _current_room
 		GameManager.advance_floor()
@@ -500,10 +501,21 @@ func _on_level_up(_new_level: int) -> void:
 
 
 func _on_item_dropped(item: Dictionary) -> void:
-	effects.show_drop(_last_death_position, item)
 	var is_legend: bool = String(item.get("rarity_id", "")) == "legend"
 	AudioManager.play_sfx("legend_drop" if is_legend else "item_drop")
 	GameManager.notification_requested.emit("[%s] %s 획득" % [String(item.get("rarity_name", "")), String(item.get("name", ""))], Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
+
+
+func _spawn_world_loot(world_position: Vector2) -> void:
+	var item: Dictionary = LootManager.roll_drop()
+	if item.is_empty():
+		return
+	effects.show_drop(world_position, item)
+	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	if not is_inside_tree():
+		return
+	if LootManager.collect_item(item):
+		effects.show_pickup(world_position, player.global_position, item)
 
 
 func _nearest_enemy() -> EnemyAI:
