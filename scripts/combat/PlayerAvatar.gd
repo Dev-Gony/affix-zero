@@ -1,6 +1,12 @@
 extends Node2D
 class_name PlayerAvatar
 
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
+}
+
 var class_id: String = "warrior"
 var body_color: Color = Color("dc3d33")
 var pulse: float = 0.0
@@ -24,27 +30,9 @@ func _draw() -> void:
 	var glow_alpha: float = 0.10 + sin(pulse * 3.0) * 0.03
 	draw_circle(Vector2.ZERO, 17.0, Color(body_color, glow_alpha))
 	draw_arc(Vector2.ZERO, 15.0, 0.15, PI - 0.15, 18, Color(body_color, 0.72), 1.0)
-	draw_rect(Rect2(-9, -10 + bob, 18, 20), Color("08070b"), true)
-	draw_rect(Rect2(-7, -8 + bob, 14, 17), body_color.darkened(0.12), true)
-	draw_rect(Rect2(-6, -14 + bob, 12, 8), Color("08070b"), true)
-	draw_rect(Rect2(-5, -13 + bob, 10, 7), body_color.lightened(0.22), true)
-	draw_rect(Rect2(-3, -11 + bob, 2, 2), Color.WHITE, true)
-	draw_rect(Rect2(2, -11 + bob, 2, 2), Color.WHITE, true)
-	match class_id:
-		"warrior":
-			draw_line(Vector2(8, -5), Vector2(15, 5), Color("d9e2ec"), 3.0)
-		"mage":
-			draw_line(Vector2(9, -7), Vector2(12, 10), Color("8b5e34"), 2.0)
-			draw_circle(Vector2(9, -8), 3.0, Color("ff8c42"))
-		"knight":
-			draw_rect(Rect2(8, -5, 6, 11), Color("9bd4e0"), true)
-		"sage":
-			draw_line(Vector2(9, -8), Vector2(13, 10), Color("b393e6"), 2.0)
-		"assassin":
-			draw_line(Vector2(-10, -3), Vector2(-15, 5), Color("eeeeee"), 2.0)
-			draw_line(Vector2(10, -3), Vector2(15, 5), Color("eeeeee"), 2.0)
-		"saint":
-			draw_arc(Vector2(0, -11), 6.0, PI, TAU, 12, Color("ffe16b"), 2.0)
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_id, Vector2i.ZERO)
+	var source := Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
+	draw_texture_rect_region(CLASS_ATLAS, Rect2(-23, -29 + bob, 46, 46), source)
 
 
 func draw_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:

@@ -23,17 +23,17 @@ Every pull request CI run also publishes two downloadable playable artifacts:
 - Floor-scaled waves, eight enemy families, death, immediate revival, and floor retreat
 - Six classes with distinct stats, unlock requirements, and skill visuals
 - Five loot rarities, seven equipment slots, 29 item bases, and ten non-duplicating affixes
-- 20-slot inventory, equipment, selling, bulk-selling, passive skills, stats, and rebirth UI
+- 20-slot loot grid, icon-based equipment overview, item comparison, selling, passive skills, stats, and rebirth UI
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
 - Damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
-- Original dark-fantasy pixel courtyard art with floor-range color grading and a denser ornamental HUD
-- Equipped-item comparison deltas directly in the inventory list
+- Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
+- Visible edge-spawn telegraphs and equipment comparison deltas in the selected-item detail panel
 - x1/x2/x5 combat speed control
 - Complete JSON save/load state with a real-time 30-second autosave interval
 - Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
 - Drop-in OGG overrides under `assets/bgm/` and `assets/sfx/` automatically replace procedural audio
 
-Audio playback becomes active when matching `.ogg` files are placed in `assets/bgm/` and `assets/sfx/`. The expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
+Procedural audio is active by default. Matching `.ogg` files placed in `assets/bgm/` and `assets/sfx/` override it automatically; expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
 
 ## Project structure
 

@@ -1,6 +1,12 @@
 extends Node2D
 class_name EnemyAI
 
+const ENEMY_ATLAS: Texture2D = preload("res://assets/sprites/enemy_atlas_alpha.png")
+const ENEMY_REGIONS: Dictionary = {
+	"slime": Vector2i(0, 0), "bat": Vector2i(1, 0), "skeleton": Vector2i(2, 0), "goblin": Vector2i(3, 0),
+	"dark_knight": Vector2i(0, 1), "lich": Vector2i(1, 1), "dragon": Vector2i(2, 1), "demon_lord": Vector2i(3, 1),
+}
+
 signal died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int)
 signal attacked_player(raw_damage: float)
 signal damage_received(world_position: Vector2, damage: int, critical: bool)
@@ -20,6 +26,7 @@ var body_color: Color = Color.WHITE
 var _attack_time_left: float = 0.0
 var _dead: bool = false
 var _hit_flash_left: float = 0.0
+var _spawn_reveal_left: float = 0.32
 
 
 func setup(data: EnemyData, current_floor: int, player_target: Node2D) -> void:
@@ -46,6 +53,10 @@ func _process(delta: float) -> void:
 		_hit_flash_left = maxf(0.0, _hit_flash_left - delta)
 		queue_redraw()
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
+	if _spawn_reveal_left > 0.0:
+		_spawn_reveal_left = maxf(0.0, _spawn_reveal_left - delta)
+		queue_redraw()
+		return
 	var distance: float = global_position.distance_to(target.global_position)
 	if distance > radius + 11.0:
 		global_position += global_position.direction_to(target.global_position) * move_speed * delta
@@ -76,32 +87,17 @@ func _die() -> void:
 
 
 func _draw() -> void:
-	var draw_color: Color = body_color.lightened(0.55) if _hit_flash_left > 0.0 else body_color
-	draw_circle(Vector2(0, radius * 0.55), Vector2(radius, radius * 0.35).x, Color(0, 0, 0, 0.28))
-	match enemy_data.id if enemy_data != null else "slime":
-		"slime":
-			draw_circle(Vector2.ZERO, radius, draw_color)
-			draw_rect(Rect2(-radius, 0, radius * 2.0, radius), draw_color, true)
-		"bat":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 2, 0), Vector2(-3, -5), Vector2(0, 5), Vector2(3, -5), Vector2(radius * 2, 0), Vector2(0, radius)]), draw_color)
-		"skeleton":
-			draw_circle(Vector2(0, -3), radius * 0.72, draw_color)
-			draw_rect(Rect2(-radius * 0.55, 2, radius * 1.1, radius), draw_color.darkened(0.12), true)
-		"goblin":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius), Vector2(0, -radius * 0.55), Vector2(radius, -radius), Vector2(radius * 0.7, radius), Vector2(-radius * 0.7, radius)]), draw_color)
-		"dark_knight":
-			draw_rect(Rect2(-radius, -radius, radius * 2, radius * 2), draw_color, true)
-			draw_rect(Rect2(-radius * 0.7, -radius * 1.35, radius * 1.4, radius * 0.5), draw_color.lightened(0.18), true)
-		"lich":
-			draw_colored_polygon(PackedVector2Array([Vector2(0, -radius * 1.3), Vector2(radius, radius), Vector2(-radius, radius)]), draw_color)
-			draw_circle(Vector2(0, -radius * 0.55), radius * 0.5, draw_color.lightened(0.25))
-		"dragon":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 1.6, 0), Vector2(-radius * 0.4, -radius), Vector2(0, -radius * 0.4), Vector2(radius * 0.4, -radius), Vector2(radius * 1.6, 0), Vector2(0, radius)]), draw_color)
-		"demon_lord":
-			draw_circle(Vector2.ZERO, radius, draw_color)
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius * 0.4), Vector2(-radius * 1.5, -radius * 1.5), Vector2(-radius * 0.3, -radius), Vector2(radius * 0.3, -radius), Vector2(radius * 1.5, -radius * 1.5), Vector2(radius, -radius * 0.4)]), draw_color.darkened(0.15))
-	draw_rect(Rect2(-radius + 2, -2, 3, 3), Color.WHITE, true)
-	draw_rect(Rect2(radius - 5, -2, 3, 3), Color.WHITE, true)
-	var bar_width: float = radius * 2.0
-	draw_rect(Rect2(-radius, -radius - 7, bar_width, 3), Color("351822"), true)
-	draw_rect(Rect2(-radius, -radius - 7, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color("ef4444"), true)
+	var enemy_id: String = enemy_data.id if enemy_data != null else "slime"
+	var atlas_cell: Vector2i = ENEMY_REGIONS.get(enemy_id, Vector2i.ZERO)
+	var source := Rect2(atlas_cell.x * 384, atlas_cell.y * 512, 384, 512)
+	var sprite_size: float = clampf(radius * 3.7, 28.0, 54.0)
+	var reveal: float = clampf(1.0 - _spawn_reveal_left / 0.32, 0.0, 1.0)
+	var sprite_modulate := Color(1.65, 1.65, 1.65, reveal) if _hit_flash_left > 0.0 else Color(1.0, 1.0, 1.0, reveal)
+	draw_circle(Vector2(0, sprite_size * 0.28), sprite_size * 0.28, Color(0, 0, 0, 0.35 * reveal))
+	if _spawn_reveal_left > 0.0:
+		draw_arc(Vector2.ZERO, 10.0 + reveal * 9.0, 0.0, TAU, 24, Color(body_color, 0.75 * (1.0 - reveal)), 2.0)
+	draw_texture_rect_region(ENEMY_ATLAS, Rect2(-sprite_size * 0.5, -sprite_size * 0.58, sprite_size, sprite_size), source, sprite_modulate)
+	var bar_width: float = maxf(20.0, sprite_size * 0.7)
+	var bar_y: float = -sprite_size * 0.52 - 5.0
+	draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width, 3), Color("351822"), true)
+	draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color("ef4444"), true)

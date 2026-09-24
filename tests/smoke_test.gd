@@ -23,6 +23,7 @@ func _run() -> void:
 	get_tree().root.add_child(main)
 	await get_tree().process_frame
 	await get_tree().process_frame
+	var battle: BattleManager = main.get_node("BattleArea")
 
 	GameManager.rebirth_count = 0
 	GameManager.rebirth_points = 0
@@ -35,9 +36,12 @@ func _run() -> void:
 	GameManager.class_base_stats["atk"] = 999
 	GameManager.recalculate_stats()
 	GameManager.set_speed_multiplier(5.0)
+	await get_tree().process_frame
+	_check(not battle._enemies.is_empty(), "Selecting a class immediately spawns a visible enemy wave")
+	for spawned_enemy: EnemyAI in battle._enemies:
+		_check(BattleManager.BATTLE_RECT.has_point(spawned_enemy.global_position), "Spawned enemies begin inside the visible arena bounds")
 	await get_tree().create_timer(12.0).timeout
 
-	var battle: BattleManager = main.get_node("BattleArea")
 	_check(battle != null, "BattleManager scene is available")
 	_check(battle._enemy_resources.size() == 8, "All eight enemy resources load")
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
@@ -70,6 +74,7 @@ func _run() -> void:
 	GameManager.inventory.clear()
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
+	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders a stable twenty-slot loot grid")
 	GameManager.equip_item(String(generated_item.get("id", "")))
 	_check(not Dictionary(GameManager.equipment.get(String(generated_item.get("slot", "")), {})).is_empty(), "Equipment flow equips an item")
 	var comparison_item: Dictionary = generated_item.duplicate(true)

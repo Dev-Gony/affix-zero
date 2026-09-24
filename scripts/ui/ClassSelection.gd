@@ -11,6 +11,11 @@ const CLASS_PATHS: Array[String] = [
 	"res://resources/classes/assassin.tres",
 	"res://resources/classes/saint.tres",
 ]
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
+}
 
 var _grid: GridContainer
 
@@ -40,6 +45,7 @@ func refresh() -> void:
 		card.disabled = not unlocked
 		card.text = _class_card_text(class_data, unlocked)
 		card.icon = _make_class_icon(class_data)
+		card.expand_icon = true
 		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		card.tooltip_text = "%s\nHP %d · MP %d · ATK %d · DEF %d · SPD %.1f · CRIT %.0f%%" % [
 			class_data.description, class_data.base_hp, class_data.base_mp, class_data.base_atk,
@@ -127,37 +133,12 @@ func _card_style(background: Color, border: Color, width: int) -> StyleBoxFlat:
 	return style
 
 
-func _make_class_icon(class_data: ClassData) -> ImageTexture:
-	var image := Image.create(20, 20, false, Image.FORMAT_RGBA8)
-	image.fill(Color(0, 0, 0, 0))
-	_fill_icon_rect(image, Rect2i(5, 16, 10, 2), Color(0, 0, 0, 0.45))
-	_fill_icon_rect(image, Rect2i(7, 3, 6, 5), class_data.color.lightened(0.28))
-	_fill_icon_rect(image, Rect2i(6, 8, 8, 8), class_data.color)
-	_fill_icon_rect(image, Rect2i(8, 5, 1, 1), Color.WHITE)
-	_fill_icon_rect(image, Rect2i(11, 5, 1, 1), Color.WHITE)
-	match class_data.id:
-		"warrior":
-			_fill_icon_rect(image, Rect2i(14, 6, 2, 10), Color("d7dde5"))
-		"mage":
-			_fill_icon_rect(image, Rect2i(15, 5, 1, 11), Color("8b5e34"))
-			_fill_icon_rect(image, Rect2i(14, 3, 3, 3), Color("ff8c42"))
-		"knight":
-			_fill_icon_rect(image, Rect2i(14, 8, 4, 7), Color("9bd4e0"))
-		"sage":
-			_fill_icon_rect(image, Rect2i(15, 5, 1, 11), Color("c9a7ff"))
-			_fill_icon_rect(image, Rect2i(14, 3, 3, 3), Color("f7e8ff"))
-		"assassin":
-			_fill_icon_rect(image, Rect2i(3, 9, 2, 7), Color("eeeeee"))
-			_fill_icon_rect(image, Rect2i(15, 9, 2, 7), Color("eeeeee"))
-		"saint":
-			_fill_icon_rect(image, Rect2i(7, 1, 6, 1), Color("ffe16b"))
-	return ImageTexture.create_from_image(image)
-
-
-func _fill_icon_rect(image: Image, rect: Rect2i, color: Color) -> void:
-	for y: int in range(rect.position.y, rect.end.y):
-		for x: int in range(rect.position.x, rect.end.x):
-			image.set_pixel(x, y, color)
+func _make_class_icon(class_data: ClassData) -> AtlasTexture:
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_data.id, Vector2i.ZERO)
+	var icon := AtlasTexture.new()
+	icon.atlas = CLASS_ATLAS
+	icon.region = Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
+	return icon
 
 
 func _select_class(class_data: ClassData) -> void:

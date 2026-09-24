@@ -10,6 +10,11 @@ const COLOR_MUTED := Color("c5b4a8")
 const COLOR_ACCENT := Color("dc3d33")
 const COLOR_GREEN := Color("4fd675")
 const COLOR_GOLD := Color("d9a441")
+const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
+const EQUIPMENT_REGIONS: Dictionary = {
+	"weapon": Vector2i(0, 0), "helmet": Vector2i(1, 0), "armor": Vector2i(2, 0), "gloves": Vector2i(3, 0),
+	"boots": Vector2i(0, 1), "ring": Vector2i(1, 1), "amulet": Vector2i(2, 1),
+}
 
 const SLOT_NAMES: Dictionary = {
 	"weapon": "무기", "helmet": "투구", "armor": "갑옷", "gloves": "장갑",
@@ -26,8 +31,12 @@ var _xp_bar: ProgressBar
 var _hud_info: Label
 var _speed_buttons: Dictionary = {}
 var _equipment_row: HBoxContainer
-var _inventory_list: VBoxContainer
+var _inventory_grid: GridContainer
 var _inventory_count: Label
+var _inventory_detail: Label
+var _inventory_equip_button: Button
+var _inventory_sell_button: Button
+var _inventory_selected_id: String = ""
 var _skills_list: VBoxContainer
 var _rebirth_content: HBoxContainer
 var _stats_label: Label
@@ -214,10 +223,10 @@ func _build_equipment_tab(tabs: TabContainer) -> void:
 func _build_inventory_tab(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()
 	tab.name = "가방"
-	tab.add_theme_constant_override("separation", 3)
+	tab.add_theme_constant_override("separation", 2)
 	tabs.add_child(tab)
 	var header := HBoxContainer.new()
-	header.custom_minimum_size.y = 25
+	header.custom_minimum_size.y = 22
 	tab.add_child(header)
 	_inventory_count = Label.new()
 	_inventory_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
@@ -225,17 +234,49 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	header.add_child(_inventory_count)
 	var sell_all := Button.new()
 	sell_all.text = "일반 일괄 판매"
-	sell_all.custom_minimum_size = Vector2(105, 24)
+	sell_all.custom_minimum_size = Vector2(105, 21)
 	sell_all.pressed.connect(_sell_all_normal)
 	header.add_child(sell_all)
-	var scroll := ScrollContainer.new()
-	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
-	tab.add_child(scroll)
-	_inventory_list = VBoxContainer.new()
-	_inventory_list.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inventory_list.add_theme_constant_override("separation", 3)
-	scroll.add_child(_inventory_list)
+	var content := HBoxContainer.new()
+	content.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	content.add_theme_constant_override("separation", 5)
+	tab.add_child(content)
+	var grid_panel := PanelContainer.new()
+	grid_panel.custom_minimum_size = Vector2(452, 0)
+	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0910"), Color("352b38"), 1, 0))
+	content.add_child(grid_panel)
+	_inventory_grid = GridContainer.new()
+	_inventory_grid.columns = 10
+	_inventory_grid.add_theme_constant_override("h_separation", 2)
+	_inventory_grid.add_theme_constant_override("v_separation", 2)
+	grid_panel.add_child(_inventory_grid)
+	var detail_panel := PanelContainer.new()
+	detail_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	detail_panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("69432f"), 1, 0))
+	content.add_child(detail_panel)
+	var detail_column := VBoxContainer.new()
+	detail_column.add_theme_constant_override("separation", 2)
+	detail_panel.add_child(detail_column)
+	_inventory_detail = Label.new()
+	_inventory_detail.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_inventory_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_inventory_detail.add_theme_font_size_override("font_size", 7)
+	detail_column.add_child(_inventory_detail)
+	var actions := HBoxContainer.new()
+	actions.add_theme_constant_override("separation", 3)
+	detail_column.add_child(actions)
+	_inventory_equip_button = Button.new()
+	_inventory_equip_button.text = "장착"
+	_inventory_equip_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inventory_equip_button.custom_minimum_size.y = 22
+	_inventory_equip_button.pressed.connect(_equip_selected_inventory)
+	actions.add_child(_inventory_equip_button)
+	_inventory_sell_button = Button.new()
+	_inventory_sell_button.text = "판매"
+	_inventory_sell_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_inventory_sell_button.custom_minimum_size.y = 22
+	_inventory_sell_button.pressed.connect(_sell_selected_inventory)
+	actions.add_child(_inventory_sell_button)
 
 
 func _build_skills_tab(tabs: TabContainer) -> void:
@@ -346,7 +387,7 @@ func _refresh_equipment() -> void:
 		var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 		card.add_theme_stylebox_override("panel", _style_box(Color("151018"), border_color, 1, 0))
 		var card_row := HBoxContainer.new()
-		card_row.add_theme_constant_override("separation", 3)
+		card_row.add_theme_constant_override("separation", 2)
 		card.add_child(card_row)
 		var equipped_marker := ColorRect.new()
 		equipped_marker.custom_minimum_size = Vector2(3, 0)
@@ -354,14 +395,22 @@ func _refresh_equipment() -> void:
 		card_row.add_child(equipped_marker)
 		var content := VBoxContainer.new()
 		content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		content.add_theme_constant_override("separation", 2)
+		content.add_theme_constant_override("separation", 1)
 		card_row.add_child(content)
 		var slot_label := Label.new()
-		slot_label.text = String(SLOT_NAMES.get(slot, slot))
+		slot_label.text = "◆ %s" % String(SLOT_NAMES.get(slot, slot))
 		slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		slot_label.add_theme_font_size_override("font_size", 8)
 		slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 		content.add_child(slot_label)
+		var icon := TextureRect.new()
+		icon.texture = _equipment_icon(slot)
+		icon.custom_minimum_size = Vector2(0, 32)
+		icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+		icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+		icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		icon.modulate = Color.WHITE if not item.is_empty() else Color(0.32, 0.30, 0.38, 0.65)
+		content.add_child(icon)
 		var item_label := Label.new()
 		item_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 		item_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -369,19 +418,16 @@ func _refresh_equipment() -> void:
 		item_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 		item_label.add_theme_font_size_override("font_size", 7)
 		if item.is_empty():
-			item_label.text = "— 비어있음 —"
+			item_label.text = "비어 있음"
 			item_label.add_theme_color_override("font_color", Color("70708a"))
 		else:
-			item_label.text = "[%s] %s\n%s · iLv.%d\n%s" % [
-				String(item.get("rarity_name", "")), String(item.get("name", "")),
-				String(SLOT_NAMES.get(slot, slot)), int(item.get("item_level", 1)), _compact_stats(item, true)
-			]
+			item_label.text = "%s\niLv.%d" % [String(item.get("name", "")), int(item.get("item_level", 1))]
 			item_label.tooltip_text = _format_item_details(item)
 			item_label.add_theme_color_override("font_color", border_color)
 		content.add_child(item_label)
 		var action := Button.new()
 		action.text = "해제"
-		action.custom_minimum_size.y = 22
+		action.custom_minimum_size.y = 19
 		action.disabled = item.is_empty()
 		action.pressed.connect(_unequip.bind(slot))
 		content.add_child(action)
@@ -390,45 +436,85 @@ func _refresh_equipment() -> void:
 
 func _refresh_inventory() -> void:
 	_inventory_count.text = "가방  %d/%d" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
-	_clear_container(_inventory_list)
+	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
 	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return int(a.get("rarity_index", 0)) > int(b.get("rarity_index", 0)))
-	if sorted_items.is_empty():
-		var empty_label := Label.new()
-		empty_label.text = "아직 획득한 아이템이 없습니다."
-		empty_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-		empty_label.add_theme_color_override("font_color", COLOR_MUTED)
-		_inventory_list.add_child(empty_label)
+	if not sorted_items.any(func(item: Dictionary) -> bool: return String(item.get("id", "")) == _inventory_selected_id):
+		_inventory_selected_id = String(sorted_items[0].get("id", "")) if not sorted_items.is_empty() else ""
+	for index: int in GameManager.INVENTORY_CAPACITY:
+		if index < sorted_items.size():
+			var item: Dictionary = sorted_items[index]
+			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
+			var slot_button := Button.new()
+			slot_button.custom_minimum_size = Vector2(42, 42)
+			slot_button.icon = _equipment_icon(String(item.get("slot", "")))
+			slot_button.expand_icon = true
+			slot_button.tooltip_text = _format_item_details(item)
+			slot_button.add_theme_stylebox_override("normal", _style_box(Color("151018"), item_color, 1, 0))
+			slot_button.add_theme_stylebox_override("hover", _style_box(Color("2b1b25"), item_color.lightened(0.2), 2, 0))
+			if String(item.get("id", "")) == _inventory_selected_id:
+				slot_button.add_theme_stylebox_override("normal", _style_box(Color("3b2028"), COLOR_GOLD, 2, 0))
+			slot_button.pressed.connect(_select_inventory_item.bind(String(item.get("id", ""))))
+			_inventory_grid.add_child(slot_button)
+		else:
+			var empty_slot := Panel.new()
+			empty_slot.custom_minimum_size = Vector2(42, 42)
+			empty_slot.add_theme_stylebox_override("panel", _style_box(Color("0d0b11"), Color("2e2938"), 1, 0))
+			_inventory_grid.add_child(empty_slot)
+	_refresh_inventory_detail(sorted_items)
+
+
+func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
+	var selected: Dictionary = {}
+	for item: Dictionary in items:
+		if String(item.get("id", "")) == _inventory_selected_id:
+			selected = item
+			break
+	if selected.is_empty():
+		_inventory_detail.text = "아이템을 획득하면 이곳에서\n능력치 비교 후 장착할 수 있습니다."
+		_inventory_detail.add_theme_color_override("font_color", COLOR_MUTED)
+		_inventory_equip_button.disabled = true
+		_inventory_sell_button.disabled = true
+		_inventory_sell_button.text = "판매"
 		return
-	for item: Dictionary in sorted_items:
-		var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(610, 54)
-		card.add_theme_stylebox_override("panel", _style_box(Color("171119"), item_color, 1, 0))
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 5)
-		card.add_child(row)
-		var description := Label.new()
-		description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		description.text = "[%s] %s  ·  iLv.%d  ·  %s\n%s\n%s" % [
-			String(item.get("rarity_name", "")), String(item.get("name", "")), int(item.get("item_level", 1)),
-			String(SLOT_NAMES.get(String(item.get("slot", "")), "")), _compact_stats(item, true), _comparison_text(item)
-		]
-		description.tooltip_text = _format_item_details(item)
-		description.add_theme_color_override("font_color", item_color)
-		description.add_theme_font_size_override("font_size", 9)
-		row.add_child(description)
-		var equip_button := Button.new()
-		equip_button.text = "장착"
-		equip_button.custom_minimum_size = Vector2(48, 34)
-		equip_button.pressed.connect(_equip.bind(String(item.get("id", ""))))
-		row.add_child(equip_button)
-		var sell_button := Button.new()
-		sell_button.text = "판매\n%dG" % int(item.get("sell_value", 0))
-		sell_button.custom_minimum_size = Vector2(52, 34)
-		sell_button.pressed.connect(_sell.bind(String(item.get("id", ""))))
-		row.add_child(sell_button)
-		_inventory_list.add_child(card)
+	var item_color := Color.from_string(String(selected.get("rarity_color", "ffffff")), Color.WHITE)
+	_inventory_detail.text = "[%s] %s\n%s · iLv.%d\n%s\n%s" % [
+		String(selected.get("rarity_name", "")), String(selected.get("name", "")),
+		String(SLOT_NAMES.get(String(selected.get("slot", "")), "")), int(selected.get("item_level", 1)),
+		_compact_stats(selected, true), _comparison_text(selected)
+	]
+	_inventory_detail.tooltip_text = _format_item_details(selected)
+	_inventory_detail.add_theme_color_override("font_color", item_color)
+	_inventory_equip_button.disabled = false
+	_inventory_sell_button.disabled = false
+	_inventory_sell_button.text = "판매 %dG" % int(selected.get("sell_value", 0))
+
+
+func _select_inventory_item(item_id: String) -> void:
+	AudioManager.play_sfx("ui_click")
+	_inventory_selected_id = item_id
+	_refresh_inventory()
+
+
+func _equip_selected_inventory() -> void:
+	if _inventory_selected_id.is_empty():
+		return
+	_equip(_inventory_selected_id)
+
+
+func _sell_selected_inventory() -> void:
+	if _inventory_selected_id.is_empty():
+		return
+	_sell(_inventory_selected_id)
+
+
+func _equipment_icon(slot: String) -> AtlasTexture:
+	var atlas_cell: Vector2i = EQUIPMENT_REGIONS.get(slot, Vector2i.ZERO)
+	var cell_size := Vector2(float(EQUIPMENT_ATLAS.get_width()) / 4.0, float(EQUIPMENT_ATLAS.get_height()) / 2.0)
+	var icon := AtlasTexture.new()
+	icon.atlas = EQUIPMENT_ATLAS
+	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+	return icon
 
 
 func _refresh_skills() -> void:

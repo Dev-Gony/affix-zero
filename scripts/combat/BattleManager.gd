@@ -1,7 +1,7 @@
 extends Node2D
 class_name BattleManager
 
-const BATTLE_RECT := Rect2(8, 38, 624, 172)
+const BATTLE_RECT := Rect2(22, 58, 596, 132)
 const PLAYER_POSITION := Vector2(320, 126)
 const ENEMY_RESOURCE_DIRECTORY: String = "res://resources/enemies/"
 const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
@@ -91,6 +91,8 @@ func _spawn_wave() -> void:
 		enemy.attacked_player.connect(_on_enemy_attack)
 		enemy.damage_received.connect(_on_enemy_damage_received)
 		_enemies.append(enemy)
+	if wave_size > 0:
+		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
 
 
 func _perform_auto_attack() -> void:
@@ -320,11 +322,13 @@ func _load_enemy_resources() -> void:
 
 
 func _random_edge_position() -> Vector2:
+	var right: float = BATTLE_RECT.end.x - 1.0
+	var bottom: float = BATTLE_RECT.end.y - 1.0
 	match randi_range(0, 3):
-		0: return Vector2(randf_range(BATTLE_RECT.position.x, BATTLE_RECT.end.x), BATTLE_RECT.position.y)
-		1: return Vector2(BATTLE_RECT.end.x, randf_range(BATTLE_RECT.position.y, BATTLE_RECT.end.y))
-		2: return Vector2(randf_range(BATTLE_RECT.position.x, BATTLE_RECT.end.x), BATTLE_RECT.end.y)
-		_: return Vector2(BATTLE_RECT.position.x, randf_range(BATTLE_RECT.position.y, BATTLE_RECT.end.y))
+		0: return Vector2(randf_range(BATTLE_RECT.position.x, right), BATTLE_RECT.position.y)
+		1: return Vector2(right, randf_range(BATTLE_RECT.position.y, bottom))
+		2: return Vector2(randf_range(BATTLE_RECT.position.x, right), bottom)
+		_: return Vector2(BATTLE_RECT.position.x, randf_range(BATTLE_RECT.position.y, bottom))
 
 
 func _start_shake(intensity: float, duration: float) -> void:
