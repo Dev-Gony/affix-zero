@@ -71,6 +71,7 @@ var _autosave_check: CheckBox
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = _create_theme()
 	_build_hud()
@@ -1157,12 +1158,17 @@ func _on_loot_filter_selected(index: int) -> void:
 
 
 func _toggle_pause_menu() -> void:
-	if GameManager.game_state == GameManager.GameState.CLASS_SELECTION:
+	if GameManager.game_state == GameManager.GameState.CLASS_SELECTION and not _pause_visible:
 		return
 	_pause_visible = not _pause_visible
 	_pause_panel.visible = _pause_visible
-	_management_window.visible = false if _pause_visible else _management_window.visible
-	GameManager.set_game_state(GameManager.GameState.PAUSED if _pause_visible else GameManager.GameState.RUNNING)
+	if _pause_visible:
+		_close_management(false)
+		GameManager.set_game_state(GameManager.GameState.PAUSED)
+		get_tree().paused = true
+	else:
+		get_tree().paused = false
+		GameManager.set_game_state(GameManager.GameState.RUNNING)
 	AudioManager.play_sfx("ui_click")
 
 
@@ -1198,6 +1204,7 @@ func _manual_load() -> void:
 
 
 func _save_and_quit() -> void:
+	get_tree().paused = false
 	SaveManager.save_game()
 	get_tree().quit()
 
