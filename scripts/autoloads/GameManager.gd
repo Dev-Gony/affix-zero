@@ -263,23 +263,46 @@ func sell_item(item_id: String) -> void:
 	var inventory_index: int = _find_inventory_index(item_id)
 	if inventory_index < 0:
 		return
-	var item: Dictionary = inventory.pop_at(inventory_index)
+	var item: Dictionary = inventory[inventory_index]
+	if bool(item.get("locked", false)):
+		notification_requested.emit("잠금 아이템은 판매할 수 없습니다.", Color("ffb86b"))
+		return
+	inventory.pop_at(inventory_index)
 	add_gold(int(item.get("sell_value", 0)))
 	inventory_changed.emit()
+
+
+func toggle_item_lock(item_id: String) -> bool:
+	var inventory_index: int = _find_inventory_index(item_id)
+	if inventory_index < 0:
+		return false
+	var item: Dictionary = inventory[inventory_index]
+	var locked: bool = not bool(item.get("locked", false))
+	item["locked"] = locked
+	inventory[inventory_index] = item
+	inventory_changed.emit()
+	notification_requested.emit("%s %s" % [String(item.get("name", "아이템")), "잠금" if locked else "잠금 해제"], Color("ffd166"))
+	return locked
 
 
 func sell_all_normal() -> void:
 	var kept_items: Array[Dictionary] = []
 	var sale_total: int = 0
+	var protected_count: int = 0
 	for item: Dictionary in inventory:
-		if String(item.get("rarity_id", "")) == "normal":
+		if String(item.get("rarity_id", "")) == "normal" and not bool(item.get("locked", false)):
 			sale_total += int(item.get("sell_value", 0))
 		else:
+			if String(item.get("rarity_id", "")) == "normal" and bool(item.get("locked", false)):
+				protected_count += 1
 			kept_items.append(item)
 	inventory = kept_items
 	if sale_total > 0:
 		add_gold(sale_total)
-		notification_requested.emit("일반 장비 판매 +%dG" % sale_total, Color("f6c85f"))
+		var protected_text: String = " · 잠금 %d개 보호" % protected_count if protected_count > 0 else ""
+		notification_requested.emit("일반 장비 판매 +%dG%s" % [sale_total, protected_text], Color("f6c85f"))
+	elif protected_count > 0:
+		notification_requested.emit("판매할 일반 장비 없음 · 잠금 %d개 보호" % protected_count, Color("ffd166"))
 	inventory_changed.emit()
 
 
@@ -372,6 +395,9 @@ func apply_save_dict(data: Dictionary) -> void:
 	selected_skill_type = String(data.get("selected_skill_type", ""))
 	class_base_stats = Dictionary(data.get("class_base_stats", class_base_stats)).duplicate(true)
 	inventory.assign(Array(data.get("inventory", [])))
+	for item: Dictionary in inventory:
+		if not item.has("locked"):
+			item["locked"] = false
 	equipment = Dictionary(data.get("equipment", {})).duplicate(true)
 	_ensure_equipment_slots()
 	skill_levels = Dictionary(data.get("skill_levels", skill_levels)).duplicate(true)
