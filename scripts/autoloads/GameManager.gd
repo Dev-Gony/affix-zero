@@ -535,7 +535,15 @@ func apply_save_dict(data: Dictionary) -> void:
 	equipment = Dictionary(data.get("equipment", {})).duplicate(true)
 	_ensure_equipment_slots()
 	class_skill_levels = Dictionary(data.get("class_skill_levels", class_skill_levels)).duplicate(true)
-	for class_id: String in CLASS_SKILL_DEFINITIONS.keys():
+	if data.has("skill_levels") and not data.has("class_skill_levels"):
+		var legacy_levels: Dictionary = Dictionary(data.get("skill_levels", {}))
+		class_skill_levels["warrior"] = {
+			"warrior_fury": int(legacy_levels.get("attack_boost", 0)),
+			"warrior_iron_skin": int(legacy_levels.get("defense_boost", 0)),
+			"warrior_bloodlust": int(legacy_levels.get("life_steal", 0)),
+		}
+	for class_key: Variant in CLASS_SKILL_DEFINITIONS.keys():
+		var class_id: String = String(class_key)
 		if not class_skill_levels.has(class_id):
 			class_skill_levels[class_id] = {}
 	rebirth_count = maxi(0, int(data.get("rebirth_count", 0)))
