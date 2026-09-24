@@ -22,3 +22,27 @@ jobs:
 
       - name: Run gameplay smoke test
         run: godot --headless --path . res://tests/smoke_test.tscn
+
+      - name: Export Windows build
+        run: |
+          mkdir -p build/windows
+          godot --headless --path . --export-release "Windows Desktop" build/windows/AFFIX_ZERO.exe
+
+      - name: Export Web build
+        run: |
+          mkdir -p build/web
+          godot --headless --path . --export-release "Web" build/web/index.html
+
+      - name: Upload Windows playable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: AFFIX-ZERO-windows
+          path: build/windows/
+          if-no-files-found: error
+
+      - name: Upload Web playable build
+        uses: actions/upload-artifact@v4
+        with:
+          name: AFFIX-ZERO-web
+          path: build/web/
+          if-no-files-found: error

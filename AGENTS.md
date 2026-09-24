@@ -32,4 +32,5 @@ The game uses a 640x360 pixel-art viewport. Preserve crisp scaling and keep comb
 - Add gameplay systems only within the scope of the active task.
 - Keep balance values in `.tres` resources. Code may contain resource paths and algorithms, but not duplicate resource balance tables.
 - Treat the 640x360 internal viewport as the layout source of truth. Verify both 640x360 and the default 2x desktop presentation.
+- Read `design-system/affix-zero/MASTER.md` and the relevant page override before changing UI. The game HUD override is `design-system/affix-zero/pages/game-hud.md`.
 - Run `res://tests/smoke_test.tscn` headlessly after changes to combat, progression, loot, saves, or UI state.

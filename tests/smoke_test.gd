@@ -43,6 +43,9 @@ func _run() -> void:
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
 	_check(GameManager.floor > 1, "Kill target advances the floor")
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
+	var game_ui: GameUI = main.get_node("UILayer/GameUI")
+	_check(game_ui._class_selection._grid.get_child_count() == 6, "Class selection renders all six cards")
+	_check(game_ui._equipment_row.get_child_count() == 7, "Equipment overview renders all seven slots")
 
 	for class_id: String in ["warrior", "mage", "knight", "sage", "assassin", "saint"]:
 		var class_data: ClassData = load("res://resources/classes/%s.tres" % class_id)
@@ -68,6 +71,12 @@ func _run() -> void:
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
 	GameManager.equip_item(String(generated_item.get("id", "")))
 	_check(not Dictionary(GameManager.equipment.get(String(generated_item.get("slot", "")), {})).is_empty(), "Equipment flow equips an item")
+	var comparison_item: Dictionary = generated_item.duplicate(true)
+	var comparison_stats: Dictionary = comparison_item.get("base_stats", {})
+	var comparison_stat: String = String(comparison_stats.keys()[0])
+	comparison_stats[comparison_stat] = float(comparison_stats[comparison_stat]) + 5.0
+	comparison_item["base_stats"] = comparison_stats
+	_check(game_ui._comparison_text(comparison_item).contains("▲"), "Inventory comparison shows an explicit upgrade delta")
 
 	var save_json: String = JSON.stringify(GameManager.to_save_dict())
 	var parsed_save: Variant = JSON.parse_string(save_json)
@@ -88,6 +97,8 @@ func _run() -> void:
 	_check(GameManager.unlocked_classes.size() == 6, "Class resources drive all rebirth unlocks")
 
 	GameManager.set_speed_multiplier(1.0)
+	main.queue_free()
+	await get_tree().process_frame
 	if _failures.is_empty():
 		print("SMOKE TEST PASSED: combat, loot, equipment, save serialization, rebirth, and UI")
 		get_tree().quit(0)

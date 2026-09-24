@@ -1,14 +1,15 @@
 extends Control
 class_name GameUI
 
-const COLOR_BACKGROUND := Color("0c0c16")
-const COLOR_PANEL := Color("111120")
-const COLOR_PANEL_ALT := Color("17172a")
-const COLOR_BORDER := Color("252540")
+const COLOR_BACKGROUND := Color("0b0910")
+const COLOR_PANEL := Color("141019")
+const COLOR_PANEL_ALT := Color("1c1520")
+const COLOR_BORDER := Color("69432f")
 const COLOR_TEXT := Color("f3f4ff")
-const COLOR_MUTED := Color("a9abc4")
+const COLOR_MUTED := Color("c5b4a8")
 const COLOR_ACCENT := Color("dc3d33")
 const COLOR_GREEN := Color("4fd675")
+const COLOR_GOLD := Color("d9a441")
 
 const SLOT_NAMES: Dictionary = {
 	"weapon": "무기", "helmet": "투구", "armor": "갑옷", "gloves": "장갑",
@@ -33,6 +34,9 @@ var _stats_label: Label
 var _notification_label: Label
 var _notification_tween: Tween
 var _class_selection: ClassSelection
+var _hud_panel: Panel
+var _bottom_panel: Panel
+var _main_tabs: TabContainer
 
 
 func _ready() -> void:
@@ -44,6 +48,7 @@ func _ready() -> void:
 	_build_class_selection()
 	_connect_signals()
 	_refresh_all()
+	_apply_game_state_visibility(GameManager.game_state)
 
 
 func _create_theme() -> Theme:
@@ -54,16 +59,16 @@ func _create_theme() -> Theme:
 	game_theme.set_color("font_hover_color", "Button", Color.WHITE)
 	game_theme.set_color("font_pressed_color", "Button", Color.WHITE)
 	game_theme.set_color("font_disabled_color", "Button", Color("64647a"))
-	game_theme.set_stylebox("panel", "Panel", _style_box(COLOR_PANEL, COLOR_BORDER, 1, 0))
-	game_theme.set_stylebox("panel", "PanelContainer", _style_box(COLOR_PANEL_ALT, COLOR_BORDER, 1, 3))
-	game_theme.set_stylebox("normal", "Button", _style_box(Color("1c1c31"), Color("34345b"), 1, 3))
-	game_theme.set_stylebox("hover", "Button", _style_box(Color("292947"), Color("5a5a8a"), 1, 3))
-	game_theme.set_stylebox("pressed", "Button", _style_box(Color("35355a"), Color("dc3d33"), 1, 3))
-	game_theme.set_stylebox("disabled", "Button", _style_box(Color("121220"), Color("252540"), 1, 3))
-	game_theme.set_stylebox("focus", "Button", _style_box(Color(0, 0, 0, 0), Color("ff6868"), 2, 3))
+	game_theme.set_stylebox("panel", "Panel", _style_box(COLOR_PANEL, COLOR_BORDER, 2, 0))
+	game_theme.set_stylebox("panel", "PanelContainer", _style_box(COLOR_PANEL_ALT, COLOR_BORDER, 1, 0))
+	game_theme.set_stylebox("normal", "Button", _style_box(Color("211720"), Color("69432f"), 1, 0))
+	game_theme.set_stylebox("hover", "Button", _style_box(Color("38202a"), Color("c17a43"), 1, 0))
+	game_theme.set_stylebox("pressed", "Button", _style_box(Color("4b1f28"), Color("e04f46"), 2, 0))
+	game_theme.set_stylebox("disabled", "Button", _style_box(Color("100d13"), Color("35271f"), 1, 0))
+	game_theme.set_stylebox("focus", "Button", _style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2, 0))
 	game_theme.set_stylebox("panel", "TabContainer", _style_box(COLOR_PANEL, COLOR_BORDER, 1, 0))
-	game_theme.set_stylebox("tab_selected", "TabContainer", _style_box(Color("272746"), COLOR_ACCENT, 1, 2))
-	game_theme.set_stylebox("tab_unselected", "TabContainer", _style_box(Color("151526"), COLOR_BORDER, 1, 2))
+	game_theme.set_stylebox("tab_selected", "TabContainer", _style_box(Color("4a1c25"), COLOR_GOLD, 2, 0))
+	game_theme.set_stylebox("tab_unselected", "TabContainer", _style_box(Color("171018"), COLOR_BORDER, 1, 0))
 	game_theme.set_color("font_selected_color", "TabContainer", Color.WHITE)
 	game_theme.set_color("font_unselected_color", "TabContainer", COLOR_MUTED)
 	game_theme.set_constant("side_margin", "TabContainer", 5)
@@ -76,6 +81,7 @@ func _style_box(background: Color, border: Color, width: int, radius: int) -> St
 	style.border_color = border
 	style.set_border_width_all(width)
 	style.set_corner_radius_all(radius)
+	style.anti_aliasing = false
 	style.content_margin_left = 4
 	style.content_margin_right = 4
 	style.content_margin_top = 3
@@ -85,8 +91,10 @@ func _style_box(background: Color, border: Color, width: int, radius: int) -> St
 
 func _build_hud() -> void:
 	var panel := Panel.new()
+	_hud_panel = panel
 	panel.position = Vector2.ZERO
 	panel.size = Vector2(640, 42)
+	panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.94), Color("8f5a3a"), 2, 0))
 	add_child(panel)
 	var row := HBoxContainer.new()
 	row.position = Vector2(7, 3)
@@ -152,10 +160,13 @@ func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> Progre
 
 func _build_bottom_panel() -> void:
 	var panel := Panel.new()
+	_bottom_panel = panel
 	panel.position = Vector2(0, 214)
 	panel.size = Vector2(640, 146)
+	panel.add_theme_stylebox_override("panel", _style_box(Color("100c12"), Color("9a6240"), 2, 0))
 	add_child(panel)
 	var tabs := TabContainer.new()
+	_main_tabs = tabs
 	tabs.name = "MainTabs"
 	tabs.position = Vector2(4, 3)
 	tabs.size = Vector2(632, 140)
@@ -169,6 +180,20 @@ func _build_bottom_panel() -> void:
 	_build_stats_tab(tabs)
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not event is InputEventKey or not event.pressed or event.echo:
+		return
+	if GameManager.game_state != GameManager.GameState.RUNNING:
+		return
+	match event.keycode:
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
+			_main_tabs.current_tab = int(event.keycode - KEY_1)
+			AudioManager.play_sfx("ui_click")
+		KEY_Z: _set_speed(1.0)
+		KEY_X: _set_speed(2.0)
+		KEY_C: _set_speed(5.0)
+
+
 func _build_equipment_tab(tabs: TabContainer) -> void:
 	var tab := MarginContainer.new()
 	tab.name = "장비"
@@ -178,7 +203,7 @@ func _build_equipment_tab(tabs: TabContainer) -> void:
 	tab.add_theme_constant_override("margin_bottom", 4)
 	tabs.add_child(tab)
 	var scroll := ScrollContainer.new()
-	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	tab.add_child(scroll)
 	_equipment_row = HBoxContainer.new()
@@ -265,7 +290,7 @@ func _build_notification() -> void:
 
 func _build_class_selection() -> void:
 	_class_selection = ClassSelection.new()
-	_class_selection.add_theme_stylebox_override("panel", _style_box(Color("0c0c16"), Color("3b3b64"), 2, 0))
+	_class_selection.add_theme_stylebox_override("panel", _style_box(Color(0.025, 0.018, 0.03, 0.90), Color("9a6240"), 2, 0))
 	add_child(_class_selection)
 
 
@@ -300,7 +325,7 @@ func _refresh_hud() -> void:
 	_mp_bar.value = GameManager.mp
 	_xp_bar.max_value = LevelManager.xp_needed(GameManager.level)
 	_xp_bar.value = GameManager.xp
-	_hud_info.text = "%d층  ·  Lv.%d  ·  %dG\n처치 %d / %d  ·  %s" % [
+	_hud_info.text = "◆ %d층  ·  Lv.%d  ·  %dG\nAUTO  처치 %d/%d  ·  %s" % [
 		GameManager.floor, GameManager.level, GameManager.gold, GameManager.kills_on_floor,
 		8 + GameManager.floor, GameManager.selected_class_name if not GameManager.selected_class_name.is_empty() else "직업 선택"
 	]
@@ -317,9 +342,9 @@ func _refresh_equipment() -> void:
 	for slot: String in GameManager.EQUIPMENT_SLOTS:
 		var item: Dictionary = GameManager.equipment.get(slot, {})
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(128, 92)
+		card.custom_minimum_size = Vector2(83, 92)
 		var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-		card.add_theme_stylebox_override("panel", _style_box(Color("121220"), border_color, 1, 2))
+		card.add_theme_stylebox_override("panel", _style_box(Color("151018"), border_color, 1, 0))
 		var card_row := HBoxContainer.new()
 		card_row.add_theme_constant_override("separation", 3)
 		card.add_child(card_row)
@@ -378,16 +403,16 @@ func _refresh_inventory() -> void:
 	for item: Dictionary in sorted_items:
 		var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 		var card := PanelContainer.new()
-		card.custom_minimum_size = Vector2(610, 46)
-		card.add_theme_stylebox_override("panel", _style_box(Color("131324"), item_color, 1, 2))
+		card.custom_minimum_size = Vector2(610, 54)
+		card.add_theme_stylebox_override("panel", _style_box(Color("171119"), item_color, 1, 0))
 		var row := HBoxContainer.new()
 		row.add_theme_constant_override("separation", 5)
 		card.add_child(row)
 		var description := Label.new()
 		description.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		description.text = "[%s] %s  ·  iLv.%d  ·  %s\n%s" % [
+		description.text = "[%s] %s  ·  iLv.%d  ·  %s\n%s\n%s" % [
 			String(item.get("rarity_name", "")), String(item.get("name", "")), int(item.get("item_level", 1)),
-			String(SLOT_NAMES.get(String(item.get("slot", "")), "")), _compact_stats(item, true)
+			String(SLOT_NAMES.get(String(item.get("slot", "")), "")), _compact_stats(item, true), _comparison_text(item)
 		]
 		description.tooltip_text = _format_item_details(item)
 		description.add_theme_color_override("font_color", item_color)
@@ -509,7 +534,40 @@ func _format_item_details(item: Dictionary) -> String:
 				_format_value(String(affix_data.get("stat", "")), float(affix_data.get("value", 0.0)))
 			])
 	lines.append("판매가: %dG" % int(item.get("sell_value", 0)))
+	lines.append("장착 비교: %s" % _comparison_text(item))
 	return "\n".join(lines)
+
+
+func _comparison_text(item: Dictionary) -> String:
+	var slot: String = String(item.get("slot", ""))
+	var equipped: Dictionary = GameManager.equipment.get(slot, {})
+	if equipped.is_empty():
+		return "현재 슬롯 비어 있음 · 즉시 장착 가능"
+	var candidate_stats: Dictionary = _item_stat_totals(item)
+	var equipped_stats: Dictionary = _item_stat_totals(equipped)
+	var changes := PackedStringArray()
+	for stat_name: String in ["ATK", "DEF", "HP", "MP", "SPD", "CRIT", "VAMP", "PEN"]:
+		var difference: float = float(candidate_stats.get(stat_name, 0.0)) - float(equipped_stats.get(stat_name, 0.0))
+		if is_zero_approx(difference):
+			continue
+		var marker: String = "▲" if difference > 0.0 else "▼"
+		var sign_text: String = "+" if difference > 0.0 else ""
+		changes.append("%s %s %s%s" % [marker, String(STAT_NAMES.get(stat_name, stat_name)), sign_text, _format_value(stat_name, difference)])
+		if changes.size() >= 4:
+			break
+	return "변화 없음" if changes.is_empty() else "  ".join(changes)
+
+
+func _item_stat_totals(item: Dictionary) -> Dictionary:
+	var totals: Dictionary = {}
+	var base_stats: Dictionary = item.get("base_stats", {})
+	for stat_name: Variant in base_stats.keys():
+		totals[String(stat_name)] = float(totals.get(String(stat_name), 0.0)) + float(base_stats[stat_name])
+	for affix_data: Variant in Array(item.get("affixes", [])):
+		if affix_data is Dictionary:
+			var stat_name: String = String(affix_data.get("stat", ""))
+			totals[stat_name] = float(totals.get(stat_name, 0.0)) + float(affix_data.get("value", 0.0))
+	return totals
 
 
 func _format_value(stat_name: String, value: float) -> String:
@@ -534,9 +592,18 @@ func _on_rebirth_changed() -> void:
 
 
 func _on_game_state_changed(state: GameManager.GameState) -> void:
+	_apply_game_state_visibility(state)
 	_class_selection.visible = state == GameManager.GameState.CLASS_SELECTION
 	if _class_selection.visible:
 		_class_selection.refresh()
+
+
+func _apply_game_state_visibility(state: GameManager.GameState) -> void:
+	var show_game_ui: bool = state != GameManager.GameState.CLASS_SELECTION
+	if _hud_panel != null:
+		_hud_panel.visible = show_game_ui
+	if _bottom_panel != null:
+		_bottom_panel.visible = show_game_ui
 
 
 func _set_speed(multiplier: float) -> void:

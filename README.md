@@ -10,6 +10,13 @@ AFFIX: ZERO is a complete Godot 4.3 idle hack-and-slash prototype. It combines f
 
 The internal pixel-art resolution is 640x360 and the default desktop window is 1280x720. The compatibility renderer keeps the project suitable for desktop and web exports.
 
+Keyboard shortcuts: `1`-`5` switch the management tabs, while `Z` / `X` / `C` select x1 / x2 / x5 combat speed. Class cards and all buttons support keyboard focus and activation.
+
+Every pull request CI run also publishes two downloadable playable artifacts:
+
+- `AFFIX-ZERO-windows`: unzip and run `AFFIX_ZERO.exe`.
+- `AFFIX-ZERO-web`: serve the extracted folder with any static HTTP server and open `index.html`.
+
 ## Implemented systems
 
 - Fixed-center automatic combat with nearest-target attacks and 3-second class skills
@@ -19,6 +26,8 @@ The internal pixel-art resolution is 640x360 and the default desktop window is 1
 - 20-slot inventory, equipment, selling, bulk-selling, passive skills, stats, and rebirth UI
 - Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
 - Damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
+- Original dark-fantasy pixel courtyard art with floor-range color grading and a denser ornamental HUD
+- Equipped-item comparison deltas directly in the inventory list
 - x1/x2/x5 combat speed control
 - Complete JSON save/load state with a real-time 30-second autosave interval
 - Three BGM channels and fourteen SFX channels prepared as `AudioStreamPlayer2D` placeholders

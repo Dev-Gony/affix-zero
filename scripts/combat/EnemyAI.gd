@@ -19,6 +19,7 @@ var gold_reward: int = 1
 var body_color: Color = Color.WHITE
 var _attack_time_left: float = 0.0
 var _dead: bool = false
+var _hit_flash_left: float = 0.0
 
 
 func setup(data: EnemyData, current_floor: int, player_target: Node2D) -> void:
@@ -41,6 +42,9 @@ func setup(data: EnemyData, current_floor: int, player_target: Node2D) -> void:
 func _process(delta: float) -> void:
 	if _dead or target == null or not is_instance_valid(target):
 		return
+	if _hit_flash_left > 0.0:
+		_hit_flash_left = maxf(0.0, _hit_flash_left - delta)
+		queue_redraw()
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
 	var distance: float = global_position.distance_to(target.global_position)
 	if distance > radius + 11.0:
@@ -56,6 +60,7 @@ func take_hit(result: Dictionary) -> void:
 	var damage: int = int(result.get("damage", 1))
 	var critical: bool = bool(result.get("critical", false))
 	hp -= damage
+	_hit_flash_left = 0.09
 	damage_received.emit(global_position, damage, critical)
 	queue_redraw()
 	if hp <= 0.0:
@@ -71,29 +76,30 @@ func _die() -> void:
 
 
 func _draw() -> void:
+	var draw_color: Color = body_color.lightened(0.55) if _hit_flash_left > 0.0 else body_color
 	draw_circle(Vector2(0, radius * 0.55), Vector2(radius, radius * 0.35).x, Color(0, 0, 0, 0.28))
 	match enemy_data.id if enemy_data != null else "slime":
 		"slime":
-			draw_circle(Vector2.ZERO, radius, body_color)
-			draw_rect(Rect2(-radius, 0, radius * 2.0, radius), body_color, true)
+			draw_circle(Vector2.ZERO, radius, draw_color)
+			draw_rect(Rect2(-radius, 0, radius * 2.0, radius), draw_color, true)
 		"bat":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 2, 0), Vector2(-3, -5), Vector2(0, 5), Vector2(3, -5), Vector2(radius * 2, 0), Vector2(0, radius)]), body_color)
+			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 2, 0), Vector2(-3, -5), Vector2(0, 5), Vector2(3, -5), Vector2(radius * 2, 0), Vector2(0, radius)]), draw_color)
 		"skeleton":
-			draw_circle(Vector2(0, -3), radius * 0.72, body_color)
-			draw_rect(Rect2(-radius * 0.55, 2, radius * 1.1, radius), body_color.darkened(0.12), true)
+			draw_circle(Vector2(0, -3), radius * 0.72, draw_color)
+			draw_rect(Rect2(-radius * 0.55, 2, radius * 1.1, radius), draw_color.darkened(0.12), true)
 		"goblin":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius), Vector2(0, -radius * 0.55), Vector2(radius, -radius), Vector2(radius * 0.7, radius), Vector2(-radius * 0.7, radius)]), body_color)
+			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius), Vector2(0, -radius * 0.55), Vector2(radius, -radius), Vector2(radius * 0.7, radius), Vector2(-radius * 0.7, radius)]), draw_color)
 		"dark_knight":
-			draw_rect(Rect2(-radius, -radius, radius * 2, radius * 2), body_color, true)
-			draw_rect(Rect2(-radius * 0.7, -radius * 1.35, radius * 1.4, radius * 0.5), body_color.lightened(0.18), true)
+			draw_rect(Rect2(-radius, -radius, radius * 2, radius * 2), draw_color, true)
+			draw_rect(Rect2(-radius * 0.7, -radius * 1.35, radius * 1.4, radius * 0.5), draw_color.lightened(0.18), true)
 		"lich":
-			draw_colored_polygon(PackedVector2Array([Vector2(0, -radius * 1.3), Vector2(radius, radius), Vector2(-radius, radius)]), body_color)
-			draw_circle(Vector2(0, -radius * 0.55), radius * 0.5, body_color.lightened(0.25))
+			draw_colored_polygon(PackedVector2Array([Vector2(0, -radius * 1.3), Vector2(radius, radius), Vector2(-radius, radius)]), draw_color)
+			draw_circle(Vector2(0, -radius * 0.55), radius * 0.5, draw_color.lightened(0.25))
 		"dragon":
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 1.6, 0), Vector2(-radius * 0.4, -radius), Vector2(0, -radius * 0.4), Vector2(radius * 0.4, -radius), Vector2(radius * 1.6, 0), Vector2(0, radius)]), body_color)
+			draw_colored_polygon(PackedVector2Array([Vector2(-radius * 1.6, 0), Vector2(-radius * 0.4, -radius), Vector2(0, -radius * 0.4), Vector2(radius * 0.4, -radius), Vector2(radius * 1.6, 0), Vector2(0, radius)]), draw_color)
 		"demon_lord":
-			draw_circle(Vector2.ZERO, radius, body_color)
-			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius * 0.4), Vector2(-radius * 1.5, -radius * 1.5), Vector2(-radius * 0.3, -radius), Vector2(radius * 0.3, -radius), Vector2(radius * 1.5, -radius * 1.5), Vector2(radius, -radius * 0.4)]), body_color.darkened(0.15))
+			draw_circle(Vector2.ZERO, radius, draw_color)
+			draw_colored_polygon(PackedVector2Array([Vector2(-radius, -radius * 0.4), Vector2(-radius * 1.5, -radius * 1.5), Vector2(-radius * 0.3, -radius), Vector2(radius * 0.3, -radius), Vector2(radius * 1.5, -radius * 1.5), Vector2(radius, -radius * 0.4)]), draw_color.darkened(0.15))
 	draw_rect(Rect2(-radius + 2, -2, 3, 3), Color.WHITE, true)
 	draw_rect(Rect2(radius - 5, -2, 3, 3), Color.WHITE, true)
 	var bar_width: float = radius * 2.0

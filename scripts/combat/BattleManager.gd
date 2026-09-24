@@ -4,6 +4,7 @@ class_name BattleManager
 const BATTLE_RECT := Rect2(8, 38, 624, 172)
 const PLAYER_POSITION := Vector2(320, 126)
 const ENEMY_RESOURCE_DIRECTORY: String = "res://resources/enemies/"
+const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 
 @onready var player: PlayerAvatar = $Player
 @onready var enemies_root: Node2D = $Enemies
@@ -51,16 +52,12 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_rect(Rect2(0, 0, 640, 216), Color("0c0c16"), true)
-	for y: int in range(42, 216, 16):
-		for x: int in range(0, 640, 16):
-			var alternating: bool = (floori(float(x) / 16.0) + floori(float(y) / 16.0)) % 2 == 0
-			var tile_color := Color("151526") if alternating else Color("111120")
-			draw_rect(Rect2(x, y, 16, 16), tile_color, true)
-	for x: int in range(0, 640, 48):
-		draw_line(Vector2(x, 42), Vector2(x, 216), Color(0.16, 0.16, 0.28, 0.24), 1.0)
-	draw_line(Vector2(0, 41), Vector2(640, 41), Color("252540"), 2.0)
-	draw_line(Vector2(0, 214), Vector2(640, 214), Color("3b3b64"), 2.0)
+	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
+	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, -54, 640, 360), false, theme_tint)
+	draw_rect(Rect2(0, 0, 640, 216), Color(0.025, 0.02, 0.04, 0.16), true)
+	draw_rect(Rect2(0, 0, 640, 42), Color(0.02, 0.015, 0.025, 0.70), true)
+	draw_line(Vector2(0, 41), Vector2(640, 41), Color("8f5a3a"), 1.0)
+	draw_line(Vector2(0, 214), Vector2(640, 214), Color("9a6240"), 2.0)
 
 
 func _start_battle() -> void:
@@ -262,6 +259,7 @@ func _on_class_selected(_class_id: String) -> void:
 
 func _on_floor_changed(new_floor: int) -> void:
 	AudioManager.play_bgm_for_floor(new_floor)
+	queue_redraw()
 
 
 func _on_game_state_changed(state: GameManager.GameState) -> void:

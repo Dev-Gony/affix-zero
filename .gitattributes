@@ -1,4 +1,5 @@
 * text=auto
+.gitattributes text eol=lf
 
 *.gd text eol=lf
 *.godot text eol=lf
@@ -7,3 +8,4 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+.gitignore text eol=lf

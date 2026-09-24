@@ -4,3 +4,6 @@
 # Local/editor artifacts
 *.tmp
 *.translation
+
+# Local export output
+build/

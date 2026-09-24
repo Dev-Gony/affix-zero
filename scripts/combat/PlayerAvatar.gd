@@ -19,14 +19,17 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	draw_ellipse(Vector2(0, 9), Vector2(13, 5), Color(0, 0, 0, 0.42))
+	var bob: float = -1.0 if fmod(pulse, 0.8) < 0.4 else 0.0
+	draw_ellipse(Vector2(0, 10), Vector2(14, 5), Color(0, 0, 0, 0.58))
 	var glow_alpha: float = 0.10 + sin(pulse * 3.0) * 0.03
-	draw_circle(Vector2.ZERO, 15.0, Color(body_color, glow_alpha))
-	draw_rect(Rect2(-8, -9, 16, 18), Color("151522"), true)
-	draw_rect(Rect2(-7, -8, 14, 16), body_color, true)
-	draw_rect(Rect2(-5, -13, 10, 7), body_color.lightened(0.18), true)
-	draw_rect(Rect2(-3, -11, 2, 2), Color.WHITE, true)
-	draw_rect(Rect2(2, -11, 2, 2), Color.WHITE, true)
+	draw_circle(Vector2.ZERO, 17.0, Color(body_color, glow_alpha))
+	draw_arc(Vector2.ZERO, 15.0, 0.15, PI - 0.15, 18, Color(body_color, 0.72), 1.0)
+	draw_rect(Rect2(-9, -10 + bob, 18, 20), Color("08070b"), true)
+	draw_rect(Rect2(-7, -8 + bob, 14, 17), body_color.darkened(0.12), true)
+	draw_rect(Rect2(-6, -14 + bob, 12, 8), Color("08070b"), true)
+	draw_rect(Rect2(-5, -13 + bob, 10, 7), body_color.lightened(0.22), true)
+	draw_rect(Rect2(-3, -11 + bob, 2, 2), Color.WHITE, true)
+	draw_rect(Rect2(2, -11 + bob, 2, 2), Color.WHITE, true)
 	match class_id:
 		"warrior":
 			draw_line(Vector2(8, -5), Vector2(15, 5), Color("d9e2ec"), 3.0)

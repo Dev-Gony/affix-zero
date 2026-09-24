@@ -29,44 +29,64 @@ func refresh() -> void:
 	for child: Node in _grid.get_children():
 		_grid.remove_child(child)
 		child.queue_free()
+	var first_unlocked_card: Button = null
 	for resource_path: String in CLASS_PATHS:
 		var class_data: ClassData = load(resource_path)
 		if class_data == null:
 			continue
 		var unlocked: bool = GameManager.unlocked_classes.has(class_data.id)
 		var card := Button.new()
-		card.custom_minimum_size = Vector2(145, 82)
+		card.custom_minimum_size = Vector2(178, 94)
 		card.disabled = not unlocked
 		card.text = _class_card_text(class_data, unlocked)
+		card.icon = _make_class_icon(class_data)
+		card.alignment = HORIZONTAL_ALIGNMENT_LEFT
 		card.tooltip_text = "%s\nHP %d · MP %d · ATK %d · DEF %d · SPD %.1f · CRIT %.0f%%" % [
 			class_data.description, class_data.base_hp, class_data.base_mp, class_data.base_atk,
 			class_data.base_def, class_data.base_spd, class_data.base_crit
 		]
 		card.add_theme_color_override("font_color", class_data.color if unlocked else Color("65657c"))
 		card.add_theme_color_override("font_disabled_color", Color("65657c"))
+		card.add_theme_font_size_override("font_size", 8)
+		card.add_theme_stylebox_override("normal", _card_style(Color("1c131b"), class_data.color.darkened(0.22), 1))
+		card.add_theme_stylebox_override("hover", _card_style(Color("38202a"), class_data.color, 2))
+		card.add_theme_stylebox_override("pressed", _card_style(Color("4b1f28"), Color("f0b45f"), 2))
+		card.add_theme_stylebox_override("disabled", _card_style(Color("0d0a0f"), Color("34282a"), 1))
+		card.add_theme_stylebox_override("focus", _card_style(Color(0, 0, 0, 0), Color("f0b45f"), 2))
 		if unlocked:
 			card.pressed.connect(_select_class.bind(class_data))
+			if first_unlocked_card == null:
+				first_unlocked_card = card
 		_grid.add_child(card)
 	visible = GameManager.game_state == GameManager.GameState.CLASS_SELECTION
+	if visible and first_unlocked_card != null:
+		call_deferred("_focus_card", first_unlocked_card)
+
+
+func _focus_card(card: Button) -> void:
+	if is_instance_valid(card) and card.is_inside_tree() and card.visible and not card.disabled:
+		card.grab_focus()
 
 
 func _build_layout() -> void:
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	outer.position = Vector2(-250, -155)
-	outer.size = Vector2(500, 310)
+	outer.position = Vector2(-285, -163)
+	outer.size = Vector2(570, 326)
 	outer.add_theme_constant_override("separation", 8)
 	add_child(outer)
 
 	var title := Label.new()
 	title.text = "AFFIX: ZERO"
+	title.custom_minimum_size.y = 30
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 22)
-	title.add_theme_color_override("font_color", Color("f3f4ff"))
+	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_color_override("font_color", Color("e2544d"))
 	outer.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "운명을 선택하세요 · 자동 전투가 곧 시작됩니다"
+	subtitle.text = "영웅을 선택하세요  ·  전투는 자동으로 시작됩니다"
+	subtitle.custom_minimum_size.y = 18
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	subtitle.add_theme_color_override("font_color", Color("a9abc4"))
 	outer.add_child(subtitle)
@@ -79,7 +99,7 @@ func _build_layout() -> void:
 	outer.add_child(_grid)
 
 	var hint := Label.new()
-	hint.text = "환생 횟수가 늘어나면 새로운 직업이 해금됩니다"
+	hint.text = "첫 플레이 추천: 전사 / 마법사   ·   환생으로 새로운 직업 해금"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 9)
 	hint.add_theme_color_override("font_color", Color("8b8da8"))
@@ -88,10 +108,56 @@ func _build_layout() -> void:
 
 func _class_card_text(class_data: ClassData, unlocked: bool) -> String:
 	var status: String = "선택 가능" if unlocked else "환생 %d회 해금" % class_data.unlock_rebirths
-	return "%s\n%s\nHP %d  ATK %d  DEF %d\nSPD %.1f  CRIT %.0f%%\n%s" % [
+	return "%s\n%s\nHP %d  ATK %d  DEF %d\nSPD %.1f  CRIT %.0f%%  ·  %s" % [
 		class_data.display_name, class_data.description, class_data.base_hp, class_data.base_atk,
 		class_data.base_def, class_data.base_spd, class_data.base_crit, status
 	]
+
+
+func _card_style(background: Color, border: Color, width: int) -> StyleBoxFlat:
+	var style := StyleBoxFlat.new()
+	style.bg_color = background
+	style.border_color = border
+	style.set_border_width_all(width)
+	style.content_margin_left = 5
+	style.content_margin_right = 5
+	style.content_margin_top = 4
+	style.content_margin_bottom = 4
+	style.anti_aliasing = false
+	return style
+
+
+func _make_class_icon(class_data: ClassData) -> ImageTexture:
+	var image := Image.create(20, 20, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0, 0, 0, 0))
+	_fill_icon_rect(image, Rect2i(5, 16, 10, 2), Color(0, 0, 0, 0.45))
+	_fill_icon_rect(image, Rect2i(7, 3, 6, 5), class_data.color.lightened(0.28))
+	_fill_icon_rect(image, Rect2i(6, 8, 8, 8), class_data.color)
+	_fill_icon_rect(image, Rect2i(8, 5, 1, 1), Color.WHITE)
+	_fill_icon_rect(image, Rect2i(11, 5, 1, 1), Color.WHITE)
+	match class_data.id:
+		"warrior":
+			_fill_icon_rect(image, Rect2i(14, 6, 2, 10), Color("d7dde5"))
+		"mage":
+			_fill_icon_rect(image, Rect2i(15, 5, 1, 11), Color("8b5e34"))
+			_fill_icon_rect(image, Rect2i(14, 3, 3, 3), Color("ff8c42"))
+		"knight":
+			_fill_icon_rect(image, Rect2i(14, 8, 4, 7), Color("9bd4e0"))
+		"sage":
+			_fill_icon_rect(image, Rect2i(15, 5, 1, 11), Color("c9a7ff"))
+			_fill_icon_rect(image, Rect2i(14, 3, 3, 3), Color("f7e8ff"))
+		"assassin":
+			_fill_icon_rect(image, Rect2i(3, 9, 2, 7), Color("eeeeee"))
+			_fill_icon_rect(image, Rect2i(15, 9, 2, 7), Color("eeeeee"))
+		"saint":
+			_fill_icon_rect(image, Rect2i(7, 1, 6, 1), Color("ffe16b"))
+	return ImageTexture.create_from_image(image)
+
+
+func _fill_icon_rect(image: Image, rect: Rect2i, color: Color) -> void:
+	for y: int in range(rect.position.y, rect.end.y):
+		for x: int in range(rect.position.x, rect.end.x):
+			image.set_pixel(x, y, color)
 
 
 func _select_class(class_data: ClassData) -> void:
