@@ -63,6 +63,11 @@ var _management_window: Panel
 var _management_title: Label
 var _management_open: bool = false
 var _dock_buttons: Dictionary = {}
+var _pause_panel: Panel
+var _pause_visible: bool = false
+var _volume_slider: HSlider
+var _fullscreen_check: CheckBox
+var _autosave_check: CheckBox
 
 
 func _ready() -> void:
@@ -70,6 +75,7 @@ func _ready() -> void:
 	theme = _create_theme()
 	_build_hud()
 	_build_bottom_panel()
+	_build_pause_menu()
 	_build_notification()
 	_build_class_selection()
 	_connect_signals()
@@ -142,7 +148,7 @@ func _build_hud() -> void:
 	panel.add_child(row)
 
 	var bars := VBoxContainer.new()
-	bars.custom_minimum_size = Vector2(214, 28)
+	bars.custom_minimum_size = Vector2(194, 28)
 	bars.add_theme_constant_override("separation", 1)
 	row.add_child(bars)
 	_hp_bar = _add_bar(bars, "HP", Color("dc2626"))
@@ -150,14 +156,14 @@ func _build_hud() -> void:
 	_xp_bar = _add_bar(bars, "XP", Color("22c55e"))
 
 	_hud_info = Label.new()
-	_hud_info.custom_minimum_size = Vector2(206, 28)
+	_hud_info.custom_minimum_size = Vector2(184, 28)
 	_hud_info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hud_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_hud_info.add_theme_font_size_override("font_size", 9)
 	row.add_child(_hud_info)
 
 	var speed_row := HBoxContainer.new()
-	speed_row.custom_minimum_size = Vector2(116, 28)
+	speed_row.custom_minimum_size = Vector2(108, 28)
 	speed_row.alignment = BoxContainer.ALIGNMENT_END
 	speed_row.add_theme_constant_override("separation", 4)
 	row.add_child(speed_row)
@@ -177,7 +183,7 @@ func _build_hud() -> void:
 		_speed_buttons[multiplier] = speed_button
 
 	var quick_row := HBoxContainer.new()
-	quick_row.custom_minimum_size = Vector2(82, 28)
+	quick_row.custom_minimum_size = Vector2(76, 28)
 	quick_row.alignment = BoxContainer.ALIGNMENT_END
 	quick_row.add_theme_constant_override("separation", 2)
 	row.add_child(quick_row)
@@ -199,7 +205,7 @@ func _build_hud() -> void:
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
 	var row := HBoxContainer.new()
-	row.custom_minimum_size = Vector2(228, 10)
+	row.custom_minimum_size = Vector2(194, 10)
 	row.add_theme_constant_override("separation", 4)
 	parent.add_child(row)
 	var label := Label.new()
@@ -208,7 +214,7 @@ func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> Progre
 	label.add_theme_font_size_override("font_size", 8)
 	row.add_child(label)
 	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(202, 7)
+	bar.custom_minimum_size = Vector2(168, 7)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.show_percentage = false
 	bar.add_theme_stylebox_override("background", _style_box(Color("090910"), Color("34344c"), 1, 1))
@@ -280,16 +286,97 @@ func _build_bottom_panel() -> void:
 		_dock_buttons[index] = dock_button
 
 
+func _build_pause_menu() -> void:
+	_pause_panel = Panel.new()
+	_pause_panel.position = Vector2(170, 72)
+	_pause_panel.size = Vector2(300, 256)
+	_pause_panel.z_index = 90
+	_pause_panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.98), COLOR_GOLD, 2, 0))
+	add_child(_pause_panel)
+
+	var column := VBoxContainer.new()
+	column.position = Vector2(14, 12)
+	column.size = Vector2(272, 232)
+	column.add_theme_constant_override("separation", 8)
+	_pause_panel.add_child(column)
+
+	var title := Label.new()
+	title.text = "일시정지 / 설정"
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_color_override("font_color", COLOR_GOLD)
+	column.add_child(title)
+
+	var resume := Button.new()
+	resume.text = "계속하기  ESC"
+	resume.custom_minimum_size.y = 28
+	resume.pressed.connect(_toggle_pause_menu)
+	column.add_child(resume)
+
+	var volume_row := HBoxContainer.new()
+	column.add_child(volume_row)
+	var volume_label := Label.new()
+	volume_label.text = "마스터 음량"
+	volume_label.custom_minimum_size.x = 92
+	volume_row.add_child(volume_label)
+	_volume_slider = HSlider.new()
+	_volume_slider.min_value = 0.0
+	_volume_slider.max_value = 100.0
+	_volume_slider.step = 5.0
+	_volume_slider.value = GameManager.master_volume * 100.0
+	_volume_slider.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_volume_slider.value_changed.connect(_on_master_volume_changed)
+	volume_row.add_child(_volume_slider)
+
+	_fullscreen_check = CheckBox.new()
+	_fullscreen_check.text = "전체화면"
+	_fullscreen_check.button_pressed = GameManager.fullscreen_enabled
+	_fullscreen_check.toggled.connect(_on_fullscreen_toggled)
+	column.add_child(_fullscreen_check)
+
+	_autosave_check = CheckBox.new()
+	_autosave_check.text = "30초 자동저장"
+	_autosave_check.button_pressed = GameManager.autosave_enabled
+	_autosave_check.toggled.connect(_on_autosave_toggled)
+	column.add_child(_autosave_check)
+
+	var save_row := HBoxContainer.new()
+	save_row.add_theme_constant_override("separation", 4)
+	column.add_child(save_row)
+	var save_button := Button.new()
+	save_button.text = "저장"
+	save_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	save_button.pressed.connect(_manual_save)
+	save_row.add_child(save_button)
+	var load_button := Button.new()
+	load_button.text = "불러오기"
+	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	load_button.pressed.connect(_manual_load)
+	save_row.add_child(load_button)
+
+	var quit_button := Button.new()
+	quit_button.text = "저장 후 종료"
+	quit_button.custom_minimum_size.y = 28
+	quit_button.pressed.connect(_save_and_quit)
+	column.add_child(quit_button)
+
+	_pause_panel.visible = false
+
+
 func _unhandled_key_input(event: InputEvent) -> void:
 	if not event is InputEventKey or not event.pressed or event.echo:
 		return
-	if GameManager.game_state != GameManager.GameState.RUNNING:
+	if event.keycode == KEY_ESCAPE:
+		if _management_open:
+			_close_management()
+		else:
+			_toggle_pause_menu()
+		return
+	if GameManager.game_state != GameManager.GameState.RUNNING or _pause_visible:
 		return
 	match event.keycode:
 		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
 			_toggle_management(int(event.keycode - KEY_1))
-		KEY_ESCAPE:
-			_close_management()
 		KEY_Z: _set_speed(1.0)
 		KEY_X: _set_speed(2.0)
 		KEY_C: _set_speed(5.0)
@@ -523,6 +610,12 @@ func _refresh_all() -> void:
 	_refresh_speed_buttons(GameManager.speed_multiplier)
 	if _loot_filter_option != null:
 		_loot_filter_option.select(GameManager.loot_min_rarity_index)
+	if _volume_slider != null:
+		_volume_slider.set_value_no_signal(GameManager.master_volume * 100.0)
+	if _fullscreen_check != null:
+		_fullscreen_check.set_pressed_no_signal(GameManager.fullscreen_enabled)
+	if _autosave_check != null:
+		_autosave_check.set_pressed_no_signal(GameManager.autosave_enabled)
 	_refresh_equipment()
 	_refresh_inventory()
 	_refresh_skills()
@@ -1052,6 +1145,38 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 
 func _on_loot_filter_selected(index: int) -> void:
 	GameManager.set_loot_min_rarity(index)
+	var cleanup: Dictionary = GameManager.sell_inventory_below_rarity(GameManager.loot_min_rarity_index)
+	var sold_count: int = int(cleanup.get("sold_count", 0))
+	var sale_total: int = int(cleanup.get("sale_total", 0))
+	var protected_count: int = int(cleanup.get("protected_count", 0))
+	if sold_count > 0:
+		_show_notification("필터 미만 장비 %d개 자동 판매 +%dG" % [sold_count, sale_total], COLOR_GOLD)
+	elif protected_count > 0:
+		_show_notification("필터 미만 잠금 장비 %d개는 보관" % protected_count, COLOR_GOLD)
+	SaveManager.save_game()
+
+
+func _toggle_pause_menu() -> void:
+	if GameManager.game_state == GameManager.GameState.CLASS_SELECTION:
+		return
+	_pause_visible = not _pause_visible
+	_pause_panel.visible = _pause_visible
+	_management_window.visible = false if _pause_visible else _management_window.visible
+	GameManager.set_game_state(GameManager.GameState.PAUSED if _pause_visible else GameManager.GameState.RUNNING)
+	AudioManager.play_sfx("ui_click")
+
+
+func _on_master_volume_changed(value: float) -> void:
+	GameManager.set_master_volume(value / 100.0)
+
+
+func _on_fullscreen_toggled(enabled: bool) -> void:
+	GameManager.set_fullscreen(enabled)
+	SaveManager.save_game()
+
+
+func _on_autosave_toggled(enabled: bool) -> void:
+	GameManager.set_autosave(enabled)
 	SaveManager.save_game()
 
 
