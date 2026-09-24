@@ -16,12 +16,16 @@ func try_drop() -> Dictionary:
 	var item: Dictionary = _generator.generate_item(GameManager.floor, GameManager.rebirth_count)
 	if item.is_empty():
 		return {}
-	if int(item.get("rarity_index", 0)) < GameManager.loot_min_rarity_index:
+	if not passes_loot_filter(item):
 		return {}
 	if not GameManager.add_inventory_item(item):
 		return {}
 	item_dropped.emit(item)
 	return item
+
+
+func passes_loot_filter(item: Dictionary) -> bool:
+	return int(item.get("rarity_index", 0)) >= GameManager.loot_min_rarity_index
 
 
 func drop_boss_reward() -> Dictionary:
