@@ -1,12 +1,6 @@
 extends Node2D
 class_name PlayerAvatar
 
-const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
-const CLASS_REGIONS: Dictionary = {
-	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
-	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
-}
-
 var class_id: String = "warrior"
 var body_color: Color = Color("dc3d33")
 var pulse: float = 0.0
@@ -50,17 +44,17 @@ func set_move_direction(direction: Vector2) -> void:
 
 func play_attack(world_target: Vector2) -> void:
 	_face_target(world_target)
-	_start_motion("attack", 0.26)
+	_start_motion("attack", 0.20)
 
 
 func play_skill(skill_type: String, world_target: Vector2) -> void:
 	_face_target(world_target)
 	_skill_color = _skill_visual_color(skill_type)
-	_start_motion("skill", 0.34)
+	_start_motion("skill", 0.30)
 
 
 func play_hit() -> void:
-	_start_motion("hit", 0.16)
+	_start_motion("hit", 0.14)
 
 
 func _face_target(world_target: Vector2) -> void:
@@ -78,13 +72,10 @@ func _start_motion(kind: String, duration: float) -> void:
 
 func _draw() -> void:
 	var moving: bool = not _move_direction.is_zero_approx() and _motion_kind == "idle"
-	var step_wave: float = sin(pulse * 12.0) if moving else 0.0
-	var bob: float = roundf((-absf(sin(pulse * TAU / 0.82)) * 0.6) + step_wave * 1.2)
-	draw_ellipse(Vector2(0, 8), Vector2(10, 3.5), Color(0, 0, 0, 0.46))
-	var glow_alpha: float = 0.05 + sin(pulse * 3.0) * 0.02
-	draw_circle(Vector2.ZERO, 13.0, Color(body_color, glow_alpha))
-	if moving:
-		draw_line(Vector2(-5, 11), Vector2(-2, 12 + step_wave * 2.0), Color(1, 1, 1, 0.18), 1.0)
+	var step_wave: float = sin(pulse * 13.0) if moving else 0.0
+	var bob: float = roundf(step_wave * 1.1)
+	draw_ellipse(Vector2(0, 9), Vector2(8.5, 3.0), Color(0, 0, 0, 0.48))
+
 	var motion_progress: float = 1.0
 	if _motion_duration > 0.0 and _motion_time_left > 0.0:
 		motion_progress = 1.0 - (_motion_time_left / _motion_duration)
@@ -94,33 +85,80 @@ func _draw() -> void:
 	match _motion_kind:
 		"attack":
 			var strike: float = sin(smoothstep(0.0, 1.0, motion_progress) * PI)
-			motion_offset = _visual_facing * strike * 8.0
-			motion_rotation = lerpf(-0.08, 0.08, motion_progress) * signf(_visual_facing.x if not is_zero_approx(_visual_facing.x) else 1.0)
+			motion_offset = _visual_facing * strike * 6.0
+			motion_rotation = lerpf(-0.10, 0.10, motion_progress)
 			_draw_attack_swing(motion_progress, strike)
 		"skill":
 			var charge: float = sin(motion_progress * PI)
-			motion_scale = Vector2(1.0 + charge * 0.10, 1.0 - charge * 0.07)
-			draw_arc(Vector2.ZERO, 17.0 + charge * 5.0, -PI * 0.15, PI * 1.35, 24, Color(_skill_color, 0.82 * charge), 2.0)
+			motion_scale = Vector2(1.0 + charge * 0.08, 1.0 - charge * 0.05)
+			draw_arc(Vector2.ZERO, 14.0 + charge * 4.0, -PI * 0.2, PI * 1.2, 20, Color(_skill_color, 0.72 * charge), 1.6)
 		"hit":
-			motion_offset.x = -2.0 if int(pulse * 60.0) % 2 == 0 else 2.0
-			motion_scale = Vector2(1.08, 0.92)
-	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_id, Vector2i.ZERO)
-	var source := Rect2(atlas_cell.x * 512, atlas_cell.y * 512, 512, 512)
+			motion_offset.x = -1.5 if int(pulse * 60.0) % 2 == 0 else 1.5
+
 	var horizontal_facing: float = -1.0 if _visual_facing.x < -0.08 else 1.0
-	draw_set_transform(motion_offset, motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
-	draw_texture_rect_region(CLASS_ATLAS, Rect2(-18, -23 + bob, 36, 36), source)
+	draw_set_transform(motion_offset + Vector2(0, bob), motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
+	_draw_class_avatar(step_wave if moving else 0.0)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _draw_class_avatar(step_wave: float) -> void:
+	var outline := Color("171219")
+	var skin := Color("e7b183")
+	var cloth := body_color
+	var cloth_dark := body_color.darkened(0.34)
+	var metal := Color("c6c3bd")
+	var accent := Color("f2d273")
+	var leg_left: float = step_wave * 1.4
+	var leg_right: float = -step_wave * 1.4
+
+	# compact old-school RPG proportions: readable head, short torso, tiny feet
+	draw_rect(Rect2(-5, -13, 10, 7), outline, true)
+	draw_rect(Rect2(-4, -12, 8, 6), skin, true)
+	draw_rect(Rect2(-6, -6, 12, 12), outline, true)
+	draw_rect(Rect2(-5, -5, 10, 10), cloth_dark, true)
+	draw_rect(Rect2(-4, -4, 8, 8), cloth, true)
+	draw_line(Vector2(-3, 5), Vector2(-3 + leg_left, 10), outline, 3.0)
+	draw_line(Vector2(3, 5), Vector2(3 + leg_right, 10), outline, 3.0)
+
+	match class_id:
+		"warrior":
+			draw_rect(Rect2(-6, -16, 12, 4), outline, true)
+			draw_rect(Rect2(-5, -15, 10, 3), Color("7b2f2a"), true)
+			draw_line(Vector2(5, -2), Vector2(11, 5), metal, 2.0)
+			draw_line(Vector2(10, 4), Vector2(12, 7), accent, 1.0)
+		"mage":
+			draw_colored_polygon(PackedVector2Array([Vector2(-7,-12), Vector2(0,-20), Vector2(7,-12)]), outline)
+			draw_colored_polygon(PackedVector2Array([Vector2(-5,-12), Vector2(0,-18), Vector2(5,-12)]), Color("4c3b8f"))
+			draw_line(Vector2(6, -3), Vector2(10, 8), Color("7d5b3f"), 2.0)
+			draw_circle(Vector2(6, -4), 2.2, Color("8be0f1"))
+		"knight":
+			draw_rect(Rect2(-6, -16, 12, 5), outline, true)
+			draw_rect(Rect2(-5, -15, 10, 4), metal, true)
+			draw_rect(Rect2(4, -3, 5, 8), outline, true)
+			draw_rect(Rect2(5, -2, 3, 6), Color("7d8994"), true)
+		"sage":
+			draw_rect(Rect2(-5, -15, 10, 3), Color("6a4f32"), true)
+			draw_line(Vector2(6, -4), Vector2(10, 8), Color("75573d"), 2.0)
+			draw_circle(Vector2(6, -5), 2.0, Color("c9a7ff"))
+		"assassin":
+			draw_colored_polygon(PackedVector2Array([Vector2(-6,-12), Vector2(0,-17), Vector2(6,-12)]), outline)
+			draw_rect(Rect2(-4, -11, 8, 2), Color("2b2430"), true)
+			draw_line(Vector2(5, 0), Vector2(11, 4), Color("d7d4cf"), 1.5)
+			draw_line(Vector2(-5, 0), Vector2(-11, 4), Color("d7d4cf"), 1.5)
+		"saint":
+			draw_circle(Vector2(0, -18), 4.2, Color("f6e58d", 0.35))
+			draw_arc(Vector2(0, -18), 4.2, 0.0, TAU, 18, Color("f6e58d"), 1.0)
+			draw_line(Vector2(6, -2), Vector2(6, 8), Color("e8ddbd"), 2.0)
+			draw_line(Vector2(3, 1), Vector2(9, 1), Color("e8ddbd"), 1.5)
 
 
 func _draw_attack_swing(progress: float, strength: float) -> void:
 	var aim_angle: float = _visual_facing.angle()
-	var sweep_center: float = aim_angle + lerpf(-0.82, 0.82, smoothstep(0.0, 1.0, progress))
+	var sweep_center: float = aim_angle + lerpf(-0.95, 0.95, smoothstep(0.0, 1.0, progress))
 	var alpha: float = sin(progress * PI)
-	var attack_color := Color("fff0c2", alpha * 0.90)
-	draw_arc(_visual_facing * 7.0, 23.0 + strength * 3.0, sweep_center - 0.48, sweep_center + 0.48, 12, attack_color, 2.4, true)
-	draw_arc(_visual_facing * 7.0, 19.0 + strength * 2.0, sweep_center - 0.38, sweep_center + 0.38, 10, Color("dc3d33", alpha * 0.58), 1.2, true)
-	var weapon_tip: Vector2 = Vector2.RIGHT.rotated(sweep_center) * (25.0 + strength * 3.0)
-	draw_line(_visual_facing * 5.0, weapon_tip, Color("ffffff", alpha * 0.72), 1.2, true)
+	var attack_color := Color("fff0c2", alpha * 0.92)
+	draw_arc(_visual_facing * 5.0, 18.0 + strength * 2.0, sweep_center - 0.42, sweep_center + 0.42, 10, attack_color, 2.0, true)
+	draw_arc(_visual_facing * 5.0, 15.0 + strength * 1.5, sweep_center - 0.32, sweep_center + 0.32, 8, Color(body_color, alpha * 0.52), 1.0, true)
 
 
 func _skill_visual_color(skill_type: String) -> Color:
