@@ -19,6 +19,8 @@ var attack: float = 1.0
 var defense: float = 0.0
 var move_speed: float = 20.0
 var attack_cooldown: float = 1.0
+var behavior: String = "chaser"
+var attack_range: float = 0.0
 var radius: float = 8.0
 var xp_reward: int = 1
 var gold_reward: int = 1
@@ -48,6 +50,9 @@ func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bou
 	defense = data.base_def * scale_factor
 	move_speed = data.move_speed
 	attack_cooldown = data.attack_cooldown
+	behavior = data.behavior
+	attack_range = data.attack_range
+	_attack_windup_duration = data.attack_windup
 	radius = data.radius
 	xp_reward = maxi(1, roundi(data.xp_reward * (1.0 + (current_floor - 1) * 0.12)))
 	gold_reward = maxi(1, roundi(data.gold_reward * (1.0 + (current_floor - 1) * 0.10)))
@@ -85,10 +90,21 @@ func _process(delta: float) -> void:
 			attacked_player.emit(self, attack)
 		return
 	var distance: float = global_position.distance_to(target.global_position)
-	if distance > radius + 11.0:
-		global_position += global_position.direction_to(target.global_position) * move_speed * delta
-		_clamp_to_movement_bounds()
-	elif _attack_time_left <= 0.0:
+	var effective_attack_range: float = attack_range if attack_range > 0.0 else radius + 11.0
+	var toward_target: Vector2 = global_position.direction_to(target.global_position)
+	var move_direction := Vector2.ZERO
+	if distance > effective_attack_range:
+		move_direction = toward_target
+	elif behavior == "caster":
+		if distance < effective_attack_range * 0.62:
+			move_direction = -toward_target
+		else:
+			move_direction = Vector2(-toward_target.y, toward_target.x) * (1.0 if get_instance_id() % 2 == 0 else -1.0)
+	elif behavior == "skirmisher" and distance < effective_attack_range * 0.68:
+		move_direction = -toward_target
+	if not move_direction.is_zero_approx():
+		_move_with_behavior(move_direction, delta)
+	if distance <= effective_attack_range and _attack_time_left <= 0.0:
 		_attack_windup_left = _attack_windup_duration
 		queue_redraw()
 
@@ -107,6 +123,30 @@ func _clamp_to_movement_bounds() -> void:
 		clampf(global_position.x, movement_bounds.position.x, movement_bounds.end.x - 1.0),
 		clampf(global_position.y, movement_bounds.position.y, movement_bounds.end.y - 1.0)
 	)
+
+
+func _move_with_behavior(direction: Vector2, delta: float) -> void:
+	var adjusted_direction: Vector2 = direction.normalized()
+	var speed_multiplier: float = 1.0
+	match behavior:
+		"hopper":
+			speed_multiplier = 0.30 + maxf(0.0, sin(_motion_clock * 8.0)) * 1.35
+		"zigzag":
+			var tangent := Vector2(-adjusted_direction.y, adjusted_direction.x)
+			adjusted_direction = (adjusted_direction + tangent * sin(_motion_clock * 9.0) * 0.72).normalized()
+			speed_multiplier = 1.08
+		"skirmisher":
+			speed_multiplier = 1.12
+		"brute":
+			speed_multiplier = 0.82
+		"caster":
+			speed_multiplier = 0.78
+		"charger":
+			speed_multiplier = 1.90 if fmod(_motion_clock, 2.4) < 0.42 else 0.58
+		"boss":
+			speed_multiplier = 0.72 + sin(_motion_clock * 2.2) * 0.10
+	global_position += adjusted_direction * move_speed * speed_multiplier * delta
+	_clamp_to_movement_bounds()
 
 
 func take_hit(result: Dictionary) -> void:

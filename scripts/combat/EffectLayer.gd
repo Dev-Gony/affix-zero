@@ -87,10 +87,14 @@ func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
 	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
 
 
-func show_enemy_attack(from: Vector2, to: Vector2) -> void:
+func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void:
 	var direction: Vector2 = from.direction_to(to)
 	var tangent := Vector2(-direction.y, direction.x)
-	_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
+	if ranged:
+		_lines.append({"points": PackedVector2Array([from, to]), "color": Color("b978ff"), "life": 0.24, "duration": 0.24, "width": 2.0})
+		spawn_fragments(to, Color("b978ff"), 5, 42.0)
+	else:
+		_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
 
 
 func show_melee_spin(center: Vector2) -> void:

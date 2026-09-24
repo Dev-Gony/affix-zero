@@ -54,6 +54,10 @@ func _run() -> void:
 
 	_check(battle != null, "BattleManager scene is available")
 	_check(battle._enemy_resources.size() == 8, "All eight enemy resources load")
+	var enemy_behaviors: Dictionary = {}
+	for enemy_resource: EnemyData in battle._enemy_resources:
+		enemy_behaviors[enemy_resource.behavior] = true
+	_check(enemy_behaviors.size() == 8, "Every enemy type has a distinct resource-driven movement behavior")
 	_check(int(GameManager.statistics.get("total_kills", 0)) > 0, "Automatic combat defeats enemies")
 	_check(GameManager.floor > 1, "Kill target advances the floor")
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
