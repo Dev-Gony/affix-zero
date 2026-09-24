@@ -8,6 +8,7 @@ const AUTOSAVE_INTERVAL: float = 30.0
 
 var _last_autosave_msec: int = 0
 var persistence_enabled: bool = true
+var autosave_enabled: bool = true
 
 
 func _ready() -> void:
@@ -18,7 +19,7 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	var now_msec: int = Time.get_ticks_msec()
-	if now_msec - _last_autosave_msec >= int(AUTOSAVE_INTERVAL * 1000.0):
+	if autosave_enabled and now_msec - _last_autosave_msec >= int(AUTOSAVE_INTERVAL * 1000.0):
 		_last_autosave_msec = now_msec
 		save_game()
 
@@ -63,6 +64,11 @@ func load_game() -> Dictionary:
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		save_game()
+
+
+func set_autosave_enabled(enabled: bool) -> void:
+	autosave_enabled = enabled
+	_last_autosave_msec = Time.get_ticks_msec()
 
 
 func set_persistence_enabled(enabled: bool) -> void:
