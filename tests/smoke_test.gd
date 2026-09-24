@@ -113,6 +113,12 @@ func _run() -> void:
 	GameManager.inventory.clear()
 	GameManager._ensure_equipment_slots(true)
 	_check(GameManager.add_inventory_item(generated_item), "Generated item enters inventory")
+	var locked_item_id: String = String(generated_item.get("id", ""))
+	_check(GameManager.toggle_item_lock(locked_item_id), "Inventory items can be locked")
+	var gold_before_locked_sale: int = GameManager.gold
+	GameManager.sell_item(locked_item_id)
+	_check(GameManager._find_inventory_index(locked_item_id) >= 0 and GameManager.gold == gold_before_locked_sale, "Locked items are protected from direct selling")
+	_check(not GameManager.toggle_item_lock(locked_item_id), "Locked items can be unlocked")
 	_check(GameManager.INVENTORY_CAPACITY == 60, "Loot-heavy progression provides a sixty-slot inventory")
 	_check(game_ui._inventory_grid.columns == 6, "Inventory uses a readable six-column scrollable grid")
 	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders every available loot slot")
