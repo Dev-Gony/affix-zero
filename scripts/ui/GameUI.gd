@@ -12,13 +12,10 @@ const COLOR_GREEN := Color("57d88b")
 const COLOR_GOLD := Color("f0b84b")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
-const CLASS_TEXTURES := {
-	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
-	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
-	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
-	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
-	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
-	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
 }
 const EQUIPMENT_REGIONS: Dictionary = {
 	"weapon": Vector2i(0, 0), "helmet": Vector2i(1, 0), "armor": Vector2i(2, 0), "gloves": Vector2i(3, 0),
@@ -36,7 +33,7 @@ const STAT_NAMES: Dictionary = {
 const RARITY_BADGES: Dictionary = {
 	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설", "epic": "에픽",
 }
-const MANAGEMENT_TITLES: Array[String] = ["장비", "가방", "스킬", "환생", "정보"]
+const MANAGEMENT_TITLES: Array[String] = ["장비", "가방", "스킬", "펫", "환생", "정보"]
 const EQUIPMENT_LAYOUT: Array[String] = ["helmet", "amulet", "ring", "weapon", "portrait", "gloves", "boots", "armor", "summary"]
 
 var _hp_bar: ProgressBar
@@ -55,6 +52,7 @@ var _inventory_lock_button: Button
 var _loot_filter_option: OptionButton
 var _inventory_selected_id: String = ""
 var _skills_list: VBoxContainer
+var _pet_content: VBoxContainer
 var _rebirth_content: VBoxContainer
 var _stats_label: Label
 var _notification_label: Label
@@ -80,6 +78,9 @@ var _pause_visible: bool = false
 var _volume_slider: HSlider
 var _fullscreen_check: CheckBox
 var _autosave_check: CheckBox
+var _minimap: GameMiniMap
+var _objective: CombatObjective
+var _boss_bar: BossStatusBar
 
 
 func _ready() -> void:
@@ -211,6 +212,30 @@ func _build_hud() -> void:
 	menu_button.pressed.connect(_toggle_pause_menu)
 	quick_row.add_child(menu_button)
 
+	_minimap = GameMiniMap.new()
+	_minimap.position = Vector2(550, 42)
+	_minimap.size = Vector2(78, 58)
+	_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_minimap.z_index = 24
+	_minimap.set_floor(GameManager.floor)
+	add_child(_minimap)
+
+	_objective = CombatObjective.new()
+	_objective.position = Vector2(12, 42)
+	_objective.size = Vector2(190, 58)
+	_objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_objective.z_index = 24
+	_objective.sync_from_game()
+	add_child(_objective)
+
+	_boss_bar = BossStatusBar.new()
+	_boss_bar.position = Vector2(210, 42)
+	_boss_bar.size = Vector2(330, 38)
+	_boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boss_bar.z_index = 25
+	_boss_bar.visible = false
+	add_child(_boss_bar)
+
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
 	var row := HBoxContainer.new()
@@ -329,20 +354,21 @@ func _build_bottom_panel() -> void:
 	_build_equipment_tab(tabs)
 	_build_inventory_tab(tabs)
 	_build_skills_tab(tabs)
+	_build_pets_tab(tabs)
 	_build_rebirth_tab(tabs)
 	_build_stats_tab(tabs)
 	window.visible = false
 
 	var dock := Panel.new()
 	_bottom_panel = dock
-	dock.position = Vector2(154, 366)
-	dock.size = Vector2(332, 31)
+	dock.position = Vector2(121, 366)
+	dock.size = Vector2(398, 31)
 	dock.z_index = 30
 	dock.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.045, 0.060, 0.88), Color("334256"), 1, 2))
 	add_child(dock)
 	var dock_row := HBoxContainer.new()
 	dock_row.position = Vector2(5, 3)
-	dock_row.size = Vector2(322, 25)
+	dock_row.size = Vector2(388, 25)
 	dock_row.add_theme_constant_override("separation", 3)
 	dock.add_child(dock_row)
 	for index: int in MANAGEMENT_TITLES.size():
@@ -447,7 +473,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if GameManager.game_state != GameManager.GameState.RUNNING or _pause_visible:
 		return
 	match event.keycode:
-		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5:
+		KEY_1, KEY_2, KEY_3, KEY_4, KEY_5, KEY_6:
 			_toggle_management(int(event.keycode - KEY_1))
 		KEY_Z: _set_speed(1.0)
 		KEY_X: _set_speed(2.0)
@@ -467,6 +493,10 @@ func _toggle_management(tab_index: int) -> void:
 	_management_open = true
 	_switch_management_tab(tab_index, false)
 	_management_window.visible = true
+	if _minimap != null:
+		_minimap.visible = false
+	if _objective != null:
+		_objective.visible = false
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -486,6 +516,10 @@ func _close_management(play_sound: bool = true) -> void:
 		AudioManager.play_sfx("ui_click")
 	_management_open = false
 	_management_window.visible = false
+	if _minimap != null:
+		_minimap.visible = GameManager.game_state == GameManager.GameState.RUNNING and not _pause_visible
+	if _objective != null:
+		_objective.visible = GameManager.game_state == GameManager.GameState.RUNNING and not _pause_visible
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -663,6 +697,24 @@ func _build_skills_tab(tabs: TabContainer) -> void:
 	tab.add_child(_skills_list)
 
 
+func _build_pets_tab(tabs: TabContainer) -> void:
+	var tab := MarginContainer.new()
+	tab.name = "펫"
+	tab.add_theme_constant_override("margin_left", 6)
+	tab.add_theme_constant_override("margin_right", 6)
+	tab.add_theme_constant_override("margin_top", 5)
+	tabs.add_child(tab)
+	var scroll := ScrollContainer.new()
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	tab.add_child(scroll)
+	_pet_content = VBoxContainer.new()
+	_pet_content.custom_minimum_size.x = 574
+	_pet_content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_pet_content.add_theme_constant_override("separation", 6)
+	scroll.add_child(_pet_content)
+
+
 func _build_rebirth_tab(tabs: TabContainer) -> void:
 	var tab := MarginContainer.new()
 	tab.name = "환생"
@@ -755,20 +807,33 @@ func _build_class_selection() -> void:
 
 func _connect_signals() -> void:
 	GameManager.stats_changed.connect(_on_stats_changed)
+	GameManager.statistics_changed.connect(_refresh_objective)
 	GameManager.class_selected.connect(_on_class_selected_ui)
 	GameManager.inventory_changed.connect(_refresh_inventory)
 	GameManager.equipment_changed.connect(_on_equipment_changed)
 	GameManager.skills_changed.connect(_refresh_skills)
-	GameManager.floor_changed.connect(func(_floor: int) -> void: _refresh_hud())
+	GameManager.floor_changed.connect(func(next_floor: int) -> void:
+		_refresh_hud()
+		if _minimap != null:
+			_minimap.set_floor(next_floor)
+		_refresh_objective()
+	)
 	GameManager.speed_changed.connect(_refresh_speed_buttons)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	GameManager.notification_requested.connect(_show_notification)
 	RebirthManager.rebirth_completed.connect(func(_count: int) -> void: _on_rebirth_changed())
 	RebirthManager.permanent_upgrade_purchased.connect(func(_stat: String) -> void: _on_rebirth_changed())
+	PetManager.pet_state_changed.connect(_refresh_pets)
+	var battle := get_tree().current_scene.get_node_or_null("BattleArea") as BattleManager
+	if battle != null:
+		battle.boss_status_changed.connect(_on_boss_status_changed)
 
 
 func _refresh_all() -> void:
 	_refresh_hud()
+	if _minimap != null:
+		_minimap.set_floor(GameManager.floor)
+	_refresh_objective()
 	_refresh_speed_buttons(GameManager.speed_multiplier)
 	if _loot_filter_option != null:
 		_loot_filter_option.select(GameManager.loot_min_rarity_index)
@@ -781,6 +846,7 @@ func _refresh_all() -> void:
 	_refresh_equipment()
 	_refresh_inventory()
 	_refresh_skills()
+	_refresh_pets()
 	_refresh_rebirth()
 	_refresh_stats()
 	_class_selection.refresh()
@@ -821,7 +887,7 @@ func _refresh_equipment() -> void:
 func _build_equipment_card(slot: String) -> PanelContainer:
 	var item: Dictionary = GameManager.equipment.get(slot, {})
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(176, 80)
+	card.custom_minimum_size = Vector2(176, 84)
 	card.set_meta("equipment_slot", slot)
 	var rarity_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 	var card_background := Color("111720") if item.is_empty() else Color("111720").lerp(rarity_color, 0.055)
@@ -844,13 +910,15 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	slot_label.add_theme_font_size_override("font_size", 7)
 	slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 	content.add_child(slot_label)
-	var icon := TextureRect.new()
-	icon.texture = _item_icon(item) if not item.is_empty() else _equipment_icon(slot)
-	icon.custom_minimum_size = Vector2(0, 28)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.modulate = Color.WHITE if not item.is_empty() else Color(0.30, 0.28, 0.36, 0.58)
+	var icon := ItemVisualIcon.new()
+	icon.custom_minimum_size = Vector2(38, 30)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if item.is_empty():
+		icon.configure_placeholder(slot)
+		icon.modulate = Color(1, 1, 1, 0.55)
+	else:
+		icon.configure(item)
 	content.add_child(icon)
 	var item_label := Label.new()
 	item_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -985,7 +1053,12 @@ func _build_equipment_summary() -> PanelContainer:
 
 
 func _class_portrait_icon() -> Texture2D:
-	return CLASS_TEXTURES.get(GameManager.selected_class, CLASS_TEXTURES["warrior"])
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(GameManager.selected_class, Vector2i.ZERO)
+	var cell_size := Vector2(float(CLASS_ATLAS.get_width()) / 3.0, float(CLASS_ATLAS.get_height()) / 2.0)
+	var icon := AtlasTexture.new()
+	icon.atlas = CLASS_ATLAS
+	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+	return icon
 
 
 func _refresh_inventory() -> void:
@@ -1012,9 +1085,13 @@ func _refresh_inventory() -> void:
 			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 			var slot_button := Button.new()
 			slot_button.custom_minimum_size = Vector2(45, 45)
-			slot_button.icon = _item_icon(item)
-			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
+			var visual_icon := ItemVisualIcon.new()
+			visual_icon.position = Vector2(5, 7)
+			visual_icon.size = Vector2(35, 35)
+			visual_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			visual_icon.configure(item)
+			slot_button.add_child(visual_icon)
 			slot_button.add_theme_stylebox_override("normal", _style_box(Color("111720"), item_color, 1, 0))
 			slot_button.add_theme_stylebox_override("hover", _style_box(Color("202a36"), item_color.lightened(0.2), 2, 0))
 			slot_button.add_theme_stylebox_override("pressed", _style_box(Color("29313d"), item_color.lightened(0.25), 2, 0))
@@ -1161,7 +1238,12 @@ func _equipment_icon(slot: String) -> AtlasTexture:
 	return icon
 
 
-func _item_icon(item: Dictionary) -> AtlasTexture:
+func _item_icon(item: Dictionary) -> Texture2D:
+	var icon_path: String = String(item.get("icon_path", ""))
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		var custom_icon: Resource = load(icon_path)
+		if custom_icon is Texture2D:
+			return custom_icon as Texture2D
 	var icon_index: int = int(item.get("icon_index", -1))
 	if icon_index < 0 or icon_index >= 30:
 		return _equipment_icon(String(item.get("slot", "weapon")))
@@ -1171,6 +1253,320 @@ func _item_icon(item: Dictionary) -> AtlasTexture:
 	icon.atlas = ITEM_BASE_ATLAS
 	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
 	return icon
+
+
+func _refresh_pets() -> void:
+	if _pet_content == null:
+		return
+	_clear_container(_pet_content)
+	var currency_row := HBoxContainer.new()
+	currency_row.add_theme_constant_override("separation", 6)
+	_pet_content.add_child(currency_row)
+	var essence_label := Label.new()
+	essence_label.text = "◆ 펫 정수 %d" % PetManager.essence
+	essence_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	essence_label.add_theme_font_size_override("font_size", 9)
+	essence_label.add_theme_color_override("font_color", Color("c084fc"))
+	currency_row.add_child(essence_label)
+	var essence_hint := Label.new()
+	essence_hint.text = "엘리트 · 보스 처치로 획득"
+	essence_hint.add_theme_font_size_override("font_size", 7)
+	essence_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	currency_row.add_child(essence_hint)
+
+	var summon_panel := PanelContainer.new()
+	summon_panel.custom_minimum_size.y = 64
+	summon_panel.add_theme_stylebox_override("panel", _style_box(Color("111521"), Color("6d45b8"), 1, 2))
+	_pet_content.add_child(summon_panel)
+	var summon_row := HBoxContainer.new()
+	summon_row.add_theme_constant_override("separation", 8)
+	summon_panel.add_child(summon_row)
+	var summon_info := VBoxContainer.new()
+	summon_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	summon_row.add_child(summon_info)
+	var summon_title := Label.new()
+	summon_title.text = "펫 소환 · ◈ %d" % PetManager.summon_crystals
+	summon_title.add_theme_font_size_override("font_size", 10)
+	summon_title.add_theme_color_override("font_color", Color("c084fc"))
+	summon_info.add_child(summon_title)
+	var summon_pity := Label.new()
+	summon_pity.text = "전설 이상 확정까지 %d회 · 10회 소환 마지막은 영웅 이상" % (PetManager.LEGENDARY_PITY - PetManager.summon_pity)
+	summon_pity.add_theme_font_size_override("font_size", 6)
+	summon_pity.add_theme_color_override("font_color", COLOR_MUTED)
+	summon_info.add_child(summon_pity)
+	var summon_once_button := Button.new()
+	summon_once_button.text = "1회 소환\n◈ %d" % PetManager.SUMMON_COST
+	summon_once_button.custom_minimum_size = Vector2(96, 44)
+	summon_once_button.disabled = PetManager.summon_crystals < PetManager.SUMMON_COST
+	summon_once_button.pressed.connect(_summon_pet_once)
+	summon_row.add_child(summon_once_button)
+	var summon_ten_button := Button.new()
+	summon_ten_button.text = "10회 소환\n◈ %d" % PetManager.TEN_SUMMON_COST
+	summon_ten_button.custom_minimum_size = Vector2(110, 44)
+	summon_ten_button.disabled = PetManager.summon_crystals < PetManager.TEN_SUMMON_COST
+	summon_ten_button.add_theme_stylebox_override("normal", _style_box(Color("21172c"), Color("b56dff"), 2, 2))
+	summon_ten_button.pressed.connect(_summon_pet_ten)
+	summon_row.add_child(summon_ten_button)
+
+	var active_data: PetData = PetManager.active_pet_data()
+	var active_panel := PanelContainer.new()
+	active_panel.custom_minimum_size.y = 98
+	active_panel.add_theme_stylebox_override("panel", _style_box(Color("101821"), COLOR_GOLD.darkened(0.32), 1, 2))
+	_pet_content.add_child(active_panel)
+	var active_row := HBoxContainer.new()
+	active_row.add_theme_constant_override("separation", 10)
+	active_panel.add_child(active_row)
+
+	var portrait := PetPortrait.new()
+	portrait.custom_minimum_size = Vector2(92, 88)
+	if active_data != null:
+		portrait.configure(active_data.id, active_data.color)
+	active_row.add_child(portrait)
+
+	var active_info := VBoxContainer.new()
+	active_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	active_info.add_theme_constant_override("separation", 3)
+	active_row.add_child(active_info)
+	if active_data == null:
+		var none := Label.new()
+		none.text = "출전 중인 펫 없음"
+		none.add_theme_font_size_override("font_size", 11)
+		active_info.add_child(none)
+	else:
+		var state: Dictionary = PetManager.pet_state(active_data.id)
+		var level: int = PetManager.level_for(active_data.id)
+		var title := Label.new()
+		title.text = "출전 중 · [%s] %s  Lv.%d" % [active_data.rarity_name, active_data.display_name, level]
+		title.add_theme_font_size_override("font_size", 12)
+		title.add_theme_color_override("font_color", active_data.color)
+		active_info.add_child(title)
+		var role := Label.new()
+		role.text = "%s · %s  |  공격 %.0f  |  공격주기 %.2fs" % [
+			active_data.role,
+			active_data.element,
+			PetManager.active_attack_power(GameManager.atk),
+			PetManager.active_attack_interval(),
+		]
+		role.add_theme_font_size_override("font_size", 8)
+		role.add_theme_color_override("font_color", COLOR_TEXT)
+		active_info.add_child(role)
+		var passive_text: String = PetManager.active_passive_text()
+		if not passive_text.is_empty():
+			var passive := Label.new()
+			passive.text = "패시브 · " + passive_text
+			passive.add_theme_font_size_override("font_size", 7)
+			passive.add_theme_color_override("font_color", Color("c6a7ff"))
+			active_info.add_child(passive)
+		var desc := Label.new()
+		desc.text = active_data.description
+		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+		desc.add_theme_font_size_override("font_size", 7)
+		desc.add_theme_color_override("font_color", COLOR_MUTED)
+		active_info.add_child(desc)
+		var progress := ProgressBar.new()
+		progress.custom_minimum_size.y = 8
+		progress.max_value = maxi(1, PetManager.xp_needed(level))
+		progress.value = int(state.get("xp", 0))
+		progress.show_percentage = false
+		progress.add_theme_stylebox_override("background", _style_box(Color("0a0e14"), Color("273343"), 1, 1))
+		progress.add_theme_stylebox_override("fill", _style_box(active_data.color.darkened(0.22), active_data.color, 1, 1))
+		active_info.add_child(progress)
+
+		var pet_actions := VBoxContainer.new()
+		pet_actions.custom_minimum_size = Vector2(124, 84)
+		pet_actions.add_theme_constant_override("separation", 4)
+		active_row.add_child(pet_actions)
+		var stars := Label.new()
+		stars.text = "★".repeat(PetManager.stars_for(active_data.id)) + "☆".repeat(PetManager.MAX_STARS - PetManager.stars_for(active_data.id))
+		stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		stars.add_theme_font_size_override("font_size", 9)
+		stars.add_theme_color_override("font_color", COLOR_GOLD)
+		pet_actions.add_child(stars)
+		var train_button := Button.new()
+		var train_cost: int = PetManager.training_cost(active_data.id)
+		train_button.text = "훈련 +1Lv · %dG" % train_cost if level < PetManager.MAX_LEVEL else "훈련 MAX"
+		train_button.disabled = level >= PetManager.MAX_LEVEL or GameManager.gold < train_cost
+		train_button.custom_minimum_size.y = 24
+		train_button.add_theme_font_size_override("font_size", 6)
+		if not train_button.disabled:
+			train_button.add_theme_stylebox_override("normal", _style_box(Color("171c24"), COLOR_GOLD.darkened(0.18), 1, 2))
+			train_button.add_theme_stylebox_override("hover", _style_box(Color("242b36"), COLOR_GOLD, 2, 2))
+		train_button.pressed.connect(_train_active_pet)
+		pet_actions.add_child(train_button)
+		var evolve_button := Button.new()
+		var evolve_cost: int = PetManager.evolution_cost(active_data.id)
+		var evolve_essence: int = PetManager.evolution_essence_cost(active_data.id)
+		var required_level: int = PetManager.evolution_required_level(active_data.id)
+		if PetManager.stars_for(active_data.id) >= PetManager.MAX_STARS:
+			evolve_button.text = "진화 MAX"
+			evolve_button.disabled = true
+		else:
+			evolve_button.text = "진화 ★%d · %dG · ◆%d" % [PetManager.stars_for(active_data.id) + 1, evolve_cost, evolve_essence]
+			evolve_button.disabled = not PetManager.can_evolve(active_data.id)
+			evolve_button.tooltip_text = "필요 Lv.%d · 펫 정수 %d · 공격/지원 효과 강화" % [required_level, evolve_essence]
+		evolve_button.custom_minimum_size.y = 24
+		evolve_button.add_theme_font_size_override("font_size", 6)
+		if not evolve_button.disabled:
+			evolve_button.add_theme_stylebox_override("normal", _style_box(Color("14211a"), COLOR_GREEN.darkened(0.10), 1, 2))
+			evolve_button.add_theme_stylebox_override("hover", _style_box(Color("1b2b22"), COLOR_GREEN, 2, 2))
+		evolve_button.pressed.connect(_evolve_active_pet)
+		pet_actions.add_child(evolve_button)
+
+	var roster_header := HBoxContainer.new()
+	_pet_content.add_child(roster_header)
+	var roster_title := Label.new()
+	roster_title.text = "보유 / 소환 가능 펫"
+	roster_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	roster_title.add_theme_font_size_override("font_size", 10)
+	roster_title.add_theme_color_override("font_color", COLOR_GOLD)
+	roster_header.add_child(roster_title)
+	var owned_count := Label.new()
+	owned_count.text = "%d / %d" % [PetManager.owned_pets.size(), PetManager.all_pet_ids().size()]
+	owned_count.add_theme_font_size_override("font_size", 8)
+	owned_count.add_theme_color_override("font_color", COLOR_MUTED)
+	roster_header.add_child(owned_count)
+
+	var grid := GridContainer.new()
+	grid.name = "PetRosterGrid"
+	grid.columns = 3
+	grid.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	_pet_content.add_child(grid)
+	for pet_id: String in PetManager.all_pet_ids():
+		_add_pet_card(grid, pet_id)
+
+
+func _add_pet_card(parent: GridContainer, pet_id: String) -> void:
+	var data: PetData = PetManager.get_pet_data(pet_id)
+	if data == null:
+		return
+	var owned: bool = PetManager.is_owned(pet_id)
+	var active: bool = PetManager.active_pet_id == pet_id
+	var button := Button.new()
+	button.custom_minimum_size = Vector2(184, 66)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.disabled = not owned
+	var rarity_border: Color = data.rarity_color
+	var border: Color = COLOR_GOLD if active else (rarity_border if owned else rarity_border.darkened(0.55))
+	var background: Color = Color("151c25").lerp(rarity_border, 0.07) if owned else Color("0d1117")
+	button.add_theme_stylebox_override("normal", _style_box(background, border.darkened(0.18), 1 if not active else 2, 2))
+	button.add_theme_stylebox_override("hover", _style_box(Color("202936"), border, 2, 2))
+	button.tooltip_text = data.description
+	button.pressed.connect(_set_active_pet.bind(pet_id))
+	parent.add_child(button)
+
+	var row := HBoxContainer.new()
+	row.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	row.position = Vector2(5, 4)
+	row.size = Vector2(172, 56)
+	row.add_theme_constant_override("separation", 5)
+	button.add_child(row)
+	var portrait := PetPortrait.new()
+	portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	portrait.custom_minimum_size = Vector2(52, 52)
+	portrait.configure(data.id, data.color if owned else Color("4b5563"))
+	row.add_child(portrait)
+	var text_col := VBoxContainer.new()
+	text_col.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	text_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	row.add_child(text_col)
+	var name := Label.new()
+	name.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	name.text = "%s%s" % [data.display_name, " · 출전" if active else ""]
+	name.add_theme_font_size_override("font_size", 8)
+	name.add_theme_color_override("font_color", data.rarity_color if owned else data.rarity_color.darkened(0.45))
+	text_col.add_child(name)
+	var state_text := Label.new()
+	state_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if owned:
+		state_text.text = "Lv.%d · %s · %s" % [PetManager.level_for(pet_id), data.role, data.rarity_name]
+	else:
+		state_text.text = "미보유 · 소환 획득 · %s" % data.rarity_name
+	state_text.add_theme_font_size_override("font_size", 6)
+	state_text.add_theme_color_override("font_color", COLOR_TEXT if owned else COLOR_MUTED)
+	text_col.add_child(state_text)
+	var skill := Label.new()
+	skill.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	skill.text = "공격 %.0f · 회복 %.1f%%" % [
+		data.base_attack,
+		data.support_heal_percent,
+	]
+	skill.add_theme_font_size_override("font_size", 6)
+	skill.add_theme_color_override("font_color", COLOR_MUTED)
+	text_col.add_child(skill)
+
+
+func _set_active_pet(pet_id: String) -> void:
+	AudioManager.play_sfx("ui_click")
+	if PetManager.set_active_pet(pet_id):
+		var data: PetData = PetManager.get_pet_data(pet_id)
+		if data != null:
+			_show_notification("%s 출전" % data.display_name, data.color)
+		SaveManager.save_game()
+
+
+func _summon_pet_once() -> void:
+	AudioManager.play_sfx("ui_click")
+	var result: Dictionary = PetManager.summon_once()
+	if result.is_empty():
+		_show_notification("소환석이 부족합니다", Color("ff6b6b"))
+		return
+	_show_summon_result([result])
+	SaveManager.save_game()
+
+
+func _summon_pet_ten() -> void:
+	AudioManager.play_sfx("ui_click")
+	var results: Array[Dictionary] = PetManager.summon_ten()
+	if results.is_empty():
+		_show_notification("소환석이 부족합니다", Color("ff6b6b"))
+		return
+	_show_summon_result(results)
+	SaveManager.save_game()
+
+
+func _show_summon_result(results: Array[Dictionary]) -> void:
+	var best: Dictionary = {}
+	var new_count: int = 0
+	var shard_total: int = 0
+	for result: Dictionary in results:
+		if best.is_empty() or int(result.get("rarity_index", 0)) > int(best.get("rarity_index", 0)):
+			best = result
+		if not bool(result.get("duplicate", false)):
+			new_count += 1
+		shard_total += int(result.get("shards", 0))
+	var color := Color.from_string(String(best.get("rarity_color", "c084fc")), Color("c084fc"))
+	var summary: String = "%d회 소환 · 최고 [%s] %s" % [
+		results.size(),
+		String(best.get("rarity_name", "")),
+		String(best.get("name", "")),
+	]
+	if new_count > 0:
+		summary += " · 신규 %d" % new_count
+	if shard_total > 0:
+		summary += " · 중복 조각 +%d" % shard_total
+	_show_notification(summary, color)
+
+
+func _train_active_pet() -> void:
+	AudioManager.play_sfx("ui_click")
+	var pet_id: String = PetManager.active_pet_id
+	if PetManager.train_pet(pet_id):
+		var data: PetData = PetManager.active_pet_data()
+		if data != null:
+			_show_notification("%s 훈련 완료 · Lv.%d" % [data.display_name, PetManager.level_for(pet_id)], data.color)
+		SaveManager.save_game()
+
+
+func _evolve_active_pet() -> void:
+	AudioManager.play_sfx("ui_click")
+	var pet_id: String = PetManager.active_pet_id
+	if PetManager.evolve_pet(pet_id):
+		var data: PetData = PetManager.active_pet_data()
+		if data != null:
+			_show_notification("%s 진화 · ★%d" % [data.display_name, PetManager.stars_for(pet_id)], COLOR_GOLD)
+		SaveManager.save_game()
 
 
 func _refresh_skills() -> void:
@@ -1506,6 +1902,18 @@ func _on_stats_changed() -> void:
 	_refresh_skills()
 	_refresh_rebirth()
 	_refresh_stats()
+	_refresh_objective()
+
+
+func _refresh_objective() -> void:
+	if _objective != null:
+		_objective.sync_from_game()
+
+
+func _on_boss_status_changed(name: String, hp_ratio: float, active: bool) -> void:
+	if _boss_bar == null:
+		return
+	_boss_bar.set_boss(name, hp_ratio, active)
 
 
 func _on_equipment_changed() -> void:
@@ -1531,6 +1939,10 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 		_hud_panel.visible = show_game_ui and not _management_open
 	if _bottom_panel != null:
 		_bottom_panel.visible = show_game_ui and not _management_open
+	if _minimap != null:
+		_minimap.visible = show_game_ui and not _management_open and not _pause_visible
+	if _objective != null:
+		_objective.visible = show_game_ui and not _management_open and not _pause_visible
 	if not show_game_ui:
 		if _management_open:
 			_management_open = false
@@ -1562,6 +1974,10 @@ func _toggle_pause_menu() -> void:
 	else:
 		get_tree().paused = false
 		GameManager.set_game_state(GameManager.GameState.RUNNING)
+	if _minimap != null:
+		_minimap.visible = not _pause_visible and not _management_open and GameManager.game_state != GameManager.GameState.CLASS_SELECTION
+	if _objective != null:
+		_objective.visible = not _pause_visible and not _management_open and GameManager.game_state != GameManager.GameState.CLASS_SELECTION
 	_sync_modal_blocker()
 	AudioManager.play_sfx("ui_click")
 

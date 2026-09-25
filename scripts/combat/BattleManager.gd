@@ -1,7 +1,10 @@
 extends Node2D
 class_name BattleManager
 
-const WORLD_RECT := Rect2(0, 0, 1920, 1200)
+signal boss_status_changed(name: String, hp_ratio: float, active: bool)
+signal elite_status_changed(name: String, color: Color, active: bool)
+
+const WORLD_RECT := WorldLayout.WORLD_RECT
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
 const ELITE_START_FLOOR: int = 6
@@ -20,6 +23,7 @@ const SAND_FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_f
 const SAND_DETAIL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_detail.png")
 const BLUE_WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/blue_wall.png")
 const SHRINE_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/shrine.png")
+const DUNGEON_COURTYARD: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
 	"res://resources/enemies/bat.tres",
@@ -36,6 +40,7 @@ const ENEMY_RESOURCE_PATHS: Array[String] = [
 @onready var enemies_root: Node2D = $Enemies
 @onready var projectiles_root: Node2D = $Projectiles
 @onready var effects: EffectLayer = $Effects
+@onready var pet: PetCompanion = $Pet
 
 var _enemy_resources: Array[EnemyData] = []
 var _boss_resource: EnemyData
@@ -55,6 +60,8 @@ var _travel_target_room: int = 4
 var _travel_waypoints: Array[Vector2] = []
 var _travel_index: int = 0
 var _player_velocity: Vector2 = Vector2.ZERO
+var _pet_attack_time_left: float = 0.0
+var _pet_support_time_left: float = 0.0
 
 
 func _ready() -> void:
@@ -69,12 +76,18 @@ func _ready() -> void:
 	camera.limit_bottom = int(WORLD_RECT.end.y)
 	player.visible = not GameManager.selected_class.is_empty()
 	GameManager.class_selected.connect(_on_class_selected)
+	GameManager.equipment_changed.connect(_on_equipment_visual_changed)
 	GameManager.player_died.connect(_on_player_died)
 	GameManager.floor_changed.connect(_on_floor_changed)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	LevelManager.level_up.connect(_on_level_up)
 	LootManager.item_dropped.connect(_on_item_dropped)
 	effects.resource_collected.connect(_on_resource_collected)
+	pet.bind_player(player)
+	PetManager.active_pet_changed.connect(func(_pet_id: String) -> void:
+		_pet_attack_time_left = 0.1
+		_pet_support_time_left = 0.5
+	)
 	queue_redraw()
 	if GameManager.game_state == GameManager.GameState.RUNNING and not GameManager.selected_class.is_empty():
 		call_deferred("_start_battle")
@@ -89,6 +102,7 @@ func _process(delta: float) -> void:
 		_update_room_travel(delta)
 		return
 	_update_target_marker()
+	_update_pet_combat(delta)
 	_update_auto_hunt(delta)
 	_attack_time_left -= delta
 	_skill_time_left -= delta
@@ -102,10 +116,13 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(WORLD_RECT, Color("17131c"), true)
-	for room_index in 9:
+	var floor_theme: int = floori(float(maxi(0, GameManager.floor - 1)) / 15.0) % 3
+	for room_index: int in WorldLayout.visible_rooms():
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
-		match room_index % 3:
+		var visual_theme: int = (room_index + floor_theme) % 3
+		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.46) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.42) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.46))
+		match visual_theme:
 			0:
 				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
 				_draw_tiled_rect(walk, BRICK_TILE, Color("80666d"))
@@ -125,14 +142,18 @@ func _draw() -> void:
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
+		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
+		_draw_room_decor(room_index, walk, visual_theme)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
 		if corridor.size.is_zero_approx():
 			continue
 		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
-		var corridor_tint: Color = Color("6a5960") if pair.x % 2 == 0 else Color("9a735c")
+		var corridor_tint: Color = Color("51464f") if pair.x % 2 == 0 else Color("735645")
+		_draw_tiled_rect(corridor.grow(6.0), WALL_TILE, Color("24222a"))
 		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
-	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.10), true)
+		_draw_corridor_gate(pair.x, pair.y)
+	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.18), true)
 
 
 func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
@@ -155,6 +176,139 @@ func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
 	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
 
 
+func _draw_corridor_gate(room_a: int, room_b: int) -> void:
+	var grid_a := WorldLayout.room_grid(room_a)
+	var grid_b := WorldLayout.room_grid(room_b)
+	var walk_a := WorldLayout.walk_rect(room_a)
+	var walk_b := WorldLayout.walk_rect(room_b)
+	var gate_color := Color("28232b")
+	var edge_color := Color("6f5c55")
+	if grid_a.y == grid_b.y:
+		var left: Rect2 = walk_a if grid_a.x < grid_b.x else walk_b
+		var right: Rect2 = walk_b if grid_a.x < grid_b.x else walk_a
+		for gate_x: float in [left.end.x - 4.0, right.position.x + 4.0]:
+			var center_y: float = left.get_center().y
+			draw_rect(Rect2(gate_x - 5.0, center_y - 38.0, 10.0, 76.0), gate_color, true)
+			draw_rect(Rect2(gate_x - 7.0, center_y - 40.0, 14.0, 8.0), edge_color, true)
+			draw_rect(Rect2(gate_x - 7.0, center_y + 32.0, 14.0, 8.0), edge_color.darkened(0.18), true)
+			draw_circle(Vector2(gate_x, center_y - 28.0), 2.0, Color("ff9c4a", 0.75))
+	else:
+		var top: Rect2 = walk_a if grid_a.y < grid_b.y else walk_b
+		var bottom: Rect2 = walk_b if grid_a.y < grid_b.y else walk_a
+		for gate_y: float in [top.end.y - 4.0, bottom.position.y + 4.0]:
+			var center_x: float = top.get_center().x
+			draw_rect(Rect2(center_x - 38.0, gate_y - 5.0, 76.0, 10.0), gate_color, true)
+			draw_rect(Rect2(center_x - 40.0, gate_y - 7.0, 8.0, 14.0), edge_color, true)
+			draw_rect(Rect2(center_x + 32.0, gate_y - 7.0, 8.0, 14.0), edge_color.darkened(0.18), true)
+			draw_circle(Vector2(center_x - 28.0, gate_y), 2.0, Color("ff9c4a", 0.75))
+
+
+func _draw_room_decor(room_index: int, walk: Rect2, theme_index: int) -> void:
+	var center: Vector2 = walk.get_center()
+
+	# Corner pillars anchor each combat room so the arena reads like a place,
+	# not just a rectangle full of tiles.
+	var pillar_points: Array[Vector2] = [
+		walk.position + Vector2(28, 28),
+		Vector2(walk.end.x - 28, walk.position.y + 28),
+		Vector2(walk.position.x + 28, walk.end.y - 28),
+		walk.end - Vector2(28, 28),
+	]
+	for p: Vector2 in pillar_points:
+		_draw_stone_pillar(p, theme_index)
+
+	# Fixed pseudo-random debris. Deterministic math avoids flickering redraws.
+	for index: int in 9:
+		var seed_value: float = float((room_index + 3) * 97 + index * 53)
+		var px: float = walk.position.x + 44.0 + fmod(seed_value * 17.0, maxf(1.0, walk.size.x - 88.0))
+		var py: float = walk.position.y + 42.0 + fmod(seed_value * 29.0, maxf(1.0, walk.size.y - 84.0))
+		var p := Vector2(px, py)
+		if p.distance_to(center) < 54.0:
+			continue
+		match theme_index:
+			0:
+				_draw_crack(p, Color("2a2024"))
+			1:
+				_draw_bone_debris(p, Color("d3b891"))
+			_:
+				_draw_arcane_rune(p, Color("4da6c8"))
+
+	# Torch pairs create Hero-Siege-like warm/cold depth without requiring a new tileset.
+	var torch_y: float = walk.position.y + 22.0
+	if theme_index == 0:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("ff8a3d"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("ff8a3d"))
+	elif theme_index == 1:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("ffc66d"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("ffc66d"))
+	else:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("55c8ff"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("55c8ff"))
+
+	# Subtle center sigil makes the fight area visually legible underneath enemy swarms.
+	var sigil_color: Color = Color("a84646", 0.10) if theme_index == 0 else (Color("d6a45a", 0.08) if theme_index == 1 else Color("4f9cca", 0.10))
+	draw_arc(center, 34.0, 0.0, TAU, 28, sigil_color, 1.2)
+	draw_line(center + Vector2(-22, 0), center + Vector2(22, 0), sigil_color, 1.0)
+	draw_line(center + Vector2(0, -22), center + Vector2(0, 22), sigil_color, 1.0)
+
+	if room_index == _current_room:
+		var floor_depth: float = clampf(float(GameManager.floor) / 100.0, 0.0, 1.0)
+		draw_arc(center, 52.0, 0.0, TAU, 36, Color(sigil_color, 0.12 + floor_depth * 0.10), 1.4)
+		if is_boss_floor():
+			var boss_pulse: float = 0.18 + sin(float(Time.get_ticks_msec()) * 0.006) * 0.05
+			draw_circle(center, 70.0, Color("7a101d", boss_pulse))
+			draw_arc(center, 66.0, 0.0, TAU, 40, Color("ff4656", 0.34), 2.2)
+			for index: int in 8:
+				var angle: float = TAU * float(index) / 8.0
+				var p: Vector2 = center + Vector2.RIGHT.rotated(angle) * 58.0
+				draw_circle(p, 3.0, Color("ff8b67", 0.72))
+
+
+func _draw_stone_pillar(position: Vector2, theme_index: int) -> void:
+	var base_color: Color = Color("5a5054") if theme_index == 0 else (Color("7f6857") if theme_index == 1 else Color("495b6d"))
+	draw_rect(Rect2(position + Vector2(-7, -10), Vector2(14, 20)), base_color.darkened(0.18), true)
+	draw_rect(Rect2(position + Vector2(-6, -12), Vector2(12, 18)), base_color, true)
+	draw_rect(Rect2(position + Vector2(-8, -13), Vector2(16, 4)), base_color.lightened(0.12), true)
+	draw_rect(Rect2(position + Vector2(-8, 6), Vector2(16, 5)), base_color.darkened(0.22), true)
+
+
+func _draw_torch(position: Vector2, flame_color: Color) -> void:
+	draw_rect(Rect2(position + Vector2(-1.5, -2), Vector2(3, 12)), Color("5d3a24"), true)
+	var pulse_value: float = 0.82 + sin(float(Time.get_ticks_msec()) * 0.008 + position.x * 0.01) * 0.12
+	draw_circle(position + Vector2(0, -5), 8.0, Color(flame_color, 0.07 * pulse_value))
+	draw_circle(position + Vector2(0, -6), 4.0, Color(flame_color, 0.42 * pulse_value))
+	draw_colored_polygon(PackedVector2Array([
+		position + Vector2(-3, -5),
+		position + Vector2(0, -13),
+		position + Vector2(3, -5),
+		position + Vector2(0, -2),
+	]), Color(flame_color.lightened(0.16), 0.92))
+
+
+func _draw_crack(position: Vector2, color: Color) -> void:
+	draw_polyline(PackedVector2Array([
+		position + Vector2(-8, -2),
+		position + Vector2(-3, 1),
+		position + Vector2(0, -1),
+		position + Vector2(4, 4),
+		position + Vector2(9, 2),
+	]), color, 1.2)
+	draw_line(position + Vector2(0, -1), position + Vector2(2, -6), Color(color, 0.7), 1.0)
+
+
+func _draw_bone_debris(position: Vector2, color: Color) -> void:
+	draw_line(position + Vector2(-6, -3), position + Vector2(6, 3), color, 2.0)
+	draw_circle(position + Vector2(-7, -4), 2.2, color)
+	draw_circle(position + Vector2(7, 4), 2.2, color)
+	draw_line(position + Vector2(-4, 5), position + Vector2(4, -5), Color(color, 0.72), 1.4)
+
+
+func _draw_arcane_rune(position: Vector2, color: Color) -> void:
+	draw_arc(position, 6.0, 0.0, TAU, 12, Color(color, 0.30), 1.0)
+	draw_line(position + Vector2(-5, 0), position + Vector2(5, 0), Color(color, 0.25), 1.0)
+	draw_line(position + Vector2(0, -5), position + Vector2(0, 5), Color(color, 0.25), 1.0)
+
+
 func _start_battle() -> void:
 	_respawning = false
 	_traveling = false
@@ -165,8 +319,12 @@ func _start_battle() -> void:
 	_player_velocity = Vector2.ZERO
 	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
+	_on_equipment_visual_changed()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
+	_pet_attack_time_left = 0.35
+	_pet_support_time_left = 1.5
+	PetManager.try_unlock_for_floor(GameManager.floor)
 	AudioManager.play_bgm_for_floor(GameManager.floor)
 	if _enemies.is_empty():
 		_spawn_wave()
@@ -204,6 +362,8 @@ func _spawn_wave() -> void:
 			spawned_elite = enemy
 	if spawned_elite != null:
 		GameManager.notification_requested.emit("엘리트 출현 · %s" % spawned_elite.elite_title(), spawned_elite.elite_color)
+		elite_status_changed.emit(spawned_elite.elite_title(), spawned_elite.elite_color, true)
+		effects.show_elite_arrival(spawned_elite.global_position, spawned_elite.elite_title(), spawned_elite.elite_color)
 	elif wave_size > 0:
 		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
 
@@ -231,12 +391,39 @@ func _spawn_boss() -> void:
 	_connect_enemy(boss)
 	_enemies.append(boss)
 	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
+	boss_status_changed.emit(_boss_resource.display_name, 1.0, true)
+	effects.show_boss_arrival(boss.global_position, _boss_resource.display_name)
 
 
 func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
-	enemy.damage_received.connect(_on_enemy_damage_received)
+	enemy.damage_received.connect(_on_enemy_damage_received.bind(enemy))
+
+
+func _update_pet_combat(delta: float) -> void:
+	var pet_data: PetData = PetManager.active_pet_data()
+	if pet_data == null or not pet.visible:
+		return
+	_pet_attack_time_left = maxf(0.0, _pet_attack_time_left - delta)
+	_pet_support_time_left = maxf(0.0, _pet_support_time_left - delta)
+	if _pet_attack_time_left <= 0.0:
+		_pet_attack_time_left = PetManager.active_attack_interval()
+		var target: EnemyAI = _nearest_enemy()
+		if target != null and pet.global_position.distance_to(target.global_position) <= pet_data.attack_range:
+			var raw_damage: float = PetManager.active_attack_power(GameManager.atk)
+			var damage: int = maxi(1, roundi(raw_damage - target.defense * 0.18))
+			pet.play_attack(target.global_position)
+			effects.show_pet_attack(pet.global_position, target.global_position, pet.pet_color())
+			target.take_hit({"damage": damage, "critical": false})
+	if _pet_support_time_left <= 0.0:
+		_pet_support_time_left = PetManager.active_support_interval()
+		var heal_percent: float = PetManager.active_support_heal_percent()
+		if heal_percent > 0.0 and GameManager.hp < GameManager.max_hp:
+			var heal_amount: int = maxi(1, roundi(float(GameManager.max_hp) * heal_percent * 0.01))
+			var restored: int = GameManager.heal(heal_amount)
+			pet.play_support()
+			effects.show_pet_heal(player.global_position, restored, pet.pet_color())
 
 
 func _perform_auto_attack() -> void:
@@ -245,14 +432,55 @@ func _perform_auto_attack() -> void:
 		return
 	if player.global_position.distance_to(target.global_position) > _attack_range():
 		return
-	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier()
-	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
+	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier() * (1.0 + PetManager.active_player_damage_bonus_percent() * 0.01)
+	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
+	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, crit_chance, false)
 	player.play_attack(target.global_position)
-	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+	if _is_ranged_class():
+		var projectile := PlayerBasicProjectile.new()
+		projectiles_root.add_child(projectile)
+		projectile.setup(player.global_position + player._visual_facing * 8.0, target, result, _basic_projectile_color(), _basic_projectile_style())
+		projectile.impacted.connect(_on_player_basic_projectile_impacted)
+		effects.show_player_basic_attack(GameManager.selected_class, player.global_position, target.global_position, bool(result.get("critical", false)))
+	else:
+		effects.show_player_basic_attack(GameManager.selected_class, player.global_position, target.global_position, bool(result.get("critical", false)))
+		target.take_hit(result)
+		_finish_player_attack_feedback(result)
+
+
+func _on_player_basic_projectile_impacted(target: EnemyAI, result: Dictionary, world_position: Vector2) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	effects.spawn_fragments(world_position, _basic_projectile_color(), 5, 42.0)
 	target.take_hit(result)
-	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
-	if bool(result.get("critical", false)):
+	_finish_player_attack_feedback(result)
+
+
+func _finish_player_attack_feedback(result: Dictionary) -> void:
+	var critical: bool = bool(result.get("critical", false))
+	AudioManager.play_sfx("critical_hit" if critical else "basic_attack")
+	if critical:
 		_start_shake(2.5, 0.15)
+
+
+func _is_ranged_class() -> bool:
+	return GameManager.selected_class in ["mage", "sage", "saint"]
+
+
+func _basic_projectile_color() -> Color:
+	match GameManager.selected_class:
+		"mage": return Color("b56dff")
+		"sage": return Color("c9a7ff")
+		"saint": return Color("fff2a1")
+	return Color("9fdcff")
+
+
+func _basic_projectile_style() -> String:
+	match GameManager.selected_class:
+		"mage": return "arcane"
+		"sage": return "lightning"
+		"saint": return "holy"
+	return "arcane"
 
 
 func _update_auto_hunt(delta: float) -> void:
@@ -349,7 +577,7 @@ func _finish_room_travel() -> void:
 
 
 func _attack_range() -> float:
-	if GameManager.selected_class in ["mage", "sage", "saint"]:
+	if _is_ranged_class():
 		return RANGED_ATTACK_RANGE
 	return MELEE_ATTACK_RANGE
 
@@ -445,8 +673,9 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var skill_level: int = 1 + floori(float(GameManager.level - 1) / 5.0)
-	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier()
-	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, GameManager.crit, true)
+	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier() * (1.0 + PetManager.active_player_damage_bonus_percent() * 0.01)
+	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
+	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, crit_chance, true)
 	enemy.take_hit(result)
 	if bool(result.get("critical", false)):
 		_start_shake(3.0, 0.18)
@@ -463,11 +692,26 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
-	var adjusted_xp: int = maxi(1, xp_reward)
-	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
+	var adjusted_xp: int = maxi(1, roundi(float(xp_reward) * (1.0 + PetManager.active_player_xp_bonus_percent() * 0.01)))
+	var pet_levels: int = PetManager.add_xp(PetManager.active_pet_id, maxi(1, adjusted_xp / 4))
+	if pet_levels > 0:
+		var active_data: PetData = PetManager.active_pet_data()
+		if active_data != null:
+			GameManager.notification_requested.emit("%s Lv.%d · 펫 성장" % [active_data.display_name, PetManager.level_for(PetManager.active_pet_id)], pet.pet_color())
+	var adjusted_gold: int = maxi(1, roundi(
+		gold_reward
+		* RebirthManager.gold_multiplier()
+		* (1.0 + GameManager.gold_bonus * 0.01)
+		* (1.0 + PetManager.active_player_gold_bonus_percent() * 0.01)
+	))
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
+		boss_status_changed.emit("", 0.0, false)
+		var boss_essence: int = 5 + maxi(0, floori(float(GameManager.floor) / 10.0))
+		effects.spawn_resource_pickup(world_position, "pet_essence", boss_essence)
+		var summon_crystals: int = 120 + maxi(0, floori(float(GameManager.floor) / 20.0)) * 20
+		effects.spawn_resource_pickup(world_position + Vector2(12, -8), "summon_crystal", summon_crystals)
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		if boss_reward.has("rarity_id"):
@@ -478,6 +722,11 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 		return
 	if defeated_elite:
+		elite_status_changed.emit(elite_name, enemy.elite_color, false)
+		var elite_essence: int = 1 + maxi(0, floori(float(GameManager.floor) / 30.0))
+		effects.spawn_resource_pickup(world_position, "pet_essence", elite_essence)
+		if randf() < 0.35:
+			effects.spawn_resource_pickup(world_position + Vector2(10, -6), "summon_crystal", 20 + maxi(0, floori(float(GameManager.floor) / 25.0)) * 5)
 		var elite_reward: Dictionary = LootManager.try_elite_drop()
 		if not elite_reward.is_empty():
 			effects.show_drop(world_position, elite_reward)
@@ -485,7 +734,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		else:
 			GameManager.notification_requested.emit("엘리트 격파 · %s · 보너스 경험치/골드" % elite_name, Color("f6c85f"))
 	_spawn_world_loot(world_position)
-	if GameManager.kills_on_floor >= 8 + GameManager.floor:
+	if GameManager.kills_on_floor >= WorldLayout.encounter_kill_goal(GameManager.floor):
 		var previous_room: int = _current_room
 		GameManager.advance_floor()
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
@@ -500,23 +749,67 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 		"gold":
 			GameManager.add_gold(amount)
 			effects.show_gold(player.global_position, amount)
+		"pet_essence":
+			var gained: int = PetManager.add_essence(amount)
+			effects.show_pet_essence(player.global_position, gained)
+		"summon_crystal":
+			var crystals: int = PetManager.add_summon_crystals(amount)
+			effects.show_summon_crystal(player.global_position, crystals)
 
 
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
+	if _respawning or not is_instance_valid(attacker):
+		return
+	var enemy_id: String = attacker.enemy_data.id if attacker.enemy_data != null else ""
+	effects.show_enemy_archetype_attack(enemy_id, attacker.global_position, player.global_position)
+
+	match enemy_id:
+		"lich":
+			_spawn_enemy_projectile(attacker, raw_damage, Color("a879ff"), "shadow", false)
+		"dragon":
+			_spawn_enemy_projectile(attacker, raw_damage * 1.08, Color("ff6a2e"), "fire", false)
+		"demon_lord":
+			_spawn_enemy_projectile(attacker, raw_damage * 1.12, Color("ff3f55"), "meteor", true)
+		_:
+			if attacker.behavior == "caster":
+				_spawn_enemy_projectile(attacker, raw_damage, attacker.body_color.lightened(0.18), "orb", false)
+			else:
+				_apply_enemy_damage(raw_damage, attacker.behavior == "boss")
+
+
+func _spawn_enemy_projectile(attacker: EnemyAI, raw_damage: float, color: Color, kind: String, boss: bool) -> void:
+	if not is_instance_valid(attacker):
+		return
+	var projectile := EnemyProjectile.new()
+	projectiles_root.add_child(projectile)
+	projectile.setup(attacker.global_position, player, raw_damage, boss, color, kind)
+	projectile.impacted.connect(_on_enemy_projectile_impacted)
+
+
+func _on_enemy_projectile_impacted(world_position: Vector2, raw_damage: float, is_boss: bool) -> void:
 	if _respawning:
 		return
+	effects.spawn_fragments(world_position, Color("c084fc") if not is_boss else Color("ff645e"), 8 if not is_boss else 14, 58.0 if not is_boss else 78.0)
+	if is_boss:
+		effects.show_fireball_explosion(world_position)
+	_apply_enemy_damage(raw_damage, is_boss)
+
+
+func _apply_enemy_damage(raw_damage: float, is_boss: bool) -> void:
 	player.play_hit()
-	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
-	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
-	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
-	var damage: int = GameManager.take_damage(raw_damage, is_boss)
+	var reduction: float = clampf(PetManager.active_player_damage_reduction_percent(), 0.0, 80.0)
+	var reduced_damage: float = raw_damage * (1.0 - reduction * 0.01)
+	var damage: int = GameManager.take_damage(reduced_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
 	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
-	_start_shake(2.0, 0.12)
+	_start_shake(3.0 if is_boss else 2.0, 0.16 if is_boss else 0.12)
 
 
-func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool) -> void:
+func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool, enemy: EnemyAI) -> void:
 	effects.show_damage(world_position, damage, critical)
+	if is_instance_valid(enemy) and enemy.behavior == "boss":
+		var display_name: String = enemy.enemy_data.display_name if enemy.enemy_data != null else "보스"
+		boss_status_changed.emit(display_name, clampf(enemy.hp / maxf(1.0, enemy.max_hp), 0.0, 1.0), true)
 
 
 func _on_player_died() -> void:
@@ -550,6 +843,11 @@ func _on_class_selected(_class_id: String) -> void:
 
 func _on_floor_changed(new_floor: int) -> void:
 	AudioManager.play_bgm_for_floor(new_floor)
+	var unlocked: Array[String] = PetManager.try_unlock_for_floor(new_floor)
+	for pet_id: String in unlocked:
+		var data: PetData = PetManager.get_pet_data(pet_id)
+		if data != null:
+			GameManager.notification_requested.emit("새 펫 해금 · %s" % data.display_name, data.color)
 	queue_redraw()
 
 
@@ -575,7 +873,11 @@ func _spawn_world_loot(world_position: Vector2) -> void:
 	if item.is_empty():
 		return
 	effects.show_drop(world_position, item)
-	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	var rarity_index: int = int(item.get("rarity_index", 0))
+	var pickup_delay: float = LOOT_PICKUP_DELAY + float(rarity_index) * 0.22
+	if rarity_index >= 4:
+		pickup_delay += 0.55
+	await get_tree().create_timer(pickup_delay, false).timeout
 	if not is_inside_tree():
 		return
 	if LootManager.collect_item(item):
@@ -604,6 +906,7 @@ func _valid_enemies_sorted() -> Array[EnemyAI]:
 
 
 func _clear_enemies() -> void:
+	boss_status_changed.emit("", 0.0, false)
 	for enemy: EnemyAI in _enemies:
 		if is_instance_valid(enemy):
 			enemy.queue_free()
@@ -616,6 +919,12 @@ func _configure_player_visual() -> void:
 	var class_resource: ClassData = load("res://resources/classes/%s.tres" % GameManager.selected_class)
 	if class_resource != null:
 		player.configure(class_resource.id, class_resource.color)
+
+
+func _on_equipment_visual_changed() -> void:
+	if player == null:
+		return
+	player.set_equipment_visual(Dictionary(GameManager.equipment.get("weapon", {})))
 
 
 func _load_enemy_resources() -> void:

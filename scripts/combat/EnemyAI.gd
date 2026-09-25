@@ -1,15 +1,16 @@
 extends Node2D
 class_name EnemyAI
 
-const ENEMY_TEXTURES := {
-	"slime": preload("res://assets/cc0/pixelboy/slime.png"),
-	"bat": preload("res://assets/cc0/pixelboy/bat.png"),
-	"skeleton": preload("res://assets/cc0/pixelboy/skeleton.png"),
-	"goblin": preload("res://assets/cc0/pixelboy/goblin.png"),
-	"dark_knight": preload("res://assets/cc0/pixelboy/dark_knight.png"),
-	"lich": preload("res://assets/cc0/pixelboy/lich.png"),
-	"dragon": preload("res://assets/cc0/pixelboy/dragon.png"),
-	"demon_lord": preload("res://assets/cc0/pixelboy/demon_lord.png"),
+const ENEMY_ATLAS: Texture2D = preload("res://assets/sprites/enemy_atlas_alpha.png")
+const ENEMY_REGIONS: Dictionary = {
+	"slime": Vector2i(0, 0),
+	"bat": Vector2i(1, 0),
+	"skeleton": Vector2i(2, 0),
+	"goblin": Vector2i(3, 0),
+	"dark_knight": Vector2i(0, 1),
+	"lich": Vector2i(1, 1),
+	"dragon": Vector2i(2, 1),
+	"demon_lord": Vector2i(3, 1),
 }
 
 const ELITE_AFFIXES: Dictionary = {
@@ -79,6 +80,10 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 var _death_time_left: float = 0.0
 var _death_duration: float = 0.28
 var _is_targeted: bool = false
+var _attack_recovery_left: float = 0.0
+var _last_move_direction: Vector2 = Vector2.LEFT
+var _stride_phase: float = 0.0
+var _attack_pose: float = 0.0
 
 
 static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictionary:
@@ -156,6 +161,13 @@ func elite_title() -> String:
 
 func _process(delta: float) -> void:
 	_motion_clock += delta
+	_stride_phase = fmod(_stride_phase + delta * maxf(2.0, move_speed * 0.12), TAU)
+	if _attack_windup_left > 0.0:
+		_attack_pose = clampf(1.0 - _attack_windup_left / maxf(0.001, _attack_windup_duration), 0.0, 1.0)
+	elif _attack_recovery_left > 0.0:
+		_attack_pose = clampf(_attack_recovery_left / 0.18, 0.0, 1.0)
+	else:
+		_attack_pose = move_toward(_attack_pose, 0.0, delta * 6.0)
 	if _dead:
 		_death_time_left = maxf(0.0, _death_time_left - delta)
 		queue_redraw()
@@ -168,6 +180,7 @@ func _process(delta: float) -> void:
 		_hit_flash_left = maxf(0.0, _hit_flash_left - delta)
 		queue_redraw()
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
+	_attack_recovery_left = maxf(0.0, _attack_recovery_left - delta)
 	if not _knockback_velocity.is_zero_approx():
 		global_position += _knockback_velocity * delta
 		_clamp_to_movement_bounds()
@@ -197,6 +210,7 @@ func _process(delta: float) -> void:
 	elif behavior == "skirmisher" and distance < effective_attack_range * 0.68:
 		move_direction = -toward_target
 	if not move_direction.is_zero_approx():
+		_last_move_direction = move_direction.normalized()
 		_move_with_behavior(move_direction, delta)
 	if distance <= effective_attack_range and _attack_time_left <= 0.0:
 		_attack_windup_left = _attack_windup_duration
@@ -270,14 +284,18 @@ func _die() -> void:
 
 func _draw() -> void:
 	var enemy_id: String = enemy_data.id if enemy_data != null else "slime"
-	var texture: Texture2D = ENEMY_TEXTURES.get(enemy_id, ENEMY_TEXTURES["slime"])
+	var atlas_cell: Vector2i = ENEMY_REGIONS.get(enemy_id, Vector2i.ZERO)
+	var atlas_cell_size := Vector2(float(ENEMY_ATLAS.get_width()) / 4.0, float(ENEMY_ATLAS.get_height()) / 2.0)
+	var atlas_source := Rect2(Vector2(atlas_cell) * atlas_cell_size, atlas_cell_size)
 	var reveal: float = clampf(1.0 - _spawn_reveal_left / 0.32, 0.0, 1.0)
 	var death_alpha: float = clampf(_death_time_left / _death_duration, 0.0, 1.0) if _dead else 1.0
 	var alpha: float = reveal * death_alpha
 	var distance_to_target: float = global_position.distance_to(target.global_position) if target != null and is_instance_valid(target) else 0.0
 	var moving: bool = not _dead and _spawn_reveal_left <= 0.0 and distance_to_target > radius + 11.0
-	var step_wave: float = sin(_motion_clock * (10.0 if enemy_id == "bat" else 7.0)) if moving else sin(_motion_clock * 3.0) * 0.25
-	var bob: float = roundf(step_wave * (2.0 if enemy_id == "bat" else 0.8))
+	var step_speed: float = 12.0 if enemy_id in ["bat", "dragon"] else (8.5 if enemy_id in ["goblin", "skeleton"] else 6.5)
+	var step_wave: float = sin(_stride_phase * step_speed * 0.15) if moving else sin(_motion_clock * 3.0) * 0.25
+	var bob_amount: float = 3.0 if enemy_id in ["bat", "dragon"] else (1.4 if enemy_id == "slime" else 1.0)
+	var bob: float = step_wave * bob_amount
 	var size_map := {
 		"slime": 22.0, "bat": 24.0, "skeleton": 26.0, "goblin": 25.0,
 		"dark_knight": 34.0, "lich": 32.0, "dragon": 44.0, "demon_lord": 48.0,
@@ -298,11 +316,155 @@ func _draw() -> void:
 		var warning_progress: float = 1.0 - _attack_windup_left / _attack_windup_duration
 		draw_arc(Vector2.ZERO, sprite_size * 0.52, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
 	var death_scale_y: float = maxf(0.15, death_alpha) if _dead else 1.0
-	draw_set_transform(Vector2(0, bob), 0.0, Vector2(1.0, death_scale_y))
-	draw_texture_rect(texture, Rect2(-sprite_size * 0.5, -sprite_size * 0.62, sprite_size, sprite_size), false, sprite_modulate)
+	var facing_scale: float = -1.0 if _last_move_direction.x < -0.08 else 1.0
+	var walk_squash: float = 1.0
+	if moving:
+		match enemy_id:
+			"slime":
+				walk_squash = 1.0 + step_wave * 0.10
+			"bat", "dragon":
+				walk_squash = 1.0 + absf(step_wave) * 0.025
+			_:
+				walk_squash = 1.0 + absf(step_wave) * 0.045
+	var attack_progress: float = _attack_pose
+	var target_dir: Vector2 = global_position.direction_to(target.global_position) if target != null and is_instance_valid(target) else _last_move_direction
+	var lunge_strength: float = 8.0
+	if enemy_id in ["goblin", "skeleton"]:
+		lunge_strength = 12.0
+	elif enemy_id in ["dark_knight", "dragon", "demon_lord"]:
+		lunge_strength = 16.0
+	var lunge: Vector2 = target_dir * sin(attack_progress * PI) * lunge_strength
+	var attack_rotation: float = 0.0
+	if enemy_id in ["skeleton", "goblin", "dark_knight"]:
+		attack_rotation = sin(attack_progress * PI) * 0.16 * (-1.0 if facing_scale < 0.0 else 1.0)
+	elif enemy_id == "bat":
+		attack_rotation = sin(attack_progress * PI) * 0.26
+	elif behavior == "boss":
+		attack_rotation = sin(attack_progress * PI) * 0.12
+	var scale_y: float = death_scale_y * walk_squash
+	var scale_x_abs: float = 2.0 - walk_squash
+	if enemy_id == "slime" and moving:
+		scale_x_abs += absf(step_wave) * 0.08
+	var scale_x: float = facing_scale * scale_x_abs
+	draw_set_transform(Vector2(0, bob) + lunge, attack_rotation, Vector2(scale_x, scale_y))
+	draw_texture_rect_region(
+		ENEMY_ATLAS,
+		Rect2(-sprite_size * 0.58, -sprite_size * 0.72, sprite_size * 1.16, sprite_size * 1.16),
+		atlas_source,
+		sprite_modulate
+	)
+	_draw_enemy_animation_overlay(enemy_id, sprite_size, alpha, moving, attack_progress)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if (_attack_windup_left > 0.0 or _attack_recovery_left > 0.0) and not _dead:
+		_draw_attack_motion(sprite_size, target_dir, alpha)
 	var bar_width: float = maxf(20.0, sprite_size * 0.72)
 	var bar_y: float = -sprite_size * 0.58 - 5.0
-	if hp < max_hp or _is_targeted:
+	if hp < max_hp or _is_targeted or is_elite or behavior == "boss":
 		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width, 3), Color("351822", alpha), true)
-		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color("ef4444", alpha), true)
+		var hp_color: Color = elite_color if is_elite else (Color("ff5b67") if behavior == "boss" else Color("ef4444"))
+		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color(hp_color, alpha), true)
+	if is_elite and not _dead:
+		var elite_label: String = elite_title()
+		var label_width: float = ThemeDB.fallback_font.get_string_size(elite_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(-label_width * 0.5, bar_y - 4),
+			elite_label,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			7,
+			Color(elite_color, alpha)
+		)
+	if behavior == "boss" and not _dead:
+		var boss_label: String = enemy_data.display_name if enemy_data != null else "보스"
+		var boss_width: float = ThemeDB.fallback_font.get_string_size(boss_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(-boss_width * 0.5, bar_y - 5),
+			boss_label,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			8,
+			Color("ff9aa4", alpha)
+		)
+
+
+
+func _draw_enemy_animation_overlay(enemy_id: String, sprite_size: float, alpha: float, moving: bool, attack_progress: float) -> void:
+	var wing_wave: float = sin(_motion_clock * 12.0)
+	var step_wave: float = sin(_stride_phase * 1.2)
+	match enemy_id:
+		"slime":
+			var squash: float = 1.0 + sin(_motion_clock * 7.0) * 0.12
+			draw_arc(Vector2(0, 2), sprite_size * 0.26 * squash, 0.0, PI, 14, Color("c5f7ff", 0.22 * alpha), 1.2)
+			if attack_progress > 0.0:
+				draw_circle(Vector2(0, -1), 5.0 + attack_progress * 4.0, Color("9bf6ff", 0.12 * alpha))
+		"bat":
+			var wing_span: float = sprite_size * (0.42 + wing_wave * 0.08)
+			draw_line(Vector2(-3, -2), Vector2(-wing_span, -7 - wing_wave * 3.0), Color(body_color.lightened(0.18), 0.65 * alpha), 2.2)
+			draw_line(Vector2(3, -2), Vector2(wing_span, -7 - wing_wave * 3.0), Color(body_color.lightened(0.18), 0.65 * alpha), 2.2)
+		"skeleton":
+			if moving:
+				draw_line(Vector2(-5, 8), Vector2(-8 + step_wave * 3.0, 14), Color("e8e0d2", 0.45 * alpha), 1.5)
+				draw_line(Vector2(5, 8), Vector2(8 - step_wave * 3.0, 14), Color("e8e0d2", 0.45 * alpha), 1.5)
+			if attack_progress > 0.0:
+				var a: float = lerpf(-1.15, 0.75, attack_progress)
+				var tip := Vector2.RIGHT.rotated(a) * (sprite_size * 0.58)
+				draw_line(Vector2(2, -1), tip, Color("dfe7ef", 0.9 * alpha), 2.0)
+				draw_circle(tip, 1.8, Color("ffffff", 0.8 * alpha))
+		"goblin":
+			if moving:
+				draw_line(Vector2(-5, 8), Vector2(-8 + step_wave * 3.5, 13), Color("8bd66f", 0.40 * alpha), 1.8)
+				draw_line(Vector2(5, 8), Vector2(8 - step_wave * 3.5, 13), Color("8bd66f", 0.40 * alpha), 1.8)
+			if attack_progress > 0.0:
+				var spear_dir := Vector2.RIGHT.rotated(lerpf(-0.45, 0.15, attack_progress))
+				draw_line(Vector2(4, 1), spear_dir * (sprite_size * 0.70), Color("cf9f60", 0.85 * alpha), 2.0)
+		"dark_knight":
+			if attack_progress > 0.0:
+				var cleave_angle: float = lerpf(-1.35, 0.95, attack_progress)
+				draw_arc(Vector2.ZERO, sprite_size * 0.66, cleave_angle - 0.18, cleave_angle + 0.18, 8, Color("ff8e6b", 0.75 * alpha), 3.0)
+			draw_circle(Vector2(5, -5), 1.5, Color("ff4d5a", (0.45 + sin(_motion_clock * 6.0) * 0.25) * alpha))
+		"lich":
+			var orb := Vector2(8, -10) + Vector2(cos(_motion_clock * 3.4), sin(_motion_clock * 3.4)) * 3.0
+			draw_circle(orb, 3.5, Color("b685ff", 0.20 * alpha))
+			draw_circle(orb, 1.7, Color("e6d3ff", 0.85 * alpha))
+			if attack_progress > 0.0:
+				draw_arc(Vector2.ZERO, sprite_size * (0.44 + attack_progress * 0.20), 0.0, TAU, 18, Color("9f7aea", 0.28 * alpha), 1.5)
+		"dragon":
+			var wing_y: float = wing_wave * 5.0
+			draw_colored_polygon(PackedVector2Array([
+				Vector2(-6, -6), Vector2(-sprite_size * 0.62, -13 + wing_y), Vector2(-sprite_size * 0.48, 4)
+			]), Color("ff6a45", 0.36 * alpha))
+			draw_colored_polygon(PackedVector2Array([
+				Vector2(6, -6), Vector2(sprite_size * 0.62, -13 + wing_y), Vector2(sprite_size * 0.48, 4)
+			]), Color("ff6a45", 0.36 * alpha))
+			if attack_progress > 0.0:
+				draw_circle(Vector2(sprite_size * 0.32, -4), 3.0 + attack_progress * 4.0, Color("ff9a3c", 0.32 * alpha))
+		"demon_lord":
+			var pulse: float = 0.65 + sin(_motion_clock * 5.0) * 0.18
+			draw_arc(Vector2.ZERO, sprite_size * 0.58, _motion_clock * 0.8, _motion_clock * 0.8 + PI * 1.45, 20, Color("ff315f", pulse * 0.35 * alpha), 2.0)
+			draw_circle(Vector2(-7, -9), 2.0, Color("ff4d5a", pulse * alpha))
+			draw_circle(Vector2(7, -9), 2.0, Color("ff4d5a", pulse * alpha))
+
+
+func _draw_attack_motion(sprite_size: float, target_dir: Vector2, alpha: float) -> void:
+	if target_dir.is_zero_approx():
+		target_dir = Vector2.RIGHT
+	var tangent := Vector2(-target_dir.y, target_dir.x)
+	var progress: float = 1.0 - (_attack_windup_left / maxf(0.001, _attack_windup_duration)) if _attack_windup_left > 0.0 else (1.0 - _attack_recovery_left / 0.18)
+	match behavior:
+		"caster":
+			var orb_pos: Vector2 = target_dir * (sprite_size * 0.52)
+			var orb_radius: float = 2.0 + progress * 4.5
+			draw_circle(orb_pos, orb_radius + 4.0, Color("9f7aea", 0.12 * alpha))
+			draw_circle(orb_pos, orb_radius, Color("c4a7ff", 0.85 * alpha))
+			draw_line(orb_pos - tangent * 4.0, orb_pos + tangent * 4.0, Color("f1e8ff", 0.55 * alpha), 1.2)
+		"boss":
+			var arc_center: float = target_dir.angle()
+			draw_arc(Vector2.ZERO, sprite_size * 0.72, arc_center - 0.65, arc_center + 0.65, 14, Color("ff645e", 0.78 * alpha), 3.2)
+			draw_arc(Vector2.ZERO, sprite_size * 0.90, arc_center - 0.46, arc_center + 0.46, 12, Color("ffb078", 0.32 * alpha), 1.4)
+		_:
+			var start: Vector2 = target_dir * (sprite_size * 0.18) - tangent * 5.0
+			var finish: Vector2 = target_dir * (sprite_size * 0.68) + tangent * 7.0
+			draw_line(start, finish, Color("ffcf9e", 0.80 * alpha), 2.0)
+			draw_circle(finish, 2.2, Color("fff1db", 0.78 * alpha))

@@ -370,3 +370,193 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Visual noise: Low / Good / Too much
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## G5.0 — Pet System + Item Art Pipeline
+
+- [ ] **전투 펫**
+  - 청월호가 플레이어 옆을 자연스럽게 따라다니는지 확인
+  - 플레이어가 이동/방 이동할 때 순간이동하거나 벽에 박혀 보이지 않는지 확인
+  - x1 / x5에서 펫 자동 공격이 보이는지 확인
+
+- [ ] **펫 지원 효과**
+  - HP가 감소했을 때 청월호의 자동 회복 텍스트가 가끔 표시되는지 확인
+  - 회복이 전투를 방해할 정도로 과도하지 않은지 확인
+
+- [ ] **펫 성장**
+  - 골드가 충분할 때 `훈련 +1Lv`가 작동하고 즉시 레벨이 오르는지 확인
+  - 요구 레벨을 만족한 펫은 진화 버튼이 활성화되고 ★ 등급이 상승하는지 확인
+  - 훈련/진화 후 저장했다가 불러와도 유지되는지 확인
+
+- [ ] **펫 탭**
+  - 상단 관리 메뉴에 펫이 장비/가방/스킬/환생/정보와 함께 표시되는지 확인
+  - 단축키 4가 펫, 5가 환생, 6이 정보 순서로 맞는지 확인
+  - 현재 출전 펫/레벨/역할/설명이 읽히는지 확인
+  - 해금되지 않은 펫은 요구 층수가 보이고 선택 불가인지 확인
+
+- [ ] **펫 해금**
+  - 현재 진행 층 기준으로 조건을 만족한 펫이 자동 해금되는지 확인
+  - 새 펫 해금 알림이 표시되는지 확인
+
+- [ ] **저장/불러오기**
+  - 활성 펫을 바꾼 뒤 저장
+  - 재실행/불러오기 후 같은 펫과 레벨이 유지되는지 확인
+
+- [ ] **아이템 외형 교체**
+  - 장비/가방에서 29개 베이스 전용 item atlas 아트가 표시되는지 확인
+  - 무기/투구/갑옷/장갑/신발/반지/목걸이가 즉시 구분되는지 확인
+  - 신검/마검/용비늘/다이아몬드 등 같은 슬롯 내부에서도 베이스 아트가 다르게 보이는지 확인
+  - 필드 드랍 아이콘도 가방/장비와 같은 실제 아이템 아트를 사용하는지 확인
+  - 희귀도 프레임과 아이템 자체 아트가 서로 싸우지 않는지 확인
+
+- [ ] **아이템 아트 파이프라인**
+  - dedicated icon 경로가 없는 기존 저장 아이템도 깨지지 않아야 함
+  - 향후 전용 PNG를 연결할 수 있는 icon_path fallback 계약 유지
+
+### G5.0 validation notes
+
+- Build commit:
+- Follower movement:
+- x1 pet attack:
+- x5 pet attack:
+- Healing support:
+- Pet tab readability:
+- Unlock behavior:
+- Save/load:
+- Existing item icons intact:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
+
+
+## G5.1 — Combat Identity + Pet Loot Loop
+
+- [ ] **프로젝트 전용 전투 그래픽**
+  - 전투 캐릭터가 이전 CC0 단일 스프라이트가 아니라 새 6직업 atlas로 보이는지 확인
+  - 몬스터 8종이 새 enemy atlas로 보이는지 확인
+  - 장착 무기가 캐릭터 손에 실제 표시되고 공격 시 함께 움직이는지 확인
+
+- [ ] **보스 / 엘리트 가독성**
+  - 보스 등장 시 중앙 상단 보스 HP바가 표시되는지 확인
+  - 보스 피격 시 HP바가 즉시 줄어드는지 확인
+  - 보스 사망/층 이동 시 HP바가 사라지는지 확인
+  - 폭군/질풍/철벽 엘리트 이름이 몬스터 위에 표시되는지 확인
+  - x5에서도 보스/엘리트 등장 연출이 과도하게 화면을 가리지 않는지 확인
+
+- [ ] **던전 / HUD**
+  - 좌측 목표 패널, 우측 3x3 미니맵이 전투를 가리지 않는지 확인
+  - 15층 단위로 붉은 성채 / 잿빛 납골당 / 푸른 금고 느낌이 순환하는지 확인
+  - 보스 층 방 중앙이 일반층보다 위협적으로 보이는지 확인
+
+- [ ] **펫 정수 루프**
+  - 엘리트 처치 시 보라색 펫 정수가 드랍/흡수되는지 확인
+  - 보스 처치 시 엘리트보다 많은 정수를 주는지 확인
+  - 펫 탭 상단 정수 수량이 즉시 증가하는지 확인
+  - 진화 버튼에 골드 + 정수 요구량이 함께 표시되는지 확인
+  - 진화 시 정수가 실제로 차감되는지 확인
+
+- [ ] **펫 패시브**
+  - 청월호 / 밤그림자: 치명 보너스 표기 확인
+  - 화염룡: 주인 피해 증가 표기 확인
+  - 유령 슬라임: 골드 보너스 표기 확인
+  - 수호 골렘: 받는 피해 감소 표기 확인
+  - 초원의 요정: 경험치 보너스 표기 확인
+  - ★ 진화 후 패시브 수치가 증가하는지 확인
+
+- [ ] **스킬 이펙트**
+  - x1에서 직업 스킬이 기존보다 명확히 구분되는지 확인
+  - x5에서 이펙트가 너무 오래 남거나 시야를 완전히 덮지 않는지 확인
+  - 마법사 화염구가 이동 중 꼬리/코어가 보이는지 확인
+
+### G5.1 validation notes
+
+- Build commit:
+- Hero atlas:
+- Enemy atlas:
+- Equipped weapon visual:
+- Item artwork:
+- Boss HUD:
+- Elite labels:
+- Dungeon themes:
+- Minimap/objective placement:
+- Pet essence loop:
+- Pet passive readability:
+- x1 skill VFX:
+- x5 skill VFX:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
+
+
+## G6.0 — Dungeon / Animation / Pet Gacha Direction Lock
+
+- [ ] **던전 구조**
+  - 기존 3x3 정사각형 보드가 보이지 않는지 확인
+  - 미니맵이 5x4 캔버스의 구불구불한 방/통로 구조로 보이는지 확인
+  - 층 진행 시 캐릭터가 실제 통로를 통해 다음 방으로 이동하는지 확인
+  - 방마다 폭/높이가 달라 반복 사각형 느낌이 줄었는지 확인
+  - 화면 밖 빈 셀 때문에 거대한 검은 공백이 노출되지 않는지 확인
+
+- [ ] **몬스터 애니메이션**
+  - 이동 시 좌/우 방향을 바라보는지 확인
+  - 걷는 동안 미세한 squash/stretch가 보여 단순 이미지 슬라이딩처럼 보이지 않는지 확인
+  - 공격 전 몸이 준비 동작을 하고 공격 순간 앞으로 튀어나오는지 확인
+  - 공격 후 원위치로 돌아오는 recovery가 보이는지 확인
+  - 엘리트/보스에서도 애니메이션이 깨지지 않는지 확인
+
+- [ ] **몬스터 공격**
+  - 근접 몬스터는 실제 베기 동작 후 피해가 들어오는지 확인
+  - caster 몬스터는 보라/속성 투사체가 실제로 날아오는지 확인
+  - 보스 원거리 공격은 일반 caster보다 크고 무겁게 보이는지 확인
+  - 투사체가 플레이어에게 닿기 전에 피해가 먼저 들어오지 않는지 확인
+  - x5에서도 투사체 수가 화면을 완전히 덮지 않는지 확인
+
+- [ ] **펫 가챠**
+  - 펫 탭에서 소환석 / pity / 1회 / 10회 소환 UI가 보이는지 확인
+  - 신규 소환 시 미보유 펫이 보유 상태로 바뀌는지 확인
+  - 중복 소환 시 신규 펫이 하나 더 생기는 대신 조각으로 전환되는지 확인
+  - 10회 소환 결과에 영웅 이상이 최소 1개 포함되는지 확인
+  - pity 직전 상태에서 다음 소환이 전설 이상인지 확인
+  - 기존 층수만 올린다고 미보유 펫이 자동 해금되지 않는지 확인
+  - 저장/불러오기 후 소환석 / pity / 보유 펫 / 조각 유지 확인
+
+- [ ] **펫 전투 애니메이션**
+  - 펫 공격 시 적 방향으로 짧게 돌진하는지 확인
+  - 회복/지원 발동 시 펫 주변에 support pulse가 보이는지 확인
+  - 진화 별 개수가 높아져도 크기/오라가 지나치게 커지지 않는지 확인
+
+- [ ] **방향성 판정**
+  - 맵/캐릭터/몬스터/펫/아이템이 동일한 다크 판타지 계열로 느껴지는지 확인
+  - Survivor 계열 요소는 UI 가독성과 드랍 강조에만 남아 있는지 확인
+  - “귀여운 모바일 게임 맵에 다크 캐릭터가 올라간 느낌”이 남아 있으면 Reject
+
+### G6.0 validation notes
+
+- Build commit:
+- Dungeon topology:
+- Corridor travel:
+- Enemy walk animation:
+- Enemy melee animation:
+- Enemy caster projectile:
+- Boss projectile:
+- Pet summon UI:
+- 10-pull guarantee:
+- Pity:
+- Duplicate shards:
+- Pet combat animation:
+- Visual direction consistency:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
+
+
+## G6.1 — Animated Combat Playtest
+- [ ] slime visibly squashes/hops instead of sliding rigidly
+- [ ] bat wings flap while moving
+- [ ] skeleton/goblin/dark knight show visible weapon attack motion
+- [ ] lich launches a curved purple shadow projectile
+- [ ] dragon launches a visible fire projectile/attack
+- [ ] demon lord launches a larger boss meteor and boss hit feedback remains readable
+- [ ] enemy windup -> strike -> recovery is visually readable at x1
+- [ ] at x5, projectile/VFX density is readable rather than a solid blob
+- [ ] active pet is visually larger than G5.1 and no longer reads as a tiny icon
+- [ ] drake/bat pet wings animate
+- [ ] pet rarity aura does not overpower the player
+- [ ] dungeon traversal remains corridor-based and does not look like a 3x3 board

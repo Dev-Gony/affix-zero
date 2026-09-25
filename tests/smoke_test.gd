@@ -150,8 +150,13 @@ func _run() -> void:
 	if bool(boss_reward.get("boss_reward", false)):
 		_check(GameManager.inventory.size() == 1, "Boss item reward enters inventory")
 		_check(int(boss_reward.get("item_level", 0)) >= GameManager.floor, "Boss reward is generated above the current floor baseline")
-	var rendered_icon: AtlasTexture = (game_ui._inventory_grid.get_child(0) as Button).icon as AtlasTexture
-	_check(rendered_icon != null and rendered_icon.atlas == GameUI.ITEM_BASE_ATLAS, "Inventory renders the generated base-item icon atlas")
+	var first_slot := game_ui._inventory_grid.get_child(0) as Button
+	var rendered_visual: ItemVisualIcon = null
+	for child: Node in first_slot.get_children():
+		if child is ItemVisualIcon:
+			rendered_visual = child as ItemVisualIcon
+			break
+	_check(rendered_visual != null and not rendered_visual.item_data.is_empty(), "Inventory renders the generated per-item pixel visual")
 	battle.effects.clear_effects()
 	battle.effects.show_drop(battle.player.global_position, generated_item)
 	_check(battle.effects._loot_icons.size() == 1, "Loot drops display their base-item icon in the arena")

@@ -7,3 +7,4 @@ class_name ItemBaseData
 @export var tier: int = 1
 @export var base_stats: Dictionary = {}
 @export_range(0, 29, 1) var icon_index: int = 0
+@export_file("*.png", "*.webp") var icon_texture_path: String = ""

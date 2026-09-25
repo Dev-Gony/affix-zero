@@ -14,6 +14,7 @@ GameManager="*res://scripts/autoloads/GameManager.gd"
 LevelManager="*res://scripts/progression/LevelManager.gd"
 RebirthManager="*res://scripts/progression/RebirthManager.gd"
 LootManager="*res://scripts/autoloads/LootManager.gd"
+PetManager="*res://scripts/autoloads/PetManager.gd"
 SaveManager="*res://scripts/autoloads/SaveManager.gd"
 AudioManager="*res://scripts/autoloads/AudioManager.gd"
 

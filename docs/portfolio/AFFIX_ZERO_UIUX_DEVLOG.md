@@ -810,3 +810,367 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate that the empty bag no longer feels broken, affordable growth actions stand out without becoming noisy, and ready-to-rebirth state reads immediately.
+
+
+## 2026-09-25 — G5.0 Pet System + Item Art Pipeline
+
+### Problem
+
+- The project had reached a much stronger UI structure, but the actual game layer still lacked a second progression axis beyond character/gear/skills.
+- The combat fantasy reference direction called for a visible companion system, while the current equipment pipeline was still tightly coupled to one shared atlas index.
+- Replacing every item visually later would require touching UI/combat code repeatedly unless the data model first accepted per-item art.
+
+### Cause
+
+- There was no persistent pet catalog, no active-pet state, no combat companion node, no pet progression save contract and no pet management screen.
+- Generated equipment dictionaries only carried `icon_index`, so art replacement was effectively locked to the existing 6x5 atlas.
+
+### Reference UX
+
+- **Survivor-style progression:** pets/companions create another clear long-term growth lane while combat remains automatic.
+- **ARPG equipment identity:** individual items need strong art identity instead of looking like anonymous atlas cells.
+- **AFFIX: ZERO:** the pet should fight and support automatically, preserving the idle-first direction rather than becoming another manual-control system.
+
+### Decision
+
+- Add pets as a fully automatic combat/progression system.
+- Launch with six companions and one guaranteed starter pet.
+- Unlock additional pets by floor progression for the first implementation rather than adding gacha/currency immediately.
+- Give pets autonomous attacks, optional periodic healing support, XP/levels, active selection and persistence.
+- Add a dedicated Pet management tab between Skills and Rebirth.
+- Add `icon_texture_path` / generated `icon_path` support so every equipment base can move to dedicated sprite art without rewriting inventory/equipment UI.
+
+### Implementation
+
+- Added `PetData` Resource schema and six launch pets:
+  - 청월호 / spirit fox
+  - 화염룡 / ember drake
+  - 유령 슬라임
+  - 수호 골렘
+  - 밤그림자 박쥐
+  - 초원의 요정
+- Added `PetManager` autoload:
+  - catalog loading
+  - owned roster
+  - active pet
+  - levels / XP / stars
+  - floor unlocks
+  - attack/support scaling
+  - gold-based training
+  - level-gated star evolution
+  - save/load payload
+- Added `PetCompanion` world node:
+  - follows the player automatically
+  - hides outside active gameplay
+  - renders a distinct procedural pixel silhouette per pet until dedicated sprites replace it
+- Added BattleManager integration:
+  - automatic pet attacks
+  - pet support healing
+  - pet XP from enemy kills
+  - floor-based pet unlock notifications
+- Added pet combat VFX for projectiles/impact and healing feedback.
+- Added Pet tab to the management hub and keyboard shortcut 6.
+- Added reusable `PetPortrait` UI renderer.
+- Added per-item sprite-path support while retaining atlas fallback compatibility.
+- Field loot also moved away from the old atlas preview to slot-aware procedural loot glyphs, so world drops and management UI now speak the same visual language.
+- Added `ItemVisualIcon` procedural pixel-art renderer so all 29 current equipment bases immediately receive distinct slot/base silhouettes and material colors in equipment/inventory UI instead of waiting for final binary art assets.
+- Dedicated art paths remain the preferred final pipeline; procedural icons are the playable bridge, not a permanent asset lock-in.
+- Added dedicated G5 pet/item-art CI contracts.
+
+### Failure / Revision
+
+- The first reaction to the graphics push was to generate visual mockups instead of shipping playable systems. That was the wrong execution order.
+- G5.0 corrects that by treating the mockup only as direction and moving immediately to persistent gameplay code and data contracts.
+- Dedicated binary sprite assets are intentionally not faked into the repo from screenshot mockups. The item/pet code now supports real dedicated art assets cleanly when those are produced.
+
+### Verification
+
+Automated contracts cover:
+
+- six-pet catalog availability
+- guaranteed starter pet ownership/selection
+- autonomous attack contribution and cadence
+- starter support healing
+- pet level/star/active state persistence
+- floor-progression unlocks
+- visible companion binding to the player
+- generated equipment carrying an overrideable art path
+- item base resources accepting dedicated sprite paths
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Companion system | None | Persistent active pet with auto combat/support |
+| Pet progression | None | XP, level, stars, floor unlock roster |
+| Combat presence | Player + enemies only | Player + visible following combat companion |
+| Management | 5 growth tabs | 6 tabs including dedicated Pet screen |
+| Item artwork | Shared atlas index only | Distinct procedural pixel identities now + dedicated sprite-path override for final assets |
+| Save data | Character/gear/progression only | Pet roster + active companion persisted |
+
+### Windows play approval
+
+Pending. Validate follower movement, pet attack readability at x1/x5, healing feedback, pet tab switching, floor unlock behavior and save/load persistence before merge.
+
+
+## 2026-09-25 — G5.1 Combat Identity + Pet Loot Loop
+
+### Problem
+
+- G5.0 added the pet system and an item-art pipeline, but the live combat screen still did not communicate enough hierarchy between normal enemies, elites, bosses, equipment drops and class skills.
+- Pet growth existed, but its star evolution path depended only on gold and did not create a reason to care about elite/boss kills beyond equipment.
+- The repository already contained project-specific hero, enemy, dungeon and 29-item art assets, yet several runtime paths still used older fallback presentation.
+
+### Cause
+
+- Threat information was mostly carried by notifications and local enemy rings, so the player could miss elite/boss state while watching at x5.
+- Equipment UI had a flexible renderer, but the generated 29-item atlas was not yet the default presentation path.
+- Pets had different attack/support numbers, but choosing a companion did not change the wider idle progression economy enough.
+
+### Reference UX
+
+- **Survivor-style readability:** bosses and elite moments must remain obvious even when the player is not manually controlling movement.
+- **ARPG identity:** equipment should look like distinct loot, not generic slot glyphs, and equipped weapons should read on the combat avatar.
+- **Idle progression:** elite/boss kills should feed a persistent growth currency so repeated farming has a visible purpose.
+
+### Decision
+
+- Keep boss gameplay automatic; improve presentation rather than adding manual dodge patterns.
+- Promote the existing project-specific class/enemy/dungeon/item art to the primary runtime path.
+- Add a compact global boss HP bar and stronger elite/boss arrival feedback.
+- Introduce pet essence as an elite/boss reward and require it for star evolution.
+- Give every launch pet a distinct player-facing passive so changing pets alters combat or farming behavior.
+- Rotate dungeon visual themes every 15 floors and visibly mark boss arenas.
+- Increase class-skill VFX readability without changing the idle control model.
+
+### Implementation
+
+- Item presentation:
+  - `item_base_atlas_v2.png` is now the default 29-base artwork in equipment/inventory.
+  - World drops use the same item artwork instead of generic slot glyphs.
+  - Final per-item PNG overrides still take priority through `icon_path`.
+- Combat identity:
+  - project-specific six-class atlas used in combat, class selection and management portraits.
+  - project-specific eight-enemy atlas used in combat.
+  - equipped weapon identity is rendered on the player during attacks, including enhancement/rarity glow.
+- Threat presentation:
+  - elite nameplates and colored HP bars.
+  - global boss HP bar.
+  - boss/elite spawn VFX and threat text.
+  - boss arenas receive a stronger room sigil treatment.
+- Dungeon readability:
+  - generated dungeon courtyard layer connected to rooms.
+  - pillars, torches, cracks, bone debris and runes added.
+  - three visual themes rotate every 15 floors: 붉은 성채 / 잿빛 납골당 / 푸른 금고.
+  - 3x3 minimap and combat objective tracker added.
+- Pet progression:
+  - persistent `pet_essence` currency.
+  - elites and bosses drop pet essence.
+  - evolution now consumes gold + essence.
+  - pet tab displays essence balance and requirements.
+  - six pets now have distinct owner passives:
+    - 청월호: critical bonus.
+    - 화염룡: owner damage bonus.
+    - 유령 슬라임: gold bonus.
+    - 수호 골렘: incoming damage reduction.
+    - 밤그림자: larger critical bonus.
+    - 초원의 요정: XP bonus.
+  - star evolution scales pet passives.
+- Skill VFX:
+  - melee spin, fireball, shield charge, chain lightning, multi-slash and holy nova received denser but short-lived combat effects.
+  - fireball projectile now has an animated core and trail.
+
+### Failure / Revision
+
+- One regression test still expected a standalone `sage.png` portrait after the class-art migration. The runtime was correct; the test encoded the old asset contract. The test was updated to validate the atlas region instead.
+- The first item-art bridge used procedural silhouettes. Once the existing 29-item project atlas was re-audited, it became clear the better production path was to use that artwork immediately and keep procedural drawing only as a fallback.
+- Boss patterns were deliberately not expanded. This project is idle-first, so the work moved toward threat readability, farming rewards and progression feedback instead of manual-control mechanics.
+
+### Verification
+
+Automated contracts now cover:
+
+- persistent pet essence and evolution spending
+- distinct pet passive identities
+- 29-item artwork atlas availability
+- boss HUD state
+- project class/enemy/dungeon assets
+- minimap/objective state
+- active weapon combat rendering
+- existing G3/G4/UIUX regression suites
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Item identity | Procedural bridge / legacy atlas paths | Actual 29-base project art + PNG override path |
+| Boss readability | Spawn notification + local sprite | Global boss HP + arrival VFX + boss arena treatment |
+| Elite readability | Aura only | Affix nameplate + colored HP + arrival VFX |
+| Pet evolution | Gold gate | Gold + elite/boss essence farming loop |
+| Pet choice | Attack/heal stat differences | Distinct combat/farming passives + star scaling |
+| Dungeon progression | Repeating room presentation | Floor-banded themes + minimap + objective tracker |
+| Skill feedback | Basic rings/lines | Stronger class-specific short VFX |
+
+### Windows play approval
+
+Pending. This is now a visual/play-feel checkpoint: verify item art, hero/enemy atlas quality, boss/elite readability, pet essence/evolution, pet passives, floor themes, minimap/objective placement and x1/x5 skill-effect density before merge.
+
+
+## 2026-09-25 — G6.0 Dungeon Combat Direction Lock
+
+### Problem
+
+Windows G5.1 play validation exposed a style mismatch: the new character/enemy art had more detail than the repeated rectangular map, enemies still read like flat images sliding toward the player, field rewards had weak physical identity, and the pet visuals/system did not match the intended long-term progression depth.
+
+### Cause
+
+- The world still used a fully connected 3x3 room board. Even with extra props, the topology read as test arenas rather than a dungeon.
+- Enemy motion relied mostly on positional movement and a static atlas cell; attacks resolved instantly for casters, which reinforced the “image moving across the floor” impression.
+- Pets were originally designed as floor-unlock companions, while the product direction now calls for a collectible rarity/gacha system similar to transformation/pet collections in long-running RPGs.
+- Visual direction had not been locked strongly enough between the bright readability of Survivor-style combat and the darker ARPG identity of Hero Siege/Diablo-like dungeons.
+
+### Reference UX
+
+- **Hero Siege / dark ARPG:** dungeon topology, connected chambers, corridors, dark materials, readable but hostile ambience, equipment that feels like loot.
+- **Survivor-style readability:** combat remains automatic and effects must remain readable at x5 speed.
+- **Collection RPG gacha:** pets use rarity, pity, duplicates and long-term collection value instead of being granted simply for reaching a floor.
+
+### Decision
+
+AFFIX: ZERO now locks its primary art/gameplay direction to **dark fantasy ARPG dungeon presentation**, while preserving Survivor-style clarity for combat information. It will not pursue a cute/cartoon overworld direction.
+
+The rule is:
+- world / monsters / equipment / pets = dark fantasy ARPG
+- readability / drop emphasis / speed controls / automatic combat feedback = Survivor-style
+- progression = idle farming + ARPG loot + collection/gacha depth
+
+### Implementation
+
+- Replaced the old 3x3 world board with a 5x4 dungeon canvas and a 14-room winding expedition route.
+- Only route/side-chamber connections are rendered; the map is no longer a fully connected board.
+- Room interior margins now vary, producing wide halls, narrow chambers and smaller side rooms.
+- Minimap was rewritten to render the dungeon graph and corridor connections instead of nine equal squares.
+- Enemy animation layer added:
+  - directional facing
+  - walk squash/stretch
+  - attack windup pose
+  - forward lunge and recovery
+  - melee slash pose
+  - caster charge pose
+  - boss attack arc
+- Caster and boss attacks now create real traveling enemy projectiles. Damage resolves on projectile impact instead of immediately at attack signal time.
+- Pet combat animation added for autonomous attack lunges and support-cast pulses.
+- Pet acquisition direction changed from floor auto-unlock to gacha:
+  - summon crystal currency
+  - 1-pull / discounted 10-pull
+  - 30-pull legendary pity
+  - 10-pull heroic-or-higher guarantee
+  - pet rarity metadata
+  - duplicate conversion into pet shards
+  - summon state persistence
+  - elite/boss farming can award summon crystals
+- Pet tab now exposes summon currency, pity counter and summon controls.
+
+### Failure / Revision
+
+- The previous G5.1 dungeon styling work improved texture density but did not solve the structural problem. A prettier 3x3 board was still a 3x3 board, so G6 changes topology rather than merely recoloring tiles.
+- The previous pet direction treated companions as unlock rewards. This was discarded because it capped collection depth too early and did not support the requested long-term rarity chase.
+- Static enemy art was not discarded, but it is now animated through combat-state transforms until dedicated multi-frame animation sheets are introduced. This removes the immediate sliding-card feel without blocking gameplay work on final art production.
+
+### Verification
+
+Automated coverage is being expanded for:
+- 5x4 dungeon topology and winding route
+- corridor travel between consecutive dungeon rooms
+- summon-only pet acquisition
+- pity guarantee and 10-pull guarantee
+- summon currency spending
+- pet combat animation states
+- existing G3/G4/G5 regression contracts
+
+### Before / After
+
+| Area | Before | G6.0 |
+|---|---|---|
+| World topology | fully connected 3x3 arena board | winding 5x4 dungeon graph with side chambers |
+| Room silhouette | repeated same-size rectangles | varied chamber shapes and corridors |
+| Enemy movement | static image translated toward target | facing + gait + windup + lunge + recovery |
+| Enemy ranged attack | instant damage with line VFX | physical projectile with travel and impact |
+| Pet acquisition | automatic floor unlock | rarity gacha + pity + duplicate shards |
+| Pet combat | floating follower + beam | attack/support animation states |
+| Art direction | mixed ARPG / cute readability | dark fantasy ARPG world with Survivor-style information clarity |
+
+### Windows play approval
+
+Pending. Do not merge until the new dungeon route, enemy animation, ranged projectiles and pet summon flow are played in Godot 4.3 on Windows.
+
+
+## 2026-09-25 — G6.1 Animated Combat Pass
+
+### Problem
+- High-detail static enemy artwork still read like image cards sliding across the floor.
+- Enemy attacks shared nearly identical feedback, so bat, skeleton, lich, dragon and boss pressure blurred together.
+- Pet combat silhouettes were too small and icon-like compared with the new darker hero/enemy art direction.
+
+### Cause
+- The enemy atlas contains strong single-frame art but the runtime applied only basic bob/squash transforms.
+- Enemy attack execution was keyed mostly by generic behavior instead of enemy archetype.
+- Pet rendering prioritized compact UI readability over in-world presence.
+
+### Reference UX
+- Hero Siege / ARPG combat: silhouettes should visibly brace, lunge, cast, flap and recover even when the game remains auto-combat.
+- Survivor-style readability: projectile shapes and skill colors should communicate source and threat immediately at x5.
+- Dark-fantasy progression: companions should feel like summoned creatures, not floating UI stickers.
+
+### Decision
+- Keep the existing authored enemy atlas, but animate it in code with archetype-specific motion and overlay poses.
+- Give lich, dragon and demon lord unique projectile types rather than one universal magic orb.
+- Add attack-specific VFX for every launch enemy family.
+- Increase companion scale/presence and attach rarity/evolution motion directly to the in-world pet.
+- Do not introduce manual dodge controls or boss input patterns; the game stays idle-first.
+
+### Implementation
+- Enemy runtime animation:
+  - slime stretch/squash pulse
+  - bat/dragon wing flap
+  - skeleton sword swing
+  - goblin spear thrust
+  - dark knight cleave
+  - lich orbiting magic focus
+  - demon lord rotating hell aura
+  - attack windup/recovery now drives actual pose state
+- Enemy projectiles:
+  - orb
+  - curved shadow bolt
+  - fireball
+  - boss meteor
+  - bone projectile contract for future ranged skeleton variants
+- Enemy attack VFX now vary by enemy id.
+- Player auto-attacks now vary by class: warrior cleave, knight impact, assassin multi-cut, mage arcane orb, sage lightning bolt, saint holy orb.
+- Lich, dragon and demon lord use distinct projectile handling in BattleManager.
+- Companion combat art:
+  - larger rarity-scaled body
+  - ground shadow
+  - rarity aura
+  - attack streak
+  - richer fox/drake/golem/bat/fairy detail
+  - drake and bat wing animation
+- Regression test now verifies animation pose advancement and projectile archetype contracts.
+
+### Failure / Revision
+- First enemy projectile pass accidentally measured travel distance against the target Node2D instead of its position. CI caught the GDScript type error. Fixed to use destination Vector2.
+- Pet ground shadow initially used a helper that only existed on PlayerAvatar. Replaced with a local polygon ellipse so the companion remains self-contained.
+
+### Verification
+- Automated G5/G6 gameplay contract extended for enemy pose animation and projectile identity.
+- Existing dungeon topology, pet gacha, item art, boss/elite and UI regression suites remain required before playtest.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Enemy movement | Static atlas card + bob | Archetype-specific flap, stride, squash and body motion |
+| Enemy attack | Generic slash/orb | Enemy-specific swing/thrust/cast/fire/meteor presentation |
+| Ranged threats | One orb look | Shadow / fire / meteor / orb projectile identities |
+| Pet in combat | Small procedural sticker | Larger rarity-scaled animated companion with attack presence |
+| Combat readability | Damage numbers carried most feedback | Motion silhouette + projectile shape + VFX communicate action |

@@ -1,13 +1,14 @@
 extends Node2D
 class_name PlayerAvatar
 
-const CLASS_TEXTURES := {
-	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
-	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
-	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
-	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
-	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
-	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0),
+	"mage": Vector2i(1, 0),
+	"knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1),
+	"assassin": Vector2i(1, 1),
+	"saint": Vector2i(2, 1),
 }
 
 var class_id: String = "warrior"
@@ -20,12 +21,27 @@ var _facing: Vector2 = Vector2.RIGHT
 var _visual_facing: Vector2 = Vector2.RIGHT
 var _skill_color: Color = Color("ffd166")
 var _move_direction: Vector2 = Vector2.ZERO
+var _weapon_base_id: String = ""
+var _weapon_rarity_color: Color = Color("d7dde8")
+var _weapon_enhancement: int = 0
 
 
 func configure(next_class_id: String, color: Color) -> void:
 	class_id = next_class_id
 	body_color = color
 	visible = true
+	queue_redraw()
+
+
+func set_equipment_visual(weapon_item: Dictionary) -> void:
+	if weapon_item.is_empty():
+		_weapon_base_id = ""
+		_weapon_rarity_color = Color("d7dde8")
+		_weapon_enhancement = 0
+	else:
+		_weapon_base_id = String(weapon_item.get("base_id", ""))
+		_weapon_rarity_color = Color.from_string(String(weapon_item.get("rarity_color", "d7dde8")), Color("d7dde8"))
+		_weapon_enhancement = int(weapon_item.get("enhancement_level", 0))
 	queue_redraw()
 
 
@@ -83,7 +99,10 @@ func _draw() -> void:
 	var moving: bool = not _move_direction.is_zero_approx() and _motion_kind == "idle"
 	var step_wave: float = sin(pulse * 13.0) if moving else 0.0
 	var bob: float = roundf(step_wave * 1.0)
-	draw_ellipse(Vector2(0, 10), Vector2(8.0, 2.8), Color(0, 0, 0, 0.48))
+	draw_ellipse(Vector2(0, 11), Vector2(9.5, 3.2), Color(0, 0, 0, 0.50))
+	if not _weapon_base_id.is_empty():
+		var aura_alpha: float = 0.10 + minf(0.18, float(_weapon_enhancement) * 0.006)
+		draw_arc(Vector2.ZERO, 14.5, 0.0, TAU, 28, Color(_weapon_rarity_color, aura_alpha + sin(pulse * 3.0) * 0.03), 1.2)
 
 	var motion_progress: float = 1.0
 	if _motion_duration > 0.0 and _motion_time_left > 0.0:
@@ -104,20 +123,72 @@ func _draw() -> void:
 		"hit":
 			motion_offset.x = -1.5 if int(pulse * 60.0) % 2 == 0 else 1.5
 
-	var texture: Texture2D = CLASS_TEXTURES.get(class_id, CLASS_TEXTURES["warrior"])
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_id, Vector2i.ZERO)
+	var cell_size := Vector2(float(CLASS_ATLAS.get_width()) / 3.0, float(CLASS_ATLAS.get_height()) / 2.0)
+	var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
 	var horizontal_facing: float = -1.0 if _visual_facing.x < -0.08 else 1.0
 	draw_set_transform(motion_offset + Vector2(0, bob), motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
-	draw_texture_rect(texture, Rect2(-12, -18, 24, 24), false)
+	draw_texture_rect_region(CLASS_ATLAS, Rect2(-18, -26, 36, 36), source)
+	_draw_equipped_weapon(motion_progress)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _draw_attack_swing(progress: float, strength: float) -> void:
 	var aim_angle: float = _visual_facing.angle()
-	var sweep_center: float = aim_angle + lerpf(-0.95, 0.95, smoothstep(0.0, 1.0, progress))
+	var sweep_center: float = aim_angle + lerpf(-1.05, 1.05, smoothstep(0.0, 1.0, progress))
 	var alpha: float = sin(progress * PI)
-	var attack_color := Color("fff0c2", alpha * 0.92)
-	draw_arc(_visual_facing * 5.0, 18.0 + strength * 2.0, sweep_center - 0.42, sweep_center + 0.42, 10, attack_color, 2.0, true)
-	draw_arc(_visual_facing * 5.0, 15.0 + strength * 1.5, sweep_center - 0.32, sweep_center + 0.32, 8, Color(body_color, alpha * 0.52), 1.0, true)
+	var rarity_mix: Color = _weapon_rarity_color if not _weapon_base_id.is_empty() else Color("fff0c2")
+	var attack_color := Color(rarity_mix.lightened(0.22), alpha * 0.94)
+	draw_arc(_visual_facing * 6.0, 21.0 + strength * 3.0, sweep_center - 0.46, sweep_center + 0.46, 12, attack_color, 2.5, true)
+	draw_arc(_visual_facing * 5.0, 17.0 + strength * 2.0, sweep_center - 0.34, sweep_center + 0.34, 10, Color(body_color, alpha * 0.55), 1.2, true)
+
+
+func _draw_equipped_weapon(motion_progress: float) -> void:
+	if _weapon_base_id.is_empty():
+		return
+	var color: Color = _weapon_visual_color()
+	var pivot := Vector2(8, -2)
+	var angle: float = -0.55
+	if _motion_kind == "attack":
+		angle = lerpf(-1.25, 1.05, smoothstep(0.0, 1.0, motion_progress))
+	elif _motion_kind == "skill":
+		angle = -0.35 + sin(motion_progress * PI) * 0.55
+	draw_set_transform(pivot, angle, Vector2.ONE)
+	if _weapon_base_id.contains("axe"):
+		draw_rect(Rect2(-1.5, -1, 3, 18), Color("82552f"), true)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(-1, -3), Vector2(9, -7), Vector2(10, 1), Vector2(0, 4)
+		]), color)
+	elif _weapon_base_id.contains("dagger"):
+		draw_rect(Rect2(-1.2, 0, 2.4, 11), Color("7a4a24"), true)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(-2.5, -1), Vector2(0, -13), Vector2(2.5, -1)
+		]), color)
+	else:
+		draw_rect(Rect2(-1.4, 0, 2.8, 11), Color("7a4a24"), true)
+		draw_rect(Rect2(-6, -1, 12, 2.5), Color("d3aa52"), true)
+		draw_colored_polygon(PackedVector2Array([
+			Vector2(-2.1, -1), Vector2(-2.8, -17), Vector2(0, -22), Vector2(2.8, -17), Vector2(2.1, -1)
+		]), color)
+		if _weapon_base_id.contains("magic"):
+			draw_circle(Vector2(0, -13), 2.4, Color("bf8bff"))
+		elif _weapon_base_id.contains("divine"):
+			draw_circle(Vector2(0, -13), 2.6, Color("fff4a8"))
+	if _weapon_enhancement >= 10:
+		draw_arc(Vector2(0, -9), 9.0, 0.0, TAU, 18, Color(_weapon_rarity_color, 0.18 + minf(0.35, float(_weapon_enhancement) * 0.012)), 1.2)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+
+
+func _weapon_visual_color() -> Color:
+	if _weapon_base_id.contains("magic"):
+		return Color("b56dff")
+	if _weapon_base_id.contains("divine"):
+		return Color("ffd866")
+	if _weapon_base_id.contains("axe"):
+		return Color("e4924a")
+	if _weapon_base_id.contains("dagger"):
+		return Color("dce6ee")
+	return _weapon_rarity_color.lightened(0.10)
 
 
 func _skill_visual_color(skill_type: String) -> Color:

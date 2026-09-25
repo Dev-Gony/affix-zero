@@ -120,7 +120,8 @@ func _run() -> void:
 	await get_tree().process_frame
 	var sage_portrait: TextureRect = ui._equipment_row.find_child("ClassPortrait", true, false) as TextureRect
 	_check(GameManager.selected_class == "sage", "Sage becomes the active class")
-	_check(sage_portrait != null and sage_portrait.texture != null and sage_portrait.texture.resource_path.ends_with("sage.png"), "Equipment portrait refreshes immediately to the active sage class")
+	var sage_icon := sage_portrait.texture as AtlasTexture if sage_portrait != null else null
+	_check(sage_icon != null and sage_icon.atlas == GameUI.CLASS_ATLAS and sage_icon.region.position.y > 0.0, "Equipment portrait refreshes immediately to the active sage class")
 
 	var normal_item := {"id": "sale-normal", "item_level": 71, "rarity_index": 0, "rarity_id": "normal", "locked": false, "enhancement_level": 0}
 	var epic_locked := {"id": "sale-epic", "item_level": 71, "rarity_index": 5, "rarity_id": "epic", "locked": true, "enhancement_level": 0}
