@@ -2,8 +2,9 @@
   "schema_version": 1,
   "recorded_date_kst": "2026-09-26",
   "repository": "Dev-Gony/affix-zero",
-  "stage": "R0-01 tooling and R0-04 handoff",
+  "stage": "R0 local inspection received; actual backup pending; E0 acceptance prepared",
   "work_branch": "chore/r0-preservation",
+  "work_pr": 18,
   "parent_candidate_branch": "fix/g6-playtest-recovery",
   "parent_candidate_sha": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
   "parent_candidate_pr": 17,
@@ -12,11 +13,50 @@
   "development_sha": "433948879fdfd23cf1cccaa0ae0c8ce3a0784eae",
   "main_sha": "a1418ad6a52f1a9e41607e29c7ecb56edbb96ab0",
   "game_runtime_changed": false,
-  "user_local_head": null,
+  "user_local_evidence": {
+    "source": "user-uploaded share-summary.json; original kept out of public repository",
+    "captured_utc": "2026-09-25T15:47:42.4675842Z",
+    "expected_origin": true,
+    "branch": "fix/g6-playtest-recovery",
+    "head": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
+    "changed_entries": 0,
+    "stash_count": 15,
+    "matching_process_count": 0,
+    "powershell": "5.1.19041.6456"
+  },
+  "user_local_head": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
+  "user_local_save_path_status": "NOT_CONFIRMED",
   "user_local_backup_status": "NOT_RUN",
   "user_windows_play_approval": "NOT_RUN",
-  "engine": {"legacy": "Godot 4.3", "final": null, "comparison": "NOT_RUN"},
-  "new_tool_ci": "See latest matching SHA Actions run and VALIDATION.md; do not infer PASS",
-  "next_task": "Receive share-summary.json, verify actual save path and byte backup, then E0-01",
+  "engine": {
+    "legacy": "Godot 4.3",
+    "user_reported_executable": "Godot_v4.3-stable_win64.exe",
+    "confirmation_source": "explicit user message; executable path and binary --version not inspected",
+    "final": null,
+    "comparison": "NOT_RUN"
+  },
+  "target_test_pc": {
+    "source": "user inspection report, not a performance measurement",
+    "cpu": "AMD Ryzen 7 5700X 8-Core Processor",
+    "gpu": "NVIDIA GeForce GTX 1050",
+    "ram_gib": 31.9,
+    "os": "Microsoft Windows 10 Pro",
+    "os_build": "19045"
+  },
+  "tool_identity": {
+    "blob": "029d565172abe9545e788447f3596218090d8a7f",
+    "lf_sha256": "3A36CA2F1FFA23C4ED9EA374F47FD83A9A8637CE68FF1D232C16C74A020FAD16",
+    "crlf_sha256": "A74FE34F585968DE3ECBC9DEBD7CF0EDDB8CCA09A0941CCC1DEBD51A0010F637",
+    "normalization_verified": true
+  },
+  "last_verified_ci": {
+    "source_head": "5409a1f41d50cf4df2fc4d2a95c9856bfbabf7a8",
+    "r0_run": 36155964584,
+    "r0_result": "success",
+    "godot_run": 36155964770,
+    "godot_result": "success",
+    "scope": "workflow results rechecked; not user Windows play or E0 evidence"
+  },
+  "next_task": "User opens actual user-data folder with existing Godot 4.3 without F5/F6, closes editor/game, runs pinned Backup tool; verify new backup summary; then isolated E0 scene",
   "reload_remote_before_work": true
 }
