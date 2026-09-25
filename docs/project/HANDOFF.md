@@ -1,45 +1,61 @@
 # AFFIX: ZERO 현재 인수인계
 
-갱신: 2026-09-26 KST. 가장 먼저 ADR-001_ENGINE_ARCHITECTURE.md를 읽는다.
+갱신: 2026-09-26 KST.
 
-## 즉시 적용할 결정
+## 현재 결정과 구현
 
-사용자가 백업 절차 반복을 중단하고 엔진/구조를 지금 선택하도록 요청했다. 새 MVP는 Godot 4.7.2-stable 일반판 + 정적 타입 GDScript + Compatibility다. 기존 4.3 전투 코어를 그대로 확장하지 않고 독립 E0에서 재작성한다. Unity 병렬 구현은 시작하지 않는다. 엔진 성능 우열을 실측한 결정은 아니다.
+- 엔진 기준: Godot 4.7.2-stable 일반판 + typed GDScript + Compatibility.
+- 기존 Godot 4.3 루트 프로젝트는 보존하며 새 엔진으로 열지 않는다.
+- 독립 E0 프로젝트가 실제 생성됨: `experiments/e0-godot/project.godot`.
+- E0-C01 구현 완료: 전사 1종 + 근접 적 1종, 자동 접근, WINDUP -> ACTIVE -> RECOVERY, 피격, 사망, 중복 공격 인스턴스 차단.
+- 전사/적 모두 idle 2, walk 2, attack 3, hit 1, death 2개의 별도 SVG 포즈 프레임을 사용한다. 최종 아트 승인이 아니라 구조 검증용 임시 자산이다.
+- 기존 save.json, SaveManager, autoload, 펫, 가챠, 환생, 인벤토리는 E0에서 읽거나 로드하지 않는다. custom user dir는 `AFFIX_ZERO_E0`다.
 
-백업 완료를 엔진 결정과 기존 저장에 접근하지 않는 E0 제작의 선행 조건으로 삼지 않는다. 과거 E0_ACCEPTANCE/로컬 가이드의 해당 문장은 ADR-001이 대체한다. 원본 저장 덮어쓰기, 원본 프로젝트 업그레이드, 저장 이관은 여전히 검증된 백업과 별도 승인 대상이다.
+## 검증
 
-다음 턴은 E0-C01 실제 구현이다. 초기 점검/버전/저장 경로/백업을 다시 요청하는 답변으로 돌아가지 않는다.
+- 최초 E0 CI에서 Godot 4.7.2의 native `CanvasItem.draw_ellipse()`와 로컬 헬퍼 이름이 충돌해 parse error 발생.
+- 헬퍼를 `_draw_shadow_ellipse()`로 변경해 해결.
+- 커밋 `4db9af2e99050198f28b6739e975230b7e0eb884`의 E0 workflow run `36160446393`에서 import 성공, contract 성공, 로그에 `E0_C01_TEST PASSED` 확인.
+- 이 자동검사는 접근/실제 피해/사망/멀티프레임 계약을 확인한다. Windows 사용자의 시각 승인과 타격감 승인은 아직 NOT_RUN이다.
+- 최신 브랜치에는 동일 런타임 코드에 CI fontconfig/concurrency 정리만 추가되었다. 최신 HEAD는 매 세션 재조회한다.
 
-## 원격/로컬 기준
+## 로컬 기준
 
-- 문서 작업 브랜치 chore/r0-preservation, PR #18 Draft/open, 미병합.
-- 이 결정 커밋의 부모 6e5452bf7c7141d4522ce6d2fcf071fdba57c94a. 이 파일을 포함하는 최신 HEAD는 GitHub에서 조회한다.
-- 새 전투 코드는 후속 전용 브랜치/작은 PR로 만든다. experiments/e0-godot/project.godot은 계획된 경로이며 아직 생성하지 않았다.
-- 기존 복구/사용자 로컬 기준 fix/g6-playtest-recovery / c95b7ba0ab64104470076e4a78cce172b1fd602d, PR #17 미승인.
-- 이전 개발선 dev/gameplay-v5-pets-items / 433948879fdfd23cf1cccaa0ae0c8ce3a0784eae. main a1418ad6a52f1a9e41607e29c7ecb56edbb96ab0. 승인 없이 이동/병합하지 않는다.
-- 마지막 Inspect에서 변경 0개, stash 15개. 현재 상태가 계속 같다고 가정하지 말되 이 기록을 최초 미확인으로 되돌리지 않는다.
-- 사용자 엔진 Godot_v4.3-stable_win64.exe. 시험 PC Ryzen 5700X, GTX1050, 31.9 GiB, Win10 Pro build19045. 새 버전 설치/실행은 아직 미확인.
+- 사용자 원본 작업선: `fix/g6-playtest-recovery` / `c95b7ba0ab64104470076e4a78cce172b1fd602d`.
+- 마지막 점검 당시 미커밋 변경 0, stash 15. 자동 stash pop/drop 금지.
+- 실제 save.json은 v2이며 원본 4.3 데이터로 보존한다. 새 E0는 읽지 않는다.
 
-## 실제 저장 자료
+## 사용자가 지금 확인할 것
 
-사용자는 실제 데이터 폴더를 채팅에서 알려주었고 save.json도 첨부했다. 사용자 이름이 포함된 절대 경로와 실제 저장 원문은 공개 GitHub에 넣지 않는다. v2 진행 데이터를 새 프로젝트에서 자동 읽기/이관/복원하지 않는다. 첨부 수신을 사용자 PC 전체의 바이트 검증 백업 완료로 처리하지 않는다.
+원본 폴더를 건드리지 않기 위해 별도 worktree를 사용한다.
 
-마지막 Backup은 godot/affix 실행 프로세스 검사에서 복사 전 차단됐다. 사용자의 -GameClosed 전달은 확인됐으며 어떤 프로세스가 남았는지는 미확인이다. BACKUP_BLOCKED_PROCESS 상태를 유지한다. 독립 E0 제작에는 이 상태가 차단 조건이 아니다.
+```bash
+cd /d/github/affix
+git fetch origin chore/r0-preservation
+git worktree add -b e0-c01-local /d/github/affix-e0 origin/chore/r0-preservation
+```
 
-## 이번 커밋의 범위와 검증
+그 뒤 Godot 4.7.2 일반판에서 아래 파일만 연다.
 
-엔진/구조 결정 ADR, 현재 ENGINE_GATE, HANDOFF, BASELINE 갱신만 한다. 게임 코드/리소스/아트/실제 세이브/백업 도구는 변경하지 않는다. 신규 엔진 실행, 새 클립 렌더, Windows 게임 승인, 성능 측정은 모두 NOT_RUN이다. 문서 기록을 구현 완료로 부르지 않는다.
+```text
+D:\github\affix-e0\experiments\e0-godot\project.godot
+```
 
-과거 R0 자동검사: 288ae4f 직접 push36155308288 및 6b71fde PR36155807362에서 PS5.1/7 각각34 checks/0 failures. 5409a1f의 R0 36155964584와 Godot smoke36155964770은 이전 세션에서 success 확인. 이전 SHA의 결과를 이 결정 커밋의 테스트 성공으로 재사용하지 않는다.
+F6/F5로 실행한다. 전사와 근접 적이 서로 접근하고, 실제 공격 포즈 3프레임을 거쳐 타격하며, 피격/사망까지 진행되어야 한다. 기존 `D:\github\affix\project.godot`은 4.7.2로 열지 않는다.
 
-## 다음 작업 E0-C01
+다음 pull부터는:
 
-별도 작업 폴더의 독립 Godot4.7.2 프로젝트, 고유 user-data 식별자 AFFIX_ZERO_E0, 기존 autoload 없음, 영구 저장/기존 save 읽기 없음. 실제 전사/근접 적 클립을 출처/라이선스와 함께 검수한 뒤 자동 접근 -> 준비 -> 타격 -> 회복 -> 피격/사망을 구현한다. 원거리/투사체/드랍은 E0-C02, 40적 x1 측정은 E0-C03이다. 원본 root 프로젝트는 새 엔진으로 열지 않는다.
+```bash
+cd /d/github/affix-e0
+git pull --ff-only
+```
 
-첫 표현은 몸/무기 일체형 실제 프레임 애니메이션이다. 정지 원화 회전/도형 검/막대 팔다리로 완성을 주장하지 않는다. 엔진 상태/피해와 표시가 같은 공격 시간표를 쓰도록 한다. UI/전투/정의 데이터를 분리하고 거대 전역 매니저를 재생산하지 않는다.
+## 다음 작업
+
+E0-C02: 원거리 적 + 실제 투사체 이동/충돌 + 드랍/회수 원장. 이후 E0-C03: 40적 x1 부하 측정. 사용자 E0-C01 시각 확인에서 애니메이션/타격감 문제를 발견하면 C02보다 먼저 수정한다.
 
 ## 새 채팅용
 
 ```text
-Dev-Gony/affix-zero 개발을 이어간다. PR #18 및 chore/r0-preservation의 docs/project/HANDOFF.md, ADR-001_ENGINE_ARCHITECTURE.md, BASELINE.json을 먼저 조회하라. 결정은 Godot4.7.2 일반판 + typed GDScript + Compatibility, 기존 전투 코어 독립 재작성이다. 사용자는 백업 절차 반복 대신 지금 엔진 선택을 요구했고 이미 선택했다. 백업은 프로세스 차단 상태지만 원본 저장에 접근하지 않는 E0 제작을 막지 않는다. 다음 작업은 E0-C01 독립 프로젝트와 실제 전사/근접 적 동작/자동 접근/타격 구현이다. 기존4.3 프로젝트/실제save/stash15개는 보존한다. 사용자의 버전/PC/저장경로는 확인됐고 save.json도 첨부됐으니 다시 묻지 마라. 신규엔진 실행/아트/성능은 NOT_RUN이다. 실측하지 않은 성능을 쓰지 마라. Codex 대신 ChatGPT+GitHub, 작은 PR, 정확한 로컬 명령, 트러블슈팅 네 열 표, 마지막 세 항목 체크포인트를 유지하라. 승인 없는 병합/초기화/자동stash복원은 금지한다.
+Dev-Gony/affix-zero 개발을 이어간다. chore/r0-preservation 최신 HEAD와 PR #18을 조회하고 docs/project/HANDOFF.md를 읽어라. 엔진은 Godot4.7.2 일반판 + typed GDScript + Compatibility로 결정됐다. experiments/e0-godot에 E0-C01이 실제 구현되어 있다: 전사/근접 적 자동 접근, WINDUP/ACTIVE/RECOVERY, 피해 1회, 피격/사망, 실제 포즈별 다중 프레임. 4db9af2의 E0 run 36160446393에서 E0_C01_TEST PASSED 확인. 최초 실패는 Godot4.7의 CanvasItem.draw_ellipse 이름 충돌이었고 _draw_shadow_ellipse로 수정했다. 최종 아트/Windows 사용자 승인은 아직 아니다. 원본 fix/g6-playtest-recovery c95b7ba와 stash15, save v2는 건드리지 않는다. 다음은 사용자 E0-C01 시각 확인 후 E0-C02 원거리/투사체/드랍이다. 승인 없는 병합/reset/clean/stash pop 금지. 마지막은 3항목 체크포인트로 끝내라.
 ```
