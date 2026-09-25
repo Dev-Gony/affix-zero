@@ -552,6 +552,7 @@ Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are notic
 - The first V2 CI run failed because the older PR-B safety test still encoded the previous double-transition behavior as the expected contract.
 - The regression was deliberately updated, not bypassed: first ESC closes management while idle combat keeps running; a second ESC explicitly opens the modal pause menu.
 - The next CI pass exposed an older G3.3 layout contract requiring at least 350px management height. V2 had landed at 346px, so the hub was increased by 4px rather than weakening the existing full-detail readability guard.
+- The following full smoke run then failed because it still hard-coded the pre-V2 **six-column inventory grid**. V2 intentionally uses an eight-column desktop grid with a persistent detail pane, so the legacy smoke contract was updated from six to eight columns rather than shrinking the new layout back to fit an obsolete assumption.
 - The redesign intentionally does not replace the existing game art or create a new asset pack yet; layout/hierarchy must be validated first before spending time on decorative art.
 
 ### Verification
