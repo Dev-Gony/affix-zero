@@ -817,7 +817,11 @@ func _spawn_world_loot(world_position: Vector2) -> void:
 	if item.is_empty():
 		return
 	effects.show_drop(world_position, item)
-	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	var rarity_index: int = int(item.get("rarity_index", 0))
+	var pickup_delay: float = LOOT_PICKUP_DELAY + float(rarity_index) * 0.22
+	if rarity_index >= 4:
+		pickup_delay += 0.55
+	await get_tree().create_timer(pickup_delay, false).timeout
 	if not is_inside_tree():
 		return
 	if LootManager.collect_item(item):
