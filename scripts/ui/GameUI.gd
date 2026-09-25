@@ -810,16 +810,17 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	var card := PanelContainer.new()
 	card.custom_minimum_size = Vector2(176, 80)
 	card.set_meta("equipment_slot", slot)
-	var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-	var card_background := Color("111720") if item.is_empty() else Color("111720").lerp(border_color, 0.08)
-	card.add_theme_stylebox_override("panel", _style_box(card_background, border_color, 2 if not item.is_empty() else 1, 2))
+	var rarity_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
+	var card_background := Color("111720") if item.is_empty() else Color("111720").lerp(rarity_color, 0.055)
+	var structural_border := Color("334155") if item.is_empty() else Color("46576a")
+	card.add_theme_stylebox_override("panel", _style_box(card_background, structural_border, 1, 2))
 	var card_row := HBoxContainer.new()
-	card_row.add_theme_constant_override("separation", 2)
+	card_row.add_theme_constant_override("separation", 3)
 	card.add_child(card_row)
-	var equipped_marker := ColorRect.new()
-	equipped_marker.custom_minimum_size = Vector2(3, 0)
-	equipped_marker.color = COLOR_GREEN if not item.is_empty() else Color(0, 0, 0, 0)
-	card_row.add_child(equipped_marker)
+	var rarity_strip := ColorRect.new()
+	rarity_strip.custom_minimum_size = Vector2(4, 0)
+	rarity_strip.color = rarity_color if not item.is_empty() else Color("252d38")
+	card_row.add_child(rarity_strip)
 	var content := VBoxContainer.new()
 	content.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	content.add_theme_constant_override("separation", 0)
@@ -854,7 +855,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 		var enhancement_text: String = " +%d" % enhancement_level if enhancement_level > 0 else ""
 		item_label.text = "%s%s · %d" % [String(item.get("base_name", item.get("name", ""))), enhancement_text, int(item.get("item_level", 1))]
 		item_label.tooltip_text = _format_item_details(item)
-		item_label.add_theme_color_override("font_color", border_color)
+		item_label.add_theme_color_override("font_color", rarity_color)
 	content.add_child(item_label)
 
 	var enhancement_hint := Label.new()
@@ -1177,23 +1178,16 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var at_cap: bool = level >= max_level
 	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size.y = 78
-	panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("3a4758"), 1, 0))
+	panel.custom_minimum_size.y = 72
+	panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("3a4758"), 1, 2))
 	_skills_list.add_child(panel)
 	var row := HBoxContainer.new()
-	row.add_theme_constant_override("separation", 5)
+	row.add_theme_constant_override("separation", 7)
 	panel.add_child(row)
-	var mark_panel := PanelContainer.new()
-	mark_panel.custom_minimum_size = Vector2(58, 58)
-	mark_panel.add_theme_stylebox_override("panel", _style_box(Color("18202a"), COLOR_GOLD.darkened(0.28), 1, 0))
-	row.add_child(mark_panel)
-	var mark_label := Label.new()
-	mark_label.text = title.substr(0, mini(2, title.length()))
-	mark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	mark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mark_label.add_theme_font_size_override("font_size", 9)
-	mark_label.add_theme_color_override("font_color", COLOR_GOLD)
-	mark_panel.add_child(mark_label)
+	var accent_strip := ColorRect.new()
+	accent_strip.custom_minimum_size = Vector2(4, 0)
+	accent_strip.color = COLOR_GOLD.darkened(0.08)
+	row.add_child(accent_strip)
 	var text_column := VBoxContainer.new()
 	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text_column)
@@ -1216,13 +1210,13 @@ func _add_skill_row(definition: Dictionary) -> void:
 	description_label.add_theme_color_override("font_color", COLOR_MUTED)
 	text_column.add_child(description_label)
 	var actions := VBoxContainer.new()
-	actions.custom_minimum_size = Vector2(104, 58)
+	actions.custom_minimum_size = Vector2(118, 58)
 	actions.add_theme_constant_override("separation", 2)
 	row.add_child(actions)
 
 	var one_button := Button.new()
 	one_button.text = "+1  %dG" % cost
-	one_button.custom_minimum_size = Vector2(104, 17)
+	one_button.custom_minimum_size = Vector2(118, 18)
 	one_button.add_theme_font_size_override("font_size", 6)
 	one_button.disabled = at_cap or GameManager.gold < cost
 	one_button.tooltip_text = "1레벨 강화 · 환생할 때마다 최대 레벨 +%d · 현재 골드 %dG" % [GameManager.CLASS_SKILL_LEVELS_PER_REBIRTH, GameManager.gold]
@@ -1233,7 +1227,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var ten_cost: int = GameManager.skill_upgrade_total_cost(skill_id, base_cost, cost_step, ten_count)
 	var ten_button := Button.new()
 	ten_button.text = "+%d  %dG" % [ten_count, ten_cost] if ten_count > 0 else "+10"
-	ten_button.custom_minimum_size = Vector2(104, 17)
+	ten_button.custom_minimum_size = Vector2(118, 18)
 	ten_button.add_theme_font_size_override("font_size", 6)
 	ten_button.disabled = ten_count <= 0
 	ten_button.tooltip_text = "최대 10레벨 한 번에 강화"
@@ -1243,7 +1237,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var max_count: int = GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
 	var max_button := Button.new()
 	max_button.text = "MAX +%d" % max_count if max_count > 0 else "MAX"
-	max_button.custom_minimum_size = Vector2(104, 17)
+	max_button.custom_minimum_size = Vector2(118, 18)
 	max_button.add_theme_font_size_override("font_size", 6)
 	max_button.disabled = max_count <= 0
 	max_button.tooltip_text = "현재 골드로 가능한 만큼 한 번에 강화"
@@ -1309,11 +1303,19 @@ func _refresh_rebirth() -> void:
 	rebirth_button.pressed.connect(_rebirth)
 	left.add_child(rebirth_button)
 
+	var upgrade_header := HBoxContainer.new()
+	_rebirth_content.add_child(upgrade_header)
 	var upgrade_title := Label.new()
 	upgrade_title.text = "영구 성장"
+	upgrade_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	upgrade_title.add_theme_font_size_override("font_size", 10)
 	upgrade_title.add_theme_color_override("font_color", COLOR_GOLD)
-	_rebirth_content.add_child(upgrade_title)
+	upgrade_header.add_child(upgrade_title)
+	var upgrade_hint := Label.new()
+	upgrade_hint.text = "포인트 1개당 영구 적용"
+	upgrade_hint.add_theme_font_size_override("font_size", 7)
+	upgrade_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	upgrade_header.add_child(upgrade_hint)
 
 	var upgrades := GridContainer.new()
 	upgrades.name = "PermanentUpgradeGrid"
@@ -1331,8 +1333,12 @@ func _refresh_rebirth() -> void:
 func _add_permanent_button(parent: GridContainer, stat_name: String, benefit: String) -> void:
 	var button := Button.new()
 	button.text = "%s\n강화 %d" % [benefit, int(GameManager.permanent_upgrades.get(stat_name, 0))]
-	button.custom_minimum_size = Vector2(136, 62)
+	button.custom_minimum_size = Vector2(136, 70)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	button.add_theme_font_size_override("font_size", 9)
+	if GameManager.rebirth_points > 0:
+		button.add_theme_stylebox_override("normal", _style_box(Color("151c25"), COLOR_GOLD.darkened(0.20), 1, 2))
+		button.add_theme_stylebox_override("hover", _style_box(Color("202936"), COLOR_GOLD, 2, 2))
 	button.disabled = GameManager.rebirth_points <= 0
 	button.tooltip_text = "영구 포인트 1 소모 · 현재 %d포인트" % GameManager.rebirth_points
 	button.pressed.connect(_buy_permanent.bind(stat_name))
