@@ -5,6 +5,9 @@ var player_target: Node2D
 var _pet_data: PetData
 var _clock: float = 0.0
 var _last_position: Vector2 = Vector2.ZERO
+var _attack_left: float = 0.0
+var _support_left: float = 0.0
+var _attack_direction: Vector2 = Vector2.RIGHT
 
 
 func _ready() -> void:
@@ -22,6 +25,8 @@ func bind_player(player: Node2D) -> void:
 
 func _process(delta: float) -> void:
 	_clock += delta
+	_attack_left = maxf(0.0, _attack_left - delta)
+	_support_left = maxf(0.0, _support_left - delta)
 	if player_target == null or not is_instance_valid(player_target) or not player_target.visible or _pet_data == null:
 		visible = false
 		return
@@ -31,6 +36,19 @@ func _process(delta: float) -> void:
 	var desired: Vector2 = player_target.global_position + follow_offset
 	global_position = global_position.lerp(desired, 1.0 - exp(-delta * 7.5))
 	_last_position = global_position
+	queue_redraw()
+
+
+func play_attack(world_target: Vector2) -> void:
+	_attack_direction = global_position.direction_to(world_target)
+	if _attack_direction.is_zero_approx():
+		_attack_direction = Vector2.RIGHT
+	_attack_left = 0.24
+	queue_redraw()
+
+
+func play_support() -> void:
+	_support_left = 0.42
 	queue_redraw()
 
 
@@ -60,12 +78,19 @@ func _draw() -> void:
 	var stars: int = PetManager.stars_for(_pet_data.id)
 	var evolution_scale: float = 1.0 + float(stars - 1) * 0.07
 	var aura_alpha: float = 0.05 + float(stars - 1) * 0.035
+	var attack_progress: float = 1.0 - (_attack_left / 0.24) if _attack_left > 0.0 else 0.0
+	var attack_offset: Vector2 = _attack_direction * sin(attack_progress * PI) * 7.0 if _attack_left > 0.0 else Vector2.ZERO
+	var support_pulse: float = sin((1.0 - _support_left / 0.42) * PI) if _support_left > 0.0 else 0.0
 	draw_circle(Vector2(0, 7 + bob), 8.5 * evolution_scale, Color(color, 0.10))
+	if support_pulse > 0.0:
+		draw_arc(Vector2.ZERO, 12.0 + support_pulse * 10.0, 0.0, TAU, 24, Color("8ff7c0", 0.55 * support_pulse), 2.0)
+		draw_arc(Vector2.ZERO, 18.0 + support_pulse * 7.0, 0.0, TAU, 24, Color(color, 0.28 * support_pulse), 1.0)
 	if stars >= 2:
 		draw_arc(Vector2(0, bob), 10.0 + stars * 1.5, 0.0, TAU, 20, Color(color, aura_alpha), 1.0 + stars * 0.18)
 	if stars >= 4:
 		draw_arc(Vector2(0, bob), 15.0 + sin(_clock * 3.0) * 1.5, -0.6, PI + 0.6, 22, Color(color.lightened(0.25), aura_alpha * 1.35), 1.2)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * evolution_scale)
+	var attack_tilt: float = sin(attack_progress * PI) * 0.14 * signf(_attack_direction.x) if _attack_left > 0.0 else 0.0
+	draw_set_transform(attack_offset, attack_tilt, Vector2.ONE * evolution_scale)
 	match _pet_data.id:
 		"spirit_fox":
 			_draw_fox(color, bob)
