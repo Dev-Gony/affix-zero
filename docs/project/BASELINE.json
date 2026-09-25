@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "recorded_date_kst": "2026-09-26",
+  "repository": "Dev-Gony/affix-zero",
+  "stage": "R0-01 tooling and R0-04 handoff",
+  "work_branch": "chore/r0-preservation",
+  "parent_candidate_branch": "fix/g6-playtest-recovery",
+  "parent_candidate_sha": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
+  "parent_candidate_pr": 17,
+  "parent_candidate_approved": false,
+  "development_branch": "dev/gameplay-v5-pets-items",
+  "development_sha": "433948879fdfd23cf1cccaa0ae0c8ce3a0784eae",
+  "main_sha": "a1418ad6a52f1a9e41607e29c7ecb56edbb96ab0",
+  "game_runtime_changed": false,
+  "user_local_head": null,
+  "user_local_backup_status": "NOT_RUN",
+  "user_windows_play_approval": "NOT_RUN",
+  "engine": {"legacy": "Godot 4.3", "final": null, "comparison": "NOT_RUN"},
+  "new_tool_ci": "See latest matching SHA Actions run and VALIDATION.md; do not infer PASS",
+  "next_task": "Receive share-summary.json, verify actual save path and byte backup, then E0-01",
+  "reload_remote_before_work": true
+}

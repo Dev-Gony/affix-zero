@@ -1,46 +1,36 @@
-# AFFIX: ZERO — implementation rules
+# AFFIX: ZERO 개발 규칙
 
-## Authority and current milestone
+## 현재 기준
 
-This project is developed through ChatGPT + GitHub PRs. Codex CLI is not required.
-Read `docs/uiux-v1/README.md`, `docs/uiux-v1/spec_lock.json`, and `docs/uiux-v1/IMPLEMENTATION_ORDER.md` before editing.
-The user-approved **AFFIX_ZERO_UIUX_MASTER_v1.0.md** and its contracts/QA package are the design authority. Its exact package and document hashes are pinned in spec_lock.json. The package is a detached handoff, not an implemented game or a claim that all its files already exist in this repository. If implementing a later milestone without that handoff, obtain it before guessing missing details.
+먼저 `docs/project/HANDOFF.md`, `docs/project/BASELINE.json`, `docs/project/DECISIONS.md`, `docs/project/R0_LOCAL_GUIDE.md`를 읽는다. 현재 단계는 R0 원본 보존과 E0 엔진 결정 준비다. 예전 PR-A 단계로 돌아가지 않는다.
 
-Precedence: explicit user change recorded in a decision record > approved v1.0 master/contracts > these engineering rules > stage-specific design pages. Files under `docs/uiux-v1/archive/` are historical evidence, not instructions.
+사용자는 ChatGPT 채팅+GitHub 개발, 작은 MVP 우선, 필요 시 엔진 전환과 전투 코어 재구축을 명시했다. Codex 실행을 요구하지 않는다. Godot은 현재 엔진이지 최종 고정 조건이 아니다. 기존 코드가 많다는 이유로 유지하지 않는다. 실제 비교하지 않고 타 엔진이 더 빠르거나 더 적합하다고 단정하지 않는다.
 
-Current milestone: **PR-A / baseline, backup, build identification**. Runtime remains 640x400, default window 1280x800 in PR-A. Target UI1280x720/world640x360 is implemented only in PR-C. Do not partially rescale the world, change movement ranges, or insert future UI while doing PR-A.
+기존 `docs/uiux-v1/` 명세는 과거 기준과 자산 보존 계약을 확인하는 자료다. 명시적인 최신 사용자 결정 > 결정 기록 > 해당 작업의 승인된 명세 > 이 규칙 순서로 적용한다. 과거 원문은 `docs/project/archive/`에 보존했다. 아카이브의 오래된 현재 단계나 완료 주장을 새 개발 상태로 취급하지 않는다.
 
-## Non-negotiable invariants
+## 범위와 데이터 보존
 
-- Godot 4.3-compatible GDScript. Keep static typing where supported.
-- Preserve 7 equipment slots, 60 inventory slots, 6 rarity IDs (Normal/Magic/Rare/Unique/Legendary/Epic), 6 classes and x1/x2/x5.
-- Rebirth preserves gold, inventory, equipped/locked items, class mastery, permanent progress and settings.
-- View filtering, future pickup policy, and selling existing items are separate actions. A filter change must never sell possessions.
-- Menus must eventually pause ALL simulation through a single coordinator; do not independently force GameState.RUNNING from every close handler.
-- A reward's ownership must not depend on the lifetime of a visual effect.
-- Save failure must not be presented as success. PR-A protects the original input with an immutable raw backup; full atomic saving and controlled exit belong to PR-B.
-- Never downgrade future save versions or silently discard legacy/unknown data.
-- No paid currencies, ads, shops, synthesis, offline rewards, or other scope additions.
-- Use existing approved art until a replacement has separate visual approval. Do not replace sprites with geometric stand-ins and call it an art upgrade.
+- 현재 런타임은 Godot 4.3 재현용으로 그대로 둔다. 새 엔진/버전 설치 및 자동 변환은 E0 결정 전 시행하지 않는다.
+- 장비 7슬롯, 가방 60칸, 6등급, 6직업, x1/x2/x5와 기존 소유권을 삭제하지 않는다. MVP의 한 캐릭터 검증은 기존 자산 삭제가 아니다.
+- 환생은 골드, 가방, 장착/잠금 장비, 직업 숙련도와 영구 진행/설정 보존 계약을 유지한다.
+- 필터, 미래 획득 정책, 기존 아이템 판매는 서로 다른 동작이다.
+- 보상 소유권은 이펙트 수명과 분리한다. 저장 실패를 성공으로 표시하지 않는다. 미지/미래 저장 데이터를 버리거나 다운그레이드하지 않는다.
+- 새 시험 프로젝트는 기존 user://와 격리한다. 실제 저장에 자동 로드, 변환, 복원하지 않는다.
+- 최종 아트 승인은 별도다. 정지 원화의 흔들기나 도형 대체를 완성된 프레임 애니메이션이라고 보고하지 않는다.
+- 이번 R0에서 게임 코드, 직업/펫/가챠, 시즌, 상점, 광고, 오프라인 보상을 추가하지 않는다.
 
-## Implementation discipline
+## 작업 절차
 
-- Use custom Resource/.tres data for balance. Do not duplicate formulas in UI strings.
-- Keep GameManager as a compatibility facade while moving responsibilities incrementally. Do not create an autoload for every helper.
-- Keep UI commands out of rendering callbacks. Use stable item IDs and signals.
-- Inspect the actual branch and HEAD; code search on the default branch is not evidence about a feature branch.
-- Stage changes in a dedicated PR branched from the verified development baseline. Do not mix PR-A through PR-H in a single change.
-- Do not merge into main without user play approval.
+실제 원격 브랜치와 HEAD 확인 -> 작은 범위/완료 기준 -> 코드 -> 자동검사 -> 필요한 실제 렌더 -> 사용자 Windows 확인 -> 승인 후 통합 순서로 진행한다. main만 검색해 개발 브랜치 상태를 판단하지 않는다. 전투 변경 시 기존 assertions를 약화해 통과시키지 않는다.
 
-## Verification and reporting
+기존 Godot 테스트는 격리된 XDG_DATA_HOME과 `-- --affix-test-mode`를 사용한다. 테스트 장면이 켜진 뒤 저장을 끄는 것만으로 autoload 시작 부작용이 차단됐다고 가정하지 않는다. R0 PowerShell 테스트는 합성 임시 폴더만 사용하며 실제 저장을 요구하지 않는다.
 
-- Existing `tests/smoke_test.gd` assertions must not be weakened to make a PR pass.
-- Launch tests with `-- --affix-test-mode` and an isolated XDG_DATA_HOME. This prevents autoload startup from loading/writing a real player save before the test scene can disable persistence.
-- PR-A adds `tests/pr_a_safety.tscn` and `tests/pr_a_capture.tscn`; CI publishes logs and actual rendered PNGs.
-- Report automation, actual render inspection and Windows play approval separately. A fixture is not a player's recovered data; a headless pass is not an art approval.
-- For local sync: close the game AND editor first. Preserve local changes with an explicitly named stash/commit. Use fast-forward-only pulls. Never default to reset --hard or git clean.
-- Run the project with F5, not an arbitrary current scene with F6.
+로컬 변경이 있으면 자동 stash/commit/복원하지 않는다. force push, reset --hard, git clean, 저장 초기화는 기본 절차에서 금지한다. 동기화는 게임/에디터 종료와 보존 확인 후 정확한 브랜치에서 `git pull --ff-only`로 한다. 오류가 나면 중단한다. 기존 프로젝트는 F5로 실행한다.
 
-## Handoff format
+## 보고와 인수인계
 
-State: changed items (max 3), tests actually run, unverified items, exact branch/commit, safe local commands, user checks (max 3), rollback. Never claim work continues in the background after the response ends.
+코드 존재, 자동검사, 실제 렌더, 사용자 Windows 승인, 엔진 실측을 구분한다. 브랜치/커밋/PR과 실제 실행한 검사를 기록한다. 이전 SHA의 PASS를 새 HEAD의 PASS로 복사하지 않는다. 사용자 승인 없는 PR 병합은 하지 않는다.
+
+오류/해결은 `문제 발생 지점 | 원인 분석 | 해결 방법 및 적용된 코드 개념 | 배운 점` 네 열 표에 남긴다. 로컬에서 해야 할 명령과 설정을 빠뜨리지 않는다. 파일/도구/메뉴를 아직 만들지 않았다면 있다고 지시하지 않는다.
+
+모든 사용자 답변 끝에 `[진행 상황 체크포인트]`와 `[현재까지 구현된 핵심 기능]`, `[방금 해결한 문제/작성한 코드]`, `[다음 턴에 이어서 해야 할 작업]`를 적는다. 채팅 밖 백그라운드 작업을 약속하지 않는다.

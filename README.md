@@ -1,76 +1,32 @@
 # AFFIX: ZERO
 
-AFFIX: ZERO is a playable Godot 4.3 idle hack-and-slash prototype under active development. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
+개발 중인 2D 자동전투·장비 파밍 게임입니다. Hero Siege식 장비/빌드 깊이, Survivor.io식 전투 가독성과 짧은 성장 선택을 결합하는 방향으로 전투 코어를 재검토하고 있습니다.
 
-## Run the game
+**현재 단계: R0 원본 보존 -> E0 엔진·아트 파이프라인 검증.** 현재 Godot 프로젝트가 있다고 최종 엔진을 Godot으로 고정하지 않습니다. 전환이 더 적합하다는 실제 근거가 나오면 초기에 전환합니다.
 
-1. Open `project.godot` in Godot 4.3.
-2. Press **F6/F5** to run `scenes/main.tscn`.
-3. Select Warrior or Mage. The remaining four classes unlock through rebirths.
+## 이어서 작업하기
 
-The internal pixel-art resolution is 640x400 and the default desktop window is 1280x800. The extra vertical room preserves the battle view while the compatibility renderer keeps the project suitable for desktop and web exports.
+- [현재 인수인계](docs/project/HANDOFF.md)
+- [브랜치와 기준 상태](docs/project/BASELINE.json)
+- [로컬 점검·세이브 백업](docs/project/R0_LOCAL_GUIDE.md)
+- [엔진 검증 기준](docs/project/ENGINE_GATE.md)
+- [결정 기록](docs/project/DECISIONS.md)
+- [트러블슈팅](docs/project/TROUBLESHOOTING.md)
 
-Keyboard shortcuts: `1`-`5` open or close the equipment, inventory, skill, rebirth, and stats windows, while `Escape` closes the active window. `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
+`main`은 최신 누적 개발선이 아닙니다. `fix/g6-playtest-recovery`는 PR #17의 미승인 복구 후보이고, `chore/r0-preservation`은 그 코드 위에 점검 도구와 인수인계만 추가한 분리 브랜치입니다. 이 브랜치를 만들었다고 #17을 승인/병합한 것은 아닙니다.
 
-Every pull request CI run also publishes two downloadable playable artifacts:
+## 구현과 미완료
 
-- `AFFIX-ZERO-windows`: unzip and run `AFFIX_ZERO.exe`.
-- `AFFIX-ZERO-web`: serve the extracted folder with any static HTTP server and open `index.html`.
+기존 코드에는 자동전투, 6직업, 장비 7슬롯/가방 60칸/6등급, 강화, 환생, 펫과 무료 재화 소환이 있습니다. 복구 후보는 소환 결과 표시와 전투 판정/펫 간격 등을 다룹니다. 다중 프레임 캐릭터·몬스터·새 펫 아트·통일된 던전·x5 시각 품질은 최종 승인되지 않았습니다.
 
-## Implemented systems
+MVP-A는 첫 캐릭터 1종·적 3유형·보스 1종·던전 한 테마에서 전투/장비/저장 품질을 검증하는 범위입니다. 기존 직업·소유권 삭제가 아닙니다. MVP-B와 도감·환생 확장·가챠 확장·아바타·오프라인·시즌은 후속 계획입니다.
 
-- Fixed-center automatic combat with nearest-target attacks and 3-second class skills
-- Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
-- Six classes with distinct stats, unlock requirements, and skill visuals
-- Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
-- Diablo-style 3x3 equipment paper doll, 60-slot scrollable loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
-- Compact five-button management dock with focused right-side windows so combat remains visible while managing a build
-- Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
-- Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
-- Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
-- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, individual loot icons, and equipment comparison deltas
-- x1/x2/x5 combat speed control
-- Complete JSON save/load state with a real-time 30-second autosave interval
-- Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
-- Drop-in OGG overrides under `assets/bgm/` and `assets/sfx/` automatically replace procedural audio
+## 기존 실행본 재현
 
-Procedural audio is active by default. Matching `.ogg` files placed in `assets/bgm/` and `assets/sfx/` override it automatically; expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
+실제 로컬 상태와 세이브를 먼저 보존합니다. 현재 실행본을 재현할 때만 기존 Godot 4.3으로 `project.godot`을 열고 F5를 누릅니다. 새 버전으로 원본을 자동 변환하지 않습니다. 현재 프로젝트 설정은 640x400, 기본 창 1280x800, Compatibility 렌더러입니다.
 
-## Project structure
+R0 도구는 게임을 실행하지 않습니다. 설치 없이 Windows PowerShell 5.1 이상과 기존 Git을 사용합니다. 자동 점검은 세이브 백업이나 엔진 성능 검증을 대신하지 않습니다.
 
-```text
-affix-zero/
-|-- project.godot
-|-- scenes/
-|   |-- main.tscn
-|   |-- battle/
-|   |-- ui/
-|   `-- effects/
-|-- scripts/
-|   |-- autoloads/       # State, save, loot, and audio managers
-|   |-- combat/          # Battle loop, enemies, damage, projectiles, effects
-|   |-- loot/            # Resource-driven item generation
-|   |-- progression/     # Level and rebirth systems
-|   `-- ui/              # HUD, tabs, inventory, and class selection
-|-- resources/
-|   |-- items/           # Item bases, rarities, and affixes
-|   |-- enemies/         # Eight enemy balance resources
-|   `-- classes/         # Six class balance resources
-|-- assets/
-|   |-- sprites/
-|   |-- sfx/
-|   `-- bgm/
-`-- tests/              # Automated smoke test and visual-QA capture scenes
-```
+기존 회귀 테스트를 직접 실행할 때는 별도 사용자 데이터 디렉터리와 `-- --affix-test-mode`를 반드시 사용합니다. 과거 README의 격리 없는 smoke 명령을 그대로 실행하지 않습니다. Windows/Web 산출물의 존재와 최신 실행 성공은 해당 커밋의 Actions 결과로 다시 확인합니다.
 
-## Validation
-
-Run the automated Godot smoke test from a terminal:
-
-```powershell
-godot --headless --path . res://tests/smoke_test.tscn
-```
-
-The test exercises automatic combat and floor progression, all six class skills, loot generation, equipment, JSON state serialization, rebirth, and UI loading. Persistence is disabled by the test runner, so it never overwrites the player's `user://save.json` file.
-
-Pull requests and pushes to `main` run the same smoke test through `.github/workflows/godot-smoke-test.yml` using Godot 4.3.
+이전 README/AGENTS는 `docs/project/archive/`에 바이트 그대로 보관했습니다. 전체 개발 마스터 v0.2는 이전 채팅의 첨부 패키지이며, 이번 문서군은 실행 인수인계입니다. 전체 12개 문서를 이 폴더에 수록했다고 주장하지 않습니다.
