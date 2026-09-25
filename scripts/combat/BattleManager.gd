@@ -149,9 +149,11 @@ func _draw() -> void:
 		if corridor.size.is_zero_approx():
 			continue
 		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
-		var corridor_tint: Color = Color("6a5960") if pair.x % 2 == 0 else Color("9a735c")
+		var corridor_tint: Color = Color("51464f") if pair.x % 2 == 0 else Color("735645")
+		_draw_tiled_rect(corridor.grow(6.0), WALL_TILE, Color("24222a"))
 		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
-	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.10), true)
+		_draw_corridor_gate(pair.x, pair.y)
+	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.18), true)
 
 
 func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
@@ -172,6 +174,33 @@ func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
 	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.end.y), Vector2(walk.size.x + wall * 2.0, wall)), texture, tint.darkened(0.12))
 	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
 	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
+
+
+func _draw_corridor_gate(room_a: int, room_b: int) -> void:
+	var grid_a := WorldLayout.room_grid(room_a)
+	var grid_b := WorldLayout.room_grid(room_b)
+	var walk_a := WorldLayout.walk_rect(room_a)
+	var walk_b := WorldLayout.walk_rect(room_b)
+	var gate_color := Color("28232b")
+	var edge_color := Color("6f5c55")
+	if grid_a.y == grid_b.y:
+		var left: Rect2 = walk_a if grid_a.x < grid_b.x else walk_b
+		var right: Rect2 = walk_b if grid_a.x < grid_b.x else walk_a
+		for gate_x: float in [left.end.x - 4.0, right.position.x + 4.0]:
+			var center_y: float = left.get_center().y
+			draw_rect(Rect2(gate_x - 5.0, center_y - 38.0, 10.0, 76.0), gate_color, true)
+			draw_rect(Rect2(gate_x - 7.0, center_y - 40.0, 14.0, 8.0), edge_color, true)
+			draw_rect(Rect2(gate_x - 7.0, center_y + 32.0, 14.0, 8.0), edge_color.darkened(0.18), true)
+			draw_circle(Vector2(gate_x, center_y - 28.0), 2.0, Color("ff9c4a", 0.75))
+	else:
+		var top: Rect2 = walk_a if grid_a.y < grid_b.y else walk_b
+		var bottom: Rect2 = walk_b if grid_a.y < grid_b.y else walk_a
+		for gate_y: float in [top.end.y - 4.0, bottom.position.y + 4.0]:
+			var center_x: float = top.get_center().x
+			draw_rect(Rect2(center_x - 38.0, gate_y - 5.0, 76.0, 10.0), gate_color, true)
+			draw_rect(Rect2(center_x - 40.0, gate_y - 7.0, 8.0, 14.0), edge_color, true)
+			draw_rect(Rect2(center_x + 32.0, gate_y - 7.0, 8.0, 14.0), edge_color.darkened(0.18), true)
+			draw_circle(Vector2(center_x - 28.0, gate_y), 2.0, Color("ff9c4a", 0.75))
 
 
 func _draw_room_decor(room_index: int, walk: Rect2, theme_index: int) -> void:
