@@ -1,9 +1,9 @@
 {
-  "version": "uiux-v2.2",
-  "stage": "UIUX-V2",
+  "version": "g5.0",
+  "stage": "GAMEPLAY-V5",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/uiux-v2-final-polish",
+  "branch": "dev/gameplay-v5-pets-items",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }
