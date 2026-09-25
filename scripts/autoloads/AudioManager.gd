@@ -71,6 +71,7 @@ const SFX_NOTE_LENGTHS: Dictionary = {
 var _bgm_players: Dictionary = {}
 var _sfx_players: Dictionary = {}
 var _current_bgm: String = ""
+var master_volume: float = 1.0
 
 
 func _ready() -> void:
@@ -92,6 +93,15 @@ func _ready() -> void:
 		player.stream = load(path) if ResourceLoader.exists(path) else _create_sfx_stream(effect_name)
 		add_child(player)
 		_sfx_players[effect_name] = player
+
+
+func set_master_volume(value: float) -> void:
+	master_volume = clampf(value, 0.0, 1.0)
+	var db: float = linear_to_db(master_volume) if master_volume > 0.001 else -80.0
+	for player: AudioStreamPlayer2D in _bgm_players.values():
+		player.volume_db = db - 10.0
+	for player: AudioStreamPlayer2D in _sfx_players.values():
+		player.volume_db = db - 2.0
 
 
 func play_bgm_for_floor(current_floor: int) -> void:

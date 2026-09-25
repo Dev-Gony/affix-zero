@@ -1,12 +1,16 @@
 extends Node2D
 class_name EnemyAI
 
-const ENEMY_ATLAS: Texture2D = preload("res://assets/sprites/enemy_atlas_alpha.png")
-const ENEMY_REGIONS: Dictionary = {
-	"slime": Vector2i(0, 0), "bat": Vector2i(1, 0), "skeleton": Vector2i(2, 0), "goblin": Vector2i(3, 0),
-	"dark_knight": Vector2i(0, 1), "lich": Vector2i(1, 1), "dragon": Vector2i(2, 1), "demon_lord": Vector2i(3, 1),
+const ENEMY_TEXTURES := {
+	"slime": preload("res://assets/cc0/pixelboy/slime.png"),
+	"bat": preload("res://assets/cc0/pixelboy/bat.png"),
+	"skeleton": preload("res://assets/cc0/pixelboy/skeleton.png"),
+	"goblin": preload("res://assets/cc0/pixelboy/goblin.png"),
+	"dark_knight": preload("res://assets/cc0/pixelboy/dark_knight.png"),
+	"lich": preload("res://assets/cc0/pixelboy/lich.png"),
+	"dragon": preload("res://assets/cc0/pixelboy/dragon.png"),
+	"demon_lord": preload("res://assets/cc0/pixelboy/demon_lord.png"),
 }
-
 signal died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int)
 signal attacked_player(enemy: EnemyAI, raw_damage: float)
 signal damage_received(world_position: Vector2, damage: int, critical: bool)
@@ -176,39 +180,35 @@ func _die() -> void:
 
 func _draw() -> void:
 	var enemy_id: String = enemy_data.id if enemy_data != null else "slime"
-	var atlas_cell: Vector2i = ENEMY_REGIONS.get(enemy_id, Vector2i.ZERO)
-	var source := Rect2(atlas_cell.x * 384, atlas_cell.y * 512, 384, 512)
-	var sprite_size: float = clampf(radius * 3.7, 28.0, 54.0)
+	var texture: Texture2D = ENEMY_TEXTURES.get(enemy_id, ENEMY_TEXTURES["slime"])
 	var reveal: float = clampf(1.0 - _spawn_reveal_left / 0.32, 0.0, 1.0)
 	var death_alpha: float = clampf(_death_time_left / _death_duration, 0.0, 1.0) if _dead else 1.0
 	var alpha: float = reveal * death_alpha
-	var sprite_modulate := Color(1.65, 1.65, 1.65, reveal) if _hit_flash_left > 0.0 else Color(1.0, 1.0, 1.0, reveal)
-	sprite_modulate.a = alpha
 	var distance_to_target: float = global_position.distance_to(target.global_position) if target != null and is_instance_valid(target) else 0.0
 	var moving: bool = not _dead and _spawn_reveal_left <= 0.0 and distance_to_target > radius + 11.0
 	var step_wave: float = sin(_motion_clock * (10.0 if enemy_id == "bat" else 7.0)) if moving else sin(_motion_clock * 3.0) * 0.25
-	var bob: float = roundf(step_wave * (2.0 if enemy_id == "bat" else 1.0))
-	var squash := Vector2(1.0, 1.0)
-	if enemy_id == "slime":
-		squash = Vector2(1.0 + step_wave * 0.06, 1.0 - step_wave * 0.06)
-	if _dead:
-		squash = Vector2(1.0 + (1.0 - death_alpha) * 0.45, maxf(0.12, death_alpha))
-	draw_circle(Vector2(0, sprite_size * 0.28), sprite_size * 0.28, Color(0, 0, 0, 0.35 * alpha))
+	var bob: float = roundf(step_wave * (2.0 if enemy_id == "bat" else 0.8))
+	var size_map := {
+		"slime": 22.0, "bat": 24.0, "skeleton": 26.0, "goblin": 25.0,
+		"dark_knight": 34.0, "lich": 32.0, "dragon": 44.0, "demon_lord": 48.0,
+	}
+	var sprite_size: float = float(size_map.get(enemy_id, 26.0))
+	var sprite_modulate := Color(1.45, 1.45, 1.45, alpha) if _hit_flash_left > 0.0 else Color(1.0, 1.0, 1.0, alpha)
+	draw_circle(Vector2(0, sprite_size * 0.28), sprite_size * 0.25, Color(0, 0, 0, 0.34 * alpha))
 	if _spawn_reveal_left > 0.0:
-		draw_arc(Vector2.ZERO, 10.0 + reveal * 9.0, 0.0, TAU, 24, Color(body_color, 0.75 * (1.0 - reveal)), 2.0)
+		draw_arc(Vector2.ZERO, 9.0 + reveal * 8.0, 0.0, TAU, 20, Color(body_color, 0.75 * (1.0 - reveal)), 2.0)
 	if _is_targeted and not _dead:
 		var target_pulse: float = 0.55 + sin(_motion_clock * 8.0) * 0.12
-		draw_arc(Vector2.ZERO, sprite_size * 0.43, 0.20, PI - 0.20, 18, Color("f6c85f", target_pulse), 1.5)
-		draw_line(Vector2(-sprite_size * 0.30, -sprite_size * 0.35), Vector2(-sprite_size * 0.18, -sprite_size * 0.25), Color("f6c85f", target_pulse), 2.0)
-		draw_line(Vector2(sprite_size * 0.30, -sprite_size * 0.35), Vector2(sprite_size * 0.18, -sprite_size * 0.25), Color("f6c85f", target_pulse), 2.0)
+		draw_arc(Vector2.ZERO, sprite_size * 0.48, 0.20, PI - 0.20, 18, Color("f6c85f", target_pulse), 1.5)
 	if _attack_windup_left > 0.0:
 		var warning_progress: float = 1.0 - _attack_windup_left / _attack_windup_duration
-		draw_arc(Vector2.ZERO, sprite_size * 0.46, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
-	draw_set_transform(Vector2(0, bob), 0.0, squash)
-	draw_texture_rect_region(ENEMY_ATLAS, Rect2(-sprite_size * 0.5, -sprite_size * 0.58, sprite_size, sprite_size), source, sprite_modulate)
+		draw_arc(Vector2.ZERO, sprite_size * 0.52, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
+	var death_scale_y: float = maxf(0.15, death_alpha) if _dead else 1.0
+	draw_set_transform(Vector2(0, bob), 0.0, Vector2(1.0, death_scale_y))
+	draw_texture_rect(texture, Rect2(-sprite_size * 0.5, -sprite_size * 0.62, sprite_size, sprite_size), false, sprite_modulate)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	var bar_width: float = maxf(20.0, sprite_size * 0.7)
-	var bar_y: float = -sprite_size * 0.52 - 5.0
+	var bar_width: float = maxf(20.0, sprite_size * 0.72)
+	var bar_y: float = -sprite_size * 0.58 - 5.0
 	if hp < max_hp or _is_targeted:
 		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width, 3), Color("351822", alpha), true)
 		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color("ef4444", alpha), true)

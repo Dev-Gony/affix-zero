@@ -1,6 +1,8 @@
 extends Node2D
 class_name EffectLayer
 
+signal resource_collected(kind: String, amount: int)
+
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
 
 var _particles: Array[Dictionary] = []
@@ -8,6 +10,8 @@ var _texts: Array[Dictionary] = []
 var _rings: Array[Dictionary] = []
 var _lines: Array[Dictionary] = []
 var _loot_icons: Array[Dictionary] = []
+var _resource_pickups: Array[Dictionary] = []
+var _pickup_target_position: Vector2 = Vector2.ZERO
 var _flash_alpha: float = 0.0
 
 
@@ -41,6 +45,7 @@ func _process(delta: float) -> void:
 	for index: int in range(_loot_icons.size() - 1, -1, -1):
 		if float(_loot_icons[index]["life"]) <= 0.0:
 			_loot_icons.remove_at(index)
+	_update_resource_pickups(delta)
 	_flash_alpha = maxf(0.0, _flash_alpha - delta * 1.8)
 	queue_redraw()
 
@@ -74,6 +79,52 @@ func show_gold(world_position: Vector2, amount: int) -> void:
 	_texts.append({"position": world_position + Vector2(-8, 8), "text": "+%dG" % amount, "color": Color("f6c85f"), "life": 0.85, "duration": 0.85, "size": 10})
 
 
+func set_pickup_target(world_position: Vector2) -> void:
+	_pickup_target_position = world_position
+
+
+func spawn_resource_pickup(world_position: Vector2, kind: String, amount: int) -> void:
+	var color := Color("61e58b") if kind == "xp" else Color("ffd45c")
+	var launch := Vector2(randf_range(-22.0, 22.0), randf_range(-28.0, -12.0))
+	_resource_pickups.append({
+		"kind": kind,
+		"amount": amount,
+		"position": world_position + Vector2(randf_range(-8.0, 8.0), randf_range(-5.0, 5.0)),
+		"velocity": launch,
+		"delay": randf_range(0.28, 0.52),
+		"color": color,
+		"age": 0.0,
+	})
+
+
+func _update_resource_pickups(delta: float) -> void:
+	for pickup: Dictionary in _resource_pickups:
+		pickup["age"] = float(pickup["age"]) + delta
+		var delay: float = float(pickup["delay"])
+		var position: Vector2 = Vector2(pickup["position"])
+		var velocity: Vector2 = Vector2(pickup["velocity"])
+		if float(pickup["age"]) < delay:
+			velocity.y += 70.0 * delta
+			velocity *= 0.96
+			position += velocity * delta
+		else:
+			var direction: Vector2 = position.direction_to(_pickup_target_position)
+			var age_after_delay: float = float(pickup["age"]) - delay
+			var magnet_speed: float = minf(520.0, 150.0 + age_after_delay * 460.0)
+			velocity = velocity.move_toward(direction * magnet_speed, 900.0 * delta)
+			position += velocity * delta
+		pickup["velocity"] = velocity
+		pickup["position"] = position
+
+	for index: int in range(_resource_pickups.size() - 1, -1, -1):
+		var pickup: Dictionary = _resource_pickups[index]
+		if float(pickup["age"]) < float(pickup["delay"]):
+			continue
+		if Vector2(pickup["position"]).distance_to(_pickup_target_position) <= 13.0:
+			resource_collected.emit(String(pickup["kind"]), int(pickup["amount"]))
+			_resource_pickups.remove_at(index)
+
+
 func show_drop(world_position: Vector2, item: Dictionary) -> void:
 	var color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 	_texts.append({"position": world_position + Vector2(-30, -18), "text": String(item.get("name", "아이템")), "color": color, "life": 1.4, "duration": 1.4, "size": 11})
@@ -89,6 +140,18 @@ func show_drop(world_position: Vector2, item: Dictionary) -> void:
 	if String(item.get("rarity_id", "")) == "legend":
 		_flash_alpha = 0.58
 		spawn_fragments(Vector2(320, 105), Color("ffd700"), 28, 105.0)
+
+
+func show_pickup(from: Vector2, to: Vector2, item: Dictionary) -> void:
+	var color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
+	_lines.append({
+		"points": PackedVector2Array([from, from.lerp(to, 0.45) + Vector2(0, -18), to]),
+		"color": Color(color, 0.85),
+		"life": 0.24,
+		"duration": 0.24,
+		"width": 2.0,
+	})
+	spawn_fragments(from, color, 5, 42.0)
 
 
 func show_level_up(world_position: Vector2) -> void:
@@ -150,6 +213,7 @@ func clear_effects() -> void:
 	_rings.clear()
 	_lines.clear()
 	_loot_icons.clear()
+	_resource_pickups.clear()
 	_flash_alpha = 0.0
 	queue_redraw()
 
@@ -173,6 +237,23 @@ func _draw() -> void:
 		var color: Color = line_data["color"]
 		color.a *= alpha
 		draw_polyline(PackedVector2Array(line_data["points"]), color, float(line_data["width"]), true)
+	for pickup: Dictionary in _resource_pickups:
+		var position: Vector2 = Vector2(pickup["position"])
+		var color: Color = pickup["color"]
+		var pulse: float = 1.0 + sin(float(pickup["age"]) * 10.0) * 0.12
+		if String(pickup["kind"]) == "xp":
+			var points := PackedVector2Array([
+				position + Vector2(0, -5) * pulse,
+				position + Vector2(4, 0) * pulse,
+				position + Vector2(0, 5) * pulse,
+				position + Vector2(-4, 0) * pulse,
+			])
+			draw_colored_polygon(points, color)
+			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
+		else:
+			draw_circle(position, 4.5 * pulse, color)
+			draw_circle(position, 2.0 * pulse, color.lightened(0.30))
+
 	for loot_icon: Dictionary in _loot_icons:
 		var life: float = float(loot_icon["life"])
 		var duration: float = float(loot_icon["duration"])

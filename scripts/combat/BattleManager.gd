@@ -1,9 +1,23 @@
 extends Node2D
 class_name BattleManager
 
-const BATTLE_RECT := Rect2(22, 54, 596, 294)
-const PLAYER_POSITION := Vector2(320, 200)
-const DUNGEON_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
+const WORLD_RECT := Rect2(0, 0, 1920, 1200)
+const PLAYER_POSITION := Vector2(960, 600)
+const BOSS_FLOOR_INTERVAL: int = 10
+const PLAYER_BASE_MOVE_SPEED: float = 54.0
+const PLAYER_ACCELERATION: float = 360.0
+const MELEE_ATTACK_RANGE: float = 42.0
+const RANGED_ATTACK_RANGE: float = 112.0
+const WANDER_RESELECT_TIME: float = 1.8
+const LOOT_PICKUP_DELAY: float = 0.72
+const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
+const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
+const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
+const RUBBLE_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/rubble.png")
+const SAND_FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_floor.png")
+const SAND_DETAIL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_detail.png")
+const BLUE_WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/blue_wall.png")
+const SHRINE_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/shrine.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
 	"res://resources/enemies/bat.tres",
@@ -16,11 +30,13 @@ const ENEMY_RESOURCE_PATHS: Array[String] = [
 ]
 
 @onready var player: PlayerAvatar = $Player
+@onready var camera: Camera2D = $Player/Camera2D
 @onready var enemies_root: Node2D = $Enemies
 @onready var projectiles_root: Node2D = $Projectiles
 @onready var effects: EffectLayer = $Effects
 
 var _enemy_resources: Array[EnemyData] = []
+var _boss_resource: EnemyData
 var _enemies: Array[EnemyAI] = []
 var _attack_time_left: float = 0.0
 var _skill_time_left: float = 3.0
@@ -28,12 +44,27 @@ var _respawning: bool = false
 var _shake_time_left: float = 0.0
 var _shake_intensity: float = 0.0
 var _last_death_position: Vector2 = PLAYER_POSITION
+var _wander_target: Vector2 = PLAYER_POSITION
+var _wander_time_left: float = 0.0
+var _current_room: int = 4
+var _combat_rect: Rect2 = Rect2()
+var _traveling: bool = false
+var _travel_target_room: int = 4
+var _travel_waypoints: Array[Vector2] = []
+var _travel_index: int = 0
+var _player_velocity: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
 	randomize()
 	_load_enemy_resources()
-	player.position = PLAYER_POSITION
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
+	camera.limit_left = int(WORLD_RECT.position.x)
+	camera.limit_top = int(WORLD_RECT.position.y)
+	camera.limit_right = int(WORLD_RECT.end.x)
+	camera.limit_bottom = int(WORLD_RECT.end.y)
 	player.visible = not GameManager.selected_class.is_empty()
 	GameManager.class_selected.connect(_on_class_selected)
 	GameManager.player_died.connect(_on_player_died)
@@ -41,6 +72,7 @@ func _ready() -> void:
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	LevelManager.level_up.connect(_on_level_up)
 	LootManager.item_dropped.connect(_on_item_dropped)
+	effects.resource_collected.connect(_on_resource_collected)
 	queue_redraw()
 	if GameManager.game_state == GameManager.GameState.RUNNING and not GameManager.selected_class.is_empty():
 		call_deferred("_start_battle")
@@ -50,7 +82,12 @@ func _process(delta: float) -> void:
 	_update_camera_shake(delta)
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	effects.set_pickup_target(player.global_position)
+	if _traveling:
+		_update_room_travel(delta)
+		return
 	_update_target_marker()
+	_update_auto_hunt(delta)
 	_attack_time_left -= delta
 	_skill_time_left -= delta
 	if _attack_time_left <= 0.0:
@@ -62,17 +99,69 @@ func _process(delta: float) -> void:
 
 
 func _draw() -> void:
-	var theme_tint := Color(0.82, 0.74, 0.68) if GameManager.floor <= 5 else (Color(0.64, 0.67, 0.86) if GameManager.floor <= 15 else Color(0.90, 0.56, 0.59))
-	draw_texture_rect(DUNGEON_TEXTURE, Rect2(0, 0, 640, 400), false, theme_tint)
-	draw_rect(Rect2(0, 0, 640, 356), Color(0.025, 0.02, 0.04, 0.16), true)
-	draw_rect(Rect2(0, 0, 640, 42), Color(0.02, 0.015, 0.025, 0.70), true)
-	draw_line(Vector2(0, 41), Vector2(640, 41), Color("8f5a3a"), 1.0)
-	draw_line(Vector2(0, 355), Vector2(640, 355), Color("9a6240"), 2.0)
+	draw_rect(WORLD_RECT, Color("17131c"), true)
+	for room_index in 9:
+		var room := WorldLayout.room_rect(room_index)
+		var walk := WorldLayout.walk_rect(room_index)
+		match room_index % 3:
+			0:
+				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("80666d"))
+				_draw_room_walls(walk, WALL_TILE, Color("9aa0aa"))
+				draw_texture_rect(SHRINE_TILE, Rect2(walk.get_center() - Vector2(20, 20), Vector2(40, 40)), false, Color("d6b36b"))
+				draw_arc(walk.get_center(), 58.0, 0.0, TAU, 36, Color(0.72, 0.22, 0.19, 0.28), 2.0)
+			1:
+				_draw_tiled_rect(room, SAND_FLOOR_TILE, Color("6b4c3e"))
+				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("b28767"))
+				_draw_room_walls(walk, WALL_TILE, Color("7e8792"))
+				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.position + Vector2(58, 42), Vector2(42, 42)), false, Color("caa785"))
+				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.end - Vector2(106, 84), Vector2(38, 38)), false, Color("a37e66"))
+			_:
+				_draw_tiled_rect(room, FLOOR_TILE, Color("303844"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("586579"))
+				_draw_room_walls(walk, BLUE_WALL_TILE, Color("9bb0c4"))
+				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
+				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
+				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
+	for pair: Vector2i in WorldLayout.connected_room_pairs():
+		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
+		if corridor.size.is_zero_approx():
+			continue
+		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
+		var corridor_tint: Color = Color("6a5960") if pair.x % 2 == 0 else Color("9a735c")
+		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
+	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.10), true)
+
+
+func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
+	var tile_size := Vector2(16, 16)
+	var y: float = area.position.y
+	while y < area.end.y:
+		var x: float = area.position.x
+		while x < area.end.x:
+			var size := Vector2(minf(tile_size.x, area.end.x - x), minf(tile_size.y, area.end.y - y))
+			draw_texture_rect(texture, Rect2(Vector2(x, y), size), false, modulate)
+			x += tile_size.x
+		y += tile_size.y
+
+
+func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
+	var wall := 16.0
+	_draw_tiled_rect(Rect2(walk.position - Vector2(wall, wall), Vector2(walk.size.x + wall * 2.0, wall)), texture, tint.lightened(0.08))
+	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.end.y), Vector2(walk.size.x + wall * 2.0, wall)), texture, tint.darkened(0.12))
+	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
+	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
 
 
 func _start_battle() -> void:
 	_respawning = false
+	_traveling = false
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
 	player.visible = true
+	player.position = WorldLayout.room_center(_current_room)
+	_player_velocity = Vector2.ZERO
+	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
@@ -84,32 +173,59 @@ func _start_battle() -> void:
 func _spawn_wave() -> void:
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	if is_boss_floor():
+		_spawn_boss()
+		return
 	var eligible: Array[EnemyData] = []
 	for enemy_resource: EnemyData in _enemy_resources:
-		if enemy_resource.unlock_floor <= GameManager.floor:
+		if enemy_resource.behavior != "boss" and enemy_resource.unlock_floor <= GameManager.floor:
 			eligible.append(enemy_resource)
 	if eligible.is_empty():
 		return
-	var wave_size: int = mini(3 + floori(GameManager.floor * 0.5), 12)
+	var wave_size: int = mini(6 + floori(GameManager.floor * 0.8), 20)
 	for index: int in wave_size:
 		var enemy := EnemyAI.new()
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
 		enemies_root.add_child(enemy)
-		enemy.global_position = _random_edge_position()
-		enemy.setup(eligible.pick_random(), GameManager.floor, player, BATTLE_RECT)
-		enemy.died.connect(_on_enemy_died)
-		enemy.attacked_player.connect(_on_enemy_attack)
-		enemy.damage_received.connect(_on_enemy_damage_received)
+		enemy.global_position = _random_spawn_position()
+		enemy.setup(eligible.pick_random(), GameManager.floor, player, _combat_rect)
+		_connect_enemy(enemy)
 		_enemies.append(enemy)
 	if wave_size > 0:
 		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
+
+
+func is_boss_floor(floor_number: int = GameManager.floor) -> bool:
+	return floor_number > 0 and floor_number % BOSS_FLOOR_INTERVAL == 0
+
+
+func _spawn_boss() -> void:
+	if _boss_resource == null:
+		push_error("Boss resource is not available")
+		return
+	var boss := EnemyAI.new()
+	boss.name = "Boss_%d" % GameManager.floor
+	enemies_root.add_child(boss)
+	boss.global_position = _random_spawn_position()
+	boss.setup(_boss_resource, GameManager.floor, player, _combat_rect)
+	_connect_enemy(boss)
+	_enemies.append(boss)
+	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
+
+
+func _connect_enemy(enemy: EnemyAI) -> void:
+	enemy.died.connect(_on_enemy_died)
+	enemy.attacked_player.connect(_on_enemy_attack)
+	enemy.damage_received.connect(_on_enemy_damage_received)
 
 
 func _perform_auto_attack() -> void:
 	var target: EnemyAI = _nearest_enemy()
 	if target == null:
 		return
-	var attack_power: float = GameManager.atk * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
+	if player.global_position.distance_to(target.global_position) > _attack_range():
+		return
+	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
 	player.play_attack(target.global_position)
 	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
@@ -117,6 +233,105 @@ func _perform_auto_attack() -> void:
 	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
 	if bool(result.get("critical", false)):
 		_start_shake(2.5, 0.15)
+
+
+func _update_auto_hunt(delta: float) -> void:
+	var target: EnemyAI = _nearest_enemy()
+	if target != null:
+		var distance: float = player.global_position.distance_to(target.global_position)
+		var desired_range: float = _attack_range() * 0.82
+		if distance > desired_range:
+			_move_player_toward(target.global_position, delta)
+		else:
+			_slow_player(delta)
+		return
+
+	_wander_time_left -= delta
+	if _wander_time_left <= 0.0 or player.global_position.distance_to(_wander_target) < 8.0:
+		_wander_time_left = WANDER_RESELECT_TIME
+		_wander_target = Vector2(
+			randf_range(_combat_rect.position.x + 24.0, _combat_rect.end.x - 24.0),
+			randf_range(_combat_rect.position.y + 24.0, _combat_rect.end.y - 24.0)
+		)
+	_move_player_toward(_wander_target, delta)
+
+
+func _move_player_toward(world_target: Vector2, delta: float) -> void:
+	var direction: Vector2 = player.global_position.direction_to(world_target)
+	if direction.is_zero_approx():
+		_slow_player(delta)
+		return
+	var move_speed: float = PLAYER_BASE_MOVE_SPEED * clampf(GameManager.spd, 0.75, 2.2)
+	var desired_velocity: Vector2 = direction * move_speed
+	_player_velocity = _player_velocity.move_toward(desired_velocity, PLAYER_ACCELERATION * delta)
+	var next_position: Vector2 = player.global_position + _player_velocity * delta
+	player.global_position = Vector2(
+		clampf(next_position.x, _combat_rect.position.x + 14.0, _combat_rect.end.x - 14.0),
+		clampf(next_position.y, _combat_rect.position.y + 16.0, _combat_rect.end.y - 14.0)
+	)
+	player.set_move_direction(_player_velocity.normalized())
+
+
+func _slow_player(delta: float) -> void:
+	_player_velocity = _player_velocity.move_toward(Vector2.ZERO, PLAYER_ACCELERATION * 1.35 * delta)
+	player.set_move_direction(_player_velocity.normalized() if _player_velocity.length() > 1.0 else Vector2.ZERO)
+
+
+func _begin_room_travel(from_room: int, to_room: int) -> void:
+	_clear_enemies()
+	_travel_target_room = to_room
+	_travel_waypoints = WorldLayout.travel_waypoints(from_room, to_room)
+	_travel_index = 0
+	_traveling = not _travel_waypoints.is_empty()
+	player.set_move_direction(Vector2.ZERO)
+	if _traveling:
+		GameManager.notification_requested.emit("다음 구역으로 이동 중", Color("8be0f1"))
+	else:
+		_current_room = to_room
+		_combat_rect = WorldLayout.walk_rect(_current_room)
+		player.position = WorldLayout.room_center(_current_room)
+		_spawn_wave()
+
+
+func _update_room_travel(delta: float) -> void:
+	if _travel_index >= _travel_waypoints.size():
+		_finish_room_travel()
+		return
+	var waypoint: Vector2 = _travel_waypoints[_travel_index]
+	var distance: float = player.global_position.distance_to(waypoint)
+	if distance <= 5.0:
+		player.global_position = waypoint
+		_travel_index += 1
+		if _travel_index >= _travel_waypoints.size():
+			_finish_room_travel()
+		return
+	var direction: Vector2 = player.global_position.direction_to(waypoint)
+	var move_speed: float = PLAYER_BASE_MOVE_SPEED * 1.45 * clampf(GameManager.spd, 0.8, 2.0)
+	var desired_velocity: Vector2 = direction * move_speed
+	_player_velocity = _player_velocity.move_toward(desired_velocity, PLAYER_ACCELERATION * delta)
+	var step: Vector2 = _player_velocity * delta
+	if step.length() >= distance:
+		player.global_position = waypoint
+	else:
+		player.global_position += step
+	player.set_move_direction(_player_velocity.normalized())
+
+
+func _finish_room_travel() -> void:
+	_traveling = false
+	_current_room = _travel_target_room
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
+	_player_velocity = Vector2.ZERO
+	player.set_move_direction(Vector2.ZERO)
+	_wander_time_left = 0.0
+	_spawn_wave()
+
+
+func _attack_range() -> float:
+	if GameManager.selected_class in ["mage", "sage", "saint"]:
+		return RANGED_ATTACK_RANGE
+	return MELEE_ATTACK_RANGE
 
 
 func _perform_auto_skill() -> void:
@@ -210,7 +425,7 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var skill_level: int = 1 + floori(float(GameManager.level - 1) / 5.0)
-	var attack_power: float = GameManager.atk * power_scale * (1.0 + float(GameManager.skill_levels.get("attack_boost", 0)) * 0.10)
+	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, GameManager.crit, true)
 	enemy.take_hit(result)
 	if bool(result.get("critical", false)):
@@ -220,22 +435,40 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int) -> void:
 	if not _enemies.has(enemy):
 		return
+	var defeated_boss: bool = enemy.behavior == "boss" and is_boss_floor()
 	_enemies.erase(enemy)
 	_last_death_position = world_position
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
-	LevelManager.add_xp(xp_reward)
+	var adjusted_xp: int = maxi(1, xp_reward)
 	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
-	GameManager.add_gold(adjusted_gold)
-	effects.show_gold(world_position, adjusted_gold)
-	LootManager.try_drop()
-	if GameManager.kills_on_floor >= 8 + GameManager.floor:
-		_clear_enemies()
+	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
+	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
+	if defeated_boss:
+		var boss_reward: Dictionary = LootManager.drop_boss_reward()
+		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
+		GameManager.notification_requested.emit("보스 격파 · %s 획득" % reward_text, Color("ffd166"))
+		var previous_room: int = _current_room
 		GameManager.advance_floor()
-		_spawn_wave()
+		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
+		return
+	_spawn_world_loot(world_position)
+	if GameManager.kills_on_floor >= 8 + GameManager.floor:
+		var previous_room: int = _current_room
+		GameManager.advance_floor()
+		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 	elif _enemies.is_empty():
 		_spawn_wave()
+
+
+func _on_resource_collected(kind: String, amount: int) -> void:
+	match kind:
+		"xp":
+			LevelManager.add_xp(amount)
+		"gold":
+			GameManager.add_gold(amount)
+			effects.show_gold(player.global_position, amount)
 
 
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
@@ -265,6 +498,10 @@ func _on_player_died() -> void:
 	GameManager.retreat_floor()
 	GameManager.revive()
 	effects.clear_effects()
+	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
+	_combat_rect = WorldLayout.walk_rect(_current_room)
+	player.position = WorldLayout.room_center(_current_room)
+	player.set_move_direction(Vector2.ZERO)
 	_respawning = false
 	GameManager.set_game_state(GameManager.GameState.RUNNING)
 	_spawn_wave()
@@ -292,10 +529,21 @@ func _on_level_up(_new_level: int) -> void:
 
 
 func _on_item_dropped(item: Dictionary) -> void:
-	effects.show_drop(_last_death_position, item)
 	var is_legend: bool = String(item.get("rarity_id", "")) == "legend"
 	AudioManager.play_sfx("legend_drop" if is_legend else "item_drop")
 	GameManager.notification_requested.emit("[%s] %s 획득" % [String(item.get("rarity_name", "")), String(item.get("name", ""))], Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
+
+
+func _spawn_world_loot(world_position: Vector2) -> void:
+	var item: Dictionary = LootManager.roll_drop()
+	if item.is_empty():
+		return
+	effects.show_drop(world_position, item)
+	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	if not is_inside_tree():
+		return
+	if LootManager.collect_item(item):
+		effects.show_pickup(world_position, player.global_position, item)
 
 
 func _nearest_enemy() -> EnemyAI:
@@ -336,23 +584,30 @@ func _configure_player_visual() -> void:
 
 func _load_enemy_resources() -> void:
 	_enemy_resources.clear()
+	_boss_resource = null
 	for resource_path: String in ENEMY_RESOURCE_PATHS:
 		var resource: Resource = load(resource_path)
 		if resource is EnemyData:
-			_enemy_resources.append(resource as EnemyData)
+			var enemy_data := resource as EnemyData
+			_enemy_resources.append(enemy_data)
+			if enemy_data.behavior == "boss":
+				_boss_resource = enemy_data
 	if _enemy_resources.size() != ENEMY_RESOURCE_PATHS.size():
 		push_error("Enemy resource catalog incomplete: loaded %d/%d" % [_enemy_resources.size(), ENEMY_RESOURCE_PATHS.size()])
+	if _boss_resource == null:
+		push_error("Enemy resource catalog has no boss")
 	_enemy_resources.sort_custom(func(a: EnemyData, b: EnemyData) -> bool: return a.unlock_floor < b.unlock_floor)
 
 
-func _random_edge_position() -> Vector2:
-	var right: float = BATTLE_RECT.end.x - 1.0
-	var bottom: float = BATTLE_RECT.end.y - 1.0
-	match randi_range(0, 3):
-		0: return Vector2(randf_range(BATTLE_RECT.position.x, right), BATTLE_RECT.position.y)
-		1: return Vector2(right, randf_range(BATTLE_RECT.position.y, bottom))
-		2: return Vector2(randf_range(BATTLE_RECT.position.x, right), bottom)
-		_: return Vector2(BATTLE_RECT.position.x, randf_range(BATTLE_RECT.position.y, bottom))
+func _random_spawn_position() -> Vector2:
+	for _attempt in 10:
+		var candidate := Vector2(
+			randf_range(_combat_rect.position.x + 24.0, _combat_rect.end.x - 24.0),
+			randf_range(_combat_rect.position.y + 24.0, _combat_rect.end.y - 24.0)
+		)
+		if candidate.distance_to(player.global_position) >= 110.0:
+			return candidate
+	return _combat_rect.position + Vector2(36.0, 36.0)
 
 
 func _start_shake(intensity: float, duration: float) -> void:
@@ -363,7 +618,7 @@ func _start_shake(intensity: float, duration: float) -> void:
 func _update_camera_shake(delta: float) -> void:
 	if _shake_time_left > 0.0:
 		_shake_time_left -= delta
-		position = Vector2(randf_range(-_shake_intensity, _shake_intensity), randf_range(-_shake_intensity, _shake_intensity)).round()
+		camera.offset = Vector2(randf_range(-_shake_intensity, _shake_intensity), randf_range(-_shake_intensity, _shake_intensity)).round()
 	else:
-		position = Vector2.ZERO
+		camera.offset = Vector2.ZERO
 		_shake_intensity = 0.0
