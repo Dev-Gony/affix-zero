@@ -14,7 +14,7 @@ func _ready() -> void:
 	_badge.position = Vector2(6, 378)
 	_badge.size = Vector2(130, 18)
 	_badge.add_theme_font_size_override("font_size", 7)
-	_badge.tooltip_text = "빌드 / 백업 진단 · F8 (진단 표시는 전투를 정지하지 않습니다)"
+	_badge.tooltip_text = "빌드 / 백업 진단 · Ctrl+Shift+9 (진단 표시는 전투를 정지하지 않습니다)"
 	_badge.pressed.connect(toggle_details)
 	add_child(_badge)
 	_panel = PanelContainer.new()
@@ -44,7 +44,7 @@ func _ready() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_F8:
+	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Ctrl+Shift+9:
 		toggle_details()
 		get_viewport().set_input_as_handled()
 
@@ -63,12 +63,12 @@ func _refresh() -> void:
 	var source: String = String(_info.get("source_commit", "unidentified"))
 	var short_id: String = source.substr(0, 7) if source.length() == 40 else "ID 없음"
 	var dirty: String = " *" if bool(_info.get("dirty", false)) else ""
-	_badge.text = "A.1  %s%s  F8" % [short_id, dirty]
+	_badge.text = "A.1  %s%s  Ctrl+Shift+9" % [short_id, dirty]
 	var status: String = String(SaveManager.backup_status.get("status", "test_mode" if not SaveManager.persistence_enabled else "not_checked"))
 	if SaveManager.write_guard_error != OK:
-		_badge.text = "저장 잠김 · F8"
+		_badge.text = "저장 잠김 · Ctrl+Shift+9"
 		_badge.add_theme_color_override("font_color", Color("ff9c9c"))
-	_details.text = "PR-A 진단 (전투 계속) · F8 닫기\n버전: %s\n커밋: %s%s\n브랜치: %s\n빌드 UTC: %s\n백업: %s\n저장 위치: %s\n백업 위치: %s\n%s" % [
+	_details.text = "PR-A 진단 (전투 계속) · Ctrl+Shift+9 닫기\n버전: %s\n커밋: %s%s\n브랜치: %s\n빌드 UTC: %s\n백업: %s\n저장 위치: %s\n백업 위치: %s\n%s" % [
 		String(_info.get("version", "")), source, dirty, String(_info.get("branch", "")),
 		String(_info.get("built_at_utc", "")), status,
 		ProjectSettings.globalize_path(SaveManager.SAVE_PATH),
