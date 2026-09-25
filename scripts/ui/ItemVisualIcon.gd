@@ -1,6 +1,8 @@
 extends Control
 class_name ItemVisualIcon
 
+const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
+
 var item_data: Dictionary = {}
 var placeholder_slot: String = ""
 var rarity_color: Color = Color("64748b")
@@ -44,6 +46,20 @@ func _draw() -> void:
 	if custom_texture != null:
 		var icon_size: float = minf(size.x, size.y) - 8.0
 		draw_texture_rect(custom_texture, Rect2(center - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size), false)
+		_draw_enhancement_badge(center)
+		return
+	var icon_index: int = int(item_data.get("icon_index", -1))
+	if icon_index >= 0 and icon_index < 30:
+		var icon_size: float = minf(size.x, size.y) - 6.0
+		var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
+		var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
+		var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+		draw_texture_rect_region(
+			ITEM_BASE_ATLAS,
+			Rect2(center - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size),
+			source,
+			Color(1, 1, 1, 0.96)
+		)
 		_draw_enhancement_badge(center)
 		return
 	var slot: String = String(item_data.get("slot", "weapon"))
