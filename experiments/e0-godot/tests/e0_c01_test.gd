@@ -1,18 +1,19 @@
 extends Node
 
-const MainScene = preload("res://main.tscn")
+const WarriorScene = preload("res://scenes/warrior.tscn")
+const MeleeScene = preload("res://scenes/melee_enemy.tscn")
 
 func _ready() -> void:
-	var main := MainScene.instantiate() as E0Main
-	add_child(main)
-	await get_tree().process_frame
+	var warrior := WarriorScene.instantiate() as E0Warrior
+	var enemy := MeleeScene.instantiate() as E0MeleeEnemy
+	add_child(warrior)
+	add_child(enemy)
+	warrior.position = Vector2(120, 180)
+	enemy.position = Vector2(430, 180)
+	warrior.set_target(enemy)
+	enemy.set_target(warrior)
 
-	var warrior := main.get_node("Warrior") as E0Warrior
-	var enemy := main.get_node("MeleeEnemy") as E0MeleeEnemy
-	if not _check(warrior != null, "warrior scene missing"):
-		return
-	if not _check(enemy != null, "enemy scene missing"):
-		return
+	await get_tree().process_frame
 	if not _check(warrior.has_multiframe_contract(), "warrior frame contract missing"):
 		return
 	if not _check(enemy.has_multiframe_contract(), "enemy frame contract missing"):
@@ -34,8 +35,9 @@ func _ready() -> void:
 		return
 	if not _check(enemy.damage_events_received == warrior.total_attacks_resolved, "one attack instance must map to one damage event"):
 		return
-	if not _check(main.player_damage_events == warrior.total_attacks_resolved, "main combat receipt must match warrior resolver"):
+	if not _check(enemy.death_signal_count == 1, "enemy death signal must be unique"):
 		return
+
 	print("E0_C01_TEST PASSED")
 	get_tree().quit(0)
 

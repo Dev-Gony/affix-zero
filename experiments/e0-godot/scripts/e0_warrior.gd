@@ -4,7 +4,7 @@ extends Node2D
 signal died
 signal damage_resolved(amount: int)
 
-enum State { IDLE, APPROACH, WINDUP, ACTIVE, RECOVERY, HIT, DEAD }
+enum State { IDLE, APPROACH, WINDUP, ACTIVE, RECOVERY, HIT, COLLECT, DEAD }
 
 const E0CombatResolver = preload("res://scripts/e0_combat_resolver.gd")
 
@@ -17,7 +17,8 @@ const E0CombatResolver = preload("res://scripts/e0_combat_resolver.gd")
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 var hp: int = max_hp
-var target: E0MeleeEnemy
+var target: E0EnemyBase
+var pickup_target: E0LootDrop
 var state: State = State.IDLE
 var state_time_left: float = 0.0
 var attack_instance_id: int = 0
@@ -25,11 +26,13 @@ var attack_damage_applied: bool = false
 var total_attacks_resolved: int = 0
 var total_damage_taken: int = 0
 var distance_travelled: float = 0.0
+var pickup_distance_travelled: float = 0.0
 
 const WINDUP: float = 0.20
 const ACTIVE: float = 0.08
 const RECOVERY: float = 0.30
 const HIT_TIME: float = 0.12
+const PICKUP_RANGE: float = 22.0
 
 func _ready() -> void:
 	hp = max_hp
@@ -37,22 +40,45 @@ func _ready() -> void:
 	sprite.play("idle")
 	queue_redraw()
 
-func set_target(next_target: E0MeleeEnemy) -> void:
+func set_target(next_target: E0EnemyBase) -> void:
 	target = next_target
-	if state == State.IDLE:
+	pickup_target = null
+	if target != null and not target.is_dead():
 		_enter_state(State.APPROACH)
+
+func set_pickup_target(drop: E0LootDrop) -> void:
+	if has_live_target():
+		return
+	pickup_target = drop
+	if pickup_target != null and is_instance_valid(pickup_target):
+		_enter_state(State.COLLECT)
+
+func has_live_target() -> bool:
+	return target != null and is_instance_valid(target) and not target.is_dead()
+
+func has_pickup_target() -> bool:
+	return pickup_target != null and is_instance_valid(pickup_target) and not pickup_target.is_collected()
 
 func _physics_process(delta: float) -> void:
 	if state == State.DEAD:
 		return
-	if target == null or not is_instance_valid(target) or target.is_dead():
+
+	if has_live_target():
+		_process_combat(delta)
+	elif has_pickup_target():
+		target = null
+		_process_pickup(delta)
+	else:
+		target = null
+		pickup_target = null
 		if state != State.HIT:
 			_enter_state(State.IDLE)
-		return
+	queue_redraw()
 
+func _process_combat(delta: float) -> void:
 	_face_target()
 	match state:
-		State.IDLE:
+		State.IDLE, State.COLLECT:
 			_enter_state(State.APPROACH)
 		State.APPROACH:
 			var distance := global_position.distance_to(target.global_position)
@@ -67,14 +93,27 @@ func _physics_process(delta: float) -> void:
 			state_time_left = maxf(0.0, state_time_left - delta)
 			if state == State.ACTIVE and not attack_damage_applied:
 				attack_damage_applied = true
-				if E0CombatResolver.in_range(global_position, target.global_position, attack_range + 6.0):
+				if has_live_target() and E0CombatResolver.in_range(global_position, target.global_position, attack_range + 6.0):
 					var amount := E0CombatResolver.damage(attack_damage, target.defense)
-					target.take_damage(amount, attack_instance_id)
-					total_attacks_resolved += 1
-					damage_resolved.emit(amount)
+					if target.take_damage(amount, attack_instance_id):
+						total_attacks_resolved += 1
+						damage_resolved.emit(amount)
 			if is_zero_approx(state_time_left):
 				_advance_timed_state()
-	queue_redraw()
+
+func _process_pickup(delta: float) -> void:
+	if state != State.COLLECT:
+		_enter_state(State.COLLECT)
+	var distance := global_position.distance_to(pickup_target.global_position)
+	if distance > PICKUP_RANGE:
+		var step := global_position.direction_to(pickup_target.global_position) * move_speed * delta
+		global_position += step
+		pickup_distance_travelled += step.length()
+		_play_if_needed("walk")
+	else:
+		pickup_target.collect_by(self)
+		pickup_target = null
+		_enter_state(State.IDLE)
 
 func _begin_attack() -> void:
 	attack_instance_id += 1
@@ -94,7 +133,12 @@ func _advance_timed_state() -> void:
 		State.RECOVERY:
 			_enter_state(State.APPROACH)
 		State.HIT:
-			_enter_state(State.APPROACH)
+			if has_live_target():
+				_enter_state(State.APPROACH)
+			elif has_pickup_target():
+				_enter_state(State.COLLECT)
+			else:
+				_enter_state(State.IDLE)
 
 func take_damage(raw_damage: int) -> void:
 	if state == State.DEAD:
@@ -132,7 +176,7 @@ func _enter_state(next_state: State) -> void:
 	match state:
 		State.IDLE:
 			_play_if_needed("idle")
-		State.APPROACH:
+		State.APPROACH, State.COLLECT:
 			_play_if_needed("walk")
 		State.DEAD:
 			sprite.play("death")

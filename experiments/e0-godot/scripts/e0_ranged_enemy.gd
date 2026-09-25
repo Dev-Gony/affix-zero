@@ -1,34 +1,35 @@
-class_name E0MeleeEnemy
+class_name E0RangedEnemy
 extends E0EnemyBase
 
-signal attack_landed(amount: int)
+signal projectile_requested(enemy: E0RangedEnemy, origin: Vector2, direction: Vector2, damage: int, projectile_id: int)
 
 enum State { IDLE, APPROACH, WINDUP, ACTIVE, RECOVERY, HIT, DEAD }
 
-@export var move_speed: float = 72.0
-@export var attack_range: float = 52.0
-@export var attack_damage: int = 12
+@export var move_speed: float = 58.0
+@export var attack_range: float = 205.0
+@export var preferred_min_range: float = 130.0
+@export var attack_damage: int = 10
 
 @onready var sprite: AnimatedSprite2D = $Sprite
 
 var target: E0Warrior
 var state: State = State.IDLE
 var state_time_left: float = 0.0
-var attack_damage_applied: bool = false
-var total_attacks_resolved: int = 0
+var projectile_serial: int = 0
+var projectiles_requested: int = 0
 var distance_travelled: float = 0.0
 
-const WINDUP: float = 0.28
+const WINDUP: float = 0.42
 const ACTIVE: float = 0.08
-const RECOVERY: float = 0.42
+const RECOVERY: float = 0.72
 const HIT_TIME: float = 0.14
 
 func _ready() -> void:
-	enemy_id = &"melee"
-	max_hp = 100
-	defense = 2.0
-	reward_gold = 8
-	reward_xp = 4
+	enemy_id = &"ranged"
+	max_hp = 75
+	defense = 1.0
+	reward_gold = 12
+	reward_xp = 6
 	super._ready()
 	sprite.sprite_frames = _build_frames()
 	sprite.play("idle")
@@ -43,8 +44,7 @@ func _physics_process(delta: float) -> void:
 	if is_dead():
 		return
 	if target == null or not is_instance_valid(target) or target.is_dead():
-		if state != State.HIT:
-			_enter_state(State.IDLE)
+		_enter_state(State.IDLE)
 		return
 
 	_face_target()
@@ -53,27 +53,25 @@ func _physics_process(delta: float) -> void:
 			_enter_state(State.APPROACH)
 		State.APPROACH:
 			var distance := global_position.distance_to(target.global_position)
+			var move_direction := Vector2.ZERO
 			if distance > attack_range:
-				var step := global_position.direction_to(target.global_position) * move_speed * delta
+				move_direction = global_position.direction_to(target.global_position)
+			elif distance < preferred_min_range:
+				move_direction = -global_position.direction_to(target.global_position)
+			else:
+				_begin_cast()
+			if not move_direction.is_zero_approx():
+				var step := move_direction * move_speed * delta
 				global_position += step
 				distance_travelled += step.length()
 				_play_if_needed("walk")
-			else:
-				_begin_attack()
 		State.WINDUP, State.ACTIVE, State.RECOVERY, State.HIT:
 			state_time_left = maxf(0.0, state_time_left - delta)
-			if state == State.ACTIVE and not attack_damage_applied:
-				attack_damage_applied = true
-				if global_position.distance_to(target.global_position) <= attack_range + 5.0:
-					target.take_damage(attack_damage)
-					total_attacks_resolved += 1
-					attack_landed.emit(attack_damage)
 			if is_zero_approx(state_time_left):
 				_advance_timed_state()
 	queue_redraw()
 
-func _begin_attack() -> void:
-	attack_damage_applied = false
+func _begin_cast() -> void:
 	state = State.WINDUP
 	state_time_left = WINDUP
 	sprite.play("attack")
@@ -83,6 +81,7 @@ func _advance_timed_state() -> void:
 		State.WINDUP:
 			state = State.ACTIVE
 			state_time_left = ACTIVE
+			_fire_projectile()
 		State.ACTIVE:
 			state = State.RECOVERY
 			state_time_left = RECOVERY
@@ -90,6 +89,15 @@ func _advance_timed_state() -> void:
 			_enter_state(State.APPROACH)
 		State.HIT:
 			_enter_state(State.APPROACH)
+
+func _fire_projectile() -> void:
+	if target == null or not is_instance_valid(target) or target.is_dead():
+		return
+	projectile_serial += 1
+	projectiles_requested += 1
+	var direction := global_position.direction_to(target.global_position)
+	var origin := global_position + direction * 18.0 + Vector2(0, -14)
+	projectile_requested.emit(self, origin, direction, attack_damage, projectile_serial)
 
 func state_name() -> String:
 	return State.keys()[state]
@@ -134,11 +142,11 @@ func _play_if_needed(animation_name: StringName) -> void:
 func _build_frames() -> SpriteFrames:
 	var frames := SpriteFrames.new()
 	frames.remove_animation("default")
-	_add_animation(frames, "idle", ["enemy_idle_0", "enemy_idle_1"], 3.5, true)
-	_add_animation(frames, "walk", ["enemy_walk_0", "enemy_walk_1"], 6.5, true)
-	_add_animation(frames, "attack", ["enemy_attack_0", "enemy_attack_1", "enemy_attack_2"], 5.0, false)
-	_add_animation(frames, "hit", ["enemy_hit"], 1.0, false)
-	_add_animation(frames, "death", ["enemy_death_0", "enemy_death_1"], 4.0, false)
+	_add_animation(frames, "idle", ["ranged_idle_0", "ranged_idle_1"], 3.0, true)
+	_add_animation(frames, "walk", ["ranged_walk_0", "ranged_walk_1"], 6.0, true)
+	_add_animation(frames, "attack", ["ranged_attack_0", "ranged_attack_1", "ranged_attack_2"], 4.2, false)
+	_add_animation(frames, "hit", ["ranged_hit"], 1.0, false)
+	_add_animation(frames, "death", ["ranged_death_0", "ranged_death_1"], 4.0, false)
 	return frames
 
 func _add_animation(frames: SpriteFrames, animation_name: StringName, frame_names: Array[String], fps: float, loop: bool) -> void:
@@ -153,7 +161,7 @@ func _draw() -> void:
 	_draw_shadow_ellipse(Vector2(0, 2), Vector2(18, 5), Color(0, 0, 0, 0.32))
 	var ratio := float(hp) / float(max_hp)
 	draw_rect(Rect2(-21, -47, 42, 5), Color("251b21"))
-	draw_rect(Rect2(-20, -46, 40.0 * ratio, 3), Color("e85d5d"))
+	draw_rect(Rect2(-20, -46, 40.0 * ratio, 3), Color("a46fea"))
 
 func _draw_shadow_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := PackedVector2Array()

@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  e0-c01:
+  e0-contracts:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.7.2
@@ -37,7 +37,6 @@ jobs:
         run: |
           apt-get update -qq
           apt-get install -y --no-install-recommends fontconfig libfontconfig1
-
       - name: Import isolated E0 project
         shell: bash
         run: |
@@ -51,3 +50,10 @@ jobs:
           timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c01_test.tscn 2>&1 | tee /tmp/e0-c01.log
           grep -q "E0_C01_TEST PASSED" /tmp/e0-c01.log
           ! grep -E "SCRIPT ERROR|Parse Error" /tmp/e0-c01.log
+      - name: Run E0-C02 contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c02_test.tscn 2>&1 | tee /tmp/e0-c02.log
+          grep -q "E0_C02_TEST PASSED" /tmp/e0-c02.log
+          ! grep -E "SCRIPT ERROR|Parse Error" /tmp/e0-c02.log
