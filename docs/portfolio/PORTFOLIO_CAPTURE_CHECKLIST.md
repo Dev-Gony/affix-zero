@@ -195,3 +195,66 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - x5 combat readability:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## UIUX V2.0 — Full Management Overhaul
+
+### Required capture set
+
+- [ ] **Management hub overview**
+  - Open any management tab.
+  - Capture the new almost-full-width hub.
+  - Confirm combat is visually dimmed behind it and the bottom combat dock is hidden.
+  - Confirm top navigation shows 장비 / 가방 / 스킬 / 환생 / 정보.
+
+- [ ] **Equipment composition**
+  - Open 장비.
+  - Confirm the character portrait sits in the center of the 3x3 composition.
+  - Confirm equipment cards are materially larger than V1 and rarity colors remain readable.
+  - Check long item names, enhancement rate/cost and buttons for clipping.
+
+- [ ] **Inventory desktop layout**
+  - Open 가방.
+  - Confirm the item grid and detail pane are visible side-by-side.
+  - Confirm eight columns fit without horizontal scrolling.
+  - Select several items and verify comparison/details update without moving the grid.
+  - Confirm clean upgrades show the green ↑ hint.
+
+- [ ] **Skill progression**
+  - Open 스킬.
+  - Confirm each skill row includes a visible level progress bar.
+  - Confirm +1 / +10 / MAX remain readable and clickable.
+
+- [ ] **Rebirth progression**
+  - Open 환생.
+  - Confirm the level-to-rebirth progress bar is visible.
+  - Confirm permanent upgrade buttons remain readable.
+
+- [ ] **Navigation / ESC**
+  - Switch tabs using the in-window top navigation.
+  - Confirm the management hub stays open.
+  - Press ESC once: management should close.
+  - Confirm pause/settings does **not** open on that same keypress.
+  - Press ESC again: pause/settings should open.
+
+- [ ] **Combat dock restoration**
+  - Close management.
+  - Confirm the compact bottom dock returns and keyboard shortcuts 1-5 still work.
+
+### UIUX V2.0 validation notes
+
+- Build commit:
+- Management scale: Too small / Good / Too large
+- Equipment scan speed:
+- Inventory grid readability:
+- Detail pane readability:
+- Upgrade arrow usefulness:
+- Skill progress readability:
+- Rebirth progress readability:
+- Top navigation:
+- ESC behavior:
+- Combat dock restore:
+- Clipping / overlap:
+- Overall visual direction: Reject / Iterate / Accept
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
