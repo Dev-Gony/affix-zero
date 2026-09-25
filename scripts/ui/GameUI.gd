@@ -753,6 +753,7 @@ func _build_equipment_portrait() -> PanelContainer:
 	var column := VBoxContainer.new()
 	panel.add_child(column)
 	var portrait := TextureRect.new()
+	portrait.name = "ClassPortrait"
 	portrait.texture = _class_portrait_icon()
 	portrait.custom_minimum_size = Vector2(0, 54)
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -1088,14 +1089,16 @@ func _add_permanent_button(parent: GridContainer, stat_name: String, benefit: St
 
 
 func _refresh_stats() -> void:
-	_stats_label.text = "모험 기록\n처치  %d     획득 골드  %dG\n최고 층  %d     환생  %d회     드롭  %d\n\n전투 능력\nATK  %d     DEF  %d\nHP  %d/%d     MP  %d/%d\nSPD  %.2f     CRIT  %.1f%%\n\n보조 능력\n흡혈  %.1f%%     경험치  +%.1f%%\n골드  +%.1f%%     관통  %.1f%%" % [
+	var enemy_scale: Dictionary = EnemyAI.floor_scaling(GameManager.floor)
+	_stats_label.text = "모험 기록\n처치  %d     획득 골드  %dG\n최고 층  %d     환생  %d회     드롭  %d\n\n전투 능력\nATK  %d     DEF  %d\nHP  %d/%d     MP  %d/%d\nSPD  %.2f     CRIT  %.1f%%\n\n현재 층 위협도\n몬스터 HP x%.1f   ATK x%.1f   DEF x%.1f\n\n보조 능력\n흡혈  %.1f%%     경험치  +%.1f%%\n골드  +%.1f%%     관통  %.1f%%" % [
 		int(GameManager.statistics.get("total_kills", 0)), int(GameManager.statistics.get("total_gold_earned", 0)),
 		int(GameManager.statistics.get("highest_floor", 1)), GameManager.rebirth_count,
 		int(GameManager.statistics.get("total_drops", 0)), GameManager.atk, GameManager.def,
 		GameManager.hp, GameManager.max_hp, GameManager.mp, GameManager.max_mp, GameManager.spd,
-		GameManager.crit, GameManager.vamp, GameManager.xp_bonus, GameManager.gold_bonus, GameManager.penetration
+		GameManager.crit,
+		float(enemy_scale.get("hp", 1.0)), float(enemy_scale.get("attack", 1.0)), float(enemy_scale.get("defense", 1.0)),
+		GameManager.vamp, GameManager.xp_bonus, GameManager.gold_bonus, GameManager.penetration
 	]
-
 
 func _compact_stats(item: Dictionary, include_affixes: bool = false) -> String:
 	var parts := PackedStringArray()
