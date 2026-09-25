@@ -49,9 +49,9 @@ static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictiona
 	var attack_scale: float = 1.0 + depth * 0.16 + depth * depth * 0.018
 	var defense_scale: float = 1.0 + depth * 0.12 + depth * depth * 0.010
 	if is_boss:
-		hp_scale *= 2.4
-		attack_scale *= 1.22
-		defense_scale *= 1.25
+		hp_scale *= 3.4
+		attack_scale *= 1.70
+		defense_scale *= 1.35
 	var late_depth: float = maxf(0.0, depth - 9.0)
 	return {
 		"hp": hp_scale,
