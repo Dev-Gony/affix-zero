@@ -4,6 +4,8 @@ class_name BattleManager
 const WORLD_RECT := Rect2(0, 0, 1920, 1200)
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
+const ELITE_START_FLOOR: int = 6
+const ELITE_AFFIX_IDS: Array[String] = ["brutal", "swift", "bulwark"]
 const PLAYER_BASE_MOVE_SPEED: float = 54.0
 const PLAYER_ACCELERATION: float = 360.0
 const MELEE_ATTACK_RANGE: float = 42.0
@@ -183,16 +185,34 @@ func _spawn_wave() -> void:
 	if eligible.is_empty():
 		return
 	var wave_size: int = mini(6 + floori(GameManager.floor * 0.8), 20)
+	var elite_index: int = -1
+	var elite_affix: String = ""
+	if wave_size > 0 and randf() * 100.0 < elite_spawn_chance_percent(GameManager.floor, GameManager.rebirth_count):
+		elite_index = randi_range(0, wave_size - 1)
+		elite_affix = ELITE_AFFIX_IDS.pick_random()
+	var spawned_elite: EnemyAI = null
 	for index: int in wave_size:
 		var enemy := EnemyAI.new()
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
 		enemies_root.add_child(enemy)
 		enemy.global_position = _random_spawn_position()
-		enemy.setup(eligible.pick_random(), GameManager.floor, player, _combat_rect)
+		var affix_for_enemy: String = elite_affix if index == elite_index else ""
+		enemy.setup(eligible.pick_random(), GameManager.floor, player, _combat_rect, affix_for_enemy)
 		_connect_enemy(enemy)
 		_enemies.append(enemy)
-	if wave_size > 0:
+		if enemy.is_elite:
+			spawned_elite = enemy
+	if spawned_elite != null:
+		GameManager.notification_requested.emit("엘리트 출현 · %s" % spawned_elite.elite_title(), spawned_elite.elite_color)
+	elif wave_size > 0:
 		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
+
+
+static func elite_spawn_chance_percent(floor_number: int, rebirths: int = 0) -> float:
+	if floor_number < ELITE_START_FLOOR:
+		return 0.0
+	var depth: float = float(floor_number - ELITE_START_FLOOR)
+	return clampf(12.0 + depth * 0.45 + maxf(0.0, rebirths) * 1.5, 12.0, 35.0)
 
 
 func is_boss_floor(floor_number: int = GameManager.floor) -> bool:
@@ -436,6 +456,8 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	if not _enemies.has(enemy):
 		return
 	var defeated_boss: bool = enemy.behavior == "boss" and is_boss_floor()
+	var defeated_elite: bool = enemy.is_elite
+	var elite_name: String = enemy.elite_title()
 	_enemies.erase(enemy)
 	_last_death_position = world_position
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
@@ -453,6 +475,12 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		GameManager.advance_floor()
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 		return
+	if defeated_elite:
+		var elite_reward: Dictionary = LootManager.try_elite_drop()
+		if not elite_reward.is_empty():
+			GameManager.notification_requested.emit("엘리트 격파 · %s · 추가 장비 획득" % elite_name, Color("f6c85f"))
+		else:
+			GameManager.notification_requested.emit("엘리트 격파 · %s · 보너스 경험치/골드" % elite_name, Color("f6c85f"))
 	_spawn_world_loot(world_position)
 	if GameManager.kills_on_floor >= 8 + GameManager.floor:
 		var previous_room: int = _current_room
