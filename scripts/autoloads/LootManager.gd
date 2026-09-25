@@ -23,6 +23,26 @@ func roll_drop() -> Dictionary:
 	return item
 
 
+func elite_drop_chance_percent(floor_number: int = GameManager.floor, rebirths: int = GameManager.rebirth_count) -> float:
+	return clampf(18.0 + maxf(0.0, floor_number - 6) * 0.10 + maxf(0.0, rebirths) * 0.8, 18.0, 30.0)
+
+
+func roll_elite_drop() -> Dictionary:
+	if randf() * 100.0 >= elite_drop_chance_percent():
+		return {}
+	var item: Dictionary = _generator.generate_item(GameManager.floor + 2, GameManager.rebirth_count + 1)
+	if not item.is_empty():
+		item["elite_reward"] = true
+	return item
+
+
+func try_elite_drop() -> Dictionary:
+	var item: Dictionary = roll_elite_drop()
+	if item.is_empty() or not collect_item(item):
+		return {}
+	return item
+
+
 func collect_item(item: Dictionary) -> bool:
 	if item.is_empty() or not passes_loot_filter(item):
 		return false

@@ -149,3 +149,145 @@ The current six-tier rarity model is temporary. The next dedicated item-system r
 12. 초월 (Transcendent)
 
 This is deliberately deferred until the item pass can update rarity data, weights, affix limits, colors, filters, drop presentation, economy, migration, and regression tests together rather than adding names without systems behind them.
+
+
+## 2026-09-25 — G4.0 Elite Monsters
+
+### Problem
+
+- Normal waves are mechanically readable but lack occasional high-attention combat moments between boss floors.
+- Auto-hunt needs rare enemies that are visible at a glance without requiring manual targeting or UI inspection.
+- Elite rewards must feel better than normal enemies without undoing the intentionally scarce field-item economy.
+
+### Cause
+
+- Every non-boss enemy currently uses only its base enemy resource plus floor scaling.
+- There is no wave-level modifier layer between normal monsters and bosses.
+- Normal drop logic is intentionally only 0.8–2.0%, so simply multiplying every elite drop into a guaranteed item would flood long idle runs.
+
+### Reference UX
+
+- **Hero Siege:** elite/champion enemies create ARPG texture between bosses through modifiers and better rewards.
+- **Survivor.io:** dangerous targets are readable immediately during crowded automated combat.
+- **AFFIX: ZERO direction:** elite identity must survive x5 speed and auto-hunt without turning every room into visual noise.
+
+### Decision
+
+- Elites begin at floor 6 and never replace boss encounters.
+- At most one elite can appear in a normal wave.
+- Encounter chance starts at 12%, scales with floor/rebirth, and caps at 35%.
+- Ship three readable archetypes:
+  - **폭군 (Brutal):** HP/attack-focused.
+  - **질풍 (Swift):** movement/attack-speed-focused.
+  - **철벽 (Bulwark):** HP/defense-focused.
+- Elites use a larger sprite footprint plus a pulsing two-ring aura in their affix color.
+- XP/gold rewards scale to roughly 2.4–2.8x normal.
+- Extra equipment is a separate 18–30% bonus roll, preserving normal field-drop scarcity.
+
+### Implementation
+
+- Added elite affix definitions and runtime state to `EnemyAI.gd`.
+- Extended enemy setup with an optional elite affix while explicitly excluding bosses.
+- Added wave-level elite selection to `BattleManager.gd`.
+- Added elite encounter probability contract with a hard 35% ceiling.
+- Added elite bonus loot logic to `LootManager.gd`.
+- Added `tests/gameplay_v4_elite.gd/.tscn` and CI coverage.
+- Build identity advanced to **g4.0**.
+
+### Failure / Revision
+
+- No player-facing revision recorded yet. Automated validation and Windows play are required before this stage is considered accepted.
+
+### Verification
+
+Automated contract targets:
+
+- No elites below floor 6.
+- 12% starting encounter chance and 35% maximum.
+- Rebirth increases encounter frequency without bypassing the cap.
+- Brutal, Swift, and Bulwark create materially different combat profiles.
+- Elite XP/gold exceeds normal rewards.
+- Bosses cannot accidentally receive normal elite affixes.
+- Elite bonus item chance remains capped at 30%.
+- Existing G3.3 enhancement test now also proves that enhancement changes the live equipped ATK stat.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Mid-floor combat | Uniform normal waves | Rare elite encounter creates attention spikes |
+| Enemy identity | Base monster behavior only | Brutal / Swift / Bulwark modifier identity |
+| Readability | Same visual weight for normal enemies | Larger elite body + pulsing colored aura |
+| Reward | Normal XP/gold/drop | 2.4–2.8x resources + restrained bonus gear roll |
+| Boss separation | Bosses are the only special combat tier | Elites bridge normal waves and bosses without replacing boss floors |
+| Regression | No elite contract | Dedicated Gameplay V4 elite CI contract |
+
+### Windows play approval
+
+Validated on Windows + Godot 4.3 on 2026-09-25.
+
+Observed in live play:
+
+- Brutal elites were encountered repeatedly and were immediately readable through the red pulse aura.
+- A Bulwark Goblin was also encountered, confirming multiple affix archetypes spawn naturally.
+- Elite silhouettes remained distinguishable in a crowded wave at the tested viewport.
+- The player repeatedly returned to the same floor range because the next boss remained a progression wall; this exposed a useful follow-up: boss difficulty needs **more readable/fair patterns**, not simply more raw stats.
+- No elite/boss overlap bug was observed in the tested run.
+
+The supplied play captures show the elite aura clearly around enemies during normal auto-hunt. G4.0 is considered player-validated; reward-frequency tuning can continue opportunistically with longer idle runs.
+
+
+## 2026-09-25 — G4.1 Direction Revision: Boss Patterns Rejected
+
+### Problem
+
+- G4.0 live play exposed a boss wall around the current high-floor progression.
+- A first response was prototyped around telegraphed boss patterns and automatic evasion.
+
+### Cause
+
+- The boss wall was initially interpreted as a combat-readability problem.
+- After reviewing the actual product loop, that interpretation conflicted with the game's core identity: the character should keep hunting on its own, accumulate resources and gear, grow stronger, and eventually clear the wall.
+
+### Reference UX
+
+- **Idle RPG progression:** a boss wall acts as a stat/progression check, not necessarily a dexterity check.
+- **AFFIX: ZERO direction:** repeated hunting should create the resources and equipment needed to break through progression walls without requiring manual dodge mastery.
+
+### Decision
+
+- Reject the boss-pattern / auto-evade prototype before merge.
+- Keep bosses as progression gates rather than pattern-learning encounters.
+- Keep the existing defeat setback and boss stat profile for now.
+- Redirect development effort toward the loop that actually resolves a wall:
+  - hunt repeatedly,
+  - collect gold/items,
+  - improve skills/equipment,
+  - retry automatically,
+  - eventually break through.
+
+### Implementation
+
+- Draft PR #8 (Gameplay V4.1: 보스 텔레그래프와 자동 회피) was closed without merge.
+- Its implementation branch is retained only as historical prototype evidence.
+- No boss-pattern code is included in the accepted G4.0 line.
+
+### Failure / Revision
+
+- The prototype was technically viable but product-directionally wrong.
+- This is an intentional rejection, not a failed implementation: adding more combat mechanics would have increased complexity while weakening the idle-game identity.
+
+### Verification
+
+- Decision is based on the Windows G4.0 play session where elites worked as intended and the boss behaved as a progression wall.
+- The accepted branch remains dev/gameplay-v4-elites; no boss-pattern changes were merged.
+
+### Before / After
+
+| Area | Prototype direction | Accepted direction |
+|---|---|---|
+| Boss wall | Read/evade special patterns | Grow stats until the wall breaks |
+| Player attention | Watch and interpret hazards | Let auto-hunt continue producing growth |
+| Failure response | Shortened retry + evade logic | Preserve progression pressure |
+| Development priority | More combat mechanics | Better farming / upgrade / equipment UX |
+| Idle identity | Weakened | Preserved |
