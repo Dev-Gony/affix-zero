@@ -9,3 +9,6 @@
 *.yml text eol=lf
 *.yaml text eol=lf
 .gitignore text eol=lf
+
+# Godot import sidecars are text and must stay LF on Windows too.
+*.import text eol=lf
