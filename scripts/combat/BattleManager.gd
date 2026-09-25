@@ -369,6 +369,7 @@ func _spawn_boss() -> void:
 func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
+	enemy.attack_started.connect(_on_enemy_attack_started)
 	enemy.damage_received.connect(_on_enemy_damage_received.bind(enemy))
 
 
@@ -405,7 +406,7 @@ func _perform_auto_attack() -> void:
 	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, crit_chance, false)
 	player.play_attack(target.global_position)
-	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+	effects.show_attack(player.global_position, target.global_position, GameManager.selected_class, bool(result.get("critical", false)))
 	target.take_hit(result)
 	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
 	if bool(result.get("critical", false)):
@@ -555,17 +556,24 @@ func _cast_shield_charge() -> void:
 	var target: EnemyAI = _nearest_enemy()
 	if target == null:
 		return
-	var direction: Vector2 = player.global_position.direction_to(target.global_position)
-	var end_position: Vector2 = player.global_position + direction * 115.0
-	effects.show_shield_charge(player.global_position, end_position)
+	var start_position: Vector2 = player.global_position
+	var direction: Vector2 = start_position.direction_to(target.global_position)
+	var end_position: Vector2 = start_position + direction * 115.0
+	end_position = Vector2(
+		clampf(end_position.x, _combat_rect.position.x + 16.0, _combat_rect.end.x - 16.0),
+		clampf(end_position.y, _combat_rect.position.y + 18.0, _combat_rect.end.y - 16.0)
+	)
+	effects.show_shield_charge(start_position, end_position)
 	for enemy: EnemyAI in _enemies.duplicate():
 		if not is_instance_valid(enemy):
 			continue
-		var relative: Vector2 = enemy.global_position - player.global_position
+		var relative: Vector2 = enemy.global_position - start_position
 		var projection: float = relative.dot(direction)
 		var line_distance: float = absf(relative.cross(direction))
-		if projection >= 0.0 and projection <= 115.0 and line_distance <= 25.0:
-			_deal_skill_damage(enemy)
+		if projection >= 0.0 and projection <= start_position.distance_to(end_position) and line_distance <= 28.0:
+			_deal_skill_damage(enemy, 1.12)
+	player.global_position = end_position
+	_player_velocity = direction * PLAYER_BASE_MOVE_SPEED * 1.8
 
 
 func _cast_chain_lightning() -> void:
@@ -679,19 +687,26 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 			effects.show_pet_essence(player.global_position, gained)
 
 
+func _on_enemy_attack_started(attacker: EnemyAI, attack_kind: String, target_position: Vector2, windup_duration: float) -> void:
+	if _respawning or not is_instance_valid(attacker):
+		return
+	effects.show_enemy_telegraph(attacker.global_position, target_position, attack_kind, windup_duration)
+
+
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	if _respawning:
 		return
 	player.play_hit()
-	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
-	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
+	var from: Vector2 = attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0
+	var attack_kind: String = attacker.attack_visual_kind() if is_instance_valid(attacker) else "slash"
+	effects.show_enemy_attack(from, player.global_position, attack_kind)
 	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
 	var reduction: float = clampf(PetManager.active_player_damage_reduction_percent(), 0.0, 80.0)
 	var reduced_damage: float = raw_damage * (1.0 - reduction * 0.01)
 	var damage: int = GameManager.take_damage(reduced_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
-	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
-	_start_shake(2.0, 0.12)
+	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(4, 7), 54.0)
+	_start_shake(3.0 if is_boss else 2.0, 0.16 if is_boss else 0.12)
 
 
 func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool, enemy: EnemyAI) -> void:
