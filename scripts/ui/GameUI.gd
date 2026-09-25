@@ -265,7 +265,7 @@ func _build_bottom_panel() -> void:
 	_management_title.add_theme_color_override("font_color", COLOR_GOLD)
 	header.add_child(_management_title)
 	var close_button := Button.new()
-	close_button.text = "닫기  ESC"
+	close_button.text = "닫기"
 	close_button.custom_minimum_size = Vector2(74, 22)
 	close_button.add_theme_font_size_override("font_size", 7)
 	close_button.pressed.connect(_close_management)
