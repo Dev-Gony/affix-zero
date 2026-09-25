@@ -103,4 +103,49 @@ Automated contracts include:
 
 ### Windows play approval
 
-Automated CI is complete, but G3.3 is **not merge-approved** until the user validates the actual Windows Godot 4.3 play experience.
+Automated CI is complete. Windows Godot 4.3 play validation was completed on 2026-09-25; fresh-character combat tuning remains a follow-up before treating early-progression balance as final.
+
+
+### Windows play validation — 2026-09-25
+
+User-tested on Windows + Godot 4.3 with F5 after syncing `dev/gameplay-v3-balance`.
+
+Observed:
+
+- Inventory: normal.
+- Sell All: normal; locked-item protection works.
+- Expanded detail panel: normal.
+- Normal-enemy damage: acceptable on the current geared character; **fresh-character retest remains a follow-up** because strong equipment may mask early-progression tuning.
+- Boss damage: acceptable on the current geared character; **fresh-character retest remains a follow-up** for the same reason.
+- Auto-hunt / room movement: normal.
+- Enhancement flow: enhancement level increments correctly.
+- Skills: normal.
+- Save / rebirth: normal.
+
+Enhancement implementation was re-checked after play feedback:
+
+- Enhancement modifies the item's **base stats**, not only the displayed +level.
+- +10 base-stat multiplier: **1.75x**
+- +20 base-stat multiplier: **2.75x**
+- +30 base-stat multiplier: **4.25x**
+- Random affix values are intentionally not multiplied by enhancement.
+- A new regression assertion verifies that a +10 equipped weapon changes the live ATK stat.
+
+### Deferred item-rarity rework
+
+The current six-tier rarity model is temporary. The next dedicated item-system rework must migrate to the approved 12-tier order:
+
+1. 하급 (Junk)
+2. 일반 (Normal)
+3. 매직 (Magic)
+4. 희귀 (Rare)
+5. 에픽 (Epic)
+6. 고유 (Unique)
+7. 유물 (Artifact)
+8. 전설 (Legendary)
+9. 고대 (Ancient)
+10. 신화 (Mythic)
+11. 신성 (Divine)
+12. 초월 (Transcendent)
+
+This is deliberately deferred until the item pass can update rarity data, weights, affix limits, colors, filters, drop presentation, economy, migration, and regression tests together rather than adding names without systems behind them.
