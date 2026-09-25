@@ -155,6 +155,12 @@ func _run() -> void:
 	var first_room: int = WorldLayout.DUNGEON_PATH[0]
 	var second_room: int = WorldLayout.DUNGEON_PATH[1]
 	_check(not WorldLayout.travel_waypoints(first_room, second_room).is_empty(), "Dungeon route exposes real corridor traversal")
+	var all_corridors_valid: bool = true
+	for pair: Vector2i in WorldLayout.connected_room_pairs():
+		if WorldLayout.corridor_rect(pair.x, pair.y).size.is_zero_approx():
+			all_corridors_valid = false
+			break
+	_check(all_corridors_valid, "Every dungeon graph edge renders a physical orthogonal corridor")
 	minimap.queue_free()
 
 	var objective := CombatObjective.new()
