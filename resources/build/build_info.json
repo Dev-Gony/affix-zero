@@ -1,9 +1,9 @@
 {
-  "version": "uiux-pr-b.1",
-  "stage": "PR-B",
+  "version": "uiux-pr-c.1",
+  "stage": "PR-C",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/uiux-pr-b-safety",
+  "branch": "dev/uiux-pr-c-hud-720",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }
