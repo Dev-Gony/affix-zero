@@ -268,6 +268,7 @@ The supplied play captures show the elite aura clearly around enemies during nor
 - Resume ordinary auto-hunt after the pattern resolves.
 - Keep pattern damage inside the existing boss maximum-hit safety cap rather than adding an uncapped damage path.
 - Leave several seconds of ordinary combat between patterns so the boss does not become a permanent hazard-animation loop.
+- Preserve the one-floor death setback, but when death happens on a boss floor, preload the previous floor to **five kills before retry** instead of forcing the entire floor grind again.
 
 ### Implementation
 
@@ -284,6 +285,7 @@ The supplied play captures show the elite aura clearly around enemies during nor
   - Auto-hunt temporarily prioritizes hazard escape over target chasing.
   - Boss special damage still routes through `GameManager.take_damage(..., true)`.
 - Added dedicated `gameplay_v4_boss_patterns` regression tests and CI step.
+- Boss-failure retry friction reduced to five kills on the previous floor; normal-floor death behavior is unchanged.
 - Build identity advanced to **g4.1**.
 
 ### Failure / Revision
@@ -304,6 +306,7 @@ Automated contracts cover:
 - Computed escape targets remain inside the room and outside the hazard radius when space allows.
 - Boss normal AI can be paused/resumed during special casting.
 - Telegraph radius and duration are registered in the effect layer.
+- Boss retry progress is deterministically set to five kills before the next boss attempt.
 
 ### Before / After
 
@@ -314,7 +317,8 @@ Automated contracts cover:
 | Boss fairness | Damage can feel abrupt | Visible warning + movement response before impact |
 | Idle identity | Watching a stat check | Watching the character react to readable mechanics |
 | Boss DPS | Continuous normal pressure | Normal pressure interrupted during readable special casts |
-| Regression | No boss-pattern contract | Dedicated timing/geometry/damage CI contracts |
+| Boss retry | Full previous-floor grind after failure | Five kills before the next boss attempt |
+| Regression | No boss-pattern contract | Dedicated timing/geometry/damage/retry CI contracts |
 
 ### Windows play approval
 
