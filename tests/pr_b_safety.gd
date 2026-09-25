@@ -115,7 +115,10 @@ func _run() -> void:
 	_check(GameManager.inventory.size() == inventory_before.size() + 1, "Accepted future drop is added exactly once")
 	var diagnostics: Node = main.get_node("BuildDiagnostics")
 	var diagnostic_badge: Button = diagnostics.get("_badge") as Button
-	_check(diagnostic_badge != null and diagnostic_badge.text.begins_with("B.1"), "Runtime badge is derived from PR-B build metadata")
+	var build_info: Dictionary = BuildInfo.read_info()
+	var source_commit: String = String(build_info.get("source_commit", ""))
+	var expected_short_id: String = source_commit.substr(0, 7) if source_commit.length() >= 7 else source_commit
+	_check(diagnostic_badge != null and not expected_short_id.is_empty() and diagnostic_badge.text.contains(expected_short_id), "Runtime badge reflects current build metadata")
 
 	get_tree().paused = false
 	main.queue_free()
