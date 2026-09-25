@@ -3,6 +3,7 @@ extends Node
 signal pet_state_changed
 signal active_pet_changed(pet_id: String)
 signal pet_unlocked(pet_id: String)
+signal pet_summoned(result: Dictionary)
 
 const PET_RESOURCE_PATHS: Array[String] = [
 	"res://resources/pets/spirit_fox.tres",
@@ -15,11 +16,24 @@ const PET_RESOURCE_PATHS: Array[String] = [
 const STARTER_PET_ID: String = "spirit_fox"
 const MAX_LEVEL: int = 75
 const MAX_STARS: int = 5
+const SUMMON_COST: int = 300
+const TEN_SUMMON_COST: int = 2700
+const LEGENDARY_PITY: int = 30
+const RARITY_NAMES: Dictionary = {
+	0: "일반",
+	1: "고급",
+	2: "희귀",
+	3: "영웅",
+	4: "전설",
+	5: "신화",
+}
 
 var _catalog: Dictionary = {}
 var owned_pets: Dictionary = {}
 var active_pet_id: String = ""
 var essence: int = 0
+var summon_crystals: int = 3000
+var summon_pity: int = 0
 
 
 func _ready() -> void:
@@ -44,6 +58,7 @@ func _ensure_starter_pet() -> void:
 			"level": 1,
 			"xp": 0,
 			"stars": 1,
+			"shards": 0,
 		}
 	if active_pet_id.is_empty() or not owned_pets.has(active_pet_id):
 		active_pet_id = STARTER_PET_ID
@@ -90,10 +105,114 @@ func unlock_pet(pet_id: String) -> bool:
 		return false
 	if is_owned(pet_id):
 		return false
-	owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1}
+	owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1, "shards": 0}
 	pet_unlocked.emit(pet_id)
 	pet_state_changed.emit()
 	return true
+
+
+func add_summon_crystals(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	summon_crystals += amount
+	pet_state_changed.emit()
+	return amount
+
+
+func shards_for(pet_id: String) -> int:
+	return maxi(0, int(pet_state(pet_id).get("shards", 0)))
+
+
+func summon_once(free: bool = false, minimum_rarity: int = 0) -> Dictionary:
+	if not free:
+		if summon_crystals < SUMMON_COST:
+			return {}
+		summon_crystals -= SUMMON_COST
+	var forced_minimum: int = minimum_rarity
+	if summon_pity + 1 >= LEGENDARY_PITY:
+		forced_minimum = maxi(forced_minimum, 4)
+	var pet_id: String = _roll_pet_id(forced_minimum)
+	if pet_id.is_empty():
+		return {}
+	var result: Dictionary = _grant_summon_result(pet_id)
+	if int(result.get("rarity_index", 0)) >= 4:
+		summon_pity = 0
+	else:
+		summon_pity += 1
+	result["pity"] = summon_pity
+	pet_summoned.emit(result)
+	pet_state_changed.emit()
+	return result
+
+
+func summon_ten() -> Array[Dictionary]:
+	var results: Array[Dictionary] = []
+	if summon_crystals < TEN_SUMMON_COST:
+		return results
+	summon_crystals -= TEN_SUMMON_COST
+	for index: int in 10:
+		var minimum_rarity: int = 3 if index == 9 else 0
+		var forced_minimum: int = minimum_rarity
+		if summon_pity + 1 >= LEGENDARY_PITY:
+			forced_minimum = maxi(forced_minimum, 4)
+		var pet_id: String = _roll_pet_id(forced_minimum)
+		if pet_id.is_empty():
+			continue
+		var result: Dictionary = _grant_summon_result(pet_id)
+		if int(result.get("rarity_index", 0)) >= 4:
+			summon_pity = 0
+		else:
+			summon_pity += 1
+		result["pity"] = summon_pity
+		results.append(result)
+		pet_summoned.emit(result)
+	pet_state_changed.emit()
+	return results
+
+
+func _roll_pet_id(minimum_rarity: int = 0) -> String:
+	var candidates: Array[PetData] = []
+	var total_weight: float = 0.0
+	for pet_id: String in _catalog.keys():
+		var data: PetData = get_pet_data(pet_id)
+		if data == null or data.rarity_index < minimum_rarity:
+			continue
+		candidates.append(data)
+		total_weight += maxf(0.01, data.summon_weight)
+	if candidates.is_empty():
+		return ""
+	var roll: float = randf() * total_weight
+	var cursor: float = 0.0
+	for data: PetData in candidates:
+		cursor += maxf(0.01, data.summon_weight)
+		if roll <= cursor:
+			return data.id
+	return candidates.back().id
+
+
+func _grant_summon_result(pet_id: String) -> Dictionary:
+	var data: PetData = get_pet_data(pet_id)
+	if data == null:
+		return {}
+	var duplicate: bool = is_owned(pet_id)
+	var shards: int = 0
+	if duplicate:
+		var state: Dictionary = pet_state(pet_id)
+		shards = maxi(1, data.duplicate_shards)
+		state["shards"] = int(state.get("shards", 0)) + shards
+		owned_pets[pet_id] = state
+	else:
+		owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1, "shards": 0}
+		pet_unlocked.emit(pet_id)
+	return {
+		"pet_id": pet_id,
+		"name": data.display_name,
+		"rarity_index": data.rarity_index,
+		"rarity_name": data.rarity_name,
+		"rarity_color": data.rarity_color.to_html(false),
+		"duplicate": duplicate,
+		"shards": shards,
+	}
 
 
 func level_for(pet_id: String) -> int:
@@ -295,19 +414,10 @@ func evolve_pet(pet_id: String) -> bool:
 	return true
 
 
-func try_unlock_for_floor(floor_number: int) -> Array[String]:
-	var unlocked: Array[String] = []
-	for pet_id: String in _catalog.keys():
-		if is_owned(pet_id):
-			continue
-		var data: PetData = get_pet_data(pet_id)
-		if data != null and floor_number >= data.unlock_floor:
-			owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1}
-			unlocked.append(pet_id)
-			pet_unlocked.emit(pet_id)
-	if not unlocked.is_empty():
-		pet_state_changed.emit()
-	return unlocked
+func try_unlock_for_floor(_floor_number: int) -> Array[String]:
+	# G6: pets are no longer granted automatically by floor.
+	# Existing saves keep previously unlocked pets, new pets come from summon gacha.
+	return []
 
 
 func to_save_dict() -> Dictionary:
@@ -315,6 +425,8 @@ func to_save_dict() -> Dictionary:
 		"active_pet_id": active_pet_id,
 		"owned_pets": owned_pets.duplicate(true),
 		"essence": essence,
+		"summon_crystals": summon_crystals,
+		"summon_pity": summon_pity,
 	}
 
 
@@ -322,6 +434,8 @@ func apply_save_dict(data: Dictionary) -> void:
 	owned_pets = Dictionary(data.get("owned_pets", {})).duplicate(true)
 	active_pet_id = String(data.get("active_pet_id", ""))
 	essence = maxi(0, int(data.get("essence", 0)))
+	summon_crystals = maxi(0, int(data.get("summon_crystals", 3000)))
+	summon_pity = clampi(int(data.get("summon_pity", 0)), 0, LEGENDARY_PITY - 1)
 	_ensure_starter_pet()
 	pet_state_changed.emit()
 	active_pet_changed.emit(active_pet_id)
