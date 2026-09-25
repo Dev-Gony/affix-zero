@@ -64,3 +64,10 @@ jobs:
           timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c03_test.tscn 2>&1 | tee /tmp/e0-c03.log
           grep -q "E0_C03_TEST PASSED" /tmp/e0-c03.log
           ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c03.log
+      - name: Run V0 vertical slice smoke
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/v0_smoke_test.tscn 2>&1 | tee /tmp/v0-smoke.log
+          grep -q "V0_SMOKE_TEST PASSED" /tmp/v0-smoke.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/v0-smoke.log
