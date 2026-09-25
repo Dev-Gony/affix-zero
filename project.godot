@@ -11,6 +11,7 @@ run/main_scene="res://scenes/main.tscn"
 [autoload]
 
 GameManager="*res://scripts/autoloads/GameManager.gd"
+PauseCoordinator="*res://scripts/autoloads/PauseCoordinator.gd"
 LevelManager="*res://scripts/progression/LevelManager.gd"
 RebirthManager="*res://scripts/progression/RebirthManager.gd"
 LootManager="*res://scripts/autoloads/LootManager.gd"

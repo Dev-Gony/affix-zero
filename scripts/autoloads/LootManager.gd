@@ -14,13 +14,13 @@ func roll_drop() -> Dictionary:
 	if randf() * 100.0 >= drop_chance:
 		return {}
 	var item: Dictionary = _generator.generate_item(GameManager.floor, GameManager.rebirth_count)
-	if item.is_empty() or not passes_loot_filter(item):
-		return {}
 	return item
 
 
 func collect_item(item: Dictionary) -> bool:
-	if item.is_empty() or not GameManager.add_inventory_item(item):
+	if item.is_empty() or not passes_loot_filter(item):
+		return false
+	if not GameManager.add_inventory_item(item):
 		return false
 	item_dropped.emit(item)
 	return true

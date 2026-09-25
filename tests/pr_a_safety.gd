@@ -86,7 +86,7 @@ func _run() -> void:
 	for key: String in ["gold", "inventory", "equipment", "class_skill_levels", "selected_class", "level", "xp", "floor", "rebirth_count"]:
 		_check(before[key] == after[key], "Backup operations preserve profile field: " + key)
 	var info: Dictionary = BuildInfo.read_info()
-	_check(String(info.get("version", "")) == "uiux-pr-a.1", "Build metadata contains the PR-A version")
+	_check(String(info.get("version", "")).begins_with("uiux-pr-"), "Build metadata contains a UIUX rebuild stage version")
 	_check(String(info.get("baseline_commit", "")) == "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2", "Build metadata pins the approved baseline")
 	_check(int(ProjectSettings.get_setting("display/window/size/viewport_width")) == 640, "PR-A does not migrate the viewport prematurely")
 	SaveManager.write_guard_error = OK
