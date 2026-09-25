@@ -673,3 +673,73 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate card density, text wrapping, permanent-upgrade row width, Info readability and whether the management-live indicator is helpful rather than distracting.
+
+## 2026-09-25 — UIUX V2.1 Visual Hierarchy Polish
+
+### Problem
+
+- The V2 overhaul fixed the screen structure, but the first Windows capture still looked one step short of a finished game UI.
+- Equipment cards used full rarity-colored frames, so a screen full of high-rarity gear became a wall of red outlines instead of a readable loadout.
+- Skill rows devoted a large square to text-only pseudo-icons, making the screen feel like a placeholder implementation despite otherwise solid information layout.
+- Rebirth growth still underused horizontal space and did not visually prioritize permanent upgrades strongly enough.
+
+### Cause
+
+- V2 correctly focused on information architecture first, but several visual treatments were inherited from earlier debug/admin cards.
+- Rarity signaling was applied to the whole equipment frame instead of being concentrated into a smaller accent.
+- Skill cards reserved icon real estate before real skill art existed, which exaggerated the unfinished look.
+
+### Reference UX
+
+- **Survivor.io:** rarity is loud on the item itself, while the surrounding management structure remains stable.
+- **Hero Siege:** dense progression screens use restrained structural chrome so stats and item identity carry the visual weight.
+- **AFFIX: ZERO:** placeholder visuals should be removed rather than enlarged until real dedicated art exists.
+
+### Decision
+
+- Keep the V2 layout and navigation intact.
+- Replace full rarity-colored equipment frames with a neutral structural border plus a slim rarity accent strip and rarity-colored item name.
+- Remove text-only square skill pseudo-icons and replace them with a narrow gold progression accent.
+- Increase the width of skill purchase controls for better desktop legibility.
+- Strengthen the rebirth permanent-upgrade row so all four upgrades read as a first-class full-width system.
+- Keep this pass visual only; no balance, progression or save behavior changes.
+
+### Implementation
+
+- Equipment cards now use neutral slate borders, subtle rarity-tinted backgrounds and a 4px rarity strip.
+- Skill rows no longer render large text-only placeholder icon tiles.
+- Skill actions widened from 104px to 118px and card spacing simplified.
+- Rebirth permanent upgrades now receive a dedicated header/hint and stronger gold affordance when points are available.
+- Management screens now hide both the top combat HUD and bottom dock, move to y=8 and expand to 384px height so they read as dedicated game surfaces rather than overlays stacked on active combat chrome.
+- UIUX regression contracts now verify restrained equipment accents, slim skill accents, four-column permanent upgrades and the two-column info dashboard.
+- Build identity advanced to **uiux-v2.1**.
+
+### Failure / Revision
+
+- The first V2 Windows capture confirmed that layout correctness alone did not remove the admin-tool impression.
+- Rather than adding more decoration, V2.1 removes visually noisy or obviously provisional elements first.
+
+### Verification
+
+Automated contracts cover:
+
+- Equipment cards keep desktop-scale width.
+- Equipment rarity accent remains narrow instead of becoming a full-frame alarm color.
+- Skill cards use a slim accent rather than a large placeholder block.
+- Rebirth permanent upgrades remain a four-column desktop grid.
+- Information screen remains a two-column dashboard rather than reverting to a text wall.
+
+### Before / After
+
+| Area | V2 capture | V2.1 direction |
+|---|---|---|
+| Equipment rarity | Full bright frame on every high-rarity card | Neutral card + focused rarity strip/name |
+| Skill identity | Large text-only pseudo-icon block | Slim progression accent until real skill art exists |
+| Skill actions | Narrow utility controls | Wider desktop purchase controls |
+| Rebirth growth | Functional but visually secondary | Dedicated permanent-growth header + stronger affordance |
+| Management framing | Combat HUD still visible behind the management shell | Dedicated near-fullscreen management surface; combat chrome hidden |
+| Overall impression | Good structure, still slightly tool-like | Less debug chrome, stronger game-screen hierarchy |
+
+### Windows play approval
+
+Pending. Validate whether the loadout feels calmer, skill rows lose the placeholder feel, and permanent growth reads more clearly without increasing visual clutter.
