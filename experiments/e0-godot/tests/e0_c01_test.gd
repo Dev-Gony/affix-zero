@@ -3,7 +3,7 @@ extends Node
 const MainScene = preload("res://main.tscn")
 
 func _ready() -> void:
-	var main := MainScene.instantiate()
+	var main := MainScene.instantiate() as E0Main
 	add_child(main)
 	await get_tree().process_frame
 
