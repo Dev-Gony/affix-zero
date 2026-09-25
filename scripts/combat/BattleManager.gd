@@ -36,6 +36,7 @@ const ENEMY_RESOURCE_PATHS: Array[String] = [
 @onready var enemies_root: Node2D = $Enemies
 @onready var projectiles_root: Node2D = $Projectiles
 @onready var effects: EffectLayer = $Effects
+@onready var pet: PetCompanion = $Pet
 
 var _enemy_resources: Array[EnemyData] = []
 var _boss_resource: EnemyData
@@ -55,6 +56,8 @@ var _travel_target_room: int = 4
 var _travel_waypoints: Array[Vector2] = []
 var _travel_index: int = 0
 var _player_velocity: Vector2 = Vector2.ZERO
+var _pet_attack_time_left: float = 0.0
+var _pet_support_time_left: float = 0.0
 
 
 func _ready() -> void:
@@ -75,6 +78,11 @@ func _ready() -> void:
 	LevelManager.level_up.connect(_on_level_up)
 	LootManager.item_dropped.connect(_on_item_dropped)
 	effects.resource_collected.connect(_on_resource_collected)
+	pet.bind_player(player)
+	PetManager.active_pet_changed.connect(func(_pet_id: String) -> void:
+		_pet_attack_time_left = 0.1
+		_pet_support_time_left = 0.5
+	)
 	queue_redraw()
 	if GameManager.game_state == GameManager.GameState.RUNNING and not GameManager.selected_class.is_empty():
 		call_deferred("_start_battle")
@@ -89,6 +97,7 @@ func _process(delta: float) -> void:
 		_update_room_travel(delta)
 		return
 	_update_target_marker()
+	_update_pet_combat(delta)
 	_update_auto_hunt(delta)
 	_attack_time_left -= delta
 	_skill_time_left -= delta
@@ -167,6 +176,9 @@ func _start_battle() -> void:
 	_configure_player_visual()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
+	_pet_attack_time_left = 0.35
+	_pet_support_time_left = 1.5
+	PetManager.try_unlock_for_floor(GameManager.floor)
 	AudioManager.play_bgm_for_floor(GameManager.floor)
 	if _enemies.is_empty():
 		_spawn_wave()
@@ -237,6 +249,29 @@ func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
 	enemy.damage_received.connect(_on_enemy_damage_received)
+
+
+func _update_pet_combat(delta: float) -> void:
+	var pet_data: PetData = PetManager.active_pet_data()
+	if pet_data == null or not pet.visible:
+		return
+	_pet_attack_time_left = maxf(0.0, _pet_attack_time_left - delta)
+	_pet_support_time_left = maxf(0.0, _pet_support_time_left - delta)
+	if _pet_attack_time_left <= 0.0:
+		_pet_attack_time_left = PetManager.active_attack_interval()
+		var target: EnemyAI = _nearest_enemy()
+		if target != null and pet.global_position.distance_to(target.global_position) <= pet_data.attack_range:
+			var raw_damage: float = PetManager.active_attack_power(GameManager.atk)
+			var damage: int = maxi(1, roundi(raw_damage - target.defense * 0.18))
+			effects.show_pet_attack(pet.global_position, target.global_position, pet.pet_color())
+			target.take_hit({"damage": damage, "critical": false})
+	if _pet_support_time_left <= 0.0:
+		_pet_support_time_left = PetManager.active_support_interval()
+		var heal_percent: float = PetManager.active_support_heal_percent()
+		if heal_percent > 0.0 and GameManager.hp < GameManager.max_hp:
+			var heal_amount: int = maxi(1, roundi(float(GameManager.max_hp) * heal_percent * 0.01))
+			var restored: int = GameManager.heal(heal_amount)
+			effects.show_pet_heal(player.global_position, restored, pet.pet_color())
 
 
 func _perform_auto_attack() -> void:
@@ -464,6 +499,11 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
 	var adjusted_xp: int = maxi(1, xp_reward)
+	var pet_levels: int = PetManager.add_xp(PetManager.active_pet_id, maxi(1, adjusted_xp / 4))
+	if pet_levels > 0:
+		var active_data: PetData = PetManager.active_pet_data()
+		if active_data != null:
+			GameManager.notification_requested.emit("%s Lv.%d · 펫 성장" % [active_data.display_name, PetManager.level_for(PetManager.active_pet_id)], pet.pet_color())
 	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
@@ -550,6 +590,11 @@ func _on_class_selected(_class_id: String) -> void:
 
 func _on_floor_changed(new_floor: int) -> void:
 	AudioManager.play_bgm_for_floor(new_floor)
+	var unlocked: Array[String] = PetManager.try_unlock_for_floor(new_floor)
+	for pet_id: String in unlocked:
+		var data: PetData = PetManager.get_pet_data(pet_id)
+		if data != null:
+			GameManager.notification_requested.emit("새 펫 해금 · %s" % data.display_name, data.color)
 	queue_redraw()
 
 
