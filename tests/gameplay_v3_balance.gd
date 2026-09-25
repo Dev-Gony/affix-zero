@@ -86,6 +86,7 @@ func _run() -> void:
 		var bought_max: int = GameManager.buy_skill_levels(skill_id, base_cost, cost_step, 0)
 		_check(bought_max == expected_max and bought_max > 0, "MAX skill upgrade spends only what is affordable")
 		_check(GameManager.class_skill_level(skill_id) == before_max_level + bought_max, "MAX skill upgrade applies the computed number of levels")
+		_check(GameManager.class_skill_level(skill_id) <= GameManager.CLASS_SKILL_MAX_LEVEL, "Bulk upgrading never exceeds the class skill level cap")
 
 	GameManager.floor = 30
 	ui._refresh_stats()
