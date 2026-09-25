@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_date_kst": "2026-09-26",
   "repository": "Dev-Gony/affix-zero",
-  "stage": "E0-C02 automated PASS; awaiting Windows visual check before E0-C03 performance harness",
+  "stage": "E0-C03 harness automated PASS; awaiting real Windows GTX1050 visible benchmark",
   "work_branch": "chore/r0-preservation",
   "work_pr": 18,
   "decision_parent_sha": "6e5452bf7c7141d4522ce6d2fcf071fdba57c94a",
@@ -33,7 +33,7 @@
   "attachment_is_verified_local_backup": false,
   "backup_blocks_isolated_implementation": false,
   "backup_required_before_legacy_migration_or_overwrite": true,
-  "user_windows_play_approval": "E0_C01_LOCAL_RUN_CONFIRMED_FINAL_ART_NOT_APPROVED",
+  "user_windows_play_approval": "E0_C01_AND_C02_LOCAL_RUN_CONFIRMED_FINAL_ART_NOT_APPROVED",
   "engine": {
     "legacy": "Godot 4.3",
     "user_reported_executable": "Godot_v4.3-stable_win64.exe",
@@ -46,7 +46,7 @@
     "decision_record": "ADR-001_ENGINE_ARCHITECTURE.md",
     "selection_basis": "Requirements and documented capabilities, not measured engine superiority",
     "comparison": "NOT_RUN",
-    "new_engine_runtime_validation": "E0_C01_USER_LOCAL_CONFIRMED_AND_E0_C02_CI_PASS"
+    "new_engine_runtime_validation": "E0_C01_C02_USER_LOCAL_CONFIRMED_AND_E0_C03_CI_PASS"
   },
   "target_test_pc": {
     "source": "user inspection report; not a performance measurement",
@@ -63,16 +63,17 @@
     "normalization_verified": true
   },
   "last_verified_ci": {
-    "source_head": "4dc503d58961f668f13eacb5f724c948dad1370f",
-    "e0_run": 36162170304,
-    "e0_job": 108161582259,
+    "source_head": "60fe8f24f28944953dcc7533e4126109d3056932",
+    "e0_run": 36163443157,
+    "e0_job": 108165362935,
     "e0_result": "success",
     "contracts": [
       "E0_C01_TEST PASSED",
-      "E0_C02_TEST PASSED"
+      "E0_C02_TEST PASSED",
+      "E0_C03_TEST PASSED"
     ],
-    "scope": "Godot 4.7.2 isolated E0 import and C01/C02 automated contracts; not Windows performance evidence"
+    "scope": "Godot 4.7.2 isolated E0 import and C01/C02/C03 harness contracts; CI performance numbers are not Windows GTX1050 evidence"
   },
-  "next_task": "User pulls E0-C02 and visually checks ranged projectile/drop/reward flow; then E0-C03 40-enemy x1 performance harness",
+  "next_task": "Run visible Windows E0-C03 benchmark on target PC, inspect JSON/CSV, then decide whether to scale to 150/300 enemies",
   "reload_remote_before_work": true
 }
