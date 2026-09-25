@@ -15,6 +15,13 @@ const DUNGEON_PATH: Array[int] = [
 	10, 11, 6, 7, 8, 3, 4, 9, 14, 13, 12, 17, 18, 19,
 ]
 
+# Floor progression walks the route forward and back so the wrap point
+# remains physically adjacent instead of teleporting across the dungeon.
+const FLOOR_TRAVERSAL: Array[int] = [
+	10, 11, 6, 7, 8, 3, 4, 9, 14, 13, 12, 17, 18, 19,
+	18, 17, 12, 13, 14, 9, 4, 3, 8, 7, 6, 11,
+]
+
 # Small side chambers visually sell a dungeon instead of a board.
 const SIDE_CONNECTIONS: Array[Vector2i] = [
 	Vector2i(6, 5),
@@ -27,7 +34,7 @@ const SIDE_CONNECTIONS: Array[Vector2i] = [
 
 
 static func room_index_for_floor(floor_number: int) -> int:
-	return DUNGEON_PATH[(maxi(1, floor_number) - 1) % DUNGEON_PATH.size()]
+	return FLOOR_TRAVERSAL[(maxi(1, floor_number) - 1) % FLOOR_TRAVERSAL.size()]
 
 
 static func room_grid(room_index: int) -> Vector2i:
