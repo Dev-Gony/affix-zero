@@ -25,4 +25,6 @@
 
 | E0-C03 Godot 자동탐지에서 standard/console 동시 발견 | Godot 압축 해제 폴더 안에 일반 exe와 console exe가 함께 있어 기존 탐지기가 둘 다 후보로 보고 중단 | 일반판(non-console)을 우선 선택하도록 수정하고, `.exe`로 끝나는 폴더 경로를 넘겨도 그 안의 standard exe를 해석하도록 보강 | 실행 파일 탐지는 파일명뿐 아니라 패키징 구조와 console/standard 변형까지 고려해야 한다 |
 
+| E0-C03 화면이 실제 게임처럼 보이지 않음 | 성능 fixture를 너무 오래 기본 실행화면/개발 진척처럼 취급함. 40적을 중앙에 몰아넣고 임시 SVG/진단 HUD를 그대로 노출해 Hero Siege+Survivor 방향과 무관한 화면이 됨 | E0를 테스트 전용으로 격리하고 기본 main scene을 V0 Vertical Slice로 교체. 본게임 dungeon/class/enemy assets, edge spawn, separation, combat/pickup/elite loop를 사용 | 기술 검증 씬은 제품 vertical slice를 대체하지 못한다. 사용자에게 보여줄 기본 실행은 항상 실제 게임 경험을 대표해야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
