@@ -2,17 +2,18 @@ extends Control
 class_name GameUI
 
 const COLOR_BACKGROUND := Color("07090d")
-const COLOR_PANEL := Color("10151c")
-const COLOR_PANEL_ALT := Color("151c25")
-const COLOR_BORDER := Color("354456")
+const COLOR_PANEL := Color("0b0e13")
+const COLOR_PANEL_ALT := Color("11131a")
+const COLOR_BORDER := Color("4b403a")
 const COLOR_TEXT := Color("edf2f7")
 const COLOR_MUTED := Color("97a4b5")
-const COLOR_ACCENT := Color("d75a5a")
+const COLOR_ACCENT := Color("b94747")
 const COLOR_GREEN := Color("57d88b")
-const COLOR_GOLD := Color("f0b84b")
+const COLOR_GOLD := Color("e8ad3e")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
 const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const DUNGEON_UI_TEXTURE: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 const CLASS_REGIONS: Dictionary = {
 	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
 	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
@@ -279,8 +280,26 @@ func _build_bottom_panel() -> void:
 	window.position = Vector2(14, 8)
 	window.size = Vector2(612, 384)
 	window.z_index = 50
-	window.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), Color("506176"), 2, 3))
+	window.add_theme_stylebox_override("panel", _style_box(Color("080b10"), Color("725039"), 2, 3))
 	add_child(window)
+
+	var dungeon_backdrop := TextureRect.new()
+	dungeon_backdrop.position = Vector2(2, 2)
+	dungeon_backdrop.size = Vector2(608, 380)
+	dungeon_backdrop.texture = DUNGEON_UI_TEXTURE
+	dungeon_backdrop.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	dungeon_backdrop.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+	dungeon_backdrop.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	dungeon_backdrop.modulate = Color(0.30, 0.20, 0.18, 0.22)
+	dungeon_backdrop.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	window.add_child(dungeon_backdrop)
+
+	var dungeon_shade := ColorRect.new()
+	dungeon_shade.position = Vector2(2, 2)
+	dungeon_shade.size = Vector2(608, 380)
+	dungeon_shade.color = Color(0.02, 0.025, 0.035, 0.76)
+	dungeon_shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	window.add_child(dungeon_shade)
 
 	var header := HBoxContainer.new()
 	header.position = Vector2(10, 7)
@@ -324,7 +343,7 @@ func _build_bottom_panel() -> void:
 	var section_panel := Panel.new()
 	section_panel.position = Vector2(8, 38)
 	section_panel.size = Vector2(596, 29)
-	section_panel.add_theme_stylebox_override("panel", _compact_style_box(Color("0e131a"), Color("2f3b4b")))
+	section_panel.add_theme_stylebox_override("panel", _compact_style_box(Color("0c1016"), Color("604633")))
 	window.add_child(section_panel)
 
 	var section_row := HBoxContainer.new()
@@ -364,7 +383,7 @@ func _build_bottom_panel() -> void:
 	dock.position = Vector2(121, 366)
 	dock.size = Vector2(398, 31)
 	dock.z_index = 30
-	dock.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.045, 0.060, 0.88), Color("334256"), 1, 2))
+	dock.add_theme_stylebox_override("panel", _style_box(Color(0.025, 0.028, 0.036, 0.92), Color("624832"), 1, 2))
 	add_child(dock)
 	var dock_row := HBoxContainer.new()
 	dock_row.position = Vector2(5, 3)
