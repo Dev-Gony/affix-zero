@@ -423,7 +423,10 @@ G4.1 growth-loop UX is considered player-validated. PR remains unmerged by polic
 
 ### Failure / Revision
 
-- No Windows visual revision yet. Automated tests validate hierarchy and data contracts, but actual screen clutter and x5 readability still require play validation.
+- During implementation review, the old premium screen flash was found to cover only the original 640x356 origin area. On later dungeon rooms the camera could be nowhere near that rectangle, making the flash effectively invisible.
+- Expanded the flash overlay across the full dungeon world and moved premium burst particles to the actual item position.
+- Epic originally inherited the normal item-drop sound because the audio branch checked only the literal Legendary rarity id. Premium audio now keys off rarity index 4+ so Legendary and Epic both use the premium cue.
+- Windows visual validation is still pending for clutter and x5 readability.
 
 ### Verification
 
