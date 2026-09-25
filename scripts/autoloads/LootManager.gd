@@ -44,7 +44,15 @@ func passes_loot_filter(item: Dictionary) -> bool:
 
 
 func drop_boss_reward() -> Dictionary:
-	var item: Dictionary = _generator.generate_item(GameManager.floor + 3, GameManager.rebirth_count + 1)
+	# Field legendaries are intentionally rare, so bosses get three independent rolls
+	# and keep the highest rarity. Bosses feel rewarding without flooding normal combat.
+	var item: Dictionary = {}
+	for _roll: int in 3:
+		var candidate: Dictionary = _generator.generate_item(GameManager.floor + 3, GameManager.rebirth_count + 1)
+		if candidate.is_empty():
+			continue
+		if item.is_empty() or int(candidate.get("rarity_index", 0)) > int(item.get("rarity_index", 0)):
+			item = candidate
 	if not item.is_empty():
 		item["boss_reward"] = true
 		item["sell_value"] = maxi(int(item.get("sell_value", 0)), GameManager.floor * 10)
