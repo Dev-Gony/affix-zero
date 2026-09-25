@@ -9,8 +9,14 @@ func _ready() -> void:
 	_generator = ItemGenerator.new()
 
 
+func drop_chance_percent(floor_number: int = GameManager.floor, rebirths: int = GameManager.rebirth_count) -> float:
+	# Keep field drops meaningful. The old curve exceeded 30% in normal mid-game play,
+	# which made rarity and equipment decisions collapse into constant inventory spam.
+	return clampf(5.0 + maxf(0.0, floor_number - 1) * 0.12 + maxf(0.0, rebirths) * 0.45, 5.0, 12.0)
+
+
 func roll_drop() -> Dictionary:
-	var drop_chance: float = 12.0 + GameManager.floor * 0.4 + GameManager.rebirth_count * 2.0
+	var drop_chance: float = drop_chance_percent()
 	if randf() * 100.0 >= drop_chance:
 		return {}
 	var item: Dictionary = _generator.generate_item(GameManager.floor, GameManager.rebirth_count)
