@@ -33,6 +33,8 @@ func _run() -> void:
 	_check(ui._management_window.size.x >= 600.0, "Management hub uses almost the full desktop width")
 	_check(ui._management_window.size.y >= 340.0, "Management hub uses the available vertical space")
 	_check(ui._management_window.position.x <= 16.0, "Management hub is centered as a primary screen, not a side popup")
+	_check(ui._management_window.position.y <= 10.0, "Management hub uses the full screen instead of sitting below the combat HUD")
+	_check(ui._management_window.size.y >= 380.0, "Management hub uses nearly the full logical screen height")
 	_check(ui._main_tabs.size.x >= 590.0, "Management content area is wide enough for desktop inventory and equipment layouts")
 	_check(ui._section_buttons.size() == GameUI.MANAGEMENT_TITLES.size(), "Every management section has an in-window navigation tab")
 	_check(ui._inventory_grid.columns == 8, "Inventory uses a dense eight-column desktop grid")
@@ -56,6 +58,7 @@ func _run() -> void:
 	await get_tree().process_frame
 	_check(ui._management_open, "Dock opens the management hub")
 	_check(ui._management_window.visible, "Management hub becomes visible when opened")
+	_check(not ui._hud_panel.visible, "Combat HUD hides while the management hub is open")
 	_check(not ui._bottom_panel.visible, "Compact combat dock hides while the full management hub is open")
 	_check(ui._section_buttons[0].button_pressed, "Current management section is visibly selected")
 
@@ -67,6 +70,7 @@ func _run() -> void:
 	ui._close_management(false)
 	await get_tree().process_frame
 	_check(not ui._management_open, "Management hub closes deterministically")
+	_check(ui._hud_panel.visible, "Combat HUD returns after closing management")
 	_check(ui._bottom_panel.visible, "Compact combat dock returns after closing management")
 
 	var equipment_card: PanelContainer = ui._build_equipment_card("weapon")
