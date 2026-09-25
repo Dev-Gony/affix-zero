@@ -2,9 +2,10 @@
   "schema_version": 1,
   "recorded_date_kst": "2026-09-26",
   "repository": "Dev-Gony/affix-zero",
-  "stage": "R0 local inspection received; actual backup pending; E0 acceptance prepared",
+  "stage": "Engine and architecture selected; next E0-C01 isolated implementation",
   "work_branch": "chore/r0-preservation",
   "work_pr": 18,
+  "decision_parent_sha": "6e5452bf7c7141d4522ce6d2fcf071fdba57c94a",
   "parent_candidate_branch": "fix/g6-playtest-recovery",
   "parent_candidate_sha": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
   "parent_candidate_pr": 17,
@@ -14,7 +15,7 @@
   "main_sha": "a1418ad6a52f1a9e41607e29c7ecb56edbb96ab0",
   "game_runtime_changed": false,
   "user_local_evidence": {
-    "source": "user-uploaded share-summary.json; original kept out of public repository",
+    "source": "user-uploaded share-summary.json; raw file not in public repository",
     "captured_utc": "2026-09-25T15:47:42.4675842Z",
     "expected_origin": true,
     "branch": "fix/g6-playtest-recovery",
@@ -22,21 +23,33 @@
     "changed_entries": 0,
     "stash_count": 15,
     "matching_process_count": 0,
-    "powershell": "5.1.19041.6456"
+    "powershell": "5.1.19041.6456",
+    "later_observation": "Subsequent user Backup attempt blocked by matching process; exact process unknown"
   },
   "user_local_head": "c95b7ba0ab64104470076e4a78cce172b1fd602d",
-  "user_local_save_path_status": "NOT_CONFIRMED",
-  "user_local_backup_status": "NOT_RUN",
+  "user_local_save_path_status": "USER_CONFIRMED_IN_CHAT_PRIVATE_PATH_NOT_PUBLISHED",
+  "user_local_backup_status": "BLOCKED_PROCESS_BEFORE_COPY",
+  "user_save_attachment_received": true,
+  "attachment_is_verified_local_backup": false,
+  "backup_blocks_isolated_implementation": false,
+  "backup_required_before_legacy_migration_or_overwrite": true,
   "user_windows_play_approval": "NOT_RUN",
   "engine": {
     "legacy": "Godot 4.3",
     "user_reported_executable": "Godot_v4.3-stable_win64.exe",
-    "confirmation_source": "explicit user message; executable path and binary --version not inspected",
-    "final": null,
-    "comparison": "NOT_RUN"
+    "confirmation_source": "explicit user message; executable path/binary --version not inspected",
+    "final": "Godot 4.7.2-stable",
+    "decision_status": "SELECTED_FOR_MVP",
+    "edition": "Standard Windows x86_64",
+    "language": "Typed GDScript",
+    "renderer": "gl_compatibility",
+    "decision_record": "ADR-001_ENGINE_ARCHITECTURE.md",
+    "selection_basis": "Requirements and documented capabilities, not measured engine superiority",
+    "comparison": "NOT_RUN",
+    "new_engine_runtime_validation": "NOT_RUN"
   },
   "target_test_pc": {
-    "source": "user inspection report, not a performance measurement",
+    "source": "user inspection report; not a performance measurement",
     "cpu": "AMD Ryzen 7 5700X 8-Core Processor",
     "gpu": "NVIDIA GeForce GTX 1050",
     "ram_gib": 31.9,
@@ -55,8 +68,8 @@
     "r0_result": "success",
     "godot_run": 36155964770,
     "godot_result": "success",
-    "scope": "workflow results rechecked; not user Windows play or E0 evidence"
+    "scope": "historical workflow results only; not current decision commit or E0 evidence"
   },
-  "next_task": "User opens actual user-data folder with existing Godot 4.3 without F5/F6, closes editor/game, runs pinned Backup tool; verify new backup summary; then isolated E0 scene",
+  "next_task": "E0-C01 isolated Godot4.7.2 project and actual warrior/melee animation plus combat; do not repeat R0 requests",
   "reload_remote_before_work": true
 }
