@@ -34,7 +34,7 @@ const STAT_NAMES: Dictionary = {
 	"CRIT": "치명", "VAMP": "흡혈", "XP_BONUS": "경험", "GOLD_BONUS": "골드", "PEN": "관통",
 }
 const RARITY_BADGES: Dictionary = {
-	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설",
+	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설", "epic": "에픽",
 }
 const MANAGEMENT_TITLES: Array[String] = ["장비", "가방", "스킬", "환생", "정보"]
 const EQUIPMENT_LAYOUT: Array[String] = ["amulet", "helmet", "ring", "weapon", "portrait", "gloves", "boots", "armor", "summary"]
@@ -742,6 +742,24 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 		item_label.add_theme_color_override("font_color", border_color)
 	content.add_child(item_label)
 
+	var enhancement_hint := Label.new()
+	enhancement_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	enhancement_hint.add_theme_font_size_override("font_size", 5)
+	if item.is_empty():
+		enhancement_hint.text = "장비 획득 대기"
+		enhancement_hint.add_theme_color_override("font_color", Color("70708a"))
+	else:
+		var preview: Dictionary = GameManager.equipment_enhancement_preview(item)
+		if String(preview.get("status", "")) == "max":
+			enhancement_hint.text = "강화 MAX"
+			enhancement_hint.add_theme_color_override("font_color", COLOR_GOLD)
+		else:
+			var preview_cost: int = int(preview.get("cost", 0))
+			var preview_rate: float = float(preview.get("success_rate", 0.0))
+			enhancement_hint.text = "성공 %s · %dG" % [_format_probability(preview_rate), preview_cost]
+			enhancement_hint.add_theme_color_override("font_color", COLOR_GREEN if GameManager.gold >= preview_cost else COLOR_MUTED)
+	content.add_child(enhancement_hint)
+
 	var action_row := HBoxContainer.new()
 	action_row.add_theme_constant_override("separation", 2)
 	content.add_child(action_row)
@@ -753,7 +771,19 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	enhance_button.add_theme_font_size_override("font_size", 5)
 	enhance_button.disabled = item.is_empty() or GameManager.equipment_enhancement_level(item) >= GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL
 	if not item.is_empty():
-		enhance_button.tooltip_text = "%s\n비용 %dG" % [GameManager.equipment_enhancement_risk_text(item), GameManager.equipment_enhancement_cost(item)]
+		var preview: Dictionary = GameManager.equipment_enhancement_preview(item)
+		if String(preview.get("status", "")) == "ready":
+			var target_level: int = int(preview.get("target_level", 0))
+			var preview_cost: int = int(preview.get("cost", 0))
+			enhance_button.text = "강화 +%d" % target_level
+			enhance_button.disabled = GameManager.gold < preview_cost
+			enhance_button.tooltip_text = "%s\n비용 %dG\n%s" % [
+				GameManager.equipment_enhancement_risk_text(item),
+				preview_cost,
+				_enhancement_gain_text(Dictionary(preview.get("stat_gains", {}))),
+			]
+		else:
+			enhance_button.text = "MAX"
 	enhance_button.pressed.connect(_enhance_equipped.bind(slot))
 	action_row.add_child(enhance_button)
 
@@ -800,8 +830,14 @@ func _build_equipment_summary() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(88, 82)
 	panel.add_theme_stylebox_override("panel", _compact_style_box(Color("171119"), Color("59443a")))
+	var growth: Dictionary = GameManager.growth_opportunity_summary()
 	var label := Label.new()
-	label.text = "전투력\nATK  %d\nDEF  %d\nCRIT %.0f%%" % [GameManager.atk, GameManager.def, GameManager.crit]
+	label.text = "전투력\nATK %d · DEF %d\n강화 가능 %d\n스킬 가능 %d" % [
+		GameManager.atk,
+		GameManager.def,
+		int(growth.get("equipment_count", 0)),
+		int(growth.get("skill_count", 0)),
+	]
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 6)
@@ -984,7 +1020,8 @@ func _item_icon(item: Dictionary) -> AtlasTexture:
 func _refresh_skills() -> void:
 	_clear_container(_skills_list)
 	var hint := Label.new()
-	hint.text = "%s 전용 패시브 · 직업별로 별도 저장" % GameManager.selected_class_name
+	var affordable_options: int = GameManager.affordable_skill_upgrade_option_count()
+	hint.text = "%s 전용 패시브 · 현재 %dG · 강화 가능 %d개" % [GameManager.selected_class_name, GameManager.gold, affordable_options]
 	hint.add_theme_font_size_override("font_size", 7)
 	hint.add_theme_color_override("font_color", COLOR_MUTED)
 	_skills_list.add_child(hint)
@@ -1197,6 +1234,26 @@ func _item_stat_totals(item: Dictionary) -> Dictionary:
 
 func _format_value(stat_name: String, value: float) -> String:
 	return "%.2f" % value if stat_name == "SPD" else "%d" % roundi(value)
+
+
+func _format_probability(value: float) -> String:
+	if value >= 10.0:
+		return "%.0f%%" % value
+	if value >= 1.0:
+		return "%.1f%%" % value
+	return "%.2f%%" % value
+
+
+func _enhancement_gain_text(stat_gains: Dictionary) -> String:
+	if stat_gains.is_empty():
+		return "다음 강화 능력치 변화 없음"
+	var parts := PackedStringArray()
+	for stat_name: Variant in stat_gains.keys():
+		parts.append("%s +%s" % [
+			String(STAT_NAMES.get(String(stat_name), stat_name)),
+			_format_value(String(stat_name), float(stat_gains[stat_name])),
+		])
+	return "다음 강화: " + " · ".join(parts)
 
 
 func _on_class_selected_ui(_class_id: String) -> void:
