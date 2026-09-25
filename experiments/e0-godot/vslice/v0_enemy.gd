@@ -77,7 +77,9 @@ func _process(delta: float) -> void:
 		var separation := Vector2.ZERO
 		var parent := get_parent()
 		if parent != null and parent.has_method("separation_for"):
-			separation = parent.call("separation_for", self)
+			var separation_value: Variant = parent.call("separation_for", self)
+			if separation_value is Vector2:
+				separation = separation_value
 		var move_dir := (to_player + separation * 1.35).normalized()
 		global_position += move_dir * speed * delta
 	elif attack_cd <= 0.0:
