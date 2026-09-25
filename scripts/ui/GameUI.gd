@@ -43,6 +43,8 @@ var _hp_bar: ProgressBar
 var _mp_bar: ProgressBar
 var _xp_bar: ProgressBar
 var _hud_info: Label
+var _hud_player_text: Label
+var _hud_class_icon: TextureRect
 var _speed_buttons: Dictionary = {}
 var _equipment_row: GridContainer
 var _inventory_grid: GridContainer
@@ -147,113 +149,128 @@ func _build_hud() -> void:
 	var panel := Panel.new()
 	_hud_panel = panel
 	panel.position = Vector2.ZERO
-	panel.size = Vector2(640, 34)
-	panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.74), Color("6f4934"), 1, 0))
+	panel.size = Vector2(1280, 92)
+	panel.z_index = 20
+	panel.add_theme_stylebox_override("panel", _style_box(Color(0.025, 0.018, 0.032, 0.90), Color("47352f"), 1, 0))
 	add_child(panel)
-	var row := HBoxContainer.new()
-	row.position = Vector2(7, 2)
-	row.size = Vector2(626, 29)
-	row.add_theme_constant_override("separation", 8)
-	panel.add_child(row)
+
+	var player_card := PanelContainer.new()
+	player_card.position = Vector2(18, 10)
+	player_card.size = Vector2(424, 70)
+	player_card.add_theme_stylebox_override("panel", _style_box(Color("12101a"), Color("4d3a34"), 1, 6))
+	panel.add_child(player_card)
+	var player_row := HBoxContainer.new()
+	player_row.add_theme_constant_override("separation", 12)
+	player_card.add_child(player_row)
+
+	_hud_class_icon = TextureRect.new()
+	_hud_class_icon.custom_minimum_size = Vector2(64, 64)
+	_hud_class_icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+	_hud_class_icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+	_hud_class_icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	player_row.add_child(_hud_class_icon)
+
+	var player_stack := VBoxContainer.new()
+	player_stack.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	player_stack.add_theme_constant_override("separation", 3)
+	player_row.add_child(player_stack)
+
+	_hud_player_text = Label.new()
+	_hud_player_text.custom_minimum_size.y = 22
+	_hud_player_text.add_theme_font_size_override("font_size", 17)
+	_hud_player_text.add_theme_color_override("font_color", Color("fff3df"))
+	player_stack.add_child(_hud_player_text)
 
 	var bars := VBoxContainer.new()
-	bars.custom_minimum_size = Vector2(194, 28)
-	bars.add_theme_constant_override("separation", 1)
-	row.add_child(bars)
-	_hp_bar = _add_bar(bars, "HP", Color("dc2626"))
-	_mp_bar = _add_bar(bars, "MP", Color("2563eb"))
-	_xp_bar = _add_bar(bars, "XP", Color("22c55e"))
+	bars.add_theme_constant_override("separation", 2)
+	player_stack.add_child(bars)
+	_hp_bar = _add_bar(bars, "HP", Color("e34848"))
+	_mp_bar = _add_bar(bars, "MP", Color("4d7cff"))
+	_xp_bar = _add_bar(bars, "XP", Color("4fd675"))
 
+	var center_card := PanelContainer.new()
+	center_card.position = Vector2(470, 10)
+	center_card.size = Vector2(330, 70)
+	center_card.add_theme_stylebox_override("panel", _style_box(Color(0.04, 0.032, 0.05, 0.86), Color("59443a"), 1, 6))
+	panel.add_child(center_card)
 	_hud_info = Label.new()
-	_hud_info.custom_minimum_size = Vector2(184, 28)
-	_hud_info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_hud_info.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_hud_info.add_theme_font_size_override("font_size", 9)
-	row.add_child(_hud_info)
+	_hud_info.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_hud_info.add_theme_font_size_override("font_size", 18)
+	_hud_info.add_theme_color_override("font_color", Color("f7ead9"))
+	center_card.add_child(_hud_info)
 
+	var speed_card := PanelContainer.new()
+	speed_card.position = Vector2(842, 10)
+	speed_card.size = Vector2(420, 70)
+	speed_card.add_theme_stylebox_override("panel", _style_box(Color(0.04, 0.032, 0.05, 0.86), Color("59443a"), 1, 6))
+	panel.add_child(speed_card)
 	var speed_row := HBoxContainer.new()
-	speed_row.custom_minimum_size = Vector2(108, 28)
-	speed_row.alignment = BoxContainer.ALIGNMENT_END
-	speed_row.add_theme_constant_override("separation", 4)
-	row.add_child(speed_row)
+	speed_row.alignment = BoxContainer.ALIGNMENT_CENTER
+	speed_row.add_theme_constant_override("separation", 10)
+	speed_card.add_child(speed_row)
 	var speed_title := Label.new()
-	speed_title.text = "속도"
+	speed_title.text = "전투 속도"
+	speed_title.custom_minimum_size.x = 92
+	speed_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	speed_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	speed_title.add_theme_font_size_override("font_size", 15)
 	speed_title.add_theme_color_override("font_color", COLOR_MUTED)
 	speed_row.add_child(speed_title)
 	for multiplier: float in GameManager.AVAILABLE_SPEED_MULTIPLIERS:
 		var speed_button := Button.new()
 		speed_button.text = "x%d" % int(multiplier)
-		speed_button.custom_minimum_size = Vector2(30, 24)
+		speed_button.custom_minimum_size = Vector2(84, 50)
 		speed_button.toggle_mode = true
-		speed_button.tooltip_text = "전투 속도를 x%d로 변경" % int(multiplier)
+		speed_button.add_theme_font_size_override("font_size", 19)
+		speed_button.tooltip_text = "전투 속도 x%d · 단축키 %s" % [int(multiplier), "Z" if multiplier == 1.0 else ("X" if multiplier == 2.0 else "C")]
 		speed_button.pressed.connect(_set_speed.bind(multiplier))
 		speed_row.add_child(speed_button)
 		_speed_buttons[multiplier] = speed_button
 
-	var quick_row := HBoxContainer.new()
-	quick_row.custom_minimum_size = Vector2(76, 28)
-	quick_row.alignment = BoxContainer.ALIGNMENT_END
-	quick_row.add_theme_constant_override("separation", 2)
-	row.add_child(quick_row)
-	var quick_save := Button.new()
-	quick_save.text = "저장"
-	quick_save.custom_minimum_size = Vector2(38, 24)
-	quick_save.add_theme_font_size_override("font_size", 7)
-	quick_save.tooltip_text = "즉시 저장"
-	quick_save.pressed.connect(_manual_save)
-	quick_row.add_child(quick_save)
-	var quick_quit := Button.new()
-	quick_quit.text = "종료"
-	quick_quit.custom_minimum_size = Vector2(38, 24)
-	quick_quit.add_theme_font_size_override("font_size", 7)
-	quick_quit.tooltip_text = "저장 후 게임 종료"
-	quick_quit.pressed.connect(_save_and_quit)
-	quick_row.add_child(quick_quit)
-
-
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
 	var row := HBoxContainer.new()
-	row.custom_minimum_size = Vector2(194, 10)
-	row.add_theme_constant_override("separation", 4)
+	row.custom_minimum_size = Vector2(330, 11)
+	row.add_theme_constant_override("separation", 6)
 	parent.add_child(row)
 	var label := Label.new()
 	label.text = title
-	label.custom_minimum_size = Vector2(18, 8)
-	label.add_theme_font_size_override("font_size", 8)
+	label.custom_minimum_size = Vector2(26, 10)
+	label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", 11)
+	label.add_theme_color_override("font_color", COLOR_MUTED)
 	row.add_child(label)
 	var bar := ProgressBar.new()
-	bar.custom_minimum_size = Vector2(168, 7)
+	bar.custom_minimum_size = Vector2(292, 9)
 	bar.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	bar.show_percentage = false
-	bar.add_theme_stylebox_override("background", _style_box(Color("090910"), Color("34344c"), 1, 1))
-	bar.add_theme_stylebox_override("fill", _style_box(fill_color, fill_color.lightened(0.18), 1, 1))
+	bar.add_theme_stylebox_override("background", _style_box(Color("090910"), Color("34344c"), 1, 2))
+	bar.add_theme_stylebox_override("fill", _style_box(fill_color, fill_color.lightened(0.16), 1, 2))
 	row.add_child(bar)
 	return bar
-
 
 func _build_modal_blocker() -> void:
 	_modal_blocker = ColorRect.new()
 	_modal_blocker.position = Vector2.ZERO
-	_modal_blocker.size = Vector2(640, 400)
-	_modal_blocker.color = Color(0.0, 0.0, 0.0, 0.28)
+	_modal_blocker.size = Vector2(1280, 720)
+	_modal_blocker.color = Color(0.0, 0.0, 0.0, 0.46)
 	_modal_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
-	_modal_blocker.z_index = 40
+	_modal_blocker.z_index = 80
 	_modal_blocker.visible = false
 	add_child(_modal_blocker)
 
 
 func _sync_modal_blocker() -> void:
 	if _modal_blocker != null:
-		_modal_blocker.visible = _management_open or _pause_visible
-
+		_modal_blocker.visible = _pause_visible
 
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(344, 38)
+	window.position = Vector2(738, 96)
 	window.size = Vector2(290, 318)
-	window.z_index = 50
+	window.z_index = 90
+	window.scale = Vector2(1.72, 1.72)
 	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
 	add_child(window)
 	var header := HBoxContainer.new()
@@ -290,21 +307,22 @@ func _build_bottom_panel() -> void:
 
 	var dock := Panel.new()
 	_bottom_panel = dock
-	dock.position = Vector2(142, 366)
-	dock.size = Vector2(356, 32)
-	dock.z_index = 30
+	dock.position = Vector2(340, 646)
+	dock.size = Vector2(600, 64)
+	dock.z_index = 60
 	dock.add_theme_stylebox_override("panel", _style_box(Color(0.04, 0.03, 0.05, 0.72), Color("6f4934"), 1, 0))
 	add_child(dock)
 	var dock_row := HBoxContainer.new()
-	dock_row.position = Vector2(6, 3)
-	dock_row.size = Vector2(344, 26)
-	dock_row.add_theme_constant_override("separation", 4)
+	dock_row.position = Vector2(10, 6)
+	dock_row.size = Vector2(580, 52)
+	dock_row.add_theme_constant_override("separation", 8)
 	dock.add_child(dock_row)
 	for index: int in MANAGEMENT_TITLES.size():
 		var dock_button := Button.new()
-		dock_button.text = "%d %s" % [index + 1, MANAGEMENT_TITLES[index]]
-		dock_button.custom_minimum_size = Vector2(65, 24)
+		dock_button.text = "%s\n%d" % [MANAGEMENT_TITLES[index], index + 1]
+		dock_button.custom_minimum_size = Vector2(109, 52)
 		dock_button.toggle_mode = true
+		dock_button.add_theme_font_size_override("font_size", 14)
 		dock_button.tooltip_text = "%s 창 열기/닫기 · 단축키 %d" % [MANAGEMENT_TITLES[index], index + 1]
 		dock_button.pressed.connect(_toggle_management.bind(index))
 		dock_row.add_child(dock_button)
@@ -313,9 +331,10 @@ func _build_bottom_panel() -> void:
 
 func _build_pause_menu() -> void:
 	_pause_panel = Panel.new()
-	_pause_panel.position = Vector2(170, 72)
+	_pause_panel.position = Vector2(385, 142)
 	_pause_panel.size = Vector2(300, 256)
-	_pause_panel.z_index = 90
+	_pause_panel.z_index = 110
+	_pause_panel.scale = Vector2(1.7, 1.7)
 	_pause_panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.98), COLOR_GOLD, 2, 0))
 	add_child(_pause_panel)
 
@@ -603,16 +622,16 @@ func _build_stats_tab(tabs: TabContainer) -> void:
 
 func _build_notification() -> void:
 	_notification_label = Label.new()
-	_notification_label.position = Vector2(12, 47)
-	_notification_label.size = Vector2(306, 24)
+	_notification_label.position = Vector2(390, 108)
+	_notification_label.size = Vector2(500, 50)
 	_notification_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_notification_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_notification_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_notification_label.modulate.a = 0.0
-	_notification_label.add_theme_stylebox_override("normal", _style_box(Color(0.04, 0.04, 0.08, 0.88), Color("34345b"), 1, 2))
-	_notification_label.z_index = 40
+	_notification_label.add_theme_font_size_override("font_size", 18)
+	_notification_label.add_theme_stylebox_override("normal", _style_box(Color(0.035, 0.03, 0.05, 0.92), Color("59443a"), 1, 6))
+	_notification_label.z_index = 70
 	add_child(_notification_label)
-
 
 func _build_class_selection() -> void:
 	_class_selection = ClassSelection.new()
@@ -659,11 +678,16 @@ func _refresh_hud() -> void:
 	_mp_bar.value = GameManager.mp
 	_xp_bar.max_value = LevelManager.xp_needed(GameManager.level)
 	_xp_bar.value = GameManager.xp
-	_hud_info.text = "◆ %d층  ·  Lv.%d  ·  %dG\nAUTO  처치 %d/%d  ·  %s" % [
-		GameManager.floor, GameManager.level, GameManager.gold, GameManager.kills_on_floor,
-		8 + GameManager.floor, GameManager.selected_class_name if not GameManager.selected_class_name.is_empty() else "직업 선택"
+	if _hud_class_icon != null:
+		_hud_class_icon.texture = CLASS_TEXTURES.get(GameManager.selected_class, CLASS_TEXTURES["warrior"])
+	if _hud_player_text != null:
+		_hud_player_text.text = "%s  ·  Lv.%d" % [
+			GameManager.selected_class_name if not GameManager.selected_class_name.is_empty() else "직업 선택",
+			GameManager.level
+		]
+	_hud_info.text = "%dF  ·  %dG\nAUTO  %d / %d" % [
+		GameManager.floor, GameManager.gold, GameManager.kills_on_floor, 8 + GameManager.floor
 	]
-
 
 func _refresh_speed_buttons(multiplier: float) -> void:
 	for speed: Variant in _speed_buttons.keys():
@@ -1282,15 +1306,20 @@ func _buy_permanent(stat_name: String) -> void:
 
 
 func _show_notification(message: String, color: Color) -> void:
-	_notification_label.text = message
+	var display_message: String = message
+	if message.begins_with("적 증원 "):
+		var count_text: String = message.trim_prefix("적 증원 ").trim_suffix("마리 접근")
+		display_message = "WAVE  ·  적 %s" % count_text
+	elif message.begins_with("보스 출현"):
+		display_message = "BOSS  ·  " + message.trim_prefix("보스 출현 · ")
+	_notification_label.text = display_message
 	_notification_label.add_theme_color_override("font_color", color)
 	_notification_label.modulate.a = 1.0
 	if _notification_tween != null and _notification_tween.is_valid():
 		_notification_tween.kill()
 	_notification_tween = create_tween()
-	_notification_tween.tween_interval(1.15)
-	_notification_tween.tween_property(_notification_label, "modulate:a", 0.0, 0.35)
-
+	_notification_tween.tween_interval(0.85)
+	_notification_tween.tween_property(_notification_label, "modulate:a", 0.0, 0.28)
 
 func _clear_container(container: Container) -> void:
 	if container == null:
