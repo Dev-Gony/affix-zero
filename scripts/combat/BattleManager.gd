@@ -436,11 +436,43 @@ func _perform_auto_attack() -> void:
 	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, crit_chance, false)
 	player.play_attack(target.global_position)
-	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+	if _is_ranged_class():
+		var projectile := PlayerBasicProjectile.new()
+		projectiles_root.add_child(projectile)
+		projectile.setup(player.global_position + player._visual_facing * 8.0, target, result, _basic_projectile_color())
+		projectile.impacted.connect(_on_player_basic_projectile_impacted)
+		effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+	else:
+		effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+		target.take_hit(result)
+		_finish_player_attack_feedback(result)
+
+
+func _on_player_basic_projectile_impacted(target: EnemyAI, result: Dictionary, world_position: Vector2) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	effects.spawn_fragments(world_position, _basic_projectile_color(), 5, 42.0)
 	target.take_hit(result)
-	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
-	if bool(result.get("critical", false)):
+	_finish_player_attack_feedback(result)
+
+
+func _finish_player_attack_feedback(result: Dictionary) -> void:
+	var critical: bool = bool(result.get("critical", false))
+	AudioManager.play_sfx("critical_hit" if critical else "basic_attack")
+	if critical:
 		_start_shake(2.5, 0.15)
+
+
+func _is_ranged_class() -> bool:
+	return GameManager.selected_class in ["mage", "sage", "saint"]
+
+
+func _basic_projectile_color() -> Color:
+	match GameManager.selected_class:
+		"mage": return Color("b56dff")
+		"sage": return Color("c9a7ff")
+		"saint": return Color("fff2a1")
+	return Color("9fdcff")
 
 
 func _update_auto_hunt(delta: float) -> void:
@@ -537,7 +569,7 @@ func _finish_room_travel() -> void:
 
 
 func _attack_range() -> float:
-	if GameManager.selected_class in ["mage", "sage", "saint"]:
+	if _is_ranged_class():
 		return RANGED_ATTACK_RANGE
 	return MELEE_ATTACK_RANGE
 
