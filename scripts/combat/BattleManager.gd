@@ -441,7 +441,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
-	var adjusted_xp: int = maxi(1, int(round(xp_reward * (1.0 + GameManager.xp_bonus * 0.01))))
+	var adjusted_xp: int = maxi(1, xp_reward)
 	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
