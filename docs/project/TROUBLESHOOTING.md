@@ -12,4 +12,6 @@
 | 설치된 Godot이 NOT_DETECTED로 표시됨 | Inspect 호출에서 -GodotExe를 지정하지 않음. 사용자는 Godot_v4.3-stable_win64.exe를 직접 확인함 | 직접 확인된 버전을 별도 근거로 BASELINE/HANDOFF에 기록. 재설치나 반복 버전 질문을 요구하지 않음. 실행 파일의 --version까지 검증한 것은 아님 | 자동 탐지 미실행을 소프트웨어 부재로 해석하지 않는다 |
 | 작업 컨테이너에서 원격 복제 시도 실패 | github.com DNS 해석 실패로 git clone 불가. 사용자 PC의 오류가 아님 | 연결된 GitHub 도구로 정확한 SHA의 파일 읽기와 문서 변경 수행. 컨테이너에서 Godot/PowerShell 실행을 했다고 주장하지 않음 | 개발 도구 접근 실패와 게임 결함을 분리하고 실제 수행한 검증만 보고한다 |
 
+| E0-C01 Godot 4.7.2 parse error | E0 helper `draw_ellipse(center, radius, color)`가 Godot 4.7.2의 새 native `CanvasItem.draw_ellipse()`와 이름 충돌. warning-as-error까지 발생 | 전사/근접 적 양쪽 헬퍼를 `_draw_shadow_ellipse()`로 변경. E0 run 36160446393에서 import + contract 통과, `E0_C01_TEST PASSED` 확인 | 엔진 마이너/메이저 전환 시 새 native API와 로컬 헬퍼 이름 충돌까지 회귀검사해야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
