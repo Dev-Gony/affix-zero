@@ -116,8 +116,7 @@ func _draw() -> void:
 	for room_index in 9:
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
-		var backdrop_tint := Color(0.58, 0.42, 0.42, 0.70) if room_index % 3 == 0 else (Color(0.62, 0.50, 0.40, 0.66) if room_index % 3 == 1 else Color(0.38, 0.50, 0.64, 0.70))
-		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
+		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if room_index % 3 == 0 else (Color(0.86, 0.72, 0.56, 0.22) if room_index % 3 == 1 else Color(0.58, 0.72, 0.90, 0.24))
 		match room_index % 3:
 			0:
 				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
@@ -138,6 +137,7 @@ func _draw() -> void:
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
+		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
 		_draw_room_decor(room_index, walk)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
