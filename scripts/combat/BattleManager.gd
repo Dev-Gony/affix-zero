@@ -4,8 +4,8 @@ class_name BattleManager
 signal boss_status_changed(name: String, hp_ratio: float, active: bool)
 signal elite_status_changed(name: String, color: Color, active: bool)
 
-const WORLD_RECT := Rect2(0, 0, 1920, 1200)
-const PLAYER_POSITION := Vector2(960, 600)
+const WORLD_RECT: Rect2 = WorldLayout.WORLD_RECT
+const PLAYER_POSITION := Vector2(1600, 800)
 const BOSS_FLOOR_INTERVAL: int = 10
 const ELITE_START_FLOOR: int = 6
 const ELITE_AFFIX_IDS: Array[String] = ["brutal", "swift", "bulwark"]
@@ -116,29 +116,29 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(WORLD_RECT, Color("17131c"), true)
-	var floor_theme: int = floori(float(maxi(0, GameManager.floor - 1)) / 15.0) % 3
-	for room_index in 9:
+	var floor_theme: int = WorldLayout.dungeon_cycle_for_floor(GameManager.floor) % 3
+	for room_index: int in WorldLayout.active_room_indices():
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
 		var visual_theme: int = (room_index + floor_theme) % 3
-		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.22) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.24))
+		var backdrop_tint := Color(0.78, 0.36, 0.28, 0.42) if visual_theme == 0 else (Color(0.58, 0.43, 0.30, 0.38) if visual_theme == 1 else Color(0.28, 0.38, 0.56, 0.42))
 		match visual_theme:
 			0:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
-				_draw_tiled_rect(walk, BRICK_TILE, Color("80666d"))
-				_draw_room_walls(walk, WALL_TILE, Color("9aa0aa"))
+				_draw_tiled_rect(room, FLOOR_TILE, Color("211b20"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("514047"))
+				_draw_room_walls(walk, WALL_TILE, Color("555864"))
 				draw_texture_rect(SHRINE_TILE, Rect2(walk.get_center() - Vector2(20, 20), Vector2(40, 40)), false, Color("d6b36b"))
 				draw_arc(walk.get_center(), 58.0, 0.0, TAU, 36, Color(0.72, 0.22, 0.19, 0.28), 2.0)
 			1:
-				_draw_tiled_rect(room, SAND_FLOOR_TILE, Color("6b4c3e"))
-				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("b28767"))
-				_draw_room_walls(walk, WALL_TILE, Color("7e8792"))
+				_draw_tiled_rect(room, SAND_FLOOR_TILE, Color("2a211d"))
+				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("5e483a"))
+				_draw_room_walls(walk, WALL_TILE, Color("50545c"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.position + Vector2(58, 42), Vector2(42, 42)), false, Color("caa785"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.end - Vector2(106, 84), Vector2(38, 38)), false, Color("a37e66"))
 			_:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("303844"))
-				_draw_tiled_rect(walk, BRICK_TILE, Color("586579"))
-				_draw_room_walls(walk, BLUE_WALL_TILE, Color("9bb0c4"))
+				_draw_tiled_rect(room, FLOOR_TILE, Color("171d25"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("354253"))
+				_draw_room_walls(walk, BLUE_WALL_TILE, Color("536475"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
@@ -149,9 +149,9 @@ func _draw() -> void:
 		if corridor.size.is_zero_approx():
 			continue
 		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
-		var corridor_tint: Color = Color("6a5960") if pair.x % 2 == 0 else Color("9a735c")
+		var corridor_tint: Color = Color("3c3238") if pair.x % 2 == 0 else Color("4b392f")
 		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
-	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.10), true)
+	draw_rect(WORLD_RECT, Color(0.012, 0.008, 0.018, 0.24), true)
 
 
 func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
