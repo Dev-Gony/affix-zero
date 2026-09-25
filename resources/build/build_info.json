@@ -1,6 +1,6 @@
 {
-  "version": "g5.0",
-  "stage": "GAMEPLAY-V5",
+  "version": "g5.1",
+  "stage": "GAMEPLAY-V5.1",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
   "branch": "dev/gameplay-v5-pets-items",
