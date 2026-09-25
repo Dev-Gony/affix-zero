@@ -15,5 +15,6 @@ base_attack = 22.0
 attack_interval = 1.05
 attack_range = 190.0
 follow_distance = 26.0
+player_damage_bonus_percent = 6.0
 unlock_floor = 20
 description = "작지만 성질은 전혀 작지 않은 화염 드레이크."
