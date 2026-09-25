@@ -93,6 +93,20 @@ func show_pet_essence(world_position: Vector2, amount: int) -> void:
 	spawn_fragments(world_position, Color("c084fc"), 7, 52.0)
 
 
+func show_summon_crystal(world_position: Vector2, amount: int) -> void:
+	if amount <= 0:
+		return
+	_texts.append({
+		"position": world_position + Vector2(-24, -8),
+		"text": "소환석 +%d" % amount,
+		"color": Color("7dd3fc"),
+		"life": 1.10,
+		"duration": 1.10,
+		"size": 9,
+	})
+	spawn_fragments(world_position, Color("7dd3fc"), 9, 60.0)
+
+
 func show_pet_attack(from: Vector2, to: Vector2, color: Color) -> void:
 	var midpoint: Vector2 = from.lerp(to, 0.52) + Vector2(0, -8)
 	_lines.append({
@@ -137,6 +151,8 @@ func spawn_resource_pickup(world_position: Vector2, kind: String, amount: int) -
 		color = Color("ffd45c")
 	elif kind == "pet_essence":
 		color = Color("c084fc")
+	elif kind == "summon_crystal":
+		color = Color("7dd3fc")
 	var launch := Vector2(randf_range(-22.0, 22.0), randf_range(-28.0, -12.0))
 	_resource_pickups.append({
 		"kind": kind,
@@ -471,7 +487,7 @@ func _draw() -> void:
 			])
 			draw_colored_polygon(points, color)
 			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
-		elif pickup_kind == "pet_essence":
+		elif pickup_kind == "pet_essence" or pickup_kind == "summon_crystal":
 			var star := PackedVector2Array()
 			for index: int in 10:
 				var angle: float = -PI * 0.5 + index * PI / 5.0
