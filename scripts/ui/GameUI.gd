@@ -694,7 +694,7 @@ func _refresh_equipment() -> void:
 func _build_equipment_card(slot: String) -> PanelContainer:
 	var item: Dictionary = GameManager.equipment.get(slot, {})
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(88, 82)
+	card.custom_minimum_size = Vector2(88, 90)
 	card.set_meta("equipment_slot", slot)
 	var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 	card.add_theme_stylebox_override("panel", _compact_style_box(Color("151018"), border_color))
@@ -771,16 +771,16 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	enhance_button.add_theme_font_size_override("font_size", 5)
 	enhance_button.disabled = item.is_empty() or GameManager.equipment_enhancement_level(item) >= GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL
 	if not item.is_empty():
-		var preview: Dictionary = GameManager.equipment_enhancement_preview(item)
-		if String(preview.get("status", "")) == "ready":
-			var target_level: int = int(preview.get("target_level", 0))
-			var preview_cost: int = int(preview.get("cost", 0))
+		var button_preview: Dictionary = GameManager.equipment_enhancement_preview(item)
+		if String(button_preview.get("status", "")) == "ready":
+			var target_level: int = int(button_preview.get("target_level", 0))
+			var preview_cost: int = int(button_preview.get("cost", 0))
 			enhance_button.text = "강화 +%d" % target_level
 			enhance_button.disabled = GameManager.gold < preview_cost
 			enhance_button.tooltip_text = "%s\n비용 %dG\n%s" % [
 				GameManager.equipment_enhancement_risk_text(item),
 				preview_cost,
-				_enhancement_gain_text(Dictionary(preview.get("stat_gains", {}))),
+				_enhancement_gain_text(Dictionary(button_preview.get("stat_gains", {}))),
 			]
 		else:
 			enhance_button.text = "MAX"
@@ -805,7 +805,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 
 func _build_equipment_portrait() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(88, 82)
+	panel.custom_minimum_size = Vector2(88, 90)
 	panel.add_theme_stylebox_override("panel", _compact_style_box(Color("0d0a10"), Color("9a6240"), 2))
 	var column := VBoxContainer.new()
 	panel.add_child(column)
@@ -828,7 +828,7 @@ func _build_equipment_portrait() -> PanelContainer:
 
 func _build_equipment_summary() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(88, 82)
+	panel.custom_minimum_size = Vector2(88, 90)
 	panel.add_theme_stylebox_override("panel", _compact_style_box(Color("171119"), Color("59443a")))
 	var growth: Dictionary = GameManager.growth_opportunity_summary()
 	var label := Label.new()
