@@ -752,22 +752,38 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	if _respawning or not is_instance_valid(attacker):
 		return
-	var ranged: bool = attacker.behavior in ["caster", "boss"]
-	effects.show_enemy_attack(attacker.global_position, player.global_position, ranged)
-	if ranged:
-		var projectile := EnemyProjectile.new()
-		projectiles_root.add_child(projectile)
-		var projectile_color: Color = Color("ff6b6b") if attacker.behavior == "boss" else attacker.body_color.lightened(0.18)
-		projectile.setup(attacker.global_position, player, raw_damage, attacker.behavior == "boss", projectile_color)
-		projectile.impacted.connect(_on_enemy_projectile_impacted)
+	var enemy_id: String = attacker.enemy_data.id if attacker.enemy_data != null else ""
+	effects.show_enemy_archetype_attack(enemy_id, attacker.global_position, player.global_position)
+
+	match enemy_id:
+		"lich":
+			_spawn_enemy_projectile(attacker, raw_damage, Color("a879ff"), "shadow", false)
+		"dragon":
+			_spawn_enemy_projectile(attacker, raw_damage * 1.08, Color("ff6a2e"), "fire", false)
+		"demon_lord":
+			_spawn_enemy_projectile(attacker, raw_damage * 1.12, Color("ff3f55"), "meteor", true)
+		_:
+			if attacker.behavior == "caster":
+				_spawn_enemy_projectile(attacker, raw_damage, attacker.body_color.lightened(0.18), "orb", false)
+			else:
+				_apply_enemy_damage(raw_damage, attacker.behavior == "boss")
+
+
+func _spawn_enemy_projectile(attacker: EnemyAI, raw_damage: float, color: Color, kind: String, boss: bool) -> void:
+	if not is_instance_valid(attacker):
 		return
-	_apply_enemy_damage(raw_damage, false)
+	var projectile := EnemyProjectile.new()
+	projectiles_root.add_child(projectile)
+	projectile.setup(attacker.global_position, player, raw_damage, boss, color, kind)
+	projectile.impacted.connect(_on_enemy_projectile_impacted)
 
 
 func _on_enemy_projectile_impacted(world_position: Vector2, raw_damage: float, is_boss: bool) -> void:
 	if _respawning:
 		return
 	effects.spawn_fragments(world_position, Color("c084fc") if not is_boss else Color("ff645e"), 8 if not is_boss else 14, 58.0 if not is_boss else 78.0)
+	if is_boss:
+		effects.show_fireball_explosion(world_position)
 	_apply_enemy_damage(raw_damage, is_boss)
 
 
