@@ -1,0 +1,40 @@
+name: G6 playtest recovery
+
+on:
+  pull_request:
+    branches:
+      - dev/gameplay-v5-pets-items
+
+permissions:
+  contents: read
+
+concurrency:
+  group: g6-recovery-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  reproduce:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.3
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+      - name: Package tracked source and matching engine for isolated reproduction
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          mkdir -p build/reproduction
+          git archive --format=tar HEAD | gzip > build/reproduction/source.tar.gz
+          cp "$(command -v godot)" build/reproduction/godot-4.3-linux
+          git rev-parse HEAD > build/reproduction/commit.txt
+          godot --version > build/reproduction/engine-version.txt
+          sha256sum build/reproduction/source.tar.gz build/reproduction/godot-4.3-linux > build/reproduction/SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: AFFIX-ZERO-g6-reproduction
+          path: build/reproduction/
+          retention-days: 1
+          if-no-files-found: error
