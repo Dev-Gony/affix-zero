@@ -1259,6 +1259,21 @@ func _refresh_pets() -> void:
 	if _pet_content == null:
 		return
 	_clear_container(_pet_content)
+	var currency_row := HBoxContainer.new()
+	currency_row.add_theme_constant_override("separation", 6)
+	_pet_content.add_child(currency_row)
+	var essence_label := Label.new()
+	essence_label.text = "◆ 펫 정수 %d" % PetManager.essence
+	essence_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	essence_label.add_theme_font_size_override("font_size", 9)
+	essence_label.add_theme_color_override("font_color", Color("c084fc"))
+	currency_row.add_child(essence_label)
+	var essence_hint := Label.new()
+	essence_hint.text = "엘리트 · 보스 처치로 획득"
+	essence_hint.add_theme_font_size_override("font_size", 7)
+	essence_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	currency_row.add_child(essence_hint)
+
 	var active_data: PetData = PetManager.active_pet_data()
 	var active_panel := PanelContainer.new()
 	active_panel.custom_minimum_size.y = 98
@@ -1339,14 +1354,15 @@ func _refresh_pets() -> void:
 		pet_actions.add_child(train_button)
 		var evolve_button := Button.new()
 		var evolve_cost: int = PetManager.evolution_cost(active_data.id)
+		var evolve_essence: int = PetManager.evolution_essence_cost(active_data.id)
 		var required_level: int = PetManager.evolution_required_level(active_data.id)
 		if PetManager.stars_for(active_data.id) >= PetManager.MAX_STARS:
 			evolve_button.text = "진화 MAX"
 			evolve_button.disabled = true
 		else:
-			evolve_button.text = "진화 ★%d · %dG" % [PetManager.stars_for(active_data.id) + 1, evolve_cost]
+			evolve_button.text = "진화 ★%d · %dG · ◆%d" % [PetManager.stars_for(active_data.id) + 1, evolve_cost, evolve_essence]
 			evolve_button.disabled = not PetManager.can_evolve(active_data.id)
-			evolve_button.tooltip_text = "필요 Lv.%d · 공격/지원 효과 강화" % required_level
+			evolve_button.tooltip_text = "필요 Lv.%d · 펫 정수 %d · 공격/지원 효과 강화" % [required_level, evolve_essence]
 		evolve_button.custom_minimum_size.y = 24
 		evolve_button.add_theme_font_size_override("font_size", 6)
 		if not evolve_button.disabled:
