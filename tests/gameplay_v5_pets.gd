@@ -24,6 +24,8 @@ func _run() -> void:
 	var original_owned: Dictionary = PetManager.owned_pets.duplicate(true)
 	var original_active: String = PetManager.active_pet_id
 	var original_essence: int = PetManager.essence
+	var original_summon_count: int = PetManager.summon_count
+	var original_last_summons: Array[Dictionary] = PetManager.last_summon_results.duplicate(true)
 	var original_gold: int = GameManager.gold
 
 	_check(PetManager.all_pet_ids().size() == 6, "Pet catalog exposes six launch companions")
@@ -38,16 +40,24 @@ func _run() -> void:
 	var before_train_level: int = PetManager.level_for(PetManager.STARTER_PET_ID)
 	_check(PetManager.train_pet(PetManager.STARTER_PET_ID), "Owned pets can spend gold to train")
 	_check(PetManager.level_for(PetManager.STARTER_PET_ID) == before_train_level + 1, "Training advances exactly one pet level")
-	PetManager.owned_pets[PetManager.STARTER_PET_ID] = {"level": 20, "xp": 0, "stars": 1}
-	_check(PetManager.can_evolve(PetManager.STARTER_PET_ID), "Levelled pets become eligible for star evolution")
-	_check(PetManager.evolve_pet(PetManager.STARTER_PET_ID), "Eligible pets can spend gold to evolve")
+	PetManager.owned_pets[PetManager.STARTER_PET_ID] = {"level": 20, "xp": 0, "stars": 1, "fragments": 10}
+	var fragments_before_evolve: int = PetManager.fragments_for(PetManager.STARTER_PET_ID)
+	var essence_before_evolve: int = PetManager.essence
+	_check(PetManager.can_evolve(PetManager.STARTER_PET_ID), "Levelled pets with duplicate fragments become eligible for star evolution")
+	_check(PetManager.evolve_pet(PetManager.STARTER_PET_ID), "Eligible pets can spend gold and fragments to evolve")
 	_check(PetManager.stars_for(PetManager.STARTER_PET_ID) == 2, "Evolution raises the persistent star rank")
-	_check(PetManager.essence < 999, "Evolution consumes pet essence")
+	_check(PetManager.fragments_for(PetManager.STARTER_PET_ID) < fragments_before_evolve, "Evolution consumes duplicate pet fragments")
+	_check(PetManager.essence == essence_before_evolve, "Evolution no longer consumes summon currency")
+	var summon_essence_before: int = PetManager.essence
+	var summon_results: Array[Dictionary] = PetManager.summon_pets(10)
+	_check(summon_results.size() == 10, "Ten-pull gacha returns ten pet results")
+	_check(PetManager.essence == summon_essence_before - PetManager.TEN_SUMMON_COST, "Ten-pull gacha spends pet essence")
+	_check(summon_results.any(func(result: Dictionary) -> bool: return int(result.get("rarity_index", 0)) >= PetManager.TEN_PULL_GUARANTEE_RARITY), "Ten-pull gacha guarantees at least hero rarity")
 	var essence_before_add: int = PetManager.essence
-	_check(PetManager.add_essence(4) == 4 and PetManager.essence == essence_before_add + 4, "Elite/boss essence rewards add to pet progression currency")
+	_check(PetManager.add_essence(4) == 4 and PetManager.essence == essence_before_add + 4, "Elite/boss essence rewards refill summon currency")
 
 	PetManager.owned_pets = {
-		"spirit_fox": {"level": 7, "xp": 13, "stars": 2},
+		"spirit_fox": {"level": 7, "xp": 13, "stars": 2, "fragments": 5},
 	}
 	PetManager.active_pet_id = "spirit_fox"
 	var snapshot: Dictionary = PetManager.to_save_dict()
@@ -60,12 +70,15 @@ func _run() -> void:
 	_check(PetManager.stars_for("spirit_fox") == 2, "Pet star state survives save round-trip")
 	_check(PetManager.active_pet_id == "spirit_fox", "Active pet survives save round-trip")
 	_check(PetManager.essence == saved_essence, "Pet essence survives save round-trip")
+	_check(PetManager.fragments_for("spirit_fox") == 5, "Duplicate pet fragments survive save round-trip")
 
 	var unlocked: Array[String] = PetManager.try_unlock_for_floor(60)
-	_check(PetManager.is_owned("ember_drake"), "Floor progression unlocks Ember Drake")
-	_check(PetManager.is_owned("stone_golem"), "Floor progression unlocks Stone Golem")
-	_check(PetManager.is_owned("meadow_fairy"), "Late-floor progression unlocks Meadow Fairy")
-	_check(unlocked.size() >= 5, "High-floor migration unlocks all eligible companions")
+	_check(unlocked.is_empty(), "Floor progression no longer grants gacha companions directly")
+	for pet_id: String in ["ember_drake", "stone_golem", "meadow_fairy", "night_bat", "ghost_slime"]:
+		PetManager.unlock_pet(pet_id)
+	_check(PetManager.is_owned("ember_drake"), "Summon collection can own Ember Drake")
+	_check(PetManager.is_owned("stone_golem"), "Summon collection can own Stone Golem")
+	_check(PetManager.is_owned("meadow_fairy"), "Summon collection can own Meadow Fairy")
 
 	PetManager.set_active_pet("ember_drake")
 	_check(PetManager.active_player_damage_bonus_percent() > 0.0, "Ember Drake grants a player damage passive")
@@ -120,10 +133,13 @@ func _run() -> void:
 	boss_bar.queue_free()
 
 	var minimap := GameMiniMap.new()
-	minimap.size = Vector2(78, 58)
+	minimap.size = Vector2(104, 66)
 	minimap.set_floor(12)
 	_check(minimap.current_floor == 12, "HUD minimap tracks the current floor")
 	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
+	_check(WorldLayout.GRID_SIZE == Vector2i(5, 4), "Dungeon world no longer uses the old 3x3 arena board")
+	_check(WorldLayout.active_room_indices().size() == 15, "Dungeon route exposes a fifteen-room winding circuit")
+	_check(WorldLayout.connected_room_pairs().size() == 14, "Dungeon minimap follows only actual corridor connections")
 	minimap.queue_free()
 
 	var objective := CombatObjective.new()
@@ -159,6 +175,8 @@ func _run() -> void:
 	PetManager.owned_pets = original_owned
 	PetManager.active_pet_id = original_active
 	PetManager.essence = original_essence
+	PetManager.summon_count = original_summon_count
+	PetManager.last_summon_results = original_last_summons
 	GameManager.gold = original_gold
 	PetManager.apply_save_dict(PetManager.to_save_dict())
 	_finish()
@@ -173,7 +191,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "pets, training/evolution, persistent companion, generated hero/enemy/dungeon art, actual 29-item atlas, boss/elite presentation, minimap, equipped weapon rendering"
+			"scope": "pet gacha/fragments, animated companion, winding dungeon, animated enemy combat, class attack VFX, item/resource readability"
 		}, "\t"))
 		report.close()
 	print("GAMEPLAY_V5_PETS %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
