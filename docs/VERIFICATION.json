@@ -7,27 +7,34 @@
     "old_engine_files_remaining": 0,
     "core_checks_passed": 23
   },
-  "u1_core": {
-    "source_commit": "009740a1cee5b1e7846c5531f9a6269439b192eb",
-    "run_id": 36174165918,
-    "job_id": 108200697687,
-    "result": "success",
-    "checks_passed": 39,
-    "marker": "CORE_SMOKE_PASSED checks=39 scope=pure-CSharp-not-Unity-editor",
-    "audit": "RESTART_AUDIT_PASSED old_engine_files_remaining=0"
+  "u1_verified": {
+    "source_commit": "64dc3f272de97fcb808c143402e9eeed4866ff67",
+    "run_id": 36174597389,
+    "core_job_id": 108202114244,
+    "core_job_result": "success",
+    "core_checks_passed": 39,
+    "core_scope": "Pure C# AttackTimeline and CombatHealth; no UnityEngine/Editor compilation",
+    "audit_result": "success",
+    "audit_scope": "Current tree and .meta plus historical Godot removal check",
+    "storage_job_id": 108202114680,
+    "storage_job_result": "success",
+    "storage_scope": "Windows PowerShell synthetic fixtures: report creation, source preservation, missing path/non-repository handling, successful exit code. Not actual user disk inspection."
   },
-  "storage_initial": {
+  "storage_initial_failure": {
     "source_commit": "009740a1cee5b1e7846c5531f9a6269439b192eb",
     "run_id": 36174165918,
     "job_id": 108200697247,
     "result": "failure",
-    "reason": "Report assertions passed but expected non-repository Git reads left nonzero LASTEXITCODE. Fix explicitly separates informational read status and tool success. Retest pending."
+    "reason": "Expected non-repository Git reads left nonzero LASTEXITCODE despite report assertions passing.",
+    "resolution": "Keep informational read failure in JSON; reset process status only after successful report creation; add exit-code assertion. Retest passed at 64dc3f2."
   },
   "unity_editor_import": "NOT_RUN",
   "unity_animation_render": "NOT_RUN",
   "windows_build": "NOT_RUN",
   "user_playtest": "NOT_RUN",
+  "new_licensed_art_import": "NOT_DONE",
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
-  "scope": "Core C# and synthetic storage inspection only; no Unity compilation or gameplay acceptance."
+  "remote_history_rewritten": false,
+  "scope": "Core C# and synthetic storage inspection only; no Unity gameplay acceptance."
 }
