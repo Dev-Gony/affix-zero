@@ -57,7 +57,15 @@ func _draw() -> void:
 		return
 	var color: Color = _pet_data.color
 	var bob: float = sin(_clock * 4.0) * 1.5
-	draw_circle(Vector2(0, 7 + bob), 8.5, Color(color, 0.10))
+	var stars: int = PetManager.stars_for(_pet_data.id)
+	var evolution_scale: float = 1.0 + float(stars - 1) * 0.07
+	var aura_alpha: float = 0.05 + float(stars - 1) * 0.035
+	draw_circle(Vector2(0, 7 + bob), 8.5 * evolution_scale, Color(color, 0.10))
+	if stars >= 2:
+		draw_arc(Vector2(0, bob), 10.0 + stars * 1.5, 0.0, TAU, 20, Color(color, aura_alpha), 1.0 + stars * 0.18)
+	if stars >= 4:
+		draw_arc(Vector2(0, bob), 15.0 + sin(_clock * 3.0) * 1.5, -0.6, PI + 0.6, 22, Color(color.lightened(0.25), aura_alpha * 1.35), 1.2)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE * evolution_scale)
 	match _pet_data.id:
 		"spirit_fox":
 			_draw_fox(color, bob)
@@ -73,6 +81,7 @@ func _draw() -> void:
 			_draw_fairy(color, bob)
 		_:
 			draw_circle(Vector2(0, bob), 6.0, color)
+	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
 func _draw_fox(color: Color, bob: float) -> void:
