@@ -116,11 +116,13 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(WORLD_RECT, Color("17131c"), true)
+	var floor_theme: int = floori(float(maxi(0, GameManager.floor - 1)) / 15.0) % 3
 	for room_index in 9:
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
-		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if room_index % 3 == 0 else (Color(0.86, 0.72, 0.56, 0.22) if room_index % 3 == 1 else Color(0.58, 0.72, 0.90, 0.24))
-		match room_index % 3:
+		var visual_theme: int = (room_index + floor_theme) % 3
+		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.22) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.24))
+		match visual_theme:
 			0:
 				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
 				_draw_tiled_rect(walk, BRICK_TILE, Color("80666d"))
@@ -141,7 +143,7 @@ func _draw() -> void:
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
 		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
-		_draw_room_decor(room_index, walk)
+		_draw_room_decor(room_index, walk, visual_theme)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
 		if corridor.size.is_zero_approx():
@@ -172,9 +174,8 @@ func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
 	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
 
 
-func _draw_room_decor(room_index: int, walk: Rect2) -> void:
+func _draw_room_decor(room_index: int, walk: Rect2, theme_index: int) -> void:
 	var center: Vector2 = walk.get_center()
-	var theme_index: int = room_index % 3
 
 	# Corner pillars anchor each combat room so the arena reads like a place,
 	# not just a rectangle full of tiles.
@@ -220,6 +221,18 @@ func _draw_room_decor(room_index: int, walk: Rect2) -> void:
 	draw_arc(center, 34.0, 0.0, TAU, 28, sigil_color, 1.2)
 	draw_line(center + Vector2(-22, 0), center + Vector2(22, 0), sigil_color, 1.0)
 	draw_line(center + Vector2(0, -22), center + Vector2(0, 22), sigil_color, 1.0)
+
+	if room_index == _current_room:
+		var floor_depth: float = clampf(float(GameManager.floor) / 100.0, 0.0, 1.0)
+		draw_arc(center, 52.0, 0.0, TAU, 36, Color(sigil_color, 0.12 + floor_depth * 0.10), 1.4)
+		if is_boss_floor():
+			var boss_pulse: float = 0.18 + sin(float(Time.get_ticks_msec()) * 0.006) * 0.05
+			draw_circle(center, 70.0, Color("7a101d", boss_pulse))
+			draw_arc(center, 66.0, 0.0, TAU, 40, Color("ff4656", 0.34), 2.2)
+			for index: int in 8:
+				var angle: float = TAU * float(index) / 8.0
+				var p: Vector2 = center + Vector2.RIGHT.rotated(angle) * 58.0
+				draw_circle(p, 3.0, Color("ff8b67", 0.72))
 
 
 func _draw_stone_pillar(position: Vector2, theme_index: int) -> void:
