@@ -397,9 +397,15 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
   - 활성 펫을 바꾼 뒤 저장
   - 재실행/불러오기 후 같은 펫과 레벨이 유지되는지 확인
 
+- [ ] **아이템 외형 교체**
+  - 장비/가방에서 기존 atlas 아이콘 대신 새 픽셀 실루엣이 보이는지 확인
+  - 무기/투구/갑옷/장갑/신발/반지/목걸이가 슬롯별로 즉시 구분되는지 확인
+  - 같은 슬롯에서도 신검/마검/용비늘/다이아몬드 등 베이스별 재질색 차이가 보이는지 확인
+  - 희귀도 색 프레임과 아이템 자체 재질색이 서로 싸우지 않는지 확인
+
 - [ ] **아이템 아트 파이프라인**
-  - 기존 장비 아이콘이 아직 정상 표시되는지 확인
-  - dedicated icon 경로가 없는 기존 아이템은 atlas fallback으로 깨지지 않아야 함
+  - dedicated icon 경로가 없는 기존 저장 아이템도 깨지지 않아야 함
+  - 향후 전용 PNG를 연결할 수 있는 icon_path fallback 계약 유지
 
 ### G5.0 validation notes
 
