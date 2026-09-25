@@ -622,6 +622,7 @@ func _build_class_selection() -> void:
 
 func _connect_signals() -> void:
 	GameManager.stats_changed.connect(_on_stats_changed)
+	GameManager.class_selected.connect(_on_class_selected_ui)
 	GameManager.inventory_changed.connect(_refresh_inventory)
 	GameManager.equipment_changed.connect(_on_equipment_changed)
 	GameManager.skills_changed.connect(_refresh_skills)
@@ -1007,14 +1008,40 @@ func _add_skill_row(definition: Dictionary) -> void:
 	description_label.add_theme_font_size_override("font_size", 6)
 	description_label.add_theme_color_override("font_color", COLOR_MUTED)
 	text_column.add_child(description_label)
-	var button := Button.new()
-	button.text = "%dG\n강화" % cost
-	button.custom_minimum_size = Vector2(70, 53)
-	button.add_theme_font_size_override("font_size", 7)
-	button.disabled = GameManager.gold < cost
-	button.tooltip_text = "현재 골드: %dG" % GameManager.gold
-	button.pressed.connect(_buy_skill.bind(skill_id, base_cost, cost_step))
-	row.add_child(button)
+	var actions := VBoxContainer.new()
+	actions.custom_minimum_size = Vector2(78, 53)
+	actions.add_theme_constant_override("separation", 2)
+	row.add_child(actions)
+
+	var one_button := Button.new()
+	one_button.text = "+1  %dG" % cost
+	one_button.custom_minimum_size = Vector2(78, 16)
+	one_button.add_theme_font_size_override("font_size", 6)
+	one_button.disabled = GameManager.gold < cost
+	one_button.tooltip_text = "1레벨 강화 · 현재 골드 %dG" % GameManager.gold
+	one_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 1))
+	actions.add_child(one_button)
+
+	var ten_count: int = mini(10, GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step))
+	var ten_cost: int = GameManager.skill_upgrade_total_cost(skill_id, base_cost, cost_step, ten_count)
+	var ten_button := Button.new()
+	ten_button.text = "+%d  %dG" % [ten_count, ten_cost] if ten_count > 0 else "+10"
+	ten_button.custom_minimum_size = Vector2(78, 16)
+	ten_button.add_theme_font_size_override("font_size", 6)
+	ten_button.disabled = ten_count <= 0
+	ten_button.tooltip_text = "최대 10레벨 한 번에 강화"
+	ten_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 10))
+	actions.add_child(ten_button)
+
+	var max_count: int = GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
+	var max_button := Button.new()
+	max_button.text = "MAX +%d" % max_count if max_count > 0 else "MAX"
+	max_button.custom_minimum_size = Vector2(78, 16)
+	max_button.add_theme_font_size_override("font_size", 6)
+	max_button.disabled = max_count <= 0
+	max_button.tooltip_text = "현재 골드로 가능한 만큼 한 번에 강화"
+	max_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 0))
+	actions.add_child(max_button)
 
 
 func _refresh_rebirth() -> void:
@@ -1133,6 +1160,14 @@ func _item_stat_totals(item: Dictionary) -> Dictionary:
 
 func _format_value(stat_name: String, value: float) -> String:
 	return "%.2f" % value if stat_name == "SPD" else "%d" % roundi(value)
+
+
+func _on_class_selected_ui(_class_id: String) -> void:
+	# Class changes after rebirth must immediately refresh every class-dependent panel.
+	_refresh_hud()
+	_refresh_equipment()
+	_refresh_skills()
+	_refresh_stats()
 
 
 func _on_stats_changed() -> void:
@@ -1265,10 +1300,15 @@ func _sell_all_normal() -> void:
 	GameManager.sell_all_normal()
 
 
-func _buy_skill(skill_id: String, base_cost: int, cost_step: int) -> void:
+func _buy_skill_amount(skill_id: String, base_cost: int, cost_step: int, amount: int) -> void:
 	AudioManager.play_sfx("ui_click")
-	if GameManager.buy_skill(skill_id, base_cost, cost_step):
-		_show_notification("%s 강화 완료" % skill_id, COLOR_GREEN)
+	var purchased: int = GameManager.buy_skill_levels(skill_id, base_cost, cost_step, amount)
+	if purchased > 0:
+		_show_notification("%s  +%d 강화 완료" % [skill_id, purchased], COLOR_GREEN)
+
+
+func _buy_skill(skill_id: String, base_cost: int, cost_step: int) -> void:
+	_buy_skill_amount(skill_id, base_cost, cost_step, 1)
 
 
 func _rebirth() -> void:
