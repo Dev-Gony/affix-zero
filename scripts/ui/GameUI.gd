@@ -824,6 +824,7 @@ func _connect_signals() -> void:
 	RebirthManager.rebirth_completed.connect(func(_count: int) -> void: _on_rebirth_changed())
 	RebirthManager.permanent_upgrade_purchased.connect(func(_stat: String) -> void: _on_rebirth_changed())
 	PetManager.pet_state_changed.connect(_refresh_pets)
+	PetManager.pet_state_changed.connect(_refresh_objective)
 	var battle := get_tree().current_scene.get_node_or_null("BattleArea") as BattleManager
 	if battle != null:
 		battle.boss_status_changed.connect(_on_boss_status_changed)
