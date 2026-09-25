@@ -1,3 +1,4 @@
+class_name E0Main
 extends Node2D
 
 const WarriorScene = preload("res://scenes/warrior.tscn")
