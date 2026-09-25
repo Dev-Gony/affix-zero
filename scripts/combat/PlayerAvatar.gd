@@ -1,13 +1,14 @@
 extends Node2D
 class_name PlayerAvatar
 
-const CLASS_TEXTURES := {
-	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
-	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
-	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
-	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
-	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
-	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0),
+	"mage": Vector2i(1, 0),
+	"knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1),
+	"assassin": Vector2i(1, 1),
+	"saint": Vector2i(2, 1),
 }
 
 var class_id: String = "warrior"
@@ -122,10 +123,12 @@ func _draw() -> void:
 		"hit":
 			motion_offset.x = -1.5 if int(pulse * 60.0) % 2 == 0 else 1.5
 
-	var texture: Texture2D = CLASS_TEXTURES.get(class_id, CLASS_TEXTURES["warrior"])
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(class_id, Vector2i.ZERO)
+	var cell_size := Vector2(float(CLASS_ATLAS.get_width()) / 3.0, float(CLASS_ATLAS.get_height()) / 2.0)
+	var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
 	var horizontal_facing: float = -1.0 if _visual_facing.x < -0.08 else 1.0
 	draw_set_transform(motion_offset + Vector2(0, bob), motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
-	draw_texture_rect(texture, Rect2(-14, -21, 28, 28), false)
+	draw_texture_rect_region(CLASS_ATLAS, Rect2(-18, -26, 36, 36), source)
 	_draw_equipped_weapon(motion_progress)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
