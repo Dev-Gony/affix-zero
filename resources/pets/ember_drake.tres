@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PetData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/pets/PetData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "ember_drake"
+display_name = "화염룡"
+rarity_index = 4
+rarity_name = "전설"
+role = "공격형"
+element = "화염"
+color = Color(1, 0.28, 0.18, 1)
+base_attack = 22.0
+attack_interval = 1.05
+attack_range = 190.0
+follow_distance = 26.0
+unlock_floor = 20
+description = "작지만 성질은 전혀 작지 않은 화염 드레이크."
