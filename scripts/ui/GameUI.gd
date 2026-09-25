@@ -843,7 +843,7 @@ func _refresh_equipment() -> void:
 func _build_equipment_card(slot: String) -> PanelContainer:
 	var item: Dictionary = GameManager.equipment.get(slot, {})
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(176, 80)
+	card.custom_minimum_size = Vector2(176, 84)
 	card.set_meta("equipment_slot", slot)
 	var rarity_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 	var card_background := Color("111720") if item.is_empty() else Color("111720").lerp(rarity_color, 0.055)
@@ -866,13 +866,15 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	slot_label.add_theme_font_size_override("font_size", 7)
 	slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 	content.add_child(slot_label)
-	var icon := TextureRect.new()
-	icon.texture = _item_icon(item) if not item.is_empty() else _equipment_icon(slot)
-	icon.custom_minimum_size = Vector2(0, 28)
-	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
-	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
-	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-	icon.modulate = Color.WHITE if not item.is_empty() else Color(0.30, 0.28, 0.36, 0.58)
+	var icon := ItemVisualIcon.new()
+	icon.custom_minimum_size = Vector2(38, 30)
+	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
+	icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	if item.is_empty():
+		icon.configure_placeholder(slot)
+		icon.modulate = Color(1, 1, 1, 0.55)
+	else:
+		icon.configure(item)
 	content.add_child(icon)
 	var item_label := Label.new()
 	item_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -1034,9 +1036,13 @@ func _refresh_inventory() -> void:
 			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 			var slot_button := Button.new()
 			slot_button.custom_minimum_size = Vector2(45, 45)
-			slot_button.icon = _item_icon(item)
-			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
+			var visual_icon := ItemVisualIcon.new()
+			visual_icon.position = Vector2(5, 7)
+			visual_icon.size = Vector2(35, 35)
+			visual_icon.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			visual_icon.configure(item)
+			slot_button.add_child(visual_icon)
 			slot_button.add_theme_stylebox_override("normal", _style_box(Color("111720"), item_color, 1, 0))
 			slot_button.add_theme_stylebox_override("hover", _style_box(Color("202a36"), item_color.lightened(0.2), 2, 0))
 			slot_button.add_theme_stylebox_override("pressed", _style_box(Color("29313d"), item_color.lightened(0.25), 2, 0))
