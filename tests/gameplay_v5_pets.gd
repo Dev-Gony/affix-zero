@@ -96,6 +96,13 @@ func _run() -> void:
 	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
 	minimap.queue_free()
 
+	var objective := CombatObjective.new()
+	objective.size = Vector2(190, 58)
+	objective.sync_from_game()
+	_check(objective.kill_goal == 8 + GameManager.floor, "Objective tracker mirrors the floor kill target")
+	_check(objective.floor_number == GameManager.floor, "Objective tracker mirrors current floor progress")
+	objective.queue_free()
+
 	var avatar := PlayerAvatar.new()
 	add_child(avatar)
 	avatar.set_equipment_visual({
