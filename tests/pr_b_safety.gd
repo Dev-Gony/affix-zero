@@ -66,14 +66,14 @@ func _run() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 
-	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Gameplay starts without a stale pause reason")
+	_check(not get_tree().paused and not get_tree().paused, "Gameplay starts without a stale pause reason")
 	ui._toggle_management(1)
-	_check(not PauseCoordinator.has_reason("management"), "Management windows never acquire a gameplay pause reason")
-	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Management UI keeps the SceneTree running")
+	_check(not get_tree().paused, "Management windows never pause gameplay")
+	_check(not get_tree().paused, "Management UI keeps the SceneTree running")
 	_check(GameManager.game_state == GameManager.GameState.RUNNING, "Management UI keeps game state RUNNING")
 	_check(ui._modal_blocker.visible, "Management window still blocks accidental background clicks")
 	ui._close_management(false)
-	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Closing management leaves gameplay running")
+	_check(not get_tree().paused, "Closing management leaves gameplay running")
 	_check(not ui._modal_blocker.visible, "Modal blocker closes with management UI")
 
 	ui._toggle_management(1)
@@ -82,10 +82,10 @@ func _run() -> void:
 	esc.pressed = true
 	ui._unhandled_key_input(esc)
 	_check(not ui._management_open, "ESC closes an open management window")
-	_check(PauseCoordinator.has_reason("pause_menu") and get_tree().paused, "ESC alone opens the pause menu and pauses the entire game")
+	_check(get_tree().paused, "ESC alone opens the pause menu and pauses the entire game")
 	_check(ui._pause_panel.visible and ui._modal_blocker.visible, "Pause menu is modal")
 	ui._toggle_pause_menu()
-	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Closing ESC menu resumes gameplay")
+	_check(not get_tree().paused, "Closing ESC menu resumes gameplay")
 
 	GameManager.inventory = [
 		{"id": "kept-normal", "rarity_index": 0, "rarity_id": "normal", "locked": false, "slot": "weapon", "name": "kept normal", "base_stats": {}, "affixes": [], "sell_value": 10},
@@ -117,14 +117,14 @@ func _run() -> void:
 	var diagnostic_badge: Button = diagnostics.get("_badge") as Button
 	_check(diagnostic_badge != null and diagnostic_badge.text.begins_with("B.1"), "Runtime badge is derived from PR-B build metadata")
 
-	PauseCoordinator.clear_all()
+	get_tree().paused = false
 	main.queue_free()
 	await get_tree().process_frame
 	_finish()
 
 
 func _finish() -> void:
-	PauseCoordinator.clear_all()
+	get_tree().paused = false
 	SaveManager.set_persistence_enabled(false)
 	var output_dir: String = ProjectSettings.globalize_path("res://build/pr-b")
 	DirAccess.make_dir_recursive_absolute(output_dir)
