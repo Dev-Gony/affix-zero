@@ -371,14 +371,26 @@ func _draw() -> void:
 			draw_rect(Rect2(position + Vector2(-beam_width * 3.0, -beam_height * 0.48), Vector2(beam_width * 6.0, beam_height * 0.48)), Color(rarity_color, alpha * 0.04), true)
 		draw_circle(position, 9.0 + rarity_index * 1.4, Color(rarity_color, alpha * (0.10 + rarity_index * 0.025)))
 		var icon_size: float = 18.0 + minf(4.0, float(rarity_index))
-		_draw_loot_symbol(
-			position,
-			String(loot_icon.get("slot", "")),
-			String(loot_icon.get("base_id", "")),
-			rarity_color,
-			alpha,
-			icon_size
-		)
+		var icon_index: int = int(loot_icon.get("icon_index", -1))
+		if icon_index >= 0 and icon_index < 30:
+			var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
+			var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
+			var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+			draw_texture_rect_region(
+				ITEM_BASE_ATLAS,
+				Rect2(position - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size),
+				source,
+				Color(1, 1, 1, alpha)
+			)
+		else:
+			_draw_loot_symbol(
+				position,
+				String(loot_icon.get("slot", "")),
+				String(loot_icon.get("base_id", "")),
+				rarity_color,
+				alpha,
+				icon_size
+			)
 	for text_data: Dictionary in _texts:
 		var alpha: float = clampf(float(text_data["life"]) / float(text_data["duration"]), 0.0, 1.0)
 		var color: Color = text_data["color"]
