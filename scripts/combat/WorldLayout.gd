@@ -1,16 +1,33 @@
 extends RefCounted
 class_name WorldLayout
 
-const ROOM_SIZE := Vector2(640, 400)
-const GRID_SIZE := Vector2i(3, 3)
+# G6 dungeon topology:
+# a larger winding floor plan instead of the old fully-connected 3x3 arena grid.
+const ROOM_SIZE := Vector2(520, 340)
+const GRID_SIZE := Vector2i(5, 4)
 const WORLD_RECT := Rect2(Vector2.ZERO, Vector2(ROOM_SIZE.x * GRID_SIZE.x, ROOM_SIZE.y * GRID_SIZE.y))
-const WALK_MARGIN := Vector2(72, 54)
-const CORRIDOR_HALF_WIDTH: float = 34.0
-const FLOOR_PATH: Array[int] = [4, 5, 2, 1, 0, 3, 6, 7, 8, 7, 6, 3, 0, 1, 2, 5]
+const WALK_MARGIN := Vector2(62, 48)
+const CORRIDOR_HALF_WIDTH: float = 30.0
+
+# Main expedition route. Consecutive rooms are always orthogonally adjacent.
+# It snakes through the dungeon, doubles back, and creates long traversal reads.
+const DUNGEON_PATH: Array[int] = [
+	10, 11, 6, 7, 8, 3, 4, 9, 14, 13, 12, 17, 18, 19,
+]
+
+# Small side chambers visually sell a dungeon instead of a board.
+const SIDE_CONNECTIONS: Array[Vector2i] = [
+	Vector2i(6, 5),
+	Vector2i(8, 13),
+	Vector2i(3, 2),
+	Vector2i(14, 15),
+	Vector2i(12, 16),
+	Vector2i(18, 17),
+]
 
 
 static func room_index_for_floor(floor_number: int) -> int:
-	return FLOOR_PATH[(maxi(1, floor_number) - 1) % FLOOR_PATH.size()]
+	return DUNGEON_PATH[(maxi(1, floor_number) - 1) % DUNGEON_PATH.size()]
 
 
 static func room_grid(room_index: int) -> Vector2i:
@@ -29,6 +46,19 @@ static func walk_rect(room_index: int) -> Rect2:
 
 static func room_center(room_index: int) -> Vector2:
 	return walk_rect(room_index).get_center()
+
+
+static func room_is_used(room_index: int) -> bool:
+	if DUNGEON_PATH.has(room_index):
+		return true
+	for pair: Vector2i in SIDE_CONNECTIONS:
+		if pair.x == room_index or pair.y == room_index:
+			return true
+	return false
+
+
+static func route_position(room_index: int) -> int:
+	return DUNGEON_PATH.find(room_index)
 
 
 static func corridor_rect(room_a: int, room_b: int) -> Rect2:
@@ -62,30 +92,40 @@ static func travel_waypoints(room_a: int, room_b: int) -> Array[Vector2]:
 	if grid_a.y == grid_b.y and absi(grid_a.x - grid_b.x) == 1:
 		var y := walk_a.get_center().y
 		if grid_b.x > grid_a.x:
-			points.append(Vector2(walk_a.end.x - 10.0, y))
-			points.append(Vector2(walk_b.position.x + 10.0, y))
+			points.append(Vector2(walk_a.end.x - 8.0, y))
+			points.append(Vector2(walk_b.position.x + 8.0, y))
 		else:
-			points.append(Vector2(walk_a.position.x + 10.0, y))
-			points.append(Vector2(walk_b.end.x - 10.0, y))
+			points.append(Vector2(walk_a.position.x + 8.0, y))
+			points.append(Vector2(walk_b.end.x - 8.0, y))
 	elif grid_a.x == grid_b.x and absi(grid_a.y - grid_b.y) == 1:
 		var x := walk_a.get_center().x
 		if grid_b.y > grid_a.y:
-			points.append(Vector2(x, walk_a.end.y - 10.0))
-			points.append(Vector2(x, walk_b.position.y + 10.0))
+			points.append(Vector2(x, walk_a.end.y - 8.0))
+			points.append(Vector2(x, walk_b.position.y + 8.0))
 		else:
-			points.append(Vector2(x, walk_a.position.y + 10.0))
-			points.append(Vector2(x, walk_b.end.y - 10.0))
+			points.append(Vector2(x, walk_a.position.y + 8.0))
+			points.append(Vector2(x, walk_b.end.y - 8.0))
 	points.append(walk_b.get_center())
 	return points
 
 
 static func connected_room_pairs() -> Array[Vector2i]:
 	var pairs: Array[Vector2i] = []
-	for y in GRID_SIZE.y:
-		for x in GRID_SIZE.x:
-			var index := y * GRID_SIZE.x + x
-			if x < GRID_SIZE.x - 1:
-				pairs.append(Vector2i(index, index + 1))
-			if y < GRID_SIZE.y - 1:
-				pairs.append(Vector2i(index, index + GRID_SIZE.x))
+	for index: int in DUNGEON_PATH.size() - 1:
+		pairs.append(Vector2i(DUNGEON_PATH[index], DUNGEON_PATH[index + 1]))
+	for pair: Vector2i in SIDE_CONNECTIONS:
+		pairs.append(pair)
 	return pairs
+
+
+static func visible_rooms() -> Array[int]:
+	var rooms: Array[int] = []
+	for room_index: int in DUNGEON_PATH:
+		if not rooms.has(room_index):
+			rooms.append(room_index)
+	for pair: Vector2i in SIDE_CONNECTIONS:
+		if not rooms.has(pair.x):
+			rooms.append(pair.x)
+		if not rooms.has(pair.y):
+			rooms.append(pair.y)
+	return rooms
