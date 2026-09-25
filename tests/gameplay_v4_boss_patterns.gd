@@ -22,6 +22,8 @@ func _check(condition: bool, message: String) -> void:
 
 func _run() -> void:
 	_check(BattleManager.BOSS_PATTERN_WARNING >= 1.30, "Boss telegraphs give base-speed auto-hunt enough reaction time")
+	_check(BattleManager.boss_pattern_warning_for_speed(1.0) >= 1.30, "x1 keeps the full boss warning window")
+	_check(BattleManager.boss_pattern_warning_for_speed(5.0) / 5.0 >= 0.55, "x5 still shows the telegraph for a readable real-time window")
 	_check(BattleManager.BOSS_PATTERN_INTERVAL >= 5.0, "Boss patterns leave meaningful normal-combat windows")
 	_check(BattleManager.boss_pattern_radius("ground_slam") > BattleManager.boss_pattern_radius("doom_mark"), "Ground slam has the larger danger radius")
 	_check(BattleManager.boss_pattern_damage_multiplier("ground_slam") <= 1.30, "Ground slam adds pattern pressure without extreme raw damage")
