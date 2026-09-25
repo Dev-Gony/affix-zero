@@ -246,7 +246,7 @@ func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
 	window.position = Vector2(14, 40)
-	window.size = Vector2(612, 346)
+	window.size = Vector2(612, 350)
 	window.z_index = 50
 	window.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), Color("506176"), 2, 3))
 	add_child(window)
