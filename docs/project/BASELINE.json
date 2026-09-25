@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_date_kst": "2026-09-26",
   "repository": "Dev-Gony/affix-zero",
-  "stage": "E0-C03 harness automated PASS; awaiting real Windows GTX1050 visible benchmark",
+  "stage": "V0 playable vertical slice implemented; awaiting Windows visual playtest",
   "work_branch": "chore/r0-preservation",
   "work_pr": 18,
   "decision_parent_sha": "6e5452bf7c7141d4522ce6d2fcf071fdba57c94a",
@@ -33,7 +33,7 @@
   "attachment_is_verified_local_backup": false,
   "backup_blocks_isolated_implementation": false,
   "backup_required_before_legacy_migration_or_overwrite": true,
-  "user_windows_play_approval": "E0_C01_AND_C02_LOCAL_RUN_CONFIRMED_FINAL_ART_NOT_APPROVED",
+  "user_windows_play_approval": "E0_C01_C02_OK_E0_C03_PRESENTATION_REJECTED_V0_NOT_RUN",
   "engine": {
     "legacy": "Godot 4.3",
     "user_reported_executable": "Godot_v4.3-stable_win64.exe",
@@ -74,6 +74,7 @@
     ],
     "scope": "Godot 4.7.2 isolated E0 import and C01/C02/C03 harness contracts; CI performance numbers are not Windows GTX1050 evidence"
   },
-  "next_task": "Run visible Windows E0-C03 benchmark on target PC, inspect JSON/CSV, then decide whether to scale to 150/300 enemies",
-  "reload_remote_before_work": true
+  "next_task": "User pulls V0 default scene and visually checks dungeon/combat/pickup/elite loop; then implement production frame animation pipeline",
+  "reload_remote_before_work": true,
+  "performance_gate": "PAUSED_UNTIL_VERTICAL_SLICE_VISUAL_BASELINE"
 }
