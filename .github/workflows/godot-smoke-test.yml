@@ -109,6 +109,15 @@ jobs:
           grep -q "GAMEPLAY_V4_LOOT PASSED" build/gameplay-v4/loot-feedback.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v4/loot-feedback.log
 
+      - name: Verify UIUX V2 management contracts
+        shell: bash
+        run: |
+          mkdir -p build/uiux-v2
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/uiux_v2_overhaul.tscn -- --affix-test-mode 2>&1 | tee build/uiux-v2/contracts.log
+          grep -q "UIUX_V2 PASSED" build/uiux-v2/contracts.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/uiux-v2/contracts.log
+
       - name: Run existing gameplay smoke test
         shell: bash
         run: |
@@ -155,6 +164,7 @@ jobs:
             build/pr-b/
             build/gameplay-v3/
             build/gameplay-v4/
+            build/uiux-v2/
           if-no-files-found: warn
 
       - name: Upload Windows playable build
