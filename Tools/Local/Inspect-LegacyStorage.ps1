@@ -77,6 +77,9 @@ $out = Join-Path $current 'Build/Reports'
 [void][IO.Directory]::CreateDirectory($out)
 $file = Join-Path $out ('storage-' + (Get-Date -Format 'yyyyMMdd-HHmmss') + '-' + [Guid]::NewGuid().ToString('N') + '.json')
 $report | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath $file -Encoding UTF8
-$folders | Format-Table path, status, gib, files -AutoSize
+$folders | ForEach-Object { [pscustomobject]$_ } | Format-Table path, status, gib, files -AutoSize
 Write-Host ('Report: ' + $file)
 Write-Host 'Review paths before sharing. No legacy folder or user save was deleted.'
+# Expected Git read failures are recorded in JSON, not the process exit code.
+# Reaching this point means the report was written successfully; errors above still throw.
+$global:LASTEXITCODE = 0

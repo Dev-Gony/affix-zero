@@ -1,30 +1,25 @@
-# RESTART-001 | Godot 종료, Unity에서 새 시작
+# 재시작 결정 v0.2
 
-결정일: 2026-09-26. 사용자 명시 요청: 기존 코드 전부 삭제하고 새로 시작, Hero Siege/Survivor.io에서 사용한 계열의 엔진 검토.
+## RESTART-001 | 2026-09-26
 
-## 결정
+사용자의 명시 요청에 따라 기존 코드/아트 전체를 폐기하고 Unity 6.3 LTS 6000.3.24f1, C#, Built-in 2D에서 시작한다. 새 브랜치는 restart/unity-6, PR #19, 새 로컬 위치는 affix-unity다. 기존 Godot/E0/V0 소스는 새 파일 트리에 없다. 과거 부모 commit과 다른 브랜치를 남긴 것은 이력 보존이며 현재 구현 재사용이 아니다.
 
-Unity 6.3 LTS 6000.3.24f1 / C# / 첫 2D 화면은 Built-in 렌더러 / Windows 우선. Unity 지원 문서의 6.3 LTS와 정식 6000.3.24f1 릴리스를 확인했다. 처음부터 URP/온라인/모바일 SDK/전역 매니저를 추가하지 않는다. 렌더 파이프라인은 실제 새 에셋 요구가 생길 때 검토한다.
+엔진 선택은 AFFIX 제작 도구/2D 작업/C# 설계를 위한 결정이다. 과거 merge 오류나 거절된 화면만으로 Godot 엔진 자체의 결함 또는 악성코드 감염이 증명된 것은 아니다. Hero Siege는 제작자 배포 페이지에 GameMaker가 명시됐지만, Survivor.io의 특정 버전 엔진을 직접 확인한 제작사 기술자료는 확보하지 못했으므로 이를 Unity 선택의 확정 사실로 쓰지 않는다.
 
-기존 트리를 상속하지 않는 새 tree를 생성하되 기존 HEAD를 정상 Git 부모로 연결한다. 새 개발선에서는 기존 코드와 이미지가 사라지고 역사에만 남는다. history rewrite와 사용자 로컬 삭제는 하지 않는다. 새 브랜치 restart/unity-6, 새 로컬 폴더 권장명 affix-unity. chore/r0-preservation이나 기존 두 Godot worktree로 다시 merge하지 않는다.
+## WORKFLOW-002 | 설치 확인 후
 
-## 엔진 사실과 판단의 구분
+사용자는 Unity D드라이브 설치 완료를 확인했다. 설치 폴더 이름이나 실행 파일을 추측하지 않고 Project Dashboard에서 실제 Editor 버전/경로를 보고한다. 설치 완료와 프로젝트 import/Play 완료는 구분한다. 아직 새 라이선스 팩이 없으므로 빈 씬을 게임으로 보여주지 않고 리소스 검수/연결부터 진행한다.
 
-- Hero Siege: Panic Art Studios의 자체 itch.io 배포 페이지가 Made with GameMaker를 명시한다. 확인된 1차 근거다.
-- Survivor.io: 검색에서 개발사 관련 Unity 채용 공고를 확인했지만, 원작 특정 빌드의 엔진/버전을 직접 선언한 개발사 기술문서는 확보하지 못했다. 복제 게임 판매 페이지를 원작 엔진 근거로 사용하지 않는다.
-- Unity 선택은 AFFIX의 2D 애니메이션/에셋 작업과 C# 데이터 설계, 향후 확장 요구에 대한 설계 판단이다. 두 게임의 실제 내부 구조를 복제한다는 뜻이 아니다.
-- 이번 project.godot merge 오류는 로컬 수정과 원격 변경이 충돌하여 Git이 중단한 사건이다. 이것만으로 Godot 엔진 결함이나 바이러스 감염을 진단할 수 없다.
-- 앞선 벤치마크는 매 프레임 누적 샘플을 정렬하고 긴 지연 샘플을 걸러내는 문제가 있었다. 그 결과로 엔진 적합성을 확정하지 않는다. 해당 코드도 재사용하지 않는다.
+## RETENTION-003 | 문서 중심 정리
 
-## 출처 (확인일 2026-09-26)
+과거 소스/이미지를 현재 프로젝트의 archive로 복사하지 않는다. 실패 기록은 history/LEGACY_RETROSPECTIVE.md에 텍스트로만 보존한다. 사용자가 공간 확보 후 삭제를 검토하므로 읽기 전용 용량/worktree 검사부터 제공한다. 실제 로컬 삭제·세이브 포기·원격 history rewrite는 각각 별도 승인을 받아야 한다.
 
-- Hero Siege 개발사 배포: https://panicartstudios.itch.io/hero-siege
-- 개발사 관련 채용 정보, 원작 엔진 확정 자료와 구분: https://www.magesbox.com/recruit/job/id/2076.html
-- Unity 6 지원: https://unity.com/releases/unity-6/support
-- 정확한 Editor 릴리스/changeset: https://unity.com/releases/editor/whats-new/6000.3.24f1
-- Unity 2D 제작: https://docs.unity3d.com/6000.3/Documentation/Manual/2d-game-creation-wokflow.html
-- Input System 1.20.0: https://docs.unity3d.com/6000.3/Documentation/Manual/com.unity.inputsystem.html
+## 근거와 제한
 
-## 이번 검증 경계
+현재 에디터 사용 버전 기준: ProjectSettings/ProjectVersion.txt.
+공식 참고: https://unity.com/releases/editor/whats-new/6000.3.24f1
+Hero Siege 제작자: https://panicartstudios.itch.io/hero-siege
+Git 보존/정리: https://git-scm.com/docs/git-worktree ; https://git-scm.com/docs/git-clone
+새 자산 원본 조건: https://pixelfrog-assets.itch.io/tiny-swords
 
-Unity 설치/로그인/라이선스와 에디터 실제 import가 이 작업 환경에 없으므로 Unity 실행/렌더/빌드/시각 검증은 NOT_RUN이다. CI는 새 파일 트리 및 순수 C# 공격 시간표만 검사한다. 설치 기반을 만들었다는 것과 게임을 완성했다는 것은 다르다.
+이 문서는 이전 결정을 현재 사실과 구분해서 기록한다. Unity 에디터/실제 아트/새 게임 완성은 실제 검증 전까지 NOT_RUN이다.
