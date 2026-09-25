@@ -88,6 +88,7 @@ func generate_item(current_floor: int, rebirth_count: int) -> Dictionary:
 		"base_id": item_base.id,
 		"base_name": item_base.display_name,
 		"icon_index": item_base.icon_index,
+		"icon_path": item_base.icon_texture_path,
 		"name": item_name,
 		"slot": item_base.slot,
 		"item_level": current_floor,
