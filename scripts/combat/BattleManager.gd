@@ -617,6 +617,8 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
 		boss_status_changed.emit("", 0.0, false)
+		var boss_essence: int = 5 + maxi(0, floori(float(GameManager.floor) / 10.0))
+		effects.spawn_resource_pickup(world_position, "pet_essence", boss_essence)
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		if boss_reward.has("rarity_id"):
@@ -628,6 +630,8 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		return
 	if defeated_elite:
 		elite_status_changed.emit(elite_name, enemy.elite_color, false)
+		var elite_essence: int = 1 + maxi(0, floori(float(GameManager.floor) / 30.0))
+		effects.spawn_resource_pickup(world_position, "pet_essence", elite_essence)
 		var elite_reward: Dictionary = LootManager.try_elite_drop()
 		if not elite_reward.is_empty():
 			effects.show_drop(world_position, elite_reward)
@@ -650,6 +654,9 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 		"gold":
 			GameManager.add_gold(amount)
 			effects.show_gold(player.global_position, amount)
+		"pet_essence":
+			var gained: int = PetManager.add_essence(amount)
+			effects.show_pet_essence(player.global_position, gained)
 
 
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
