@@ -305,3 +305,34 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Text clipping:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+## UIUX V2.1 — Visual Hierarchy Polish
+
+- [ ] 장비 화면
+  - 고등급 장비가 여러 개 있어도 화면 전체가 빨간 테두리 벽처럼 보이지 않는지 확인
+  - 희귀도는 좌측 얇은 스트립 + 아이템명 색으로 충분히 읽히는지 확인
+  - 강화/해제 버튼 가독성 확인
+
+- [ ] 스킬 화면
+  - 기존 큰 텍스트 네모 블록이 제거되어 임시 UI 느낌이 줄었는지 확인
+  - 스킬명 / 레벨 / 진행바 / 설명 / +1/+10/MAX 순서가 자연스러운지 확인
+  - 우측 강화 버튼 폭이 충분한지 확인
+
+- [ ] 환생 화면
+  - 영구 성장 헤더와 4개 강화 카드가 한 시스템처럼 읽히는지 확인
+  - 포인트 보유 시 강화 가능 상태가 명확한지 확인
+
+- [ ] 정보 화면
+  - 2열 카드 대시보드 유지 여부 확인
+  - 긴 텍스트 벽처럼 보이지 않는지 확인
+
+### V2.1 validation notes
+
+- Build commit:
+- Equipment hierarchy:
+- Skill placeholder feel: Removed / Still present
+- Rebirth growth readability:
+- Info dashboard readability:
+- Visual clutter: Low / Good / Too much
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
