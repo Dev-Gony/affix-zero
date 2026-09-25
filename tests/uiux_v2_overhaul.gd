@@ -37,6 +37,15 @@ func _run() -> void:
 	_check(ui._section_buttons.size() == GameUI.MANAGEMENT_TITLES.size(), "Every management section has an in-window navigation tab")
 	_check(ui._inventory_grid.columns == 8, "Inventory uses a dense eight-column desktop grid")
 	_check(ui._inventory_detail.custom_minimum_size.x >= 170.0, "Inventory keeps a persistent comparison/detail pane")
+	_check(ui._management_live_status != null and ui._management_live_status.text.contains("자동사냥"), "Management header explicitly communicates that idle combat continues")
+	var info_dashboard := ui.find_child("InfoDashboard", true, false) as GridContainer
+	_check(info_dashboard != null and info_dashboard.columns == 2 and info_dashboard.get_child_count() == 4, "Info screen uses four dashboard cards instead of a raw text wall")
+	var permanent_grid := ui.find_child("PermanentUpgradeGrid", true, false) as GridContainer
+	_check(permanent_grid != null and permanent_grid.columns == 4 and permanent_grid.get_child_count() == 4, "Rebirth permanent upgrades use a full-width four-card row")
+	GameManager.set_loot_min_rarity(5)
+	ui._refresh_inventory()
+	_check(ui._inventory_count.text.contains("에픽만"), "Empty inventory header explains the active acquisition filter")
+	_check(ui._inventory_detail.text.contains("획득 필터"), "Empty inventory detail explains why lower-rarity drops may not appear")
 	_check(GameUI.EQUIPMENT_LAYOUT.size() == 9 and GameUI.EQUIPMENT_LAYOUT[4] == "portrait", "Equipment layout keeps the character portrait at the visual center")
 	_check(ui._class_selection._grid.get_child_count() == 6, "Class selection keeps all six class choices in one readable screen")
 	if ui._class_selection._grid.get_child_count() > 0:
@@ -76,7 +85,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "full-width management hub, top navigation, equipment scale, 8-column inventory, detail pane, compact dock behavior"
+			"scope": "full-width management hub, top navigation, equipment scale, 8-column inventory, empty-state context, info dashboard, rebirth card grid, compact dock behavior"
 		}, "\t"))
 		report.close()
 	print("UIUX_V2 %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
