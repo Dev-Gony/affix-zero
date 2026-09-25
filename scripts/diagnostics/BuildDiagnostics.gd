@@ -44,9 +44,11 @@ func _ready() -> void:
 
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == KEY_Ctrl+Shift+9:
-		toggle_details()
-		get_viewport().set_input_as_handled()
+	if event is InputEventKey and event.pressed and not event.echo:
+		var diagnostic_shortcut: bool = event.ctrl_pressed and event.shift_pressed and event.keycode == KEY_9
+		if diagnostic_shortcut:
+			toggle_details()
+			get_viewport().set_input_as_handled()
 
 
 func toggle_details() -> void:
