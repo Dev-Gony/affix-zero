@@ -5,6 +5,7 @@ var item_data: Dictionary = {}
 var placeholder_slot: String = ""
 var rarity_color: Color = Color("64748b")
 var accent_color: Color = Color("cbd5e1")
+var custom_texture: Texture2D
 
 
 func configure(item: Dictionary) -> void:
@@ -12,12 +13,19 @@ func configure(item: Dictionary) -> void:
 	placeholder_slot = ""
 	rarity_color = Color.from_string(String(item.get("rarity_color", "64748b")), Color("64748b"))
 	accent_color = _base_accent(String(item.get("base_id", "")), String(item.get("slot", "weapon")))
+	custom_texture = null
+	var icon_path: String = String(item.get("icon_path", ""))
+	if not icon_path.is_empty() and ResourceLoader.exists(icon_path):
+		var resource: Resource = load(icon_path)
+		if resource is Texture2D:
+			custom_texture = resource as Texture2D
 	queue_redraw()
 
 
 func configure_placeholder(slot: String) -> void:
 	item_data = {}
 	placeholder_slot = slot
+	custom_texture = null
 	rarity_color = Color("334155")
 	accent_color = Color("64748b")
 	queue_redraw()
@@ -33,6 +41,11 @@ func _draw() -> void:
 	if item_data.is_empty():
 		_draw_slot_placeholder(center, placeholder_slot)
 		return
+	if custom_texture != null:
+		var icon_size: float = minf(size.x, size.y) - 8.0
+		draw_texture_rect(custom_texture, Rect2(center - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size), false)
+		_draw_enhancement_badge(center)
+		return
 	var slot: String = String(item_data.get("slot", "weapon"))
 	var base_id: String = String(item_data.get("base_id", ""))
 	match slot:
@@ -44,10 +57,15 @@ func _draw() -> void:
 		"ring": _draw_ring(center, base_id)
 		"amulet": _draw_amulet(center, base_id)
 		_: _draw_slot_placeholder(center, slot)
+	_draw_enhancement_badge(center)
+
+
+func _draw_enhancement_badge(center: Vector2) -> void:
 	var enhancement: int = int(item_data.get("enhancement_level", 0))
-	if enhancement > 0:
-		draw_circle(center + Vector2(size.x * 0.30, -size.y * 0.30), 5.0, Color("0a0f16"))
-		draw_string(ThemeDB.fallback_font, center + Vector2(size.x * 0.22, -size.y * 0.22), "+%d" % enhancement, HORIZONTAL_ALIGNMENT_LEFT, -1, 6, Color("f8d66d"))
+	if enhancement <= 0:
+		return
+	draw_circle(center + Vector2(size.x * 0.30, -size.y * 0.30), 5.0, Color("0a0f16"))
+	draw_string(ThemeDB.fallback_font, center + Vector2(size.x * 0.22, -size.y * 0.22), "+%d" % enhancement, HORIZONTAL_ALIGNMENT_LEFT, -1, 6, Color("f8d66d"))
 
 
 func _draw_weapon(c: Vector2, base_id: String) -> void:
