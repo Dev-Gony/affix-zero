@@ -110,46 +110,77 @@ func _draw() -> void:
 
 
 func _draw_fox(color: Color, bob: float) -> void:
-	draw_circle(Vector2(0, bob), 5.0, color)
-	draw_colored_polygon(PackedVector2Array([Vector2(-5, -3+bob), Vector2(-3, -10+bob), Vector2(0, -4+bob)]), color.lightened(0.08))
-	draw_colored_polygon(PackedVector2Array([Vector2(5, -3+bob), Vector2(3, -10+bob), Vector2(0, -4+bob)]), color.lightened(0.08))
+	var dark := color.darkened(0.45)
+	var light := color.lightened(0.26)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-7,4+bob),Vector2(-5,-5+bob),Vector2(0,-9+bob),Vector2(5,-5+bob),Vector2(7,4+bob),Vector2(0,8+bob)
+	]),dark)
+	draw_colored_polygon(PackedVector2Array([Vector2(-5,-4+bob),Vector2(-4,-12+bob),Vector2(-1,-6+bob)]),light)
+	draw_colored_polygon(PackedVector2Array([Vector2(5,-4+bob),Vector2(4,-12+bob),Vector2(1,-6+bob)]),light)
+	draw_circle(Vector2(-2,-1+bob),1.0,Color("e8fbff"))
+	draw_circle(Vector2(2,-1+bob),1.0,Color("e8fbff"))
 	for i: int in 3:
-		var angle: float = -0.9 + float(i) * 0.9
-		draw_arc(Vector2(-2, 4+bob), 8.0 + i * 1.5, angle, angle + 0.85, 8, Color(color, 0.65), 2.0)
-	draw_circle(Vector2(-1.7, -1+bob), 0.8, Color("07111f"))
-	draw_circle(Vector2(1.7, -1+bob), 0.8, Color("07111f"))
+		draw_arc(Vector2(-3+i,5+bob),8.0+i*1.4,-1.0+i*0.24,0.32+i*0.28,9,Color(light,0.72),2.0)
 
 
 func _draw_drake(color: Color, bob: float) -> void:
-	draw_circle(Vector2(0, bob), 5.5, color)
-	draw_colored_polygon(PackedVector2Array([Vector2(-4, 0+bob), Vector2(-12, -5+bob), Vector2(-9, 4+bob)]), color.darkened(0.08))
-	draw_colored_polygon(PackedVector2Array([Vector2(4, 0+bob), Vector2(12, -5+bob), Vector2(9, 4+bob)]), color.darkened(0.08))
-	draw_colored_polygon(PackedVector2Array([Vector2(-2, -4+bob), Vector2(0, -10+bob), Vector2(2, -4+bob)]), color.lightened(0.18))
+	var dark := color.darkened(0.48)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-4,1+bob),Vector2(-14,-7+bob),Vector2(-11,6+bob),Vector2(-6,7+bob)
+	]),dark)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(4,1+bob),Vector2(14,-7+bob),Vector2(11,6+bob),Vector2(6,7+bob)
+	]),dark)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-6,-3+bob),Vector2(0,-10+bob),Vector2(6,-3+bob),Vector2(5,7+bob),Vector2(-5,7+bob)
+	]),color)
+	draw_colored_polygon(PackedVector2Array([Vector2(-3,-7+bob),Vector2(0,-15+bob),Vector2(2,-7+bob)]),color.lightened(0.22))
+	draw_circle(Vector2(-2,-2+bob),1.0,Color("fff0a0"))
+	draw_circle(Vector2(2,-2+bob),1.0,Color("fff0a0"))
 
 
 func _draw_slime(color: Color, bob: float) -> void:
-	draw_circle(Vector2(0, 1+bob), 6.5, Color(color, 0.88))
-	draw_rect(Rect2(-6, 1+bob, 12, 5), Color(color, 0.88), true)
-	draw_circle(Vector2(-2, 0+bob), 1.0, Color("07111f"))
-	draw_circle(Vector2(2, 0+bob), 1.0, Color("07111f"))
+	draw_circle(Vector2(0,1+bob),8.0,Color(color.darkened(0.18),0.74))
+	draw_circle(Vector2(0,-1+bob),7.0,Color(color,0.90))
+	draw_rect(Rect2(-7,0+bob,14,6),Color(color,0.90),true)
+	draw_circle(Vector2(-2.5,-1+bob),1.0,Color("eaf8ff"))
+	draw_circle(Vector2(2.5,-1+bob),1.0,Color("eaf8ff"))
+	draw_circle(Vector2(-2.5,-1+bob),0.45,Color("07111f"))
+	draw_circle(Vector2(2.5,-1+bob),0.45,Color("07111f"))
 
 
 func _draw_golem(color: Color, bob: float) -> void:
-	draw_rect(Rect2(-5, -5+bob, 10, 11), color, true)
-	draw_rect(Rect2(-8, -2+bob, 3, 7), color.darkened(0.12), true)
-	draw_rect(Rect2(5, -2+bob, 3, 7), color.darkened(0.12), true)
-	draw_rect(Rect2(-2, -1+bob, 4, 2), Color("70d6ff"), true)
+	var stone := color.darkened(0.20)
+	draw_rect(Rect2(-6,-7+bob,12,14),stone,true)
+	draw_rect(Rect2(-10,-3+bob,4,9),stone.darkened(0.15),true)
+	draw_rect(Rect2(6,-3+bob,4,9),stone.darkened(0.15),true)
+	draw_colored_polygon(PackedVector2Array([Vector2(-6,-7+bob),Vector2(-2,-11+bob),Vector2(5,-10+bob),Vector2(6,-7+bob)]),color.lightened(0.12))
+	draw_circle(Vector2(0,-1+bob),2.1,Color("3ddcff",0.55))
+	draw_circle(Vector2(0,-1+bob),0.9,Color("c4f8ff"))
 
 
 func _draw_bat(color: Color, bob: float) -> void:
-	draw_circle(Vector2(0, bob), 3.5, color)
-	draw_colored_polygon(PackedVector2Array([Vector2(-3, bob), Vector2(-11, -5+bob), Vector2(-8, 4+bob)]), color)
-	draw_colored_polygon(PackedVector2Array([Vector2(3, bob), Vector2(11, -5+bob), Vector2(8, 4+bob)]), color)
-	draw_circle(Vector2(0, -1+bob), 0.8, Color("ff6b6b"))
+	var flap: float = sin(_clock * 12.0) * 3.0
+	var wing := color.darkened(0.14)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-3,bob),Vector2(-13,-5-flap+bob),Vector2(-10,3+bob),Vector2(-6,7+bob)
+	]),wing)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(3,bob),Vector2(13,-5-flap+bob),Vector2(10,3+bob),Vector2(6,7+bob)
+	]),wing)
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-4,-4+bob),Vector2(0,-8+bob),Vector2(4,-4+bob),Vector2(4,6+bob),Vector2(0,8+bob),Vector2(-4,6+bob)
+	]),color.darkened(0.42))
+	draw_circle(Vector2(-1.5,-2+bob),0.9,Color("ff555d"))
+	draw_circle(Vector2(1.5,-2+bob),0.9,Color("ff555d"))
 
 
 func _draw_fairy(color: Color, bob: float) -> void:
-	draw_circle(Vector2(0, bob), 3.0, color)
-	draw_circle(Vector2(-5, -1+bob), 3.0, Color(color.lightened(0.2), 0.55))
-	draw_circle(Vector2(5, -1+bob), 3.0, Color(color.lightened(0.2), 0.55))
-	draw_circle(Vector2(0, bob), 7.0, Color(color, 0.08))
+	var flutter: float = sin(_clock * 9.0) * 1.5
+	draw_circle(Vector2(-6-flutter,-1+bob),4.0,Color(color.lightened(0.25),0.34))
+	draw_circle(Vector2(6+flutter,-1+bob),4.0,Color(color.lightened(0.25),0.34))
+	draw_colored_polygon(PackedVector2Array([
+		Vector2(-3,-5+bob),Vector2(0,-9+bob),Vector2(3,-5+bob),Vector2(3,5+bob),Vector2(0,9+bob),Vector2(-3,5+bob)
+	]),color.darkened(0.12))
+	draw_circle(Vector2(0,-4+bob),2.4,color.lightened(0.18))
+	draw_circle(Vector2(-0.7,-4.5+bob),0.5,Color("ffffff"))
