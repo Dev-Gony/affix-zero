@@ -2,61 +2,61 @@
 
 갱신: 2026-09-26 KST.
 
-## 현재 구현 상태
+## 가장 중요한 현재 방향
 
-- 엔진: Godot 4.7.2-stable 일반판 + typed GDScript + Compatibility.
-- 독립 프로젝트: `experiments/e0-godot/project.godot`.
-- legacy Godot 4.3 루트 프로젝트와 실제 save v2는 E0에서 읽지 않는다.
-- E0-C01: 전사 + 근접 적, 자동 접근, WINDUP/ACTIVE/RECOVERY, 피해 1회, 피격/사망, 실제 포즈 프레임 구현.
-- 사용자가 Windows에서 E0-C01을 직접 실행했고 2026-09-26 채팅에서 확인 완료를 보고하며 실행 화면을 제공했다. 이는 로컬 실행/렌더 확인이며 최종 아트 승인으로 확대하지 않는다.
-- E0-C02: 원거리 적 + 실제 이동 투사체 + 구간 충돌 판정 + 적별 드랍 + 전사의 물리적 드랍 접근/회수 + idempotent RewardLedger 구현. 사용자가 Windows에서 문제없이 실행 완료를 확인함.
-- 보상은 적 사망 순간 지급하지 않고 드랍 접촉 시에만 ledger에 반영한다. 같은 drop_id는 두 번 반영되지 않는다.
-- 원거리 적은 E0 arena bounds 안에서 이동한다.
+E0는 엔진/판정/성능 계약을 확인하기 위한 실험 장치일 뿐이며 **게임의 기본 실행 화면으로 사용하지 않는다**.
 
-## 최신 자동검증
+사용자가 Windows에서 E0-C03 40적 화면을 확인한 결과, 원형 군집/도형형 임시 캐릭터/진단 HUD가 실제 AFFIX 게임 방향과 현저히 다르다고 판단했다. 이 피드백은 정당하며 E0를 더 확장하는 작업을 중단했다.
 
-런타임/CI 기준 커밋: `4dc503d58961f668f13eacb5f724c948dad1370f`.
-E0 Godot 4.7.2 workflow run: `36162170304`, job `108161582259`, conclusion success.
+현재부터 개발 기준은 `V0 Vertical Slice`다.
 
-확인 로그:
-- Godot Engine v4.7.2.stable
-- import success
-- `E0_C01_TEST PASSED`
-- `E0_C02_TEST PASSED`
-- workflow가 SCRIPT ERROR / Parse Error / missing resource loader를 실패 조건으로 검사한다.
+## 엔진
 
-E0-C02 contract가 자동 확인한 것:
-- 전사와 근접/원거리 적의 실제 전투 완료
-- 원거리 적 projectile request와 실제 projectile node 1:1 생성
-- 투사체가 40px보다 많이 이동한 뒤 충돌하므로 발사 순간 즉시 피해가 아님
-- 각 적 death signal 1회
-- 사망 순간 ledger 미지급
-- 적 2마리 -> drop 2개 -> pickup 2회
-- GOLD 20 / XP 10
-- duplicate drop id 재수령 거부
-- 전사가 드랍을 회수하기 위해 실제 좌표를 이동
+- Godot 4.7.2 Standard
+- typed GDScript
+- Compatibility
+- 엔진 전환은 현재 보류. 이유: E0 40적 x1에서 성능 여유가 충분히 관찰됐고, 현재 문제는 엔진이 아니라 임시 아트/배치/연출/게임 화면 구성에 있음.
+- 이 판단은 Godot이 최종적으로 무조건 고정이라는 뜻이 아니다.
 
-## 이번에 해결한 C02 검증 문제
+## V0 Vertical Slice
 
-첫 C02 run에서는 E0 editor import를 `--quit-after 3`으로 종료해 import scan이 너무 일찍 끝났고, runtime `load(svg)`에서 `No loader found for resource`가 발생했다. 당시 frame contract는 프레임 슬롯 개수만 세어 null texture도 통과시키는 결함이 있었다.
+기본 실행 씬은 이제:
+`res://vslice/v0_main.tscn`
 
-수정:
-1. CI import를 `godot --headless --editor --path experiments/e0-godot --import`로 변경.
-2. frame contract가 각 frame texture의 non-null까지 검사하도록 강화.
-3. 원거리 적 이동을 arena bounds로 제한하고 C02 timeout snapshot을 추가.
-4. push/PR E0 workflow concurrency key를 같은 branch 기준으로 통일해 중복 검증을 줄임.
+E0-C03가 아니다.
 
-## 로컬 기준
+구현:
+- 저장소의 본게임 제작 자산 `assets/sprites/dungeon_courtyard.png` 사용
+- `class_atlas_alpha.png` warrior 사용
+- `enemy_atlas_alpha.png` slime/bat/skeleton/goblin/dark_knight 사용
+- 화면 가장자리 스폰
+- 적 간 separation 적용
+- 최대 일반 적 18개
+- 자동 타깃/접근/근접 공격
+- 피격/넉백/데미지 숫자/타격 파편
+- 적 사망
+- XP/Gold world pickup + 자석 회수
+- 레벨업 시 ATK 증가/회복
+- 30킬 뒤 Dark Knight elite
+- stage clear / retry
+- compact HUD
+- arena clamp + y-sort
+- legacy save/manager는 계속 격리
 
-- legacy 작업선: `fix/g6-playtest-recovery / c95b7ba0ab64104470076e4a78cce172b1fd602d`.
-- 마지막 점검 당시 legacy working tree 변경 0, stash 15.
-- E0 로컬 worktree: 사용자가 `D:\github\affix-e0`에서 C01 실행 확인.
-- 자동 stash pop/drop, reset --hard, git clean 금지.
-- 실제 save v2는 E0에서 로드하지 않는다.
+중요: 현재 class/enemy atlas는 본게임용 원본 아트이지만 직업/몬스터별 단일 포즈 atlas다. V0의 공격/이동은 아직 production frame animation 완성이 아니다. 이 사실을 숨기지 않는다. 다음 아트 단계에서 walk/attack/hit/death 실제 프레임 세트를 새로 제작/연결해야 한다.
 
-## 사용자가 다음에 실행할 명령
+## 자동검증
 
-E0 worktree에서:
+V0 smoke가 Godot 4.7.2에서 다음을 검증:
+- repository production texture 세 개를 실제 파일에서 로딩
+- player 생성
+- enemy spawn
+
+커밋 `a450668ac1723bf8df639bc72d4c14e910bbe352` 계열 workflow의 V0 smoke step에서 `V0_SMOKE_TEST PASSED` 확인. 이후 arena clamp/y-sort 수정은 최신 HEAD의 CI를 계속 확인한다.
+
+## 로컬 실행
+
+사용자의 E0 worktree는 그대로 사용한다.
 
 ```bash
 cd /d/github/affix-e0
@@ -64,44 +64,26 @@ git fetch origin chore/r0-preservation
 git merge --ff-only origin/chore/r0-preservation
 ```
 
-Godot 4.7.2 일반판에서 기존에 열었던:
+Godot 4.7.2 Standard에서:
+`D:\github\affix-e0\experiments\e0-godot\project.godot`
 
-```text
-D:\github\affix-e0\experiments\e0-godot\project.godot
-```
+F5를 누르면 V0 vertical slice가 기본 실행되어야 한다.
 
-을 다시 실행한다. 화면 제목이 `E0-C02`로 바뀌고 전사/근접 적/보라색 원거리 적, 날아가는 보라색 투사체, 노란 드랍, RewardLedger GOLD/XP 표시가 보여야 한다.
-
-## E0-C03 구현/검증
-
-- 40적 x1 고정부하 하네스 구현: 근접 32 + 원거리 8 + 전사 1.
-- 적 HP를 높여 측정 중 40마리 수를 유지한다. 드랍은 C02에서 이미 검증했으므로 C03 부하 fixture에서는 0으로 고정.
-- 실제 E0 projectile node를 사용한다.
-- warm-up 10초, 측정 60초, 3회 반복이 Windows 기본값.
-- Time.get_ticks_usec 기반 wall-clock frame time을 수집하고 p50/p95/p99/max/avg FPS 계산.
-- JSON summary + CSV raw samples를 E0 user-data/perf 폴더에 기록.
-- Windows visible run에서는 vsync를 harness가 끄고 Engine.time_scale=1, max_fps=0.
-- CI는 0.2초 warm-up + 1.2초 측정 1회로 harness 계약만 검사하며 그 성능 수치를 GTX1050 결과로 사용하지 않는다.
-- 자동검증 기준 commit 60fe8f24f28944953dcc7533e4126109d3056932, run 36163443157, job 108165362935, success.
-- 로그에 E0_C01_TEST PASSED / E0_C02_TEST PASSED / E0_C03_TEST PASSED 확인.
-- CI headless의 p50/p95/p99 값은 harness 동작 증거일 뿐 성능 판정 자료가 아니다.
+화면에 E0-C03/40 ENEMIES 진단화면이 다시 기본으로 뜨면 실패다.
 
 ## 다음 개발
 
-사용자가 Windows visible E0-C03을 실행해 생성된 JSON 결과를 전달하면 실제 GTX1050 기준선을 판정한다.
-
-E0-C03:
-- 40적 x1 부하 장면
-- 고정된 스폰/효과 조건
-- frame-time p50/p95/p99 및 최대 중단
-- 적/투사체/드랍 수
-- CI 수치는 사용자 GTX1050 성능으로 쓰지 않음
-- 실제 Windows 사용자 PC 측정 절차 제공
-
-C03 전에 C02 시각 확인에서 투사체/카이팅/드랍 회수 표현이 이상하면 그 문제를 먼저 수정한다.
+1. 사용자 V0 실제 화면 확인
+2. gameplay/visual 오류 즉시 수정
+3. V0-02 production animation asset pipeline
+   - warrior walk/attack/hit/death
+   - 첫 melee monster walk/attack/hit/death
+   - 공격 프레임과 damage active frame 동기화
+4. V0-03 survivor-style spawn pacing + elite/boss telegraph
+5. 그 다음에만 40/150/300 성능 재측정
 
 ## 새 채팅용
 
 ```text
-Dev-Gony/affix-zero를 이어서 개발한다. chore/r0-preservation 최신 HEAD, PR #18, docs/project/HANDOFF.md를 먼저 확인한다. 엔진은 Godot4.7.2 Standard + typed GDScript + Compatibility. experiments/e0-godot에 C01과 C02가 구현되어 있다. 사용자는 Windows에서 C01을 실행 확인했다. C02는 원거리 적, 실제 이동 투사체/segment collision, 적별 world drop, 전사 물리 회수, idempotent RewardLedger까지 구현됐다. runtime 기준 commit 4dc503d, E0 run 36162170304/job108161582259에서 import, C01, C02 전부 success이며 로그에 E0_C01_TEST PASSED / E0_C02_TEST PASSED가 있다. 이전 C02 실패는 --quit-after 3 import 조기종료와 null texture contract 문제였고 --import + non-null texture 검사로 해결했다. legacy fix/g6-playtest-recovery c95b7ba, stash15, save v2는 건드리지 않는다. 다음은 사용자 C02 시각 확인 후 E0-C03 40적 x1 성능 하네스다. 승인 없는 병합/reset/clean/stash pop 금지. 모든 답변 마지막에 세 항목 체크포인트를 유지한다.
+Dev-Gony/affix-zero 개발을 이어간다. chore/r0-preservation 최신 HEAD와 PR #18, docs/project/HANDOFF.md를 확인한다. E0는 테스트 전용이며 기본 실행 화면으로 쓰지 않는다. 사용자는 E0-C03 40적 원형 군집/임시 도형 화면을 명확히 거절했고 성능 실험 확장을 중단했다. 기본 실행은 experiments/e0-godot/vslice/v0_main.tscn의 V0 Vertical Slice다. dungeon_courtyard + class_atlas_alpha + enemy_atlas_alpha를 실제 repo asset에서 로딩하고 edge spawn, separation, auto melee combat, hit FX, death, XP/gold pickups, level-up, 30kill dark knight elite, compact HUD를 구현했다. V0_SMOKE_TEST PASSED 증거가 있다. 단 class/enemy atlas는 아직 실제 walk/attack/hit/death frame animation asset이 아니므로 최종 애니메이션 완성이라고 주장하면 안 된다. 다음은 사용자 V0 화면 확인 후 production animation pipeline이다. legacy save/stash는 건드리지 않는다. 승인 없는 merge/reset/clean/stash pop 금지. 모든 답변 마지막에 3항목 진행 상황 체크포인트를 유지한다.
 ```
