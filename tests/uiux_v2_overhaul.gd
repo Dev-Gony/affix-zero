@@ -71,7 +71,21 @@ func _run() -> void:
 
 	var equipment_card: PanelContainer = ui._build_equipment_card("weapon")
 	_check(equipment_card.custom_minimum_size.x >= 170.0, "Equipment cards are large enough for icon, item identity and upgrade action")
+	var equipment_row: HBoxContainer = equipment_card.get_child(0)
+	var equipment_rarity_strip: Control = equipment_row.get_child(0)
+	_check(equipment_rarity_strip.custom_minimum_size.x <= 6.0, "Equipment rarity is expressed as a restrained accent strip instead of a full loud frame")
 	equipment_card.queue_free()
+
+	_check(ui._skills_list.get_child_count() >= 2, "Skill screen exposes progression cards below its summary")
+	var first_skill_panel: PanelContainer = ui._skills_list.get_child(1)
+	var first_skill_row: HBoxContainer = first_skill_panel.get_child(0)
+	var skill_accent_strip: Control = first_skill_row.get_child(0)
+	_check(skill_accent_strip.custom_minimum_size.x <= 6.0, "Skill rows use a slim progression accent instead of placeholder icon blocks")
+
+	var permanent_grid: GridContainer = ui.find_child("PermanentUpgradeGrid", true, false)
+	_check(permanent_grid != null and permanent_grid.columns == 4, "Permanent rebirth upgrades use the full-width four-card layout")
+	var info_dashboard: GridContainer = ui.find_child("InfoDashboard", true, false)
+	_check(info_dashboard != null and info_dashboard.columns == 2, "Information screen uses a two-column dashboard instead of a text wall")
 
 	_finish()
 
