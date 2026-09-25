@@ -519,10 +519,14 @@ func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: b
 func _on_player_died() -> void:
 	if _respawning:
 		return
+	var died_on_boss_floor: bool = is_boss_floor()
 	_respawning = true
 	GameManager.set_game_state(GameManager.GameState.PAUSED)
 	_clear_enemies()
-	GameManager.notification_requested.emit("쓰러졌습니다 · 1층 후퇴 후 자동 부활", Color("ff6b6b"))
+	if died_on_boss_floor:
+		GameManager.notification_requested.emit("보스에게 패배 · 1층 후퇴 · 파밍 후 자동 재도전", Color("ff8a72"))
+	else:
+		GameManager.notification_requested.emit("쓰러졌습니다 · 1층 후퇴 후 자동 부활", Color("ff6b6b"))
 	await get_tree().create_timer(0.75).timeout
 	GameManager.retreat_floor()
 	GameManager.revive()

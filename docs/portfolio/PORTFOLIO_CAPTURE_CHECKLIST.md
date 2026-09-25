@@ -107,3 +107,51 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Boss separation: no elite-affix overlap observed
 - Bugs found: none in tested elite flow
 - Merge approval: gameplay validated; PR remains unmerged by policy
+
+
+## G4.1 — Idle Growth Loop UX
+
+### Required capture set
+
+- [ ] **Equipment growth at a glance**
+  - Open 장비.
+  - Capture at least one equipped item whose next enhancement is affordable.
+  - Confirm success rate and cost are visible without opening a tooltip.
+  - Confirm the 강화 button shows the next +level.
+
+- [ ] **Low-probability enhancement readability**
+  - Inspect a high enhancement milestone if available.
+  - Confirm values such as 0.3% / 0.01% are not rounded to 0% or clipped.
+
+- [ ] **Growth summary**
+  - Capture the equipment summary tile.
+  - Confirm 강화 가능 / 스킬 가능 counts match the current gold state.
+  - Spend gold and confirm the counts refresh immediately.
+
+- [ ] **Skill growth header**
+  - Open 스킬.
+  - Confirm current gold and affordable skill-option count are visible at the top.
+  - Buy +1 / +10 / MAX and confirm the header refreshes.
+
+- [ ] **Epic inventory badge**
+  - If an Epic item is available in the current save, confirm its bag badge reads 에픽 rather than 일반.
+  - Natural Epic acquisition is not required solely for this capture.
+
+- [ ] **Boss wall loop**
+  - Lose to a boss naturally.
+  - Confirm the message says 파밍 후 자동 재도전.
+  - Confirm mechanics remain unchanged: one-floor retreat, automatic farming, eventual automatic boss re-entry.
+
+### G4.1 validation notes
+
+- Build commit: d2664d4 lineage / G4.1
+- Equipment card readability: PASS
+- Enhancement cost/rate visibility: PASS
+- Very-low-rate formatting: implementation/CI PASS; live milestone item not required
+- Growth summary refresh: PASS
+- Skill header refresh: PASS
+- Epic badge: implementation/CI PASS
+- Boss defeat loop message: PASS
+- Existing retreat/retry behavior unchanged: PASS
+- Bugs found: none in tested flow
+- Merge approval: gameplay validated; PR remains unmerged by policy
