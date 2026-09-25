@@ -1,0 +1,16 @@
+{
+  "stage": "U0_UNITY_FOUNDATION",
+  "branch": "restart/unity-6",
+  "legacy_parent": "f58a919b442ea8a8956619b5e62c4c7e9340d355",
+  "engine": "Unity 6.3 LTS 6000.3.24f1",
+  "renderer": "Built-in 2D",
+  "old_code_reused": false,
+  "old_images_reused": false,
+  "unity_editor_import": "NOT_RUN",
+  "unity_playmode": "NOT_RUN",
+  "windows_build": "NOT_RUN",
+  "art_import": "NOT_RUN",
+  "gameplay_acceptance": "NOT_RUN",
+  "core_ci": "PENDING_FIRST_EXECUTION",
+  "next": "U1: verify Unity import and approved asset animation; build one readable combat scene"
+}

@@ -1,0 +1,29 @@
+name: Unity restart foundation
+on:
+  push:
+    branches: [restart/unity-6]
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+concurrency:
+  group: unity-restart-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  core-and-tree-only:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - name: Verify fresh source tree and tracked metadata
+        run: python3 Tools/audit_restart.py
+      - name: Compile and exercise pure C# timeline
+        run: dotnet run --project Tests/CoreSmoke/CoreSmoke.csproj --configuration Release
+      - name: State validation boundary
+        run: echo 'Unity Editor import, animation playback, rendering, build and Windows playtest NOT_RUN. This job is not gameplay approval.'

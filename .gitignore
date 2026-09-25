@@ -1,13 +1,19 @@
-# Godot 4 generated files
-.godot/
-
-# Local/editor artifacts
-*.tmp
-*.translation
-
-# Local export output
-build/
-
-# Default import sidecars generated locally for raw CC0 source art.
-# If a CC0 asset later needs custom import settings, force-add that specific .import file.
-assets/cc0/**/*.import
+# Unity-generated caches only. Never ignore Assets/**/*.meta.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Bb]uilds/
+/[Bb]uild/
+/.vs/
+/.idea/
+*.csproj.user
+*.sln
+*.slnx
+/Assembly-CSharp*.csproj
+/Artifacts/
+**/bin/
+**/obj/
+.DS_Store
+Thumbs.db

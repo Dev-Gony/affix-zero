@@ -1,6 +1,0 @@
-# Isolated E0/V0 prototype editor sidecars.
-# The project currently uses path-based resources and default import settings.
-# Revisit when V0 is promoted to the production project root.
-.godot/
-**/*.import
-**/*.uid
