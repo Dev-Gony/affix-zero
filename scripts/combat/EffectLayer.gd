@@ -49,7 +49,7 @@ func _process(delta: float) -> void:
 		if float(_loot_icons[index]["life"]) <= 0.0:
 			_loot_icons.remove_at(index)
 	_update_resource_pickups(delta)
-	_flash_alpha = maxf(0.0, _flash_alpha - delta * 1.8)
+	_flash_alpha = maxf(0.0, _flash_alpha - loot_delta * 1.8)
 	queue_redraw()
 
 
@@ -148,7 +148,7 @@ static func loot_visual_profile(rarity_index: int, special_reward: bool = false)
 		"ring_count": ring_count,
 		"flash_alpha": flash_alpha,
 		"fragment_count": fragment_count,
-		"label_size": mini(12, 8 + tier / 2),
+		"label_size": mini(12, 8 + floori(float(tier) / 2.0)),
 	}
 
 
