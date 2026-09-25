@@ -68,43 +68,54 @@ func _run() -> void:
 
 	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Gameplay starts without a stale pause reason")
 	ui._toggle_management(1)
-	_check(PauseCoordinator.has_reason("management"), "Opening management acquires the management pause reason")
-	_check(PauseCoordinator.is_paused() and get_tree().paused, "Management UI pauses the entire SceneTree")
-	_check(GameManager.game_state == GameManager.GameState.PAUSED, "Management pause is reflected in game state")
-	_check(ui._modal_blocker.visible, "Management window enables the modal input blocker")
-	var player_position: Vector2 = battle.player.global_position
-	var enemy_position: Vector2 = battle._enemies[0].global_position
-	await get_tree().create_timer(0.25, true).timeout
-	_check(battle.player.global_position.is_equal_approx(player_position), "Player cannot move while management UI is open")
-	_check(battle._enemies[0].global_position.is_equal_approx(enemy_position), "Enemy cannot move while management UI is open")
+	_check(not PauseCoordinator.has_reason("management"), "Management windows never acquire a gameplay pause reason")
+	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Management UI keeps the SceneTree running")
+	_check(GameManager.game_state == GameManager.GameState.RUNNING, "Management UI keeps game state RUNNING")
+	_check(ui._modal_blocker.visible, "Management window still blocks accidental background clicks")
 	ui._close_management(false)
-	_check(not PauseCoordinator.has_reason("management") and not get_tree().paused, "Closing management releases its pause reason")
-	_check(GameManager.game_state == GameManager.GameState.RUNNING, "Gameplay returns to RUNNING after the final pause reason closes")
+	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Closing management leaves gameplay running")
 	_check(not ui._modal_blocker.visible, "Modal blocker closes with management UI")
 
-	ui._toggle_pause_menu()
-	_check(PauseCoordinator.has_reason("pause_menu") and get_tree().paused, "ESC menu uses the same central pause coordinator")
+	ui._toggle_management(1)
+	var esc := InputEventKey.new()
+	esc.keycode = KEY_ESCAPE
+	esc.pressed = true
+	ui._unhandled_key_input(esc)
+	_check(not ui._management_open, "ESC closes an open management window")
+	_check(PauseCoordinator.has_reason("pause_menu") and get_tree().paused, "ESC alone opens the pause menu and pauses the entire game")
 	_check(ui._pause_panel.visible and ui._modal_blocker.visible, "Pause menu is modal")
 	ui._toggle_pause_menu()
-	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Closing ESC menu resumes only after pause reasons are clear")
+	_check(not PauseCoordinator.is_paused() and not get_tree().paused, "Closing ESC menu resumes gameplay")
 
 	GameManager.inventory = [
-		{"id": "kept-normal", "rarity_index": 0, "locked": false},
-		{"id": "kept-legend", "rarity_index": 4, "locked": false},
+		{"id": "kept-normal", "rarity_index": 0, "rarity_id": "normal", "locked": false, "slot": "weapon", "name": "kept normal", "base_stats": {}, "affixes": [], "sell_value": 10},
+		{"id": "kept-legend", "rarity_index": 4, "rarity_id": "legend", "locked": false, "slot": "ring", "name": "kept legend", "base_stats": {}, "affixes": [], "sell_value": 100},
 	]
 	GameManager.gold = 4321
+	ui._refresh_inventory()
 	var inventory_before: Array[Dictionary] = GameManager.inventory.duplicate(true)
 	var gold_before: int = GameManager.gold
 	ui._on_loot_filter_selected(4)
+	ui._refresh_inventory()
 	_check(GameManager.loot_min_rarity_index == 4, "Pickup policy changes to legend-only")
 	_check(GameManager.inventory == inventory_before, "Changing pickup policy never sells or deletes existing inventory")
 	_check(GameManager.gold == gold_before, "Changing pickup policy never changes gold")
+	var owned_slot_buttons: int = 0
+	for child: Node in ui._inventory_grid.get_children():
+		if child is Button:
+			owned_slot_buttons += 1
+	_check(owned_slot_buttons == 2, "Existing normal and legend items both remain visible after pickup policy changes")
+	var legacy_cleanup: Dictionary = GameManager.sell_inventory_below_rarity(4)
+	_check(int(legacy_cleanup.get("sold_count", -1)) == 0 and GameManager.inventory == inventory_before, "Deprecated rarity cleanup path cannot delete owned items")
 	var low_item := {"id": "future-normal", "rarity_index": 0}
 	_check(not LootManager.collect_item(low_item), "Below-policy future drop is rejected at pickup time")
 	_check(GameManager.inventory == inventory_before, "Rejected future drop does not mutate existing inventory")
-	var legend_item := {"id": "future-legend", "rarity_index": 4, "slot": "ring", "name": "test legend", "base_stats": {}, "affixes": [], "sell_value": 1}
+	var legend_item := {"id": "future-legend", "rarity_index": 4, "rarity_id": "legend", "slot": "ring", "name": "test legend", "base_stats": {}, "affixes": [], "sell_value": 1}
 	_check(LootManager.collect_item(legend_item), "At-policy future drop is accepted")
 	_check(GameManager.inventory.size() == inventory_before.size() + 1, "Accepted future drop is added exactly once")
+	var diagnostics: Node = main.get_node("BuildDiagnostics")
+	var diagnostic_badge: Button = diagnostics.get("_badge") as Button
+	_check(diagnostic_badge != null and diagnostic_badge.text.begins_with("B.1"), "Runtime badge is derived from PR-B build metadata")
 
 	PauseCoordinator.clear_all()
 	main.queue_free()
