@@ -565,8 +565,8 @@ func _on_level_up(_new_level: int) -> void:
 
 
 func _on_item_dropped(item: Dictionary) -> void:
-	var is_legend: bool = String(item.get("rarity_id", "")) == "legend"
-	AudioManager.play_sfx("legend_drop" if is_legend else "item_drop")
+	var premium_drop: bool = int(item.get("rarity_index", 0)) >= 4
+	AudioManager.play_sfx("legend_drop" if premium_drop else "item_drop")
 	GameManager.notification_requested.emit("[%s] %s 획득" % [String(item.get("rarity_name", "")), String(item.get("name", ""))], Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
 
 
