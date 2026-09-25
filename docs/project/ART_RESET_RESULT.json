@@ -1,0 +1,22 @@
+{
+  "schema": "affix-art-reset-result-v1",
+  "source_head": "137b92a9644d39a8374353b10291b991a3658618",
+  "base": "46ad2db3538734d3aed48a119856f32862f7c164",
+  "workflow_run": 36167970258,
+  "workflow_url": "https://github.com/Dev-Gony/affix-zero/actions/runs/36167970258",
+  "deletion_job": 108180626520,
+  "deletion_job_result": "success",
+  "deleted_image_count": 57,
+  "current_image_count": 0,
+  "old_blob_occurrences": 0,
+  "preserved_rule_file_count": 164,
+  "problems": [],
+  "startup_job": 108180626206,
+  "startup_job_result": "success",
+  "startup_scope": "Godot 4.7.2 headless import and image-free notice startup of root and experiments/e0-godot",
+  "new_art_imported": false,
+  "new_gameplay_validation": "NOT_RUN",
+  "user_windows_validation": "NOT_RUN",
+  "history_rewritten": false,
+  "scope": "current development tree images removed; game sources byte-preserved; not new gameplay or final art approval"
+}
