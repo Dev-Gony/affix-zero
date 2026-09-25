@@ -1,6 +1,6 @@
 # E0 최소 전투·에셋·엔진 시험 계약 v0.1
 
-작성: 2026-09-26 KST. 상태: E0-C01 사용자 Windows 실행 확인, E0-C02 자동 구현/검증 완료. C02 사용자 시각 확인과 E0-C03 성능 실측은 대기. 사용자 Backup 실행 확인 전 기존 프로젝트에 통합하거나 새 엔진으로 변환하지 않는다. 이 문서는 첫 시험의 범위이며 완제품 콘텐츠 승인이 아니다.
+작성: 2026-09-26 KST. 상태: E0-C01/C02 사용자 Windows 실행 확인. E0-C03 40적 x1 성능 하네스 구현 및 자동계약 통과. 실제 Windows GTX1050 성능 측정은 대기. 사용자 Backup 실행 확인 전 기존 프로젝트에 통합하거나 새 엔진으로 변환하지 않는다. 이 문서는 첫 시험의 범위이며 완제품 콘텐츠 승인이 아니다.
 
 ## 1. 이번에 증명할 장면
 
@@ -105,3 +105,17 @@ E0-02 첫 작업은 작은 실제 에셋 세트의 출처/동작 검수와 독�
 ### C01 사용자 로컬 확인
 
 2026-09-26 사용자 메시지에서 E0-C01 실행 완료를 명시했고 Windows 실행 화면을 제공했다. 화면에서 Godot 4.7.2 E0-C01 독립 프로젝트와 Warrior/MeleeEnemy의 APPROACH 상태가 렌더된 것을 확인했다. 단일 스크린샷만으로 시간축 애니메이션 품질이나 최종 아트 품질까지 승인됐다고 기록하지 않는다.
+
+
+## 10. E0-C03 성능 하네스 결과
+
+- 구현 커밋: `60fe8f24f28944953dcc7533e4126109d3056932`.
+- GitHub Actions run `36163443157`, job `108165362935`, conclusion success.
+- `E0_C01_TEST PASSED`, `E0_C02_TEST PASSED`, `E0_C03_TEST PASSED`.
+- fixture: 전사 1, 적 40(근접 32/원거리 8), x1, Compatibility, 실제 E0 projectile.
+- measurement default: warm-up 10s + 60s 측정 x 3회.
+- outputs: JSON summary + CSV frame samples.
+- CI headless 단축 실행에서 40적 유지, projectile activity, percentile ordering, x1, renderer contract를 확인했다.
+- CI에서 관측된 p50/p95/p99는 headless/Linux 환경이므로 사용자 GTX1050의 성능 근거로 사용하지 않는다.
+- 실제 Windows 측정은 NOT_RUN이며 제안 기준 p95 <= 16.7ms, p99 <= 33.3ms의 통과 여부도 아직 결정하지 않는다.
+- 사용자는 E0-C02를 Windows에서 문제없이 진행 완료했다고 채팅에서 확인했다.
