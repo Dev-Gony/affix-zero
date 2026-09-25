@@ -38,6 +38,10 @@ func _run() -> void:
 	_check(ui._inventory_grid.columns == 8, "Inventory uses a dense eight-column desktop grid")
 	_check(ui._inventory_detail.custom_minimum_size.x >= 170.0, "Inventory keeps a persistent comparison/detail pane")
 	_check(GameUI.EQUIPMENT_LAYOUT.size() == 9 and GameUI.EQUIPMENT_LAYOUT[4] == "portrait", "Equipment layout keeps the character portrait at the visual center")
+	_check(ui._class_selection._grid.get_child_count() == 6, "Class selection keeps all six class choices in one readable screen")
+	if ui._class_selection._grid.get_child_count() > 0:
+		var first_class_card: Control = ui._class_selection._grid.get_child(0)
+		_check(first_class_card.custom_minimum_size.x >= 180.0, "Class selection cards are large enough for desktop stats and descriptions")
 
 	ui._toggle_management(0)
 	await get_tree().process_frame
