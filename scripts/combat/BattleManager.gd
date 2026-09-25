@@ -4,6 +4,11 @@ class_name BattleManager
 const WORLD_RECT := Rect2(0, 0, 1920, 1200)
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
+const BOSS_PATTERN_INITIAL_DELAY: float = 3.2
+const BOSS_PATTERN_INTERVAL: float = 5.6
+const BOSS_PATTERN_WARNING: float = 1.05
+const BOSS_SLAM_RADIUS: float = 82.0
+const BOSS_MARK_RADIUS: float = 58.0
 const ELITE_START_FLOOR: int = 6
 const ELITE_AFFIX_IDS: Array[String] = ["brutal", "swift", "bulwark"]
 const PLAYER_BASE_MOVE_SPEED: float = 54.0
@@ -55,6 +60,14 @@ var _travel_target_room: int = 4
 var _travel_waypoints: Array[Vector2] = []
 var _travel_index: int = 0
 var _player_velocity: Vector2 = Vector2.ZERO
+var _boss_pattern_cooldown: float = 0.0
+var _boss_pattern_time_left: float = 0.0
+var _boss_pattern_active: bool = false
+var _boss_pattern_kind: String = ""
+var _boss_pattern_center: Vector2 = Vector2.ZERO
+var _boss_pattern_evade_target: Vector2 = Vector2.ZERO
+var _boss_pattern_boss: EnemyAI
+var _boss_pattern_cast_count: int = 0
 
 
 func _ready() -> void:
@@ -89,7 +102,11 @@ func _process(delta: float) -> void:
 		_update_room_travel(delta)
 		return
 	_update_target_marker()
-	_update_auto_hunt(delta)
+	var boss_evading: bool = _update_boss_pattern(delta)
+	if boss_evading:
+		_move_player_toward(_boss_pattern_evade_target, delta)
+	else:
+		_update_auto_hunt(delta)
 	_attack_time_left -= delta
 	_skill_time_left -= delta
 	if _attack_time_left <= 0.0:
@@ -167,6 +184,7 @@ func _start_battle() -> void:
 	_configure_player_visual()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
+	_reset_boss_pattern_state()
 	AudioManager.play_bgm_for_floor(GameManager.floor)
 	if _enemies.is_empty():
 		_spawn_wave()
@@ -230,13 +248,140 @@ func _spawn_boss() -> void:
 	boss.setup(_boss_resource, GameManager.floor, player, _combat_rect)
 	_connect_enemy(boss)
 	_enemies.append(boss)
-	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
+	_boss_pattern_cooldown = BOSS_PATTERN_INITIAL_DELAY
+	_boss_pattern_cast_count = 0
+	GameManager.notification_requested.emit("보스 출현 · %s · 위험 패턴은 자동 회피" % _boss_resource.display_name, Color("ff6b6b"))
 
 
 func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
 	enemy.damage_received.connect(_on_enemy_damage_received)
+
+
+static func boss_pattern_radius(kind: String) -> float:
+	return BOSS_MARK_RADIUS if kind == "doom_mark" else BOSS_SLAM_RADIUS
+
+
+static func boss_pattern_damage_multiplier(kind: String) -> float:
+	return 1.12 if kind == "doom_mark" else 1.28
+
+
+static func compute_boss_evade_target(player_position: Vector2, hazard_center: Vector2, radius: float, arena: Rect2) -> Vector2:
+	var primary: Vector2 = hazard_center.direction_to(player_position)
+	if primary.is_zero_approx():
+		primary = Vector2.RIGHT
+	var directions: Array[Vector2] = [
+		primary,
+		Vector2(-primary.y, primary.x),
+		Vector2(primary.y, -primary.x),
+		-primary,
+	]
+	var best: Vector2 = player_position
+	var best_distance: float = player_position.distance_to(hazard_center)
+	for direction: Vector2 in directions:
+		var raw: Vector2 = player_position + direction.normalized() * (radius + 62.0)
+		var candidate := Vector2(
+			clampf(raw.x, arena.position.x + 18.0, arena.end.x - 18.0),
+			clampf(raw.y, arena.position.y + 18.0, arena.end.y - 18.0)
+		)
+		var distance: float = candidate.distance_to(hazard_center)
+		if distance > best_distance:
+			best = candidate
+			best_distance = distance
+	return best
+
+
+func _active_boss() -> EnemyAI:
+	for enemy: EnemyAI in _enemies:
+		if is_instance_valid(enemy) and enemy.behavior == "boss":
+			return enemy
+	return null
+
+
+func _update_boss_pattern(delta: float) -> bool:
+	var boss: EnemyAI = _active_boss()
+	if boss == null or not is_boss_floor():
+		if _boss_pattern_active:
+			_finish_boss_pattern(false)
+		return false
+	if _boss_pattern_active:
+		if not is_instance_valid(_boss_pattern_boss):
+			_reset_boss_pattern_state()
+			return false
+		_boss_pattern_time_left = maxf(0.0, _boss_pattern_time_left - delta)
+		if _boss_pattern_time_left <= 0.0:
+			_resolve_boss_pattern()
+			return false
+		return true
+	_boss_pattern_cooldown = maxf(0.0, _boss_pattern_cooldown - delta)
+	if _boss_pattern_cooldown <= 0.0:
+		_begin_boss_pattern(boss)
+		return true
+	return false
+
+
+func _begin_boss_pattern(boss: EnemyAI) -> void:
+	_boss_pattern_active = true
+	_boss_pattern_boss = boss
+	_boss_pattern_kind = "ground_slam" if _boss_pattern_cast_count % 2 == 0 else "doom_mark"
+	_boss_pattern_cast_count += 1
+	_boss_pattern_time_left = BOSS_PATTERN_WARNING
+	var radius: float = boss_pattern_radius(_boss_pattern_kind)
+	if _boss_pattern_kind == "ground_slam":
+		_boss_pattern_center = boss.global_position
+		effects.show_boss_telegraph(_boss_pattern_center, radius, BOSS_PATTERN_WARNING, Color("ff5b61"), "마왕 강타")
+		GameManager.notification_requested.emit("보스 패턴 · 마왕 강타 · 이탈 중", Color("ff7b72"))
+	else:
+		_boss_pattern_center = player.global_position
+		effects.show_boss_telegraph(_boss_pattern_center, radius, BOSS_PATTERN_WARNING, Color("c084fc"), "파멸 표식")
+		GameManager.notification_requested.emit("보스 패턴 · 파멸 표식 · 이탈 중", Color("c9a7ff"))
+	_boss_pattern_evade_target = compute_boss_evade_target(player.global_position, _boss_pattern_center, radius, _combat_rect)
+	boss.set_special_casting(true)
+
+
+func _resolve_boss_pattern() -> void:
+	if not _boss_pattern_active:
+		return
+	var boss: EnemyAI = _boss_pattern_boss
+	var radius: float = boss_pattern_radius(_boss_pattern_kind)
+	var color := Color("c084fc") if _boss_pattern_kind == "doom_mark" else Color("ff5b61")
+	effects.show_boss_impact(_boss_pattern_center, radius, color)
+	var avoided: bool = player.global_position.distance_to(_boss_pattern_center) > radius
+	if avoided:
+		effects.show_boss_evade(player.global_position)
+	else:
+		var raw_damage: float = boss.attack * boss_pattern_damage_multiplier(_boss_pattern_kind) if is_instance_valid(boss) else 1.0
+		player.play_hit()
+		var damage: int = GameManager.take_damage(raw_damage, true)
+		effects.show_damage(player.global_position + Vector2(0, -14), damage, false)
+		effects.spawn_fragments(player.global_position, color, 8, 62.0)
+		_start_shake(4.2, 0.20)
+	_finish_boss_pattern(true)
+
+
+func _finish_boss_pattern(start_cooldown: bool) -> void:
+	if is_instance_valid(_boss_pattern_boss):
+		_boss_pattern_boss.set_special_casting(false)
+	_boss_pattern_active = false
+	_boss_pattern_time_left = 0.0
+	_boss_pattern_kind = ""
+	_boss_pattern_boss = null
+	if start_cooldown:
+		_boss_pattern_cooldown = BOSS_PATTERN_INTERVAL
+
+
+func _reset_boss_pattern_state() -> void:
+	if is_instance_valid(_boss_pattern_boss):
+		_boss_pattern_boss.set_special_casting(false)
+	_boss_pattern_active = false
+	_boss_pattern_time_left = 0.0
+	_boss_pattern_kind = ""
+	_boss_pattern_center = Vector2.ZERO
+	_boss_pattern_evade_target = Vector2.ZERO
+	_boss_pattern_boss = null
+	_boss_pattern_cooldown = BOSS_PATTERN_INITIAL_DELAY if is_boss_floor() else 0.0
+	_boss_pattern_cast_count = 0
 
 
 func _perform_auto_attack() -> void:
@@ -468,6 +613,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
+		_reset_boss_pattern_state()
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		GameManager.notification_requested.emit("보스 격파 · %s 획득" % reward_text, Color("ffd166"))
@@ -520,6 +666,7 @@ func _on_player_died() -> void:
 	if _respawning:
 		return
 	_respawning = true
+	_reset_boss_pattern_state()
 	GameManager.set_game_state(GameManager.GameState.PAUSED)
 	_clear_enemies()
 	GameManager.notification_requested.emit("쓰러졌습니다 · 1층 후퇴 후 자동 부활", Color("ff6b6b"))
@@ -597,6 +744,7 @@ func _valid_enemies_sorted() -> Array[EnemyAI]:
 
 
 func _clear_enemies() -> void:
+	_reset_boss_pattern_state()
 	for enemy: EnemyAI in _enemies:
 		if is_instance_valid(enemy):
 			enemy.queue_free()
