@@ -20,6 +20,7 @@ const SAND_FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_f
 const SAND_DETAIL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/sand_detail.png")
 const BLUE_WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/blue_wall.png")
 const SHRINE_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/shrine.png")
+const DUNGEON_COURTYARD: Texture2D = preload("res://assets/sprites/dungeon_courtyard.png")
 const ENEMY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/enemies/slime.tres",
 	"res://resources/enemies/bat.tres",
@@ -115,6 +116,8 @@ func _draw() -> void:
 	for room_index in 9:
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
+		var backdrop_tint := Color(0.58, 0.42, 0.42, 0.70) if room_index % 3 == 0 else (Color(0.62, 0.50, 0.40, 0.66) if room_index % 3 == 1 else Color(0.38, 0.50, 0.64, 0.70))
+		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
 		match room_index % 3:
 			0:
 				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
