@@ -403,10 +403,11 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
   - 재실행/불러오기 후 같은 펫과 레벨이 유지되는지 확인
 
 - [ ] **아이템 외형 교체**
-  - 장비/가방에서 기존 atlas 아이콘 대신 새 픽셀 실루엣이 보이는지 확인
-  - 무기/투구/갑옷/장갑/신발/반지/목걸이가 슬롯별로 즉시 구분되는지 확인
-  - 같은 슬롯에서도 신검/마검/용비늘/다이아몬드 등 베이스별 재질색 차이가 보이는지 확인
-  - 희귀도 색 프레임과 아이템 자체 재질색이 서로 싸우지 않는지 확인
+  - 장비/가방에서 29개 베이스 전용 item atlas 아트가 표시되는지 확인
+  - 무기/투구/갑옷/장갑/신발/반지/목걸이가 즉시 구분되는지 확인
+  - 신검/마검/용비늘/다이아몬드 등 같은 슬롯 내부에서도 베이스 아트가 다르게 보이는지 확인
+  - 필드 드랍 아이콘도 가방/장비와 같은 실제 아이템 아트를 사용하는지 확인
+  - 희귀도 프레임과 아이템 자체 아트가 서로 싸우지 않는지 확인
 
 - [ ] **아이템 아트 파이프라인**
   - dedicated icon 경로가 없는 기존 저장 아이템도 깨지지 않아야 함
@@ -423,5 +424,63 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Unlock behavior:
 - Save/load:
 - Existing item icons intact:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
+
+
+## G5.1 — Combat Identity + Pet Loot Loop
+
+- [ ] **프로젝트 전용 전투 그래픽**
+  - 전투 캐릭터가 이전 CC0 단일 스프라이트가 아니라 새 6직업 atlas로 보이는지 확인
+  - 몬스터 8종이 새 enemy atlas로 보이는지 확인
+  - 장착 무기가 캐릭터 손에 실제 표시되고 공격 시 함께 움직이는지 확인
+
+- [ ] **보스 / 엘리트 가독성**
+  - 보스 등장 시 중앙 상단 보스 HP바가 표시되는지 확인
+  - 보스 피격 시 HP바가 즉시 줄어드는지 확인
+  - 보스 사망/층 이동 시 HP바가 사라지는지 확인
+  - 폭군/질풍/철벽 엘리트 이름이 몬스터 위에 표시되는지 확인
+  - x5에서도 보스/엘리트 등장 연출이 과도하게 화면을 가리지 않는지 확인
+
+- [ ] **던전 / HUD**
+  - 좌측 목표 패널, 우측 3x3 미니맵이 전투를 가리지 않는지 확인
+  - 15층 단위로 붉은 성채 / 잿빛 납골당 / 푸른 금고 느낌이 순환하는지 확인
+  - 보스 층 방 중앙이 일반층보다 위협적으로 보이는지 확인
+
+- [ ] **펫 정수 루프**
+  - 엘리트 처치 시 보라색 펫 정수가 드랍/흡수되는지 확인
+  - 보스 처치 시 엘리트보다 많은 정수를 주는지 확인
+  - 펫 탭 상단 정수 수량이 즉시 증가하는지 확인
+  - 진화 버튼에 골드 + 정수 요구량이 함께 표시되는지 확인
+  - 진화 시 정수가 실제로 차감되는지 확인
+
+- [ ] **펫 패시브**
+  - 청월호 / 밤그림자: 치명 보너스 표기 확인
+  - 화염룡: 주인 피해 증가 표기 확인
+  - 유령 슬라임: 골드 보너스 표기 확인
+  - 수호 골렘: 받는 피해 감소 표기 확인
+  - 초원의 요정: 경험치 보너스 표기 확인
+  - ★ 진화 후 패시브 수치가 증가하는지 확인
+
+- [ ] **스킬 이펙트**
+  - x1에서 직업 스킬이 기존보다 명확히 구분되는지 확인
+  - x5에서 이펙트가 너무 오래 남거나 시야를 완전히 덮지 않는지 확인
+  - 마법사 화염구가 이동 중 꼬리/코어가 보이는지 확인
+
+### G5.1 validation notes
+
+- Build commit:
+- Hero atlas:
+- Enemy atlas:
+- Equipped weapon visual:
+- Item artwork:
+- Boss HUD:
+- Elite labels:
+- Dungeon themes:
+- Minimap/objective placement:
+- Pet essence loop:
+- Pet passive readability:
+- x1 skill VFX:
+- x5 skill VFX:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
