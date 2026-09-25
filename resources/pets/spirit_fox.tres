@@ -17,5 +17,6 @@ attack_range = 170.0
 follow_distance = 24.0
 support_heal_percent = 1.8
 support_interval = 7.0
+player_crit_bonus_percent = 2.0
 unlock_floor = 1
 description = "푸른 달빛을 두른 영혼의 여우. 공격과 회복을 함께 보조한다."
