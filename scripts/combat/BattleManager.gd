@@ -268,6 +268,10 @@ static func boss_pattern_damage_multiplier(kind: String) -> float:
 	return 1.12 if kind == "doom_mark" else 1.28
 
 
+static func boss_retry_progress_for_floor(floor_number: int) -> int:
+	return maxi(0, 8 + floor_number - BOSS_RETRY_KILLS)
+
+
 static func compute_boss_evade_target(player_position: Vector2, hazard_center: Vector2, radius: float, arena: Rect2) -> Vector2:
 	var primary: Vector2 = hazard_center.direction_to(player_position)
 	if primary.is_zero_approx():
@@ -678,8 +682,7 @@ func _on_player_died() -> void:
 	await get_tree().create_timer(0.75).timeout
 	GameManager.retreat_floor()
 	if died_on_boss_floor:
-		var retry_threshold: int = 8 + GameManager.floor
-		GameManager.kills_on_floor = maxi(0, retry_threshold - BOSS_RETRY_KILLS)
+		GameManager.kills_on_floor = boss_retry_progress_for_floor(GameManager.floor)
 	GameManager.revive()
 	effects.clear_effects()
 	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
