@@ -325,7 +325,7 @@ func _draw() -> void:
 			var ring_radius: float = 12.0 + float(ring_index) * 5.0 + sin(age * 6.0 + ring_index) * 1.5
 			draw_arc(position, ring_radius, 0.0, TAU, 32, Color(rarity_color.lightened(0.22), alpha * (0.72 - ring_index * 0.12)), 1.4 + ring_index * 0.45, true)
 		if bool(loot_icon.get("special_reward", false)):
-			draw_arc(position, glow_radius + 5.0, 0.0, TAU, 36, Color("ffe6a3", alpha * 0.72), 1.5, true)
+			draw_arc(position, glow_radius + 5.0, 0.0, TAU, 36, Color(Color("ffe6a3"), alpha * 0.72), 1.5, true)
 		var icon_index: int = int(loot_icon["icon_index"])
 		if icon_index >= 0 and icon_index < 30:
 			var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
