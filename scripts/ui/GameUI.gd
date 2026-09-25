@@ -1035,6 +1035,17 @@ func _add_inventory_slot_labels(button: Button, item: Dictionary, selected: bool
 	rarity_badge.add_theme_font_size_override("font_size", 6)
 	rarity_badge.add_theme_color_override("font_color", Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
 	button.add_child(rarity_badge)
+	var comparison: String = _comparison_text(item)
+	if comparison.contains("▲") and not comparison.contains("▼"):
+		var upgrade_badge := Label.new()
+		upgrade_badge.position = Vector2(33, 1)
+		upgrade_badge.size = Vector2(10, 10)
+		upgrade_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
+		upgrade_badge.text = "↑"
+		upgrade_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		upgrade_badge.add_theme_font_size_override("font_size", 8)
+		upgrade_badge.add_theme_color_override("font_color", COLOR_GREEN)
+		button.add_child(upgrade_badge)
 	var level_badge := Label.new()
 	level_badge.position = Vector2(24, 32)
 	level_badge.size = Vector2(19, 10)
@@ -1128,7 +1139,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var at_cap: bool = level >= max_level
 	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size.y = 72
+	panel.custom_minimum_size.y = 78
 	panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("3a4758"), 1, 0))
 	_skills_list.add_child(panel)
 	var row := HBoxContainer.new()
@@ -1152,6 +1163,14 @@ func _add_skill_row(definition: Dictionary) -> void:
 	title_label.text = "%s  Lv.%d/%d%s" % [title, level, max_level, "  MAX" if at_cap else ""]
 	title_label.add_theme_font_size_override("font_size", 10)
 	text_column.add_child(title_label)
+	var level_bar := ProgressBar.new()
+	level_bar.custom_minimum_size.y = 6
+	level_bar.max_value = maxi(1, max_level)
+	level_bar.value = level
+	level_bar.show_percentage = false
+	level_bar.add_theme_stylebox_override("background", _style_box(Color("0a0e14"), Color("273343"), 1, 1))
+	level_bar.add_theme_stylebox_override("fill", _style_box(COLOR_GOLD.darkened(0.20), COLOR_GOLD, 1, 1))
+	text_column.add_child(level_bar)
 	var description_label := Label.new()
 	description_label.text = description
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -1208,6 +1227,14 @@ func _refresh_rebirth() -> void:
 	]
 	info.add_theme_font_size_override("font_size", 8)
 	left.add_child(info)
+	var rebirth_progress := ProgressBar.new()
+	rebirth_progress.custom_minimum_size.y = 8
+	rebirth_progress.max_value = maxi(1, RebirthManager.required_level())
+	rebirth_progress.value = mini(GameManager.level, RebirthManager.required_level())
+	rebirth_progress.show_percentage = false
+	rebirth_progress.add_theme_stylebox_override("background", _style_box(Color("0a0e14"), Color("273343"), 1, 1))
+	rebirth_progress.add_theme_stylebox_override("fill", _style_box(COLOR_ACCENT.darkened(0.20), COLOR_ACCENT, 1, 1))
+	left.add_child(rebirth_progress)
 	var rebirth_button := Button.new()
 	rebirth_button.text = "환생하기"
 	rebirth_button.custom_minimum_size.y = 26
