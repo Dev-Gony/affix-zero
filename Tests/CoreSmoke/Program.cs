@@ -50,6 +50,7 @@ internal static class Program
             Throws(() => attack.Begin(0), "invalid target rejected");
             Throws(() => attack.FrameAt(0, 8), "empty frame set rejected");
             Check(attack.FrameAt(6, 8) == 5, "last frame clamped");
+            CombatHealthChecks.Run(Check, Throws);
             Console.WriteLine("CORE_SMOKE_PASSED checks=" + passed + " scope=pure-CSharp-not-Unity-editor");
             return 0;
         }

@@ -8,5 +8,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="../../Assets/_Game/Core/AttackTimeline.cs" Link="AttackTimeline.cs" />
+    <Compile Include="../../Assets/_Game/Core/CombatHealth.cs" Link="CombatHealth.cs" />
   </ItemGroup>
 </Project>

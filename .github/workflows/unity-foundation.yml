@@ -7,7 +7,7 @@ on:
 permissions:
   contents: read
 concurrency:
-  group: unity-restart-${{ github.ref }}
+  group: unity-restart-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   core-and-tree-only:
@@ -16,14 +16,26 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
           persist-credentials: false
       - uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
       - name: Verify fresh source tree and tracked metadata
-        run: python3 Tools/audit_restart.py
-      - name: Compile and exercise pure C# timeline
+        run: python3 Tools/audit_restart.py --require-history
+      - name: Compile and exercise pure C# timeline and health
         run: dotnet run --project Tests/CoreSmoke/CoreSmoke.csproj --configuration Release
       - name: State validation boundary
-        run: echo 'Unity Editor import, animation playback, rendering, build and Windows playtest NOT_RUN. This job is not gameplay approval.'
+        run: echo 'Unity Editor import, rendering, scene builder, build and Windows playtest NOT_RUN. Core tests are not gameplay approval.'
+  storage-inspection-only:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - name: Test read-only storage report on synthetic fixtures
+        shell: powershell
+        run: ./Tests/Local/StorageReportTest.ps1
