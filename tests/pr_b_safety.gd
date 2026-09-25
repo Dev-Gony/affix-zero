@@ -82,8 +82,11 @@ func _run() -> void:
 	esc.pressed = true
 	ui._unhandled_key_input(esc)
 	_check(not ui._management_open, "ESC closes an open management window")
-	_check(get_tree().paused, "ESC alone opens the pause menu and pauses the entire game")
-	_check(ui._pause_panel.visible and ui._modal_blocker.visible, "Pause menu is modal")
+	_check(not get_tree().paused, "Closing management with ESC keeps idle gameplay running")
+	_check(not ui._pause_panel.visible and not ui._modal_blocker.visible, "Management ESC performs only one state transition")
+	ui._unhandled_key_input(esc)
+	_check(get_tree().paused, "A second ESC opens the pause menu and pauses the entire game")
+	_check(ui._pause_panel.visible and ui._modal_blocker.visible, "Pause menu remains modal when explicitly opened")
 	ui._toggle_pause_menu()
 	_check(not get_tree().paused, "Closing ESC menu resumes gameplay")
 
