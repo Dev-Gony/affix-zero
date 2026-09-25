@@ -213,8 +213,8 @@ func _build_hud() -> void:
 	quick_row.add_child(menu_button)
 
 	_minimap = GameMiniMap.new()
-	_minimap.position = Vector2(550, 42)
-	_minimap.size = Vector2(78, 58)
+	_minimap.position = Vector2(524, 42)
+	_minimap.size = Vector2(104, 66)
 	_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_minimap.z_index = 24
 	_minimap.set_floor(GameManager.floor)
@@ -222,15 +222,15 @@ func _build_hud() -> void:
 
 	_objective = CombatObjective.new()
 	_objective.position = Vector2(12, 42)
-	_objective.size = Vector2(190, 58)
+	_objective.size = Vector2(186, 62)
 	_objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_objective.z_index = 24
 	_objective.sync_from_game()
 	add_child(_objective)
 
 	_boss_bar = BossStatusBar.new()
-	_boss_bar.position = Vector2(210, 42)
-	_boss_bar.size = Vector2(330, 38)
+	_boss_bar.position = Vector2(202, 42)
+	_boss_bar.size = Vector2(314, 38)
 	_boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_boss_bar.z_index = 25
 	_boss_bar.visible = false
