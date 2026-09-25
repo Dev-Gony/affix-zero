@@ -720,9 +720,10 @@ func affordable_skill_upgrade_option_count() -> int:
 
 
 func growth_opportunity_summary() -> Dictionary:
+	var equipment_slots: Array[String] = affordable_equipment_enhancement_slots()
 	return {
-		"equipment_slots": affordable_equipment_enhancement_slots(),
-		"equipment_count": affordable_equipment_enhancement_slots().size(),
+		"equipment_slots": equipment_slots,
+		"equipment_count": equipment_slots.size(),
 		"skill_count": affordable_skill_upgrade_option_count(),
 		"gold": gold,
 	}
