@@ -57,6 +57,26 @@ func _run() -> void:
 	base.icon_texture_path = "res://assets/items/example.png"
 	_check(base.icon_texture_path.ends_with(".png"), "Item base supports dedicated per-item sprite paths")
 
+	var icon := ItemVisualIcon.new()
+	icon.size = Vector2(40, 40)
+	icon.configure({
+		"base_id": "weapon_divine_sword",
+		"slot": "weapon",
+		"rarity_color": "ffd166",
+		"enhancement_level": 7,
+	})
+	_check(icon.accent_color == Color("ffd86b"), "Divine sword receives a dedicated gold visual identity")
+	icon.configure({
+		"base_id": "ring_diamond",
+		"slot": "ring",
+		"rarity_color": "d138ff",
+	})
+	_check(icon.accent_color == Color("91ecff"), "Diamond ring receives a dedicated crystal visual identity")
+	icon.queue_free()
+
+	_check(GameUI.MANAGEMENT_TITLES.size() == 6, "Management hub now includes six growth sections")
+	_check(GameUI.MANAGEMENT_TITLES[3] == "펫", "Pet management sits between skills and rebirth")
+
 	var dummy_player := Node2D.new()
 	dummy_player.visible = true
 	add_child(dummy_player)
