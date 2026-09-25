@@ -397,19 +397,50 @@ func skill_damage_multiplier() -> float:
 	return 1.0 + class_skill_effect("damage")
 
 
-func buy_skill(skill_id: String, base_cost: int, cost_step: int) -> bool:
+func skill_upgrade_total_cost(skill_id: String, base_cost: int, cost_step: int, level_count: int, class_id: String = selected_class) -> int:
+	if level_count <= 0 or class_id.is_empty():
+		return 0
+	var current_level: int = class_skill_level(skill_id, class_id)
+	var count: int = level_count
+	return count * base_cost + cost_step * (count * current_level + (count * (count - 1)) / 2)
+
+
+func max_affordable_skill_upgrades(skill_id: String, base_cost: int, cost_step: int, max_levels: int = 9999) -> int:
+	if selected_class.is_empty() or gold <= 0:
+		return 0
+	var count: int = 0
+	var running_cost: int = 0
+	var current_level: int = class_skill_level(skill_id)
+	while count < max_levels:
+		var next_cost: int = base_cost + (current_level + count) * cost_step
+		if running_cost + next_cost > gold:
+			break
+		running_cost += next_cost
+		count += 1
+	return count
+
+
+func buy_skill_levels(skill_id: String, base_cost: int, cost_step: int, requested_levels: int) -> int:
 	if selected_class.is_empty():
-		return false
+		return 0
+	var affordable: int = max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
+	var purchase_count: int = affordable if requested_levels <= 0 else mini(requested_levels, affordable)
+	if purchase_count <= 0:
+		return 0
+	var total_cost: int = skill_upgrade_total_cost(skill_id, base_cost, cost_step, purchase_count)
+	if not spend_gold(total_cost):
+		return 0
 	var levels: Dictionary = Dictionary(class_skill_levels.get(selected_class, {})).duplicate(true)
 	var current_level: int = int(levels.get(skill_id, 0))
-	var cost: int = base_cost + current_level * cost_step
-	if not spend_gold(cost):
-		return false
-	levels[skill_id] = current_level + 1
+	levels[skill_id] = current_level + purchase_count
 	class_skill_levels[selected_class] = levels
 	recalculate_stats()
 	skills_changed.emit()
-	return true
+	return purchase_count
+
+
+func buy_skill(skill_id: String, base_cost: int, cost_step: int) -> bool:
+	return buy_skill_levels(skill_id, base_cost, cost_step, 1) == 1
 
 
 func record_kill() -> void:
