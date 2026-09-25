@@ -23,4 +23,6 @@
 
 | E0-C03 Windows runner에서 GodotExe not found | 사용자가 예시 경로 `C:\Users\Gwony\Downloads\Godot_v4.7.2-stable_win64.exe`를 전달했지만 실제 exe가 그 위치에 없음 | runner의 `-GodotExe`를 선택값으로 바꾸고 Desktop/Downloads 재귀검색 및 PATH 자동탐지 추가. 여러 개면 후보를 출력하고 명시 선택 요구 | 로컬 실행 안내에 예시 경로를 실제 경로처럼 고정하면 불필요한 실패가 생긴다. 가능한 경우 실행기를 스스로 탐지하게 만든다 |
 
+| E0-C03 Godot 자동탐지에서 standard/console 동시 발견 | Godot 압축 해제 폴더 안에 일반 exe와 console exe가 함께 있어 기존 탐지기가 둘 다 후보로 보고 중단 | 일반판(non-console)을 우선 선택하도록 수정하고, `.exe`로 끝나는 폴더 경로를 넘겨도 그 안의 standard exe를 해석하도록 보강 | 실행 파일 탐지는 파일명뿐 아니라 패키징 구조와 console/standard 변형까지 고려해야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
