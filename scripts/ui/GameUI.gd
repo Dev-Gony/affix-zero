@@ -251,14 +251,14 @@ func _sync_modal_blocker() -> void:
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(344, 38)
-	window.size = Vector2(290, 318)
+	window.position = Vector2(320, 8)
+	window.size = Vector2(316, 355)
 	window.z_index = 50
 	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
 	add_child(window)
 	var header := HBoxContainer.new()
 	header.position = Vector2(6, 4)
-	header.size = Vector2(278, 22)
+	header.size = Vector2(304, 22)
 	window.add_child(header)
 	_management_title = Label.new()
 	_management_title.text = MANAGEMENT_TITLES[0]
@@ -277,7 +277,7 @@ func _build_bottom_panel() -> void:
 	_main_tabs = tabs
 	tabs.name = "MainTabs"
 	tabs.position = Vector2(4, 28)
-	tabs.size = Vector2(282, 286)
+	tabs.size = Vector2(308, 323)
 	tabs.tabs_visible = false
 	window.add_child(tabs)
 
@@ -469,20 +469,28 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_inventory_count)
 	_loot_filter_option = OptionButton.new()
-	_loot_filter_option.custom_minimum_size = Vector2(90, 21)
+	_loot_filter_option.custom_minimum_size = Vector2(76, 21)
 	_loot_filter_option.tooltip_text = "이 등급 이상만 자동 획득"
-	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설만"]:
+	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽만"]:
 		_loot_filter_option.add_item(rarity_name)
 	_loot_filter_option.item_selected.connect(_on_loot_filter_selected)
 	header.add_child(_loot_filter_option)
+	var sell_normal := Button.new()
+	sell_normal.text = "일반"
+	sell_normal.custom_minimum_size = Vector2(48, 21)
+	sell_normal.add_theme_font_size_override("font_size", 6)
+	sell_normal.tooltip_text = "잠금 제외 일반 등급만 판매"
+	sell_normal.pressed.connect(_sell_all_normal)
+	header.add_child(sell_normal)
 	var sell_all := Button.new()
-	sell_all.text = "일반 판매"
-	sell_all.custom_minimum_size = Vector2(76, 21)
-	sell_all.add_theme_font_size_override("font_size", 7)
-	sell_all.pressed.connect(_sell_all_normal)
+	sell_all.text = "전체 판매"
+	sell_all.custom_minimum_size = Vector2(62, 21)
+	sell_all.add_theme_font_size_override("font_size", 6)
+	sell_all.tooltip_text = "잠금한 장비는 보호하고 가방의 나머지를 전부 판매"
+	sell_all.pressed.connect(_sell_all_unlocked)
 	header.add_child(sell_all)
 	var grid_panel := PanelContainer.new()
-	grid_panel.custom_minimum_size = Vector2(0, 184)
+	grid_panel.custom_minimum_size = Vector2(0, 150)
 	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0910"), Color("352b38"), 1, 0))
 	tab.add_child(grid_panel)
 	var grid_scroll := ScrollContainer.new()
@@ -512,9 +520,9 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	detail_column.add_child(detail_scroll)
 	_inventory_detail = Label.new()
-	_inventory_detail.custom_minimum_size.x = 270
+	_inventory_detail.custom_minimum_size = Vector2(296, 96)
 	_inventory_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_inventory_detail.add_theme_font_size_override("font_size", 6)
+	_inventory_detail.add_theme_font_size_override("font_size", 7)
 	detail_scroll.add_child(_inventory_detail)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 3)
@@ -863,18 +871,14 @@ func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
 		_inventory_sell_button.text = "판매"
 		return
 	var item_color := Color.from_string(String(selected.get("rarity_color", "ffffff")), Color.WHITE)
-	_inventory_detail.text = "[%s] %s\n%s · iLv.%d\n%s\n%s" % [
-		String(selected.get("rarity_name", "")), String(selected.get("name", "")),
-		String(SLOT_NAMES.get(String(selected.get("slot", "")), "")), int(selected.get("item_level", 1)),
-		_compact_stats(selected, true), _comparison_text(selected)
-	]
-	_inventory_detail.tooltip_text = _format_item_details(selected)
+	_inventory_detail.text = _format_item_details(selected)
+	_inventory_detail.tooltip_text = ""
 	_inventory_detail.add_theme_color_override("font_color", item_color)
 	_inventory_equip_button.disabled = false
 	_inventory_lock_button.disabled = false
 	_inventory_lock_button.text = "잠금 해제" if bool(selected.get("locked", false)) else "잠금"
 	_inventory_sell_button.disabled = bool(selected.get("locked", false))
-	_inventory_sell_button.text = "잠금됨" if bool(selected.get("locked", false)) else "판매 %dG" % int(selected.get("sell_value", 0))
+	_inventory_sell_button.text = "잠금됨" if bool(selected.get("locked", false)) else "판매 %dG" % GameManager.item_sell_value(selected)
 
 
 func _select_inventory_item(item_id: String) -> void:
@@ -1153,7 +1157,7 @@ func _format_item_details(item: Dictionary) -> String:
 		lines.append("강화 비용: %dG" % GameManager.equipment_enhancement_cost(item))
 	else:
 		lines.append("다음 강화: 최대 강화 +%d" % GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL)
-	lines.append("판매가: %dG%s" % [int(item.get("sell_value", 0)), " · 잠금" if bool(item.get("locked", false)) else ""])
+	lines.append("판매가: %dG%s" % [GameManager.item_sell_value(item), " · 잠금" if bool(item.get("locked", false)) else ""])
 	lines.append("장착 비교: %s" % _comparison_text(item))
 	return "\n".join(lines)
 
@@ -1249,7 +1253,7 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 
 func _on_loot_filter_selected(index: int) -> void:
 	GameManager.set_loot_min_rarity(index)
-	_show_notification("앞으로 %s 등급만 자동 획득 · 기존 가방은 유지" % ["일반+", "마법+", "희귀+", "고유+", "전설"][GameManager.loot_min_rarity_index], COLOR_GOLD)
+	_show_notification("앞으로 %s 등급만 자동 획득 · 기존 가방은 유지" % ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽"][GameManager.loot_min_rarity_index], COLOR_GOLD)
 	SaveManager.save_game()
 
 
@@ -1336,6 +1340,11 @@ func _sell(item_id: String) -> void:
 func _sell_all_normal() -> void:
 	AudioManager.play_sfx("ui_click")
 	GameManager.sell_all_normal()
+
+
+func _sell_all_unlocked() -> void:
+	AudioManager.play_sfx("ui_click")
+	GameManager.sell_all_unlocked()
 
 
 func _buy_skill_amount(skill_id: String, base_cost: int, cost_step: int, amount: int) -> void:
