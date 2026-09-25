@@ -23,6 +23,7 @@ func _check(condition: bool, message: String) -> void:
 func _run() -> void:
 	var original_owned: Dictionary = PetManager.owned_pets.duplicate(true)
 	var original_active: String = PetManager.active_pet_id
+	var original_essence: int = PetManager.essence
 	var original_gold: int = GameManager.gold
 
 	_check(PetManager.all_pet_ids().size() == 6, "Pet catalog exposes six launch companions")
@@ -33,6 +34,7 @@ func _run() -> void:
 	_check(PetManager.active_attack_interval() < 3.0, "Active pet attacks on a readable automatic cadence")
 	_check(PetManager.active_support_heal_percent() > 0.0, "Starter support pet provides automatic sustain")
 	GameManager.gold = 100000000
+	PetManager.essence = 999
 	var before_train_level: int = PetManager.level_for(PetManager.STARTER_PET_ID)
 	_check(PetManager.train_pet(PetManager.STARTER_PET_ID), "Owned pets can spend gold to train")
 	_check(PetManager.level_for(PetManager.STARTER_PET_ID) == before_train_level + 1, "Training advances exactly one pet level")
@@ -40,18 +42,24 @@ func _run() -> void:
 	_check(PetManager.can_evolve(PetManager.STARTER_PET_ID), "Levelled pets become eligible for star evolution")
 	_check(PetManager.evolve_pet(PetManager.STARTER_PET_ID), "Eligible pets can spend gold to evolve")
 	_check(PetManager.stars_for(PetManager.STARTER_PET_ID) == 2, "Evolution raises the persistent star rank")
+	_check(PetManager.essence < 999, "Evolution consumes pet essence")
+	var essence_before_add: int = PetManager.essence
+	_check(PetManager.add_essence(4) == 4 and PetManager.essence == essence_before_add + 4, "Elite/boss essence rewards add to pet progression currency")
 
 	PetManager.owned_pets = {
 		"spirit_fox": {"level": 7, "xp": 13, "stars": 2},
 	}
 	PetManager.active_pet_id = "spirit_fox"
 	var snapshot: Dictionary = PetManager.to_save_dict()
+	var saved_essence: int = PetManager.essence
 	PetManager.owned_pets = {}
 	PetManager.active_pet_id = ""
+	PetManager.essence = 0
 	PetManager.apply_save_dict(snapshot)
 	_check(PetManager.level_for("spirit_fox") == 7, "Pet level survives save round-trip")
 	_check(PetManager.stars_for("spirit_fox") == 2, "Pet star state survives save round-trip")
 	_check(PetManager.active_pet_id == "spirit_fox", "Active pet survives save round-trip")
+	_check(PetManager.essence == saved_essence, "Pet essence survives save round-trip")
 
 	var unlocked: Array[String] = PetManager.try_unlock_for_floor(60)
 	_check(PetManager.is_owned("ember_drake"), "Floor progression unlocks Ember Drake")
@@ -137,6 +145,7 @@ func _run() -> void:
 
 	PetManager.owned_pets = original_owned
 	PetManager.active_pet_id = original_active
+	PetManager.essence = original_essence
 	GameManager.gold = original_gold
 	PetManager.apply_save_dict(PetManager.to_save_dict())
 	_finish()
