@@ -22,7 +22,7 @@ func bind_player(player: Node2D) -> void:
 
 func _process(delta: float) -> void:
 	_clock += delta
-	if player_target == null or not is_instance_valid(player_target) or _pet_data == null:
+	if player_target == null or not is_instance_valid(player_target) or not player_target.visible or _pet_data == null:
 		visible = false
 		return
 	visible = true
