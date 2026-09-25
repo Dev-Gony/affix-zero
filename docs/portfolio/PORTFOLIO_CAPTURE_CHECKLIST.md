@@ -47,16 +47,20 @@ This checklist is for **real Windows Godot 4.3 play captures**, not headless fix
 
 Record after Windows play:
 
-- Build commit:
-- Floor / rebirth:
-- Character / class:
-- Normal-enemy hit feel:
-- Boss hit feel:
-- Sell All result:
-- Inventory detail clipping:
-- Epic seen naturally: Yes / No
-- Bugs found:
-- Merge approval: Pending / Approved / Rejected
+- Build commit: 8bf5186 lineage / G3.3 branch
+- Floor / rebirth: existing geared save
+- Character / class: existing geared character
+- Normal-enemy hit feel: Normal on geared character; fresh-character retest required
+- Boss hit feel: Normal on geared character; fresh-character retest required
+- Sell All result: PASS
+- Inventory detail clipping: PASS
+- Enhancement level increment: PASS; live stat application confirmed by code + regression test
+- Auto-hunt / movement: PASS
+- Skills: PASS
+- Save / rebirth: PASS
+- Epic seen naturally: Not required
+- Bugs found: none in tested G3.3 flows
+- Merge approval: gameplay validated; early-progression damage tuning still follow-up
 
 ## Portfolio story to preserve
 
