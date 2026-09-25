@@ -50,6 +50,7 @@ const RARITY_RESOURCE_PATHS: Array[String] = [
 	"res://resources/items/rarity_rare.tres",
 	"res://resources/items/rarity_unique.tres",
 	"res://resources/items/rarity_legend.tres",
+	"res://resources/items/rarity_epic.tres",
 ]
 
 var _item_bases: Array[ItemBaseData] = []
@@ -96,7 +97,7 @@ func generate_item(current_floor: int, rebirth_count: int) -> Dictionary:
 		"rarity_color": rarity.color.to_html(false),
 		"base_stats": scaled_base_stats,
 		"affixes": rolled_affixes,
-		"sell_value": roundi((5.0 + current_floor * 2.0) * (rarity.index + 1) * 0.8),
+		"sell_value": GameManager.calculate_item_sell_value(current_floor, rarity.index, 0),
 	}
 
 
@@ -124,6 +125,9 @@ func rarity_probabilities(current_floor: int, rebirth_count: int) -> Dictionary:
 				weight *= 0.35 + progression * 0.25
 			4:
 				# Field legendary drops should feel shocking, not routine.
+				weight *= 0.05 + progression * 0.05
+			5:
+				# Epic is the chase tier above legendary: hundreds of thousands of kills can pass without one.
 				weight *= 0.05 + progression * 0.05
 		adjusted_weights.append(maxf(0.0, weight))
 		total_weight += maxf(0.0, weight)
