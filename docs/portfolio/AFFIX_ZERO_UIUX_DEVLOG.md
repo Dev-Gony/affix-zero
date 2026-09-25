@@ -1103,3 +1103,73 @@ Automated coverage is being expanded for:
 ### Windows play approval
 
 Pending. Do not merge until the new dungeon route, enemy animation, ranged projectiles and pet summon flow are played in Godot 4.3 on Windows.
+
+
+## 2026-09-25 — G6.1 Animated Combat Pass
+
+### Problem
+- High-detail static enemy artwork still read like image cards sliding across the floor.
+- Enemy attacks shared nearly identical feedback, so bat, skeleton, lich, dragon and boss pressure blurred together.
+- Pet combat silhouettes were too small and icon-like compared with the new darker hero/enemy art direction.
+
+### Cause
+- The enemy atlas contains strong single-frame art but the runtime applied only basic bob/squash transforms.
+- Enemy attack execution was keyed mostly by generic behavior instead of enemy archetype.
+- Pet rendering prioritized compact UI readability over in-world presence.
+
+### Reference UX
+- Hero Siege / ARPG combat: silhouettes should visibly brace, lunge, cast, flap and recover even when the game remains auto-combat.
+- Survivor-style readability: projectile shapes and skill colors should communicate source and threat immediately at x5.
+- Dark-fantasy progression: companions should feel like summoned creatures, not floating UI stickers.
+
+### Decision
+- Keep the existing authored enemy atlas, but animate it in code with archetype-specific motion and overlay poses.
+- Give lich, dragon and demon lord unique projectile types rather than one universal magic orb.
+- Add attack-specific VFX for every launch enemy family.
+- Increase companion scale/presence and attach rarity/evolution motion directly to the in-world pet.
+- Do not introduce manual dodge controls or boss input patterns; the game stays idle-first.
+
+### Implementation
+- Enemy runtime animation:
+  - slime stretch/squash pulse
+  - bat/dragon wing flap
+  - skeleton sword swing
+  - goblin spear thrust
+  - dark knight cleave
+  - lich orbiting magic focus
+  - demon lord rotating hell aura
+  - attack windup/recovery now drives actual pose state
+- Enemy projectiles:
+  - orb
+  - curved shadow bolt
+  - fireball
+  - boss meteor
+  - bone projectile contract for future ranged skeleton variants
+- Enemy attack VFX now vary by enemy id.
+- Lich, dragon and demon lord use distinct projectile handling in BattleManager.
+- Companion combat art:
+  - larger rarity-scaled body
+  - ground shadow
+  - rarity aura
+  - attack streak
+  - richer fox/drake/golem/bat/fairy detail
+  - drake and bat wing animation
+- Regression test now verifies animation pose advancement and projectile archetype contracts.
+
+### Failure / Revision
+- First enemy projectile pass accidentally measured travel distance against the target Node2D instead of its position. CI caught the GDScript type error. Fixed to use destination Vector2.
+- Pet ground shadow initially used a helper that only existed on PlayerAvatar. Replaced with a local polygon ellipse so the companion remains self-contained.
+
+### Verification
+- Automated G5/G6 gameplay contract extended for enemy pose animation and projectile identity.
+- Existing dungeon topology, pet gacha, item art, boss/elite and UI regression suites remain required before playtest.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Enemy movement | Static atlas card + bob | Archetype-specific flap, stride, squash and body motion |
+| Enemy attack | Generic slash/orb | Enemy-specific swing/thrust/cast/fire/meteor presentation |
+| Ranged threats | One orb look | Shadow / fire / meteor / orb projectile identities |
+| Pet in combat | Small procedural sticker | Larger rarity-scaled animated companion with attack presence |
+| Combat readability | Damage numbers carried most feedback | Motion silhouette + projectile shape + VFX communicate action |
