@@ -57,6 +57,8 @@ func save_game(data: Dictionary = {}) -> Error:
 			last_save_error = write_guard_reason
 			return backup_error
 	var save_data: Dictionary = data if not data.is_empty() else GameManager.to_save_dict()
+	if data.is_empty():
+		save_data["pets"] = PetManager.to_save_dict()
 	var error: Error = write_atomic(SAVE_PATH, save_data)
 	if error != OK:
 		last_save_error = "저장 트랜잭션 실패 (%d)" % int(error)
@@ -143,6 +145,7 @@ func load_game() -> Dictionary:
 		return {}
 	LootManager.migrate_save_data(data)
 	GameManager.apply_save_dict(data)
+	PetManager.apply_save_dict(Dictionary(data.get("pets", {})))
 	RebirthManager.sync_unlocked_classes()
 	write_guard_error = OK
 	write_guard_reason = ""
