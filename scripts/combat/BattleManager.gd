@@ -11,7 +11,6 @@ const PLAYER_ACCELERATION: float = 360.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
-const LOOT_PICKUP_DELAY: float = 0.72
 const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
 const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
 const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
@@ -469,6 +468,8 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
+		if boss_reward.has("rarity_id"):
+			effects.show_drop(world_position, boss_reward)
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		GameManager.notification_requested.emit("보스 격파 · %s 획득" % reward_text, Color("ffd166"))
 		var previous_room: int = _current_room
@@ -478,6 +479,8 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	if defeated_elite:
 		var elite_reward: Dictionary = LootManager.try_elite_drop()
 		if not elite_reward.is_empty():
+			if elite_reward.has("rarity_id"):
+				effects.show_drop(world_position, elite_reward)
 			GameManager.notification_requested.emit("엘리트 격파 · %s · 추가 장비 획득" % elite_name, Color("f6c85f"))
 		else:
 			GameManager.notification_requested.emit("엘리트 격파 · %s · 보너스 경험치/골드" % elite_name, Color("f6c85f"))
@@ -562,17 +565,18 @@ func _on_level_up(_new_level: int) -> void:
 
 
 func _on_item_dropped(item: Dictionary) -> void:
-	var is_legend: bool = String(item.get("rarity_id", "")) == "legend"
-	AudioManager.play_sfx("legend_drop" if is_legend else "item_drop")
+	var is_chase_drop: bool = int(item.get("rarity_index", 0)) >= 4
+	AudioManager.play_sfx("legend_drop" if is_chase_drop else "item_drop")
 	GameManager.notification_requested.emit("[%s] %s 획득" % [String(item.get("rarity_name", "")), String(item.get("name", ""))], Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
 
 
 func _spawn_world_loot(world_position: Vector2) -> void:
 	var item: Dictionary = LootManager.roll_drop()
-	if item.is_empty():
+	if item.is_empty() or not LootManager.passes_loot_filter(item):
 		return
 	effects.show_drop(world_position, item)
-	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	var pickup_delay: float = EffectLayer.loot_pickup_delay_for_rarity(int(item.get("rarity_index", 0)))
+	await get_tree().create_timer(pickup_delay, false, false, true).timeout
 	if not is_inside_tree():
 		return
 	if LootManager.collect_item(item):
