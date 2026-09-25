@@ -96,14 +96,14 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 
 ### G4.0 validation notes
 
-- Build commit:
-- Floor / rebirth:
-- Elite frequency: Too rare / Good / Too frequent
-- Brutal feel:
-- Swift feel:
-- Bulwark feel:
-- x5 readability:
-- Reward feel:
-- Boss separation:
-- Bugs found:
-- Merge approval: Pending / Approved / Rejected
+- Build commit: 0efce28 lineage / G4.0
+- Floor / rebirth: high-floor geared save, around floor 49
+- Elite frequency: Good enough for live validation; longer idle-run tuning remains optional
+- Brutal feel: PASS; encountered repeatedly
+- Swift feel: not captured in this short validation session
+- Bulwark feel: PASS; Bulwark Goblin encountered naturally
+- x5 readability: aura/silhouette remains readable in crowded combat
+- Reward feel: no blocking issue observed
+- Boss separation: no elite-affix overlap observed
+- Bugs found: none in tested elite flow
+- Merge approval: gameplay validated; PR remains unmerged by policy
