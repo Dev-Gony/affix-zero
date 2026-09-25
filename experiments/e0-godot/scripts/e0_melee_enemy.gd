@@ -97,11 +97,20 @@ func state_name() -> String:
 func has_multiframe_contract() -> bool:
 	var frames := sprite.sprite_frames
 	return (
-		frames.get_frame_count("idle") >= 2
-		and frames.get_frame_count("walk") >= 2
-		and frames.get_frame_count("attack") >= 3
-		and frames.get_frame_count("death") >= 2
+		_animation_has_textures(frames, &"idle", 2)
+		and _animation_has_textures(frames, &"walk", 2)
+		and _animation_has_textures(frames, &"attack", 3)
+		and _animation_has_textures(frames, &"hit", 1)
+		and _animation_has_textures(frames, &"death", 2)
 	)
+
+func _animation_has_textures(frames: SpriteFrames, animation_name: StringName, minimum_frames: int) -> bool:
+	if frames.get_frame_count(animation_name) < minimum_frames:
+		return false
+	for index in frames.get_frame_count(animation_name):
+		if frames.get_frame_texture(animation_name, index) == null:
+			return false
+	return true
 
 func _on_hit() -> void:
 	state = State.HIT
