@@ -484,3 +484,74 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - x5 skill VFX:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## G6.0 — Dark ARPG Dungeon / Combat Rebuild
+
+- [ ] **던전 동선**
+  - 이전 3x3 보드가 보이지 않고 방/통로가 이어진 굴곡 던전처럼 느껴지는지 확인
+  - 층 클리어 후 캐릭터가 실제 통로를 걸어서 다음 방으로 이동하는지 확인
+  - 카메라가 긴 이동 중 월드 끝/검은 영역을 이상하게 노출하지 않는지 확인
+  - 방 크기/형태가 지나치게 동일하게 반복되지 않는지 확인
+
+- [ ] **맵 아트**
+  - 캐릭터/몬스터 대비 바닥과 벽이 지나치게 싸 보이지 않는지 확인
+  - 횃불/기둥/잔해/룬이 전투 가독성을 해치지 않으면서 공간 밀도를 올리는지 확인
+  - 전체 톤이 밝은 모바일풍이 아니라 dark ARPG로 일관되는지 확인
+
+- [ ] **몬스터 animation**
+  - 이동 시 정적 JPG가 미끄러지는 느낌이 줄었는지 확인
+  - 슬라임 squash, 박쥐 flap, 대형 몬스터 hover가 보이는지 확인
+  - 공격 전 pullback/windup → 공격 lunge가 이어지는지 확인
+  - 피격 시 hit reaction, 사망 시 fall/flatten이 보이는지 확인
+
+- [ ] **적 공격 VFX**
+  - 근접 slash / slime slam / bat dive가 구분되는지 확인
+  - 리치 shadow bolt / dragon flame / demon hellfire가 서로 다른 공격으로 보이는지 확인
+  - x5에서도 선딜 텔레그래프가 너무 늦거나 너무 오래 남지 않는지 확인
+
+- [ ] **직업별 기본 공격**
+  - 전사 / 기사 / 마법사 / 현자 / 암살자 / 성자의 기본 공격 색/형태가 서로 구분되는지 확인
+  - 기사 shield charge 사용 시 캐릭터가 실제로 앞으로 이동하는지 확인
+
+- [ ] **필드 드랍**
+  - XP가 녹색 점 대신 결정 조각으로 보이는지 확인
+  - 골드가 노란 점 대신 동전 묶음으로 보이는지 확인
+  - 펫 정수가 보라색 별 결정로 구분되는지 확인
+  - 장비가 실제 아이템 그림 + 희귀도 링/빛기둥으로 바닥에서 식별되는지 확인
+  - 고등급 장비가 너무 빨리 흡수되어 그림을 못 보는 문제는 없는지 확인
+
+- [ ] **펫 가챠**
+  - 펫 탭에 1회/10회 소환 버튼과 정수 비용이 표시되는지 확인
+  - 정수가 부족하면 소환 버튼이 비활성화되는지 확인
+  - 10회 소환 후 영웅 이상 결과가 최소 1개 포함되는지 확인
+  - 신규 펫은 보유 목록에 추가되고, 중복은 조각이 증가하는지 확인
+  - 진화가 정수가 아닌 골드 + 해당 펫 조각을 요구하는지 확인
+
+- [ ] **펫 실제 외형**
+  - 청월호 꼬리, 화염룡 날개, 밤그림자 flap 등 각 펫 실루엣이 전투 중 구별되는지 확인
+  - 펫 자동 공격 시 짧은 lunge가 보이는지 확인
+  - 회복 지원 시 pulse 연출이 보이는지 확인
+  - 캐릭터 옆에서 크기/채도/이펙트가 과하게 튀거나 지나치게 초라하지 않은지 확인
+
+### G6.0 validation notes
+
+- Build commit:
+- Dungeon route:
+- Corridor travel:
+- Map art quality:
+- Enemy movement animation:
+- Enemy windup/attack:
+- Enemy hit/death:
+- Class basic attack VFX:
+- Knight real charge:
+- XP/gold/essence readability:
+- Gear drop readability:
+- 1x summon:
+- 10x guarantee:
+- Duplicate fragments:
+- Live pet appearance:
+- x1 readability:
+- x5 readability:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
