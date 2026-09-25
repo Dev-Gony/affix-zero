@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="RarityData" load_steps=2 format=3]
+[ext_resource type="Script" path="res://resources/items/RarityData.gd" id="1"]
+[resource]
+script = ExtResource("1")
+id = "epic"
+display_name = "에픽"
+index = 5
+color = Color(0.82, 0.22, 1, 1)
+max_affixes = 6
+stat_multiplier = 4.5
+drop_weight = 0.2
