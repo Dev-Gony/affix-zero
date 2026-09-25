@@ -224,4 +224,14 @@ Automated contract targets:
 
 ### Windows play approval
 
-Pending. Validate actual visibility at x1/x2/x5, elite frequency, time-to-kill, reward feel, and whether the aura remains readable in crowded waves.
+Validated on Windows + Godot 4.3 on 2026-09-25.
+
+Observed in live play:
+
+- Brutal elites were encountered repeatedly and were immediately readable through the red pulse aura.
+- A Bulwark Goblin was also encountered, confirming multiple affix archetypes spawn naturally.
+- Elite silhouettes remained distinguishable in a crowded wave at the tested viewport.
+- The player repeatedly returned to the same floor range because the next boss remained a progression wall; this exposed a useful follow-up: boss difficulty needs **more readable/fair patterns**, not simply more raw stats.
+- No elite/boss overlap bug was observed in the tested run.
+
+The supplied play captures show the elite aura clearly around enemies during normal auto-hunt. G4.0 is considered player-validated; reward-frequency tuning can continue opportunistically with longer idle runs.
