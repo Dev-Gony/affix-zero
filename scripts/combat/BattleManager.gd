@@ -439,7 +439,7 @@ func _perform_auto_attack() -> void:
 	if _is_ranged_class():
 		var projectile := PlayerBasicProjectile.new()
 		projectiles_root.add_child(projectile)
-		projectile.setup(player.global_position + player._visual_facing * 8.0, target, result, _basic_projectile_color())
+		projectile.setup(player.global_position + player._visual_facing * 8.0, target, result, _basic_projectile_color(), _basic_projectile_style())
 		projectile.impacted.connect(_on_player_basic_projectile_impacted)
 		effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
 	else:
@@ -473,6 +473,14 @@ func _basic_projectile_color() -> Color:
 		"sage": return Color("c9a7ff")
 		"saint": return Color("fff2a1")
 	return Color("9fdcff")
+
+
+func _basic_projectile_style() -> String:
+	match GameManager.selected_class:
+		"mage": return "arcane"
+		"sage": return "lightning"
+		"saint": return "holy"
+	return "arcane"
 
 
 func _update_auto_hunt(delta: float) -> void:
