@@ -19,6 +19,7 @@ const MAX_STARS: int = 5
 var _catalog: Dictionary = {}
 var owned_pets: Dictionary = {}
 var active_pet_id: String = ""
+var essence: int = 0
 
 
 func _ready() -> void:
@@ -160,6 +161,24 @@ func active_support_interval() -> float:
 	return data.support_interval if data != null else 999.0
 
 
+func add_essence(amount: int) -> int:
+	if amount <= 0:
+		return 0
+	essence += amount
+	pet_state_changed.emit()
+	return amount
+
+
+func evolution_essence_cost(pet_id: String) -> int:
+	var stars: int = stars_for(pet_id)
+	match stars:
+		1: return 3
+		2: return 8
+		3: return 16
+		4: return 30
+	return 0
+
+
 func training_cost(pet_id: String) -> int:
 	var level: int = level_for(pet_id)
 	var stars: int = stars_for(pet_id)
@@ -200,15 +219,23 @@ func can_evolve(pet_id: String) -> bool:
 	var stars: int = stars_for(pet_id)
 	if stars >= MAX_STARS:
 		return false
-	return level_for(pet_id) >= evolution_required_level(pet_id) and GameManager.gold >= evolution_cost(pet_id)
+	return (
+		level_for(pet_id) >= evolution_required_level(pet_id)
+		and GameManager.gold >= evolution_cost(pet_id)
+		and essence >= evolution_essence_cost(pet_id)
+	)
 
 
 func evolve_pet(pet_id: String) -> bool:
 	if not can_evolve(pet_id):
 		return false
 	var cost: int = evolution_cost(pet_id)
+	var essence_cost: int = evolution_essence_cost(pet_id)
+	if essence < essence_cost:
+		return false
 	if not GameManager.spend_gold(cost):
 		return false
+	essence -= essence_cost
 	var state: Dictionary = pet_state(pet_id)
 	state["stars"] = mini(MAX_STARS, int(state.get("stars", 1)) + 1)
 	owned_pets[pet_id] = state
@@ -235,12 +262,14 @@ func to_save_dict() -> Dictionary:
 	return {
 		"active_pet_id": active_pet_id,
 		"owned_pets": owned_pets.duplicate(true),
+		"essence": essence,
 	}
 
 
 func apply_save_dict(data: Dictionary) -> void:
 	owned_pets = Dictionary(data.get("owned_pets", {})).duplicate(true)
 	active_pet_id = String(data.get("active_pet_id", ""))
+	essence = maxi(0, int(data.get("essence", 0)))
 	_ensure_starter_pet()
 	pet_state_changed.emit()
 	active_pet_changed.emit(active_pet_id)
