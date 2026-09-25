@@ -356,7 +356,7 @@ func _build_pause_menu() -> void:
 	_pause_panel.position = Vector2(170, 72)
 	_pause_panel.size = Vector2(300, 256)
 	_pause_panel.z_index = 90
-	_pause_panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.98), COLOR_GOLD, 2, 0))
+	_pause_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), COLOR_GOLD, 2, 3))
 	add_child(_pause_panel)
 
 	var column := VBoxContainer.new()
@@ -697,19 +697,19 @@ func _build_stats_tab(tabs: TabContainer) -> void:
 func _build_notification() -> void:
 	_notification_label = Label.new()
 	_notification_label.position = Vector2(12, 47)
-	_notification_label.size = Vector2(306, 24)
+	_notification_label.size = Vector2(360, 24)
 	_notification_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_notification_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_notification_label.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_notification_label.modulate.a = 0.0
-	_notification_label.add_theme_stylebox_override("normal", _style_box(Color(0.04, 0.04, 0.08, 0.88), Color("34345b"), 1, 2))
+	_notification_label.add_theme_stylebox_override("normal", _style_box(Color("101722"), Color("405168"), 1, 2))
 	_notification_label.z_index = 40
 	add_child(_notification_label)
 
 
 func _build_class_selection() -> void:
 	_class_selection = ClassSelection.new()
-	_class_selection.add_theme_stylebox_override("panel", _style_box(Color(0.025, 0.018, 0.03, 0.90), Color("9a6240"), 2, 0))
+	_class_selection.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), Color("60748d"), 2, 3))
 	add_child(_class_selection)
 
 
@@ -879,10 +879,10 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action.custom_minimum_size.y = 19
 	action.add_theme_font_size_override("font_size", 6)
-	action.add_theme_stylebox_override("normal", _compact_style_box(Color("211720"), Color("69432f")))
-	action.add_theme_stylebox_override("hover", _compact_style_box(Color("38202a"), Color("c17a43")))
-	action.add_theme_stylebox_override("pressed", _compact_style_box(Color("4b1f28"), Color("e04f46"), 2))
-	action.add_theme_stylebox_override("disabled", _compact_style_box(Color("100d13"), Color("35271f")))
+	action.add_theme_stylebox_override("normal", _compact_style_box(Color("141a22"), Color("405168")))
+	action.add_theme_stylebox_override("hover", _compact_style_box(Color("202a36"), Color("6e849d")))
+	action.add_theme_stylebox_override("pressed", _compact_style_box(Color("29313d"), Color("e04f46"), 2))
+	action.add_theme_stylebox_override("disabled", _compact_style_box(Color("100d13"), Color("252e39")))
 	action.add_theme_stylebox_override("focus", _compact_style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2))
 	action.disabled = item.is_empty()
 	action.pressed.connect(_unequip.bind(slot))
@@ -959,12 +959,12 @@ func _refresh_inventory() -> void:
 			slot_button.icon = _item_icon(item)
 			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
-			slot_button.add_theme_stylebox_override("normal", _style_box(Color("151018"), item_color, 1, 0))
-			slot_button.add_theme_stylebox_override("hover", _style_box(Color("2b1b25"), item_color.lightened(0.2), 2, 0))
-			slot_button.add_theme_stylebox_override("pressed", _style_box(Color("4b1f28"), item_color.lightened(0.25), 2, 0))
+			slot_button.add_theme_stylebox_override("normal", _style_box(Color("111720"), item_color, 1, 0))
+			slot_button.add_theme_stylebox_override("hover", _style_box(Color("202a36"), item_color.lightened(0.2), 2, 0))
+			slot_button.add_theme_stylebox_override("pressed", _style_box(Color("29313d"), item_color.lightened(0.25), 2, 0))
 			if String(item.get("id", "")) == _inventory_selected_id:
-				slot_button.add_theme_stylebox_override("normal", _style_box(Color("3b2028"), COLOR_GOLD, 2, 0))
-				slot_button.add_theme_stylebox_override("hover", _style_box(Color("4b2730"), COLOR_GOLD.lightened(0.18), 2, 0))
+				slot_button.add_theme_stylebox_override("normal", _style_box(Color("27303c"), COLOR_GOLD, 2, 0))
+				slot_button.add_theme_stylebox_override("hover", _style_box(Color("313b49"), COLOR_GOLD.lightened(0.18), 2, 0))
 			slot_button.pressed.connect(_select_inventory_item.bind(String(item.get("id", ""))))
 			slot_button.focus_entered.connect(_focus_inventory_item.bind(String(item.get("id", ""))))
 			slot_button.gui_input.connect(_on_inventory_slot_input.bind(String(item.get("id", ""))))
@@ -1129,14 +1129,14 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.y = 72
-	panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("59443a"), 1, 0))
+	panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("3a4758"), 1, 0))
 	_skills_list.add_child(panel)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 5)
 	panel.add_child(row)
 	var mark_panel := PanelContainer.new()
 	mark_panel.custom_minimum_size = Vector2(58, 58)
-	mark_panel.add_theme_stylebox_override("panel", _style_box(Color("251722"), COLOR_GOLD.darkened(0.28), 1, 0))
+	mark_panel.add_theme_stylebox_override("panel", _style_box(Color("18202a"), COLOR_GOLD.darkened(0.28), 1, 0))
 	row.add_child(mark_panel)
 	var mark_label := Label.new()
 	mark_label.text = title.substr(0, mini(2, title.length()))
@@ -1197,7 +1197,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 func _refresh_rebirth() -> void:
 	_clear_container(_rebirth_content)
 	var info_panel := PanelContainer.new()
-	info_panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("69432f"), 1, 0))
+	info_panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("405168"), 1, 0))
 	_rebirth_content.add_child(info_panel)
 	var left := VBoxContainer.new()
 	info_panel.add_child(left)
