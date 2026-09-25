@@ -23,6 +23,7 @@ func _check(condition: bool, message: String) -> void:
 func _run() -> void:
 	var original_owned: Dictionary = PetManager.owned_pets.duplicate(true)
 	var original_active: String = PetManager.active_pet_id
+	var original_gold: int = GameManager.gold
 
 	_check(PetManager.all_pet_ids().size() == 6, "Pet catalog exposes six launch companions")
 	_check(PetManager.get_pet_data("spirit_fox") != null, "Starter spirit fox resource loads")
@@ -31,6 +32,14 @@ func _run() -> void:
 	_check(PetManager.active_attack_power(100.0) > 0.0, "Active pet contributes autonomous combat damage")
 	_check(PetManager.active_attack_interval() < 3.0, "Active pet attacks on a readable automatic cadence")
 	_check(PetManager.active_support_heal_percent() > 0.0, "Starter support pet provides automatic sustain")
+	GameManager.gold = 100000000
+	var before_train_level: int = PetManager.level_for(PetManager.STARTER_PET_ID)
+	_check(PetManager.train_pet(PetManager.STARTER_PET_ID), "Owned pets can spend gold to train")
+	_check(PetManager.level_for(PetManager.STARTER_PET_ID) == before_train_level + 1, "Training advances exactly one pet level")
+	PetManager.owned_pets[PetManager.STARTER_PET_ID] = {"level": 20, "xp": 0, "stars": 1}
+	_check(PetManager.can_evolve(PetManager.STARTER_PET_ID), "Levelled pets become eligible for star evolution")
+	_check(PetManager.evolve_pet(PetManager.STARTER_PET_ID), "Eligible pets can spend gold to evolve")
+	_check(PetManager.stars_for(PetManager.STARTER_PET_ID) == 2, "Evolution raises the persistent star rank")
 
 	PetManager.owned_pets = {
 		"spirit_fox": {"level": 7, "xp": 13, "stars": 2},
@@ -91,6 +100,7 @@ func _run() -> void:
 
 	PetManager.owned_pets = original_owned
 	PetManager.active_pet_id = original_active
+	GameManager.gold = original_gold
 	PetManager.apply_save_dict(PetManager.to_save_dict())
 	_finish()
 
