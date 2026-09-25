@@ -189,7 +189,7 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
 		var error: Error = save_game()
 		if error == OK:
-			PauseCoordinator.clear_all()
+			get_tree().paused = false
 			get_tree().quit()
 		else:
 			save_blocked.emit("종료 취소: 저장에 실패했습니다. %s" % last_save_error)
