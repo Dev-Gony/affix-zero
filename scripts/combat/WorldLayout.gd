@@ -41,7 +41,19 @@ static func room_rect(room_index: int) -> Rect2:
 
 static func walk_rect(room_index: int) -> Rect2:
 	var room := room_rect(room_index)
-	return Rect2(room.position + WALK_MARGIN, room.size - WALK_MARGIN * 2.0)
+	var margin := WALK_MARGIN
+	match room_index % 4:
+		0:
+			margin = Vector2(88, 62)
+		1:
+			margin = Vector2(48, 74)
+		2:
+			margin = Vector2(108, 40)
+		_:
+			margin = Vector2(62, 48)
+	if route_position(room_index) < 0:
+		margin += Vector2(26, 18)
+	return Rect2(room.position + margin, room.size - margin * 2.0)
 
 
 static func room_center(room_index: int) -> Vector2:
