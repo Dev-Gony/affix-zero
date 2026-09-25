@@ -369,4 +369,14 @@ Automated contracts cover:
 
 ### Windows play approval
 
-Pending. Validate that equipment cards remain readable, low success rates are not visually clipped, skill/equipment growth counts update immediately after spending gold, and the boss defeat message appears without changing the existing automatic retreat/retry behavior.
+Validated on Windows + Godot 4.3 on 2026-09-25.
+
+Observed in live play:
+
+- Equipment enhancement controls correctly disable when gold is insufficient.
+- Enhancement success-rate / cost display was visible and readable in the equipment grid.
+- Skill growth header and upgrade state were confirmed in live play.
+- Boss defeat preserved the existing one-floor retreat and automatic farming/retry loop while showing the new progression-oriented message.
+- The enlarged equipment layout remained readable without problematic clipping.
+
+G4.1 growth-loop UX is considered player-validated. PR remains unmerged by policy.
