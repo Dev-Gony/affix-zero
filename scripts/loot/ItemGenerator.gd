@@ -115,16 +115,16 @@ func rarity_probabilities(current_floor: int, rebirth_count: int) -> Dictionary:
 		var weight: float = rarity.drop_weight
 		match rarity.index:
 			0:
-				weight *= maxf(0.72, 1.0 - progression * 0.25)
+				weight *= maxf(0.78, 1.0 - progression * 0.25)
 			1:
 				weight *= 1.0
 			2:
 				weight *= 1.0 + progression * 0.40
 			3:
-				weight *= 1.0 + progression * 0.55
+				weight *= 0.35 + progression * 0.25
 			4:
-				# Legendary stays legendary. Progression helps slightly, but never explodes with floor/rebirth.
-				weight *= 0.65 + progression * 0.35
+				# Field legendary drops should feel shocking, not routine.
+				weight *= 0.05 + progression * 0.05
 		adjusted_weights.append(maxf(0.0, weight))
 		total_weight += maxf(0.0, weight)
 
