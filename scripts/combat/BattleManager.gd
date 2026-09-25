@@ -680,18 +680,35 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 
 
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
+	if _respawning or not is_instance_valid(attacker):
+		return
+	var ranged: bool = attacker.behavior in ["caster", "boss"]
+	effects.show_enemy_attack(attacker.global_position, player.global_position, ranged)
+	if ranged:
+		var projectile := EnemyProjectile.new()
+		projectiles_root.add_child(projectile)
+		var projectile_color: Color = Color("ff6b6b") if attacker.behavior == "boss" else attacker.body_color.lightened(0.18)
+		projectile.setup(attacker.global_position, player.global_position, raw_damage, attacker.behavior == "boss", projectile_color)
+		projectile.impacted.connect(_on_enemy_projectile_impacted)
+		return
+	_apply_enemy_damage(raw_damage, false)
+
+
+func _on_enemy_projectile_impacted(world_position: Vector2, raw_damage: float, is_boss: bool) -> void:
 	if _respawning:
 		return
+	effects.spawn_fragments(world_position, Color("c084fc") if not is_boss else Color("ff645e"), 8 if not is_boss else 14, 58.0 if not is_boss else 78.0)
+	_apply_enemy_damage(raw_damage, is_boss)
+
+
+func _apply_enemy_damage(raw_damage: float, is_boss: bool) -> void:
 	player.play_hit()
-	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
-	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
-	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
 	var reduction: float = clampf(PetManager.active_player_damage_reduction_percent(), 0.0, 80.0)
 	var reduced_damage: float = raw_damage * (1.0 - reduction * 0.01)
 	var damage: int = GameManager.take_damage(reduced_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
 	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
-	_start_shake(2.0, 0.12)
+	_start_shake(3.0 if is_boss else 2.0, 0.16 if is_boss else 0.12)
 
 
 func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool, enemy: EnemyAI) -> void:
