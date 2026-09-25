@@ -856,6 +856,8 @@ Pending. Validate that the empty bag no longer feels broken, affordable growth a
   - levels / XP / stars
   - floor unlocks
   - attack/support scaling
+  - gold-based training
+  - level-gated star evolution
   - save/load payload
 - Added `PetCompanion` world node:
   - follows the player automatically
@@ -870,6 +872,7 @@ Pending. Validate that the empty bag no longer feels broken, affordable growth a
 - Added Pet tab to the management hub and keyboard shortcut 6.
 - Added reusable `PetPortrait` UI renderer.
 - Added per-item sprite-path support while retaining atlas fallback compatibility.
+- Field loot also moved away from the old atlas preview to slot-aware procedural loot glyphs, so world drops and management UI now speak the same visual language.
 - Added `ItemVisualIcon` procedural pixel-art renderer so all 29 current equipment bases immediately receive distinct slot/base silhouettes and material colors in equipment/inventory UI instead of waiting for final binary art assets.
 - Dedicated art paths remain the preferred final pipeline; procedural icons are the playable bridge, not a permanent asset lock-in.
 - Added dedicated G5 pet/item-art CI contracts.
