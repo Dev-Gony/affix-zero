@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PetData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/pets/PetData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "stone_golem"
+display_name = "수호 골렘"
+rarity_index = 3
+rarity_name = "영웅"
+role = "방어형"
+element = "대지"
+color = Color(0.68, 0.64, 0.56, 1)
+base_attack = 15.0
+attack_interval = 1.70
+attack_range = 140.0
+follow_distance = 22.0
+support_heal_percent = 1.0
+support_interval = 8.0
+unlock_floor = 30
+description = "묵직하게 따라다니며 주인을 지키는 수호 골렘."
