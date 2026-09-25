@@ -170,6 +170,28 @@ func _run() -> void:
 	_check(objective.floor_number == GameManager.floor, "Objective tracker mirrors current floor progress")
 	objective.queue_free()
 
+	var dummy_enemy_data := EnemyData.new()
+	dummy_enemy_data.id = "slime"
+	dummy_enemy_data.display_name = "시험 슬라임"
+	dummy_enemy_data.base_hp = 100.0
+	dummy_enemy_data.base_atk = 10.0
+	dummy_enemy_data.base_def = 0.0
+	dummy_enemy_data.move_speed = 20.0
+	dummy_enemy_data.attack_cooldown = 1.0
+	dummy_enemy_data.radius = 8.0
+	dummy_enemy_data.xp_reward = 1
+	dummy_enemy_data.gold_reward = 1
+	var dummy_enemy := EnemyAI.new()
+	add_child(dummy_enemy)
+	dummy_enemy.setup(dummy_enemy_data, 1, null, Rect2(0, 0, 200, 200))
+	dummy_enemy.global_position = Vector2(60, 0)
+	var basic_projectile := PlayerBasicProjectile.new()
+	add_child(basic_projectile)
+	basic_projectile.setup(Vector2.ZERO, dummy_enemy, {"damage": 10, "critical": false}, Color("b56dff"))
+	_check(basic_projectile.target == dummy_enemy, "Ranged basic attacks bind to a visible enemy projectile target")
+	basic_projectile.queue_free()
+	dummy_enemy.queue_free()
+
 	var avatar := PlayerAvatar.new()
 	add_child(avatar)
 	avatar.set_equipment_visual({
