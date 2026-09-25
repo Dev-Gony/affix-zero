@@ -52,12 +52,15 @@ static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictiona
 		hp_scale *= 2.4
 		attack_scale *= 1.22
 		defense_scale *= 1.25
+	var late_depth: float = maxf(0.0, depth - 9.0)
 	return {
 		"hp": hp_scale,
 		"attack": attack_scale,
 		"defense": defense_scale,
-		"flat_attack": depth * 10.0,
-		"flat_defense": depth * 1.5,
+		# Flat pressure starts after floor 10 so the first run remains readable,
+		# while persistent rebirth gear cannot trivialize later floors forever.
+		"flat_attack": late_depth * 15.0,
+		"flat_defense": late_depth * 2.0,
 	}
 
 
