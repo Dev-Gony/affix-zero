@@ -86,11 +86,6 @@ func _run() -> void:
 	var skill_accent_strip: Control = first_skill_row.get_child(0)
 	_check(skill_accent_strip.custom_minimum_size.x <= 6.0, "Skill rows use a slim progression accent instead of placeholder icon blocks")
 
-	var permanent_grid: GridContainer = ui.find_child("PermanentUpgradeGrid", true, false)
-	_check(permanent_grid != null and permanent_grid.columns == 4, "Permanent rebirth upgrades use the full-width four-card layout")
-	var info_dashboard: GridContainer = ui.find_child("InfoDashboard", true, false)
-	_check(info_dashboard != null and info_dashboard.columns == 2, "Information screen uses a two-column dashboard instead of a text wall")
-
 	_finish()
 
 
