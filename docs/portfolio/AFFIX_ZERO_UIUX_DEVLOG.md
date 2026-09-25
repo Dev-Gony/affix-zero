@@ -911,3 +911,106 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate follower movement, pet attack readability at x1/x5, healing feedback, pet tab switching, floor unlock behavior and save/load persistence before merge.
+
+
+## 2026-09-25 — G5.1 Combat Identity + Pet Loot Loop
+
+### Problem
+
+- G5.0 added the pet system and an item-art pipeline, but the live combat screen still did not communicate enough hierarchy between normal enemies, elites, bosses, equipment drops and class skills.
+- Pet growth existed, but its star evolution path depended only on gold and did not create a reason to care about elite/boss kills beyond equipment.
+- The repository already contained project-specific hero, enemy, dungeon and 29-item art assets, yet several runtime paths still used older fallback presentation.
+
+### Cause
+
+- Threat information was mostly carried by notifications and local enemy rings, so the player could miss elite/boss state while watching at x5.
+- Equipment UI had a flexible renderer, but the generated 29-item atlas was not yet the default presentation path.
+- Pets had different attack/support numbers, but choosing a companion did not change the wider idle progression economy enough.
+
+### Reference UX
+
+- **Survivor-style readability:** bosses and elite moments must remain obvious even when the player is not manually controlling movement.
+- **ARPG identity:** equipment should look like distinct loot, not generic slot glyphs, and equipped weapons should read on the combat avatar.
+- **Idle progression:** elite/boss kills should feed a persistent growth currency so repeated farming has a visible purpose.
+
+### Decision
+
+- Keep boss gameplay automatic; improve presentation rather than adding manual dodge patterns.
+- Promote the existing project-specific class/enemy/dungeon/item art to the primary runtime path.
+- Add a compact global boss HP bar and stronger elite/boss arrival feedback.
+- Introduce pet essence as an elite/boss reward and require it for star evolution.
+- Give every launch pet a distinct player-facing passive so changing pets alters combat or farming behavior.
+- Rotate dungeon visual themes every 15 floors and visibly mark boss arenas.
+- Increase class-skill VFX readability without changing the idle control model.
+
+### Implementation
+
+- Item presentation:
+  - `item_base_atlas_v2.png` is now the default 29-base artwork in equipment/inventory.
+  - World drops use the same item artwork instead of generic slot glyphs.
+  - Final per-item PNG overrides still take priority through `icon_path`.
+- Combat identity:
+  - project-specific six-class atlas used in combat, class selection and management portraits.
+  - project-specific eight-enemy atlas used in combat.
+  - equipped weapon identity is rendered on the player during attacks, including enhancement/rarity glow.
+- Threat presentation:
+  - elite nameplates and colored HP bars.
+  - global boss HP bar.
+  - boss/elite spawn VFX and threat text.
+  - boss arenas receive a stronger room sigil treatment.
+- Dungeon readability:
+  - generated dungeon courtyard layer connected to rooms.
+  - pillars, torches, cracks, bone debris and runes added.
+  - three visual themes rotate every 15 floors: 붉은 성채 / 잿빛 납골당 / 푸른 금고.
+  - 3x3 minimap and combat objective tracker added.
+- Pet progression:
+  - persistent `pet_essence` currency.
+  - elites and bosses drop pet essence.
+  - evolution now consumes gold + essence.
+  - pet tab displays essence balance and requirements.
+  - six pets now have distinct owner passives:
+    - 청월호: critical bonus.
+    - 화염룡: owner damage bonus.
+    - 유령 슬라임: gold bonus.
+    - 수호 골렘: incoming damage reduction.
+    - 밤그림자: larger critical bonus.
+    - 초원의 요정: XP bonus.
+  - star evolution scales pet passives.
+- Skill VFX:
+  - melee spin, fireball, shield charge, chain lightning, multi-slash and holy nova received denser but short-lived combat effects.
+  - fireball projectile now has an animated core and trail.
+
+### Failure / Revision
+
+- One regression test still expected a standalone `sage.png` portrait after the class-art migration. The runtime was correct; the test encoded the old asset contract. The test was updated to validate the atlas region instead.
+- The first item-art bridge used procedural silhouettes. Once the existing 29-item project atlas was re-audited, it became clear the better production path was to use that artwork immediately and keep procedural drawing only as a fallback.
+- Boss patterns were deliberately not expanded. This project is idle-first, so the work moved toward threat readability, farming rewards and progression feedback instead of manual-control mechanics.
+
+### Verification
+
+Automated contracts now cover:
+
+- persistent pet essence and evolution spending
+- distinct pet passive identities
+- 29-item artwork atlas availability
+- boss HUD state
+- project class/enemy/dungeon assets
+- minimap/objective state
+- active weapon combat rendering
+- existing G3/G4/UIUX regression suites
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Item identity | Procedural bridge / legacy atlas paths | Actual 29-base project art + PNG override path |
+| Boss readability | Spawn notification + local sprite | Global boss HP + arrival VFX + boss arena treatment |
+| Elite readability | Aura only | Affix nameplate + colored HP + arrival VFX |
+| Pet evolution | Gold gate | Gold + elite/boss essence farming loop |
+| Pet choice | Attack/heal stat differences | Distinct combat/farming passives + star scaling |
+| Dungeon progression | Repeating room presentation | Floor-banded themes + minimap + objective tracker |
+| Skill feedback | Basic rings/lines | Stronger class-specific short VFX |
+
+### Windows play approval
+
+Pending. This is now a visual/play-feel checkpoint: verify item art, hero/enemy atlas quality, boss/elite readability, pet essence/evolution, pet passives, floor themes, minimap/objective placement and x1/x5 skill-effect density before merge.
