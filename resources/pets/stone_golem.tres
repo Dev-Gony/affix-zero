@@ -17,5 +17,6 @@ attack_range = 140.0
 follow_distance = 22.0
 support_heal_percent = 1.0
 support_interval = 8.0
+player_damage_reduction_percent = 6.0
 unlock_floor = 30
 description = "묵직하게 따라다니며 주인을 지키는 수호 골렘."
