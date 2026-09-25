@@ -161,12 +161,12 @@ func _add_animation(frames: SpriteFrames, animation_name: StringName, frame_name
 		frames.add_frame(animation_name, texture)
 
 func _draw() -> void:
-	draw_ellipse(Vector2(0, 2), Vector2(18, 5), Color(0, 0, 0, 0.32))
+	_draw_shadow_ellipse(Vector2(0, 2), Vector2(18, 5), Color(0, 0, 0, 0.32))
 	var ratio := float(hp) / float(max_hp)
 	draw_rect(Rect2(-21, -47, 42, 5), Color("251b21"))
 	draw_rect(Rect2(-20, -46, 40.0 * ratio, 3), Color("e85d5d"))
 
-func draw_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
+func _draw_shadow_ellipse(center: Vector2, radius: Vector2, color: Color) -> void:
 	var points := PackedVector2Array()
 	for index in 18:
 		var angle := TAU * float(index) / 18.0
