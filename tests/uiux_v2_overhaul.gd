@@ -48,6 +48,7 @@ func _run() -> void:
 	ui._refresh_inventory()
 	_check(ui._inventory_count.text.contains("에픽만"), "Empty inventory header explains the active acquisition filter")
 	_check(ui._inventory_detail.text.contains("획득 필터"), "Empty inventory detail explains why lower-rarity drops may not appear")
+	_check(ui._inventory_empty_hint.visible and ui._inventory_empty_hint.text.contains("에픽만"), "Empty bag uses a centered filter-aware message instead of only showing dead slots")
 	_check(GameUI.EQUIPMENT_LAYOUT.size() == 9 and GameUI.EQUIPMENT_LAYOUT[4] == "portrait", "Equipment layout keeps the character portrait at the visual center")
 	_check(ui._class_selection._grid.get_child_count() == 6, "Class selection keeps all six class choices in one readable screen")
 	if ui._class_selection._grid.get_child_count() > 0:

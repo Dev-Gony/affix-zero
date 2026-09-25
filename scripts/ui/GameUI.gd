@@ -48,6 +48,7 @@ var _equipment_row: GridContainer
 var _inventory_grid: GridContainer
 var _inventory_count: Label
 var _inventory_detail: Label
+var _inventory_empty_hint: Label
 var _inventory_equip_button: Button
 var _inventory_sell_button: Button
 var _inventory_lock_button: Button
@@ -587,6 +588,16 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_grid.add_theme_constant_override("v_separation", 3)
 	grid_margin.add_child(_inventory_grid)
 
+	_inventory_empty_hint = Label.new()
+	_inventory_empty_hint.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_inventory_empty_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_inventory_empty_hint.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_inventory_empty_hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_inventory_empty_hint.add_theme_font_size_override("font_size", 10)
+	_inventory_empty_hint.add_theme_color_override("font_color", COLOR_MUTED)
+	_inventory_empty_hint.z_index = 3
+	grid_panel.add_child(_inventory_empty_hint)
+
 	var detail_panel := PanelContainer.new()
 	detail_panel.custom_minimum_size = Vector2(188, 0)
 	detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
@@ -895,6 +906,9 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 			var preview_cost: int = int(button_preview.get("cost", 0))
 			enhance_button.text = "강화 +%d" % target_level
 			enhance_button.disabled = GameManager.gold < preview_cost
+			if not enhance_button.disabled:
+				enhance_button.add_theme_stylebox_override("normal", _style_box(Color("171c24"), COLOR_GOLD.darkened(0.18), 1, 2))
+				enhance_button.add_theme_stylebox_override("hover", _style_box(Color("242b36"), COLOR_GOLD, 2, 2))
 			enhance_button.tooltip_text = "%s\n비용 %dG\n%s" % [
 				GameManager.equipment_enhancement_risk_text(item),
 				preview_cost,
@@ -980,6 +994,9 @@ func _refresh_inventory() -> void:
 	_inventory_count.text = "가방  %d/%d · 획득 %s · 등급순 자동 정렬" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY, filter_text]
 	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
+	if _inventory_empty_hint != null:
+		_inventory_empty_hint.visible = sorted_items.is_empty()
+		_inventory_empty_hint.text = "가방이 비어 있습니다\n현재 획득 필터: %s\n자동사냥 중 장비를 획득하면 여기에 표시됩니다." % filter_text
 	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
 		var rarity_a: int = int(a.get("rarity_index", 0))
 		var rarity_b: int = int(b.get("rarity_index", 0))
@@ -1221,6 +1238,9 @@ func _add_skill_row(definition: Dictionary) -> void:
 	one_button.custom_minimum_size = Vector2(118, 18)
 	one_button.add_theme_font_size_override("font_size", 6)
 	one_button.disabled = at_cap or GameManager.gold < cost
+	if not one_button.disabled:
+		one_button.add_theme_stylebox_override("normal", _style_box(Color("171c24"), COLOR_GOLD.darkened(0.18), 1, 2))
+		one_button.add_theme_stylebox_override("hover", _style_box(Color("242b36"), COLOR_GOLD, 2, 2))
 	one_button.tooltip_text = "1레벨 강화 · 환생할 때마다 최대 레벨 +%d · 현재 골드 %dG" % [GameManager.CLASS_SKILL_LEVELS_PER_REBIRTH, GameManager.gold]
 	one_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 1))
 	actions.add_child(one_button)
@@ -1242,6 +1262,9 @@ func _add_skill_row(definition: Dictionary) -> void:
 	max_button.custom_minimum_size = Vector2(118, 18)
 	max_button.add_theme_font_size_override("font_size", 6)
 	max_button.disabled = max_count <= 0
+	if not max_button.disabled:
+		max_button.add_theme_stylebox_override("normal", _style_box(Color("14211a"), COLOR_GREEN.darkened(0.12), 1, 2))
+		max_button.add_theme_stylebox_override("hover", _style_box(Color("1b2b22"), COLOR_GREEN, 2, 2))
 	max_button.tooltip_text = "현재 골드로 가능한 만큼 한 번에 강화"
 	max_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 0))
 	actions.add_child(max_button)
@@ -1289,7 +1312,8 @@ func _refresh_rebirth() -> void:
 	rebirth_progress.value = mini(GameManager.level, required_level)
 	rebirth_progress.show_percentage = false
 	rebirth_progress.add_theme_stylebox_override("background", _style_box(Color("0a0e14"), Color("273343"), 1, 1))
-	rebirth_progress.add_theme_stylebox_override("fill", _style_box(COLOR_ACCENT.darkened(0.20), COLOR_ACCENT, 1, 1))
+	var rebirth_fill: Color = COLOR_GREEN if can_rebirth_now else COLOR_GOLD
+	rebirth_progress.add_theme_stylebox_override("fill", _style_box(rebirth_fill.darkened(0.18), rebirth_fill, 1, 1))
 	left.add_child(rebirth_progress)
 
 	var reset_hint := Label.new()
@@ -1302,6 +1326,9 @@ func _refresh_rebirth() -> void:
 	rebirth_button.text = "환생 가능 · +%d 영구 포인트" % RebirthManager.reward_points() if can_rebirth_now else "환생까지 %d레벨 남음" % maxi(0, required_level - GameManager.level)
 	rebirth_button.custom_minimum_size.y = 29
 	rebirth_button.disabled = not can_rebirth_now
+	if can_rebirth_now:
+		rebirth_button.add_theme_stylebox_override("normal", _style_box(Color("14211a"), COLOR_GREEN.darkened(0.10), 2, 2))
+		rebirth_button.add_theme_stylebox_override("hover", _style_box(Color("1b2b22"), COLOR_GREEN, 2, 2))
 	rebirth_button.pressed.connect(_rebirth)
 	left.add_child(rebirth_button)
 

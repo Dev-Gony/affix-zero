@@ -340,3 +340,33 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Visual clutter: Low / Good / Too much
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## UIUX V2.2 — Final Polish
+
+- [ ] 빈 가방
+  - 에픽만 등 높은 획득 필터 상태에서 가방이 비었을 때 중앙 안내가 표시되는지 확인
+  - 빈 슬롯만 덩그러니 보여서 오류처럼 느껴지지 않는지 확인
+
+- [ ] 장비 강화
+  - 현재 골드로 강화 가능한 장비 버튼이 금색 계열로 자연스럽게 강조되는지 확인
+  - 강화 불가/해제 버튼과 시각적으로 구분되는지 확인
+
+- [ ] 스킬 강화
+  - +1 강화 가능 버튼은 금색, MAX 가능 버튼은 녹색 계열로 읽히는지 확인
+  - 강조가 과해서 모든 버튼이 싸우는 느낌은 없는지 확인
+
+- [ ] 환생
+  - 아직 조건 미달이면 진행바가 금색 계열인지 확인
+  - 환생 가능 시 진행바/주요 버튼이 녹색으로 바뀌는지 확인
+
+### V2.2 validation notes
+
+- Build commit:
+- Empty bag state:
+- Equipment affordance:
+- Skill affordance:
+- Rebirth readiness:
+- Visual noise: Low / Good / Too much
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
