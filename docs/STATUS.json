@@ -1,16 +1,21 @@
 {
   "stage": "U0_UNITY_FOUNDATION",
   "branch": "restart/unity-6",
+  "pr": 19,
   "legacy_parent": "f58a919b442ea8a8956619b5e62c4c7e9340d355",
   "engine": "Unity 6.3 LTS 6000.3.24f1",
   "renderer": "Built-in 2D",
   "old_code_reused": false,
   "old_images_reused": false,
+  "old_engine_files_removed": 178,
+  "old_engine_files_remaining": 0,
   "unity_editor_import": "NOT_RUN",
   "unity_playmode": "NOT_RUN",
   "windows_build": "NOT_RUN",
   "art_import": "NOT_RUN",
   "gameplay_acceptance": "NOT_RUN",
-  "core_ci": "PENDING_FIRST_EXECUTION",
+  "core_ci": "PASS_23_PURE_CSHARP_CHECKS",
+  "verified_source_commit": "a7134227e7c0b646d912ece86cf2bb86e4a2aca4",
+  "verified_workflow_run": 36169362337,
   "next": "U1: verify Unity import and approved asset animation; build one readable combat scene"
 }

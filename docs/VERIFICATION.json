@@ -1,0 +1,17 @@
+{
+  "source_commit": "a7134227e7c0b646d912ece86cf2bb86e4a2aca4",
+  "run_id": 36169362337,
+  "job_id": 108184847337,
+  "conclusion": "success",
+  "old_engine_files_removed": 178,
+  "old_engine_files_remaining": 0,
+  "audit_problems": [],
+  "core_checks_passed": 23,
+  "core_marker": "CORE_SMOKE_PASSED checks=23 scope=pure-CSharp-not-Unity-editor",
+  "audit_marker": "RESTART_AUDIT_PASSED",
+  "unity_editor_import": "NOT_RUN",
+  "unity_animation_render": "NOT_RUN",
+  "windows_build": "NOT_RUN",
+  "user_playtest": "NOT_RUN",
+  "scope": "Fresh Git source tree and newly written pure C# AttackTimeline only. Not Unity gameplay approval."
+}
