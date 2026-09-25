@@ -88,6 +88,15 @@ func _run() -> void:
 	_check(PlayerAvatar.CLASS_ATLAS != null, "Combat heroes use the generated class atlas")
 	_check(EnemyAI.ENEMY_ATLAS != null, "Combat enemies use the generated enemy atlas")
 	_check(BattleManager.DUNGEON_COURTYARD != null, "Combat rooms layer the generated dungeon courtyard art")
+	_check(ItemVisualIcon.ITEM_BASE_ATLAS != null, "Inventory visuals use the dedicated 29-item artwork atlas")
+
+	var boss_bar := BossStatusBar.new()
+	boss_bar.size = Vector2(330, 38)
+	boss_bar.set_boss("시험 보스", 0.42, true)
+	_check(boss_bar.active and is_equal_approx(boss_bar.hp_ratio, 0.42), "Boss HUD exposes live boss health state")
+	boss_bar.set_boss("", 0.0, false)
+	_check(not boss_bar.active, "Boss HUD clears after a boss fight")
+	boss_bar.queue_free()
 
 	var minimap := GameMiniMap.new()
 	minimap.size = Vector2(78, 58)
@@ -142,7 +151,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "pets, training/evolution, persistent companion, generated hero/enemy/dungeon art, minimap, item visuals, equipped weapon rendering"
+			"scope": "pets, training/evolution, persistent companion, generated hero/enemy/dungeon art, actual 29-item atlas, boss/elite presentation, minimap, equipped weapon rendering"
 		}, "\t"))
 		report.close()
 	print("GAMEPLAY_V5_PETS %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
