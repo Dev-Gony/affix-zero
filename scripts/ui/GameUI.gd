@@ -65,6 +65,11 @@ var _main_tabs: TabContainer
 var _management_window: Panel
 var _management_title: Label
 var _management_gold: Label
+var _management_live_status: Label
+var _stats_adventure_label: Label
+var _stats_combat_label: Label
+var _stats_threat_label: Label
+var _stats_bonus_label: Label
 var _management_open: bool = false
 var _dock_buttons: Dictionary = {}
 var _section_buttons: Dictionary = {}
@@ -265,9 +270,18 @@ func _build_bottom_panel() -> void:
 	_management_title.add_theme_color_override("font_color", COLOR_GOLD)
 	header.add_child(_management_title)
 
+	_management_live_status = Label.new()
+	_management_live_status.text = "● 자동사냥 계속"
+	_management_live_status.custom_minimum_size = Vector2(104, 24)
+	_management_live_status.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_management_live_status.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_management_live_status.add_theme_font_size_override("font_size", 7)
+	_management_live_status.add_theme_color_override("font_color", COLOR_GREEN)
+	header.add_child(_management_live_status)
+
 	_management_gold = Label.new()
 	_management_gold.text = "0G"
-	_management_gold.custom_minimum_size = Vector2(112, 24)
+	_management_gold.custom_minimum_size = Vector2(104, 24)
 	_management_gold.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_management_gold.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	_management_gold.add_theme_font_size_override("font_size", 9)
@@ -653,37 +667,58 @@ func _build_stats_tab(tabs: TabContainer) -> void:
 	tab.name = "정보"
 	tab.add_theme_constant_override("separation", 6)
 	tabs.add_child(tab)
-	_stats_label = Label.new()
-	_stats_label.vertical_alignment = VERTICAL_ALIGNMENT_TOP
-	_stats_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_stats_label.add_theme_font_size_override("font_size", 9)
-	_stats_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	tab.add_child(_stats_label)
 
-	var save_row := HBoxContainer.new()
-	save_row.add_theme_constant_override("separation", 4)
-	tab.add_child(save_row)
-	var save_button := Button.new()
-	save_button.text = "저장"
-	save_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	save_button.pressed.connect(_manual_save)
-	save_row.add_child(save_button)
-	var load_button := Button.new()
-	load_button.text = "불러오기"
-	load_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	load_button.pressed.connect(_manual_load)
-	save_row.add_child(load_button)
-	var quit_button := Button.new()
-	quit_button.text = "저장 후 종료"
-	quit_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	quit_button.pressed.connect(_save_and_quit)
-	save_row.add_child(quit_button)
+	var grid := GridContainer.new()
+	grid.name = "InfoDashboard"
+	grid.columns = 2
+	grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	grid.add_theme_constant_override("h_separation", 6)
+	grid.add_theme_constant_override("v_separation", 6)
+	tab.add_child(grid)
 
-	var save_hint := Label.new()
-	save_hint.text = "자동 저장: 30초마다 · 창 종료 시 자동 저장"
-	save_hint.add_theme_font_size_override("font_size", 6)
-	save_hint.add_theme_color_override("font_color", COLOR_MUTED)
-	tab.add_child(save_hint)
+	_stats_adventure_label = _add_info_card(grid, "모험 기록", COLOR_GOLD)
+	_stats_combat_label = _add_info_card(grid, "전투 능력", Color("7dd3fc"))
+	_stats_threat_label = _add_info_card(grid, "현재 층 위협도", Color("fb7185"))
+	_stats_bonus_label = _add_info_card(grid, "보조 능력", COLOR_GREEN)
+
+	var hint := Label.new()
+	hint.text = "저장 · 불러오기 · 종료는 우측 상단 메뉴에서 관리"
+	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	hint.add_theme_font_size_override("font_size", 6)
+	hint.add_theme_color_override("font_color", COLOR_MUTED)
+	tab.add_child(hint)
+
+
+func _add_info_card(parent: GridContainer, title: String, accent: Color) -> Label:
+	var panel := PanelContainer.new()
+	panel.custom_minimum_size = Vector2(286, 112)
+	panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	panel.add_theme_stylebox_override("panel", _style_box(Color("111821"), accent.darkened(0.45), 1, 2))
+	parent.add_child(panel)
+
+	var column := VBoxContainer.new()
+	column.add_theme_constant_override("separation", 5)
+	panel.add_child(column)
+
+	var title_label := Label.new()
+	title_label.text = title
+	title_label.add_theme_font_size_override("font_size", 10)
+	title_label.add_theme_color_override("font_color", accent)
+	column.add_child(title_label)
+
+	var divider := ColorRect.new()
+	divider.custom_minimum_size.y = 1
+	divider.color = Color(accent, 0.35)
+	column.add_child(divider)
+
+	var value_label := Label.new()
+	value_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	value_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	value_label.add_theme_font_size_override("font_size", 8)
+	value_label.add_theme_color_override("font_color", COLOR_TEXT)
+	column.add_child(value_label)
+	return value_label
 
 
 func _build_notification() -> void:
@@ -776,7 +811,8 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	card.custom_minimum_size = Vector2(176, 80)
 	card.set_meta("equipment_slot", slot)
 	var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-	card.add_theme_stylebox_override("panel", _style_box(Color("111720"), border_color, 1, 2))
+	var card_background := Color("111720") if item.is_empty() else Color("111720").lerp(border_color, 0.08)
+	card.add_theme_stylebox_override("panel", _style_box(card_background, border_color, 2 if not item.is_empty() else 1, 2))
 	var card_row := HBoxContainer.new()
 	card_row.add_theme_constant_override("separation", 2)
 	card.add_child(card_row)
@@ -897,11 +933,17 @@ func _build_equipment_portrait() -> PanelContainer:
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	column.add_child(portrait)
 	var class_label := Label.new()
-	class_label.text = GameManager.selected_class_name
+	class_label.text = "%s · Lv.%d" % [GameManager.selected_class_name, GameManager.level]
 	class_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	class_label.add_theme_font_size_override("font_size", 9)
+	class_label.add_theme_font_size_override("font_size", 8)
 	class_label.add_theme_color_override("font_color", COLOR_GOLD)
 	column.add_child(class_label)
+	var rebirth_label := Label.new()
+	rebirth_label.text = "환생 %d회" % GameManager.rebirth_count
+	rebirth_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	rebirth_label.add_theme_font_size_override("font_size", 6)
+	rebirth_label.add_theme_color_override("font_color", COLOR_MUTED)
+	column.add_child(rebirth_label)
 	return panel
 
 
@@ -930,7 +972,9 @@ func _class_portrait_icon() -> Texture2D:
 
 
 func _refresh_inventory() -> void:
-	_inventory_count.text = "가방  %d/%d · 등급순 자동 정렬" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
+	var filter_labels: Array[String] = ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽만"]
+	var filter_text: String = filter_labels[clampi(GameManager.loot_min_rarity_index, 0, filter_labels.size() - 1)]
+	_inventory_count.text = "가방  %d/%d · 획득 %s · 등급순 자동 정렬" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY, filter_text]
 	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
 	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -977,7 +1021,9 @@ func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
 			selected = item
 			break
 	if selected.is_empty():
-		_inventory_detail.text = "아이템을 획득하면 이곳에서\n능력치 비교 후 장착할 수 있습니다."
+		var filter_labels: Array[String] = ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽만"]
+		var filter_text: String = filter_labels[clampi(GameManager.loot_min_rarity_index, 0, filter_labels.size() - 1)]
+		_inventory_detail.text = "현재 가방이 비어 있습니다.\n\n획득 필터: %s\n필터보다 낮은 등급은 자동 획득하지 않습니다.\n\n아이템을 획득하면 이곳에서\n능력치 비교 후 장착할 수 있습니다." % filter_text
 		_inventory_detail.add_theme_color_override("font_color", COLOR_MUTED)
 		_inventory_equip_button.disabled = true
 		_inventory_lock_button.disabled = true
@@ -1207,64 +1253,113 @@ func _add_skill_row(definition: Dictionary) -> void:
 
 func _refresh_rebirth() -> void:
 	_clear_container(_rebirth_content)
+	var required_level: int = RebirthManager.required_level()
+	var can_rebirth_now: bool = RebirthManager.can_rebirth()
+
 	var info_panel := PanelContainer.new()
-	info_panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("405168"), 1, 0))
+	info_panel.custom_minimum_size.y = 112
+	info_panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), COLOR_ACCENT.darkened(0.42), 1, 2))
 	_rebirth_content.add_child(info_panel)
+
 	var left := VBoxContainer.new()
+	left.add_theme_constant_override("separation", 5)
 	info_panel.add_child(left)
-	var info := Label.new()
-	info.text = "환생 %d회  ·  영구 포인트 %d\n현재 Lv.%d / 필요 Lv.%d\n예상 보상  +%d 포인트\n레벨·골드·층·스킬·장비·가방 초기화" % [
-		GameManager.rebirth_count, GameManager.rebirth_points, GameManager.level,
-		RebirthManager.required_level(), RebirthManager.reward_points()
+
+	var status_row := HBoxContainer.new()
+	left.add_child(status_row)
+	var status := Label.new()
+	status.text = "환생 %d회" % GameManager.rebirth_count
+	status.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	status.add_theme_font_size_override("font_size", 11)
+	status.add_theme_color_override("font_color", COLOR_GOLD)
+	status_row.add_child(status)
+	var points := Label.new()
+	points.text = "영구 포인트 %d" % GameManager.rebirth_points
+	points.add_theme_font_size_override("font_size", 9)
+	points.add_theme_color_override("font_color", COLOR_GREEN if GameManager.rebirth_points > 0 else COLOR_MUTED)
+	status_row.add_child(points)
+
+	var progress_text := Label.new()
+	progress_text.text = "현재 Lv.%d / 필요 Lv.%d  ·  예상 보상 +%d 포인트" % [
+		GameManager.level, required_level, RebirthManager.reward_points()
 	]
-	info.add_theme_font_size_override("font_size", 8)
-	left.add_child(info)
+	progress_text.add_theme_font_size_override("font_size", 8)
+	progress_text.add_theme_color_override("font_color", COLOR_MUTED)
+	left.add_child(progress_text)
+
 	var rebirth_progress := ProgressBar.new()
-	rebirth_progress.custom_minimum_size.y = 8
-	rebirth_progress.max_value = maxi(1, RebirthManager.required_level())
-	rebirth_progress.value = mini(GameManager.level, RebirthManager.required_level())
+	rebirth_progress.custom_minimum_size.y = 11
+	rebirth_progress.max_value = maxi(1, required_level)
+	rebirth_progress.value = mini(GameManager.level, required_level)
 	rebirth_progress.show_percentage = false
 	rebirth_progress.add_theme_stylebox_override("background", _style_box(Color("0a0e14"), Color("273343"), 1, 1))
 	rebirth_progress.add_theme_stylebox_override("fill", _style_box(COLOR_ACCENT.darkened(0.20), COLOR_ACCENT, 1, 1))
 	left.add_child(rebirth_progress)
+
+	var reset_hint := Label.new()
+	reset_hint.text = "환생 시 레벨 · 골드 · 층 · 스킬 · 장비 · 가방 초기화"
+	reset_hint.add_theme_font_size_override("font_size", 7)
+	reset_hint.add_theme_color_override("font_color", Color("d6a4a4"))
+	left.add_child(reset_hint)
+
 	var rebirth_button := Button.new()
-	rebirth_button.text = "환생하기"
-	rebirth_button.custom_minimum_size.y = 26
-	rebirth_button.disabled = not RebirthManager.can_rebirth()
+	rebirth_button.text = "환생 가능 · +%d 영구 포인트" % RebirthManager.reward_points() if can_rebirth_now else "환생까지 %d레벨 남음" % maxi(0, required_level - GameManager.level)
+	rebirth_button.custom_minimum_size.y = 29
+	rebirth_button.disabled = not can_rebirth_now
 	rebirth_button.pressed.connect(_rebirth)
 	left.add_child(rebirth_button)
 
-	var right := GridContainer.new()
-	right.columns = 2
-	right.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	right.add_theme_constant_override("h_separation", 5)
-	right.add_theme_constant_override("v_separation", 5)
-	_rebirth_content.add_child(right)
-	_add_permanent_button(right, "atk", "ATK +2")
-	_add_permanent_button(right, "def", "DEF +2")
-	_add_permanent_button(right, "hp", "HP +10")
-	_add_permanent_button(right, "spd", "SPD +0.05")
+	var upgrade_title := Label.new()
+	upgrade_title.text = "영구 성장"
+	upgrade_title.add_theme_font_size_override("font_size", 10)
+	upgrade_title.add_theme_color_override("font_color", COLOR_GOLD)
+	_rebirth_content.add_child(upgrade_title)
+
+	var upgrades := GridContainer.new()
+	upgrades.columns = 4
+	upgrades.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	upgrades.add_theme_constant_override("h_separation", 6)
+	upgrades.add_theme_constant_override("v_separation", 5)
+	_rebirth_content.add_child(upgrades)
+	_add_permanent_button(upgrades, "atk", "ATK +2")
+	_add_permanent_button(upgrades, "def", "DEF +2")
+	_add_permanent_button(upgrades, "hp", "HP +10")
+	_add_permanent_button(upgrades, "spd", "SPD +0.05")
 
 
 func _add_permanent_button(parent: GridContainer, stat_name: String, benefit: String) -> void:
 	var button := Button.new()
 	button.text = "%s\n강화 %d" % [benefit, int(GameManager.permanent_upgrades.get(stat_name, 0))]
-	button.custom_minimum_size = Vector2(132, 43)
+	button.custom_minimum_size = Vector2(136, 62)
+	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.disabled = GameManager.rebirth_points <= 0
-	button.tooltip_text = "영구 포인트 1 소모"
+	button.tooltip_text = "영구 포인트 1 소모 · 현재 %d포인트" % GameManager.rebirth_points
 	button.pressed.connect(_buy_permanent.bind(stat_name))
 	parent.add_child(button)
 
 
 func _refresh_stats() -> void:
 	var enemy_scale: Dictionary = EnemyAI.floor_scaling(GameManager.floor)
-	_stats_label.text = "모험 기록\n처치  %d     획득 골드  %dG\n최고 층  %d     환생  %d회     드롭  %d\n\n전투 능력\nATK  %d     DEF  %d\nHP  %d/%d     MP  %d/%d\nSPD  %.2f     CRIT  %.1f%%\n\n현재 층 위협도\n몬스터 HP x%.1f   ATK x%.1f   DEF x%.1f\n\n보조 능력\n흡혈  %.1f%%     경험치  +%.1f%%\n골드  +%.1f%%     관통  %.1f%%" % [
-		int(GameManager.statistics.get("total_kills", 0)), int(GameManager.statistics.get("total_gold_earned", 0)),
-		int(GameManager.statistics.get("highest_floor", 1)), GameManager.rebirth_count,
-		int(GameManager.statistics.get("total_drops", 0)), GameManager.atk, GameManager.def,
-		GameManager.hp, GameManager.max_hp, GameManager.mp, GameManager.max_mp, GameManager.spd,
-		GameManager.crit,
-		float(enemy_scale.get("hp", 1.0)), float(enemy_scale.get("attack", 1.0)), float(enemy_scale.get("defense", 1.0)),
+	_stats_adventure_label.text = "처치  %d\n획득 골드  %dG\n최고 층  %d  ·  환생 %d회\n장비 드롭  %d" % [
+		int(GameManager.statistics.get("total_kills", 0)),
+		int(GameManager.statistics.get("total_gold_earned", 0)),
+		int(GameManager.statistics.get("highest_floor", 1)),
+		GameManager.rebirth_count,
+		int(GameManager.statistics.get("total_drops", 0)),
+	]
+	_stats_combat_label.text = "ATK  %d  ·  DEF  %d\nHP  %d/%d\nMP  %d/%d\nSPD  %.2f  ·  CRIT %.1f%%" % [
+		GameManager.atk, GameManager.def,
+		GameManager.hp, GameManager.max_hp,
+		GameManager.mp, GameManager.max_mp,
+		GameManager.spd, GameManager.crit,
+	]
+	_stats_threat_label.text = "%d층 기준\n몬스터 HP   x%.1f\n몬스터 ATK  x%.1f\n몬스터 DEF  x%.1f" % [
+		GameManager.floor,
+		float(enemy_scale.get("hp", 1.0)),
+		float(enemy_scale.get("attack", 1.0)),
+		float(enemy_scale.get("defense", 1.0)),
+	]
+	_stats_bonus_label.text = "흡혈  %.1f%%\n경험치  +%.1f%%\n골드  +%.1f%%\n관통  %.1f%%" % [
 		GameManager.vamp, GameManager.xp_bonus, GameManager.gold_bonus, GameManager.penetration
 	]
 
