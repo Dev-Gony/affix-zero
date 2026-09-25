@@ -1316,6 +1316,13 @@ func _refresh_pets() -> void:
 		role.add_theme_font_size_override("font_size", 8)
 		role.add_theme_color_override("font_color", COLOR_TEXT)
 		active_info.add_child(role)
+		var passive_text: String = PetManager.active_passive_text()
+		if not passive_text.is_empty():
+			var passive := Label.new()
+			passive.text = "패시브 · " + passive_text
+			passive.add_theme_font_size_override("font_size", 7)
+			passive.add_theme_color_override("font_color", Color("c6a7ff"))
+			active_info.add_child(passive)
 		var desc := Label.new()
 		desc.text = active_data.description
 		desc.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
