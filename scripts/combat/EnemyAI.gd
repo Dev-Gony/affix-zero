@@ -311,6 +311,31 @@ func _draw() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var bar_width: float = maxf(20.0, sprite_size * 0.72)
 	var bar_y: float = -sprite_size * 0.58 - 5.0
-	if hp < max_hp or _is_targeted:
+	if hp < max_hp or _is_targeted or is_elite or behavior == "boss":
 		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width, 3), Color("351822", alpha), true)
-		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color("ef4444", alpha), true)
+		var hp_color: Color = elite_color if is_elite else (Color("ff5b67") if behavior == "boss" else Color("ef4444"))
+		draw_rect(Rect2(-bar_width * 0.5, bar_y, bar_width * clampf(hp / max_hp, 0.0, 1.0), 3), Color(hp_color, alpha), true)
+	if is_elite and not _dead:
+		var elite_label: String = elite_title()
+		var label_width: float = ThemeDB.fallback_font.get_string_size(elite_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 7).x
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(-label_width * 0.5, bar_y - 4),
+			elite_label,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			7,
+			Color(elite_color, alpha)
+		)
+	if behavior == "boss" and not _dead:
+		var boss_label: String = enemy_data.display_name if enemy_data != null else "보스"
+		var boss_width: float = ThemeDB.fallback_font.get_string_size(boss_label, HORIZONTAL_ALIGNMENT_LEFT, -1, 8).x
+		draw_string(
+			ThemeDB.fallback_font,
+			Vector2(-boss_width * 0.5, bar_y - 5),
+			boss_label,
+			HORIZONTAL_ALIGNMENT_LEFT,
+			-1,
+			8,
+			Color("ff9aa4", alpha)
+		)
