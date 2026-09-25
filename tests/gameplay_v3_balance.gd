@@ -73,7 +73,25 @@ func _run() -> void:
 	cost_item["enhancement_level"] = 9
 	var plus_ten_cost: int = GameManager.equipment_enhancement_cost(cost_item)
 	_check(plus_ten_cost > plus_one_cost * 20, "Enhancement costs explode as risk tiers rise")
-	_check(GameManager.equipment_enhancement_stat_multiplier(30) > 3.0, "+30 enhancement provides a major base-stat payoff")
+	_check(is_equal_approx(GameManager.equipment_enhancement_stat_multiplier(10), 1.75), "+10 enhancement applies the expected 1.75x base-stat multiplier")
+	_check(is_equal_approx(GameManager.equipment_enhancement_stat_multiplier(20), 2.75), "+20 enhancement applies the expected 2.75x base-stat multiplier")
+	_check(is_equal_approx(GameManager.equipment_enhancement_stat_multiplier(30), 4.25), "+30 enhancement applies the expected 4.25x base-stat multiplier")
+	GameManager.equipment = {}
+	GameManager._ensure_equipment_slots(true)
+	GameManager.class_base_stats["atk"] = 10
+	GameManager.level = 1
+	GameManager.permanent_upgrades["atk"] = 0
+	GameManager.equipment["weapon"] = {
+		"id": "enhancement-stat-proof",
+		"slot": "weapon",
+		"base_stats": {"ATK": 20.0},
+		"affixes": [],
+		"enhancement_level": 10,
+	}
+	GameManager.recalculate_stats(false)
+	_check(GameManager.atk == 45, "Equipped +10 weapon increases the live ATK stat using the enhancement multiplier")
+	GameManager.equipment = {}
+	GameManager._ensure_equipment_slots(true)
 
 	GameManager.reset_run_progress()
 	GameManager.rebirth_count = 2
