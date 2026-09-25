@@ -390,9 +390,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_ESCAPE:
 		if _management_open:
-			_close_management()
-		else:
-			_toggle_pause_menu()
+			_close_management(false)
+		_toggle_pause_menu()
 		return
 	if GameManager.game_state != GameManager.GameState.RUNNING or _pause_visible:
 		return
@@ -414,8 +413,6 @@ func _toggle_management(tab_index: int) -> void:
 	if _management_open and _main_tabs.current_tab == tab_index:
 		_close_management(false)
 		return
-	if not _management_open:
-		PauseCoordinator.acquire("management")
 	_management_open = true
 	_main_tabs.current_tab = tab_index
 	_management_title.text = MANAGEMENT_TITLES[tab_index]
@@ -431,7 +428,6 @@ func _close_management(play_sound: bool = true) -> void:
 		AudioManager.play_sfx("ui_click")
 	_management_open = false
 	_management_window.visible = false
-	PauseCoordinator.release_all("management")
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -1169,7 +1165,6 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 	if not show_game_ui:
 		if _management_open:
 			_management_open = false
-			PauseCoordinator.release_all("management")
 		if _pause_visible:
 			_pause_visible = false
 			_pause_panel.visible = false
