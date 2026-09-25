@@ -79,6 +79,40 @@ func show_gold(world_position: Vector2, amount: int) -> void:
 	_texts.append({"position": world_position + Vector2(-8, 8), "text": "+%dG" % amount, "color": Color("f6c85f"), "life": 0.85, "duration": 0.85, "size": 10})
 
 
+func show_pet_attack(from: Vector2, to: Vector2, color: Color) -> void:
+	var midpoint: Vector2 = from.lerp(to, 0.52) + Vector2(0, -8)
+	_lines.append({
+		"points": PackedVector2Array([from, midpoint, to]),
+		"color": Color(color, 0.92),
+		"life": 0.22,
+		"duration": 0.22,
+		"width": 2.0,
+	})
+	spawn_fragments(to, color, 4, 36.0)
+
+
+func show_pet_heal(world_position: Vector2, amount: int, color: Color) -> void:
+	if amount <= 0:
+		return
+	_texts.append({
+		"position": world_position + Vector2(-16, -24),
+		"text": "펫 회복 +%d" % amount,
+		"color": color,
+		"life": 0.95,
+		"duration": 0.95,
+		"size": 9,
+	})
+	_rings.append({
+		"center": world_position,
+		"radius": 7.0,
+		"speed": 24.0,
+		"color": Color(color, 0.72),
+		"life": 0.55,
+		"duration": 0.55,
+		"width": 1.5,
+	})
+
+
 func set_pickup_target(world_position: Vector2) -> void:
 	_pickup_target_position = world_position
 
