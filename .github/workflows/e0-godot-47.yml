@@ -1,0 +1,43 @@
+name: E0 Godot 4.7.2
+
+on:
+  push:
+    branches: [chore/r0-preservation]
+    paths:
+      - 'experiments/e0-godot/**'
+      - '.github/workflows/e0-godot-47.yml'
+  pull_request:
+    paths:
+      - 'experiments/e0-godot/**'
+      - '.github/workflows/e0-godot-47.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  e0-c01:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2
+    timeout-minutes: 10
+    env:
+      XDG_DATA_HOME: /tmp/affix-e0-ci-data
+      XDG_CONFIG_HOME: /tmp/affix-e0-ci-config
+      LIBGL_ALWAYS_SOFTWARE: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Import isolated E0 project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --editor --path experiments/e0-godot --quit-after 3 2>&1 | tee /tmp/e0-import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" /tmp/e0-import.log
+      - name: Run E0-C01 contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c01_test.tscn 2>&1 | tee /tmp/e0-c01.log
+          grep -q "E0_C01_TEST PASSED" /tmp/e0-c01.log
+          ! grep -E "SCRIPT ERROR|Parse Error" /tmp/e0-c01.log
