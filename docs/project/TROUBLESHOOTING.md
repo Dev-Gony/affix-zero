@@ -19,4 +19,6 @@
 | C02 코드 패치 중 설정 줄에 literal `\\n` 삽입 | 텍스트 기반 자동 패치에서 escape 문자열을 실제 개행으로 잘못 처리 | 원격 파일을 다시 읽어 literal escape를 실제 줄바꿈으로 수정하고 movement bounds 코드가 실제 삽입됐는지 재검토 | AI가 만든 패치도 적용 결과 파일을 다시 읽어 검증해야 한다 |
 | E0 Actions가 push와 PR에서 중복 실행 | concurrency key가 push ref와 PR number를 달리 사용해 같은 head를 두 번 검증 | `github.head_ref || github.ref_name` 기반 branch key로 통일, cancel-in-progress 유지 | CI 병렬성보다 같은 변경의 중복 실행 제거가 빠른 피드백에 더 중요할 때가 있다 |
 
+| E0-C03 성능 수치 해석 | CI headless/Linux 측정은 Windows GTX1050 렌더 성능과 환경이 다르며 그대로 비교하면 거짓 결론 가능 | CI는 40적/x1/percentile/report 파이프라인 계약만 검사하고 실제 성능 판정은 visible Windows run의 JSON/CSV로 분리 | 성능 테스트는 숫자보다 먼저 측정 환경과 workload 동일성을 고정해야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
