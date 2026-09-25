@@ -31,9 +31,11 @@ func _run() -> void:
 	var generator := ItemGenerator.new()
 	var probabilities: Dictionary = generator.rarity_probabilities(31, 5)
 	var legend_probability: float = float(probabilities.get("legend", 1.0))
+	var epic_probability: float = float(probabilities.get("epic", 1.0))
 	var unique_probability: float = float(probabilities.get("unique", 1.0))
 	_check(legend_probability < 0.002, "Legendary items are below 0.2 percent of generated field items at floor 31 / rebirth 5")
-	_check(unique_probability > legend_probability, "Unique remains more common than legendary")
+	_check(epic_probability < 0.0002, "Epic items are below 0.02 percent of generated field items at floor 31 / rebirth 5")
+	_check(unique_probability > legend_probability and legend_probability > epic_probability, "Rarity ordering remains unique > legendary > epic by probability")
 
 	var floor10: Dictionary = EnemyAI.floor_scaling(10)
 	var floor30: Dictionary = EnemyAI.floor_scaling(30)
@@ -42,9 +44,24 @@ func _run() -> void:
 	_check(float(floor30.get("attack", 0.0)) > float(floor10.get("attack", 0.0)) * 3.0, "Enemy attack scaling accelerates meaningfully into late floors")
 	_check(float(boss30.get("hp", 0.0)) > float(floor30.get("hp", 0.0)) * 2.0, "Bosses receive a separate HP multiplier")
 
-	GameManager.floor = 63
-	_check(GameManager.enemy_armor_penetration() > 0.60, "Floor 63 enemies bypass enough armor to prevent immortal DEF stacking")
-	_check(GameManager.enemy_minimum_hit_ratio() > 0.03, "Floor 63 connected hits leave visible minimum chip damage")
+	GameManager.floor = 71
+	_check(GameManager.enemy_armor_penetration(false) <= 0.45, "Normal enemies have a bounded armor penetration ceiling")
+	_check(GameManager.enemy_armor_penetration(true) > GameManager.enemy_armor_penetration(false), "Bosses penetrate more armor than normal enemies")
+	_check(GameManager.enemy_minimum_hit_ratio(true) > GameManager.enemy_minimum_hit_ratio(false), "Bosses guarantee more chip damage than normal enemies")
+	var original_max_hp: int = GameManager.max_hp
+	var original_hp: int = GameManager.hp
+	var original_def: int = GameManager.def
+	GameManager.max_hp = 1000
+	GameManager.hp = 1000
+	GameManager.def = 0
+	var normal_damage: int = GameManager.take_damage(999999.0, false)
+	GameManager.hp = 1000
+	var boss_damage: int = GameManager.take_damage(999999.0, true)
+	_check(normal_damage <= 320, "A single normal-enemy hit cannot one-shot a full-health player")
+	_check(boss_damage > normal_damage and boss_damage <= 600, "Boss hits are clearly more threatening but still bounded")
+	GameManager.max_hp = original_max_hp
+	GameManager.hp = original_hp
+	GameManager.def = original_def
 
 	_check(is_equal_approx(GameManager.equipment_enhancement_success_rate(10), 5.0), "+10 enhancement is a 5 percent wall")
 	_check(is_equal_approx(GameManager.equipment_enhancement_success_rate(20), 0.3), "+20 enhancement is an extreme 0.3 percent wall")
@@ -69,6 +86,9 @@ func _run() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var ui: GameUI = main.get_node("UILayer/GameUI")
+	_check(ui._management_window.size.y >= 350.0, "Management window is taller for full inventory details")
+	_check(ui._inventory_detail.custom_minimum_size.y >= 96.0, "Inventory detail panel has enough vertical space")
+	_check(ui._loot_filter_option.item_count == 6, "Pickup filter includes the epic rarity tier")
 
 	var warrior: ClassData = load("res://resources/classes/warrior.tres")
 	var sage: ClassData = load("res://resources/classes/sage.tres")
@@ -83,6 +103,17 @@ func _run() -> void:
 	var sage_portrait: TextureRect = ui._equipment_row.find_child("ClassPortrait", true, false) as TextureRect
 	_check(GameManager.selected_class == "sage", "Sage becomes the active class")
 	_check(sage_portrait != null and sage_portrait.texture != null and sage_portrait.texture.resource_path.ends_with("sage.png"), "Equipment portrait refreshes immediately to the active sage class")
+
+	var normal_item := {"id": "sale-normal", "item_level": 71, "rarity_index": 0, "rarity_id": "normal", "locked": false, "enhancement_level": 0}
+	var epic_locked := {"id": "sale-epic", "item_level": 71, "rarity_index": 5, "rarity_id": "epic", "locked": true, "enhancement_level": 0}
+	_check(GameManager.item_sell_value(normal_item) >= 350, "High-floor normal gear sells for materially more than the old ~118G curve")
+	_check(GameManager.item_sell_value(epic_locked) > GameManager.item_sell_value(normal_item) * 10, "Epic gear has a premium sell value")
+	GameManager.inventory = [normal_item.duplicate(true), epic_locked.duplicate(true)]
+	GameManager.gold = 0
+	var sold: Dictionary = GameManager.sell_all_unlocked()
+	_check(int(sold.get("sold_count", 0)) == 1 and int(sold.get("protected_count", 0)) == 1, "Sell-all sells unlocked inventory and protects locked gear")
+	_check(GameManager.inventory.size() == 1 and String(GameManager.inventory[0].get("rarity_id", "")) == "epic", "Locked epic gear survives sell-all")
+	_check(GameManager.gold == GameManager.item_sell_value(normal_item), "Sell-all credits the increased dynamic sell value")
 
 	var definitions: Array = GameManager.class_skill_definitions("sage")
 	_check(not definitions.is_empty(), "Sage has class-specific skill definitions")
@@ -129,7 +160,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "class portrait, bulk skills, loot rarity/drop frequency, late-floor enemy scaling"
+			"scope": "class portrait, bulk skills, epic rarity, sell-all economy, bounded normal hits, boss threat"
 		}, "\t"))
 		report.close()
 	print("GAMEPLAY_V3_BALANCE %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
