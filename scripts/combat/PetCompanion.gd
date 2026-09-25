@@ -82,7 +82,11 @@ func _draw() -> void:
 	var attack_progress: float = 1.0 - (_attack_left / 0.24) if _attack_left > 0.0 else 0.0
 	var attack_offset: Vector2 = _attack_direction * sin(attack_progress * PI) * 7.0 if _attack_left > 0.0 else Vector2.ZERO
 	var support_pulse: float = sin((1.0 - _support_left / 0.42) * PI) if _support_left > 0.0 else 0.0
-	draw_ellipse(Vector2(0, 9 + bob), Vector2(10.0, 3.0) * evolution_scale, Color(0, 0, 0, 0.38))
+	var shadow_points := PackedVector2Array()
+	for shadow_index: int in 18:
+		var shadow_angle: float = TAU * float(shadow_index) / 18.0
+		shadow_points.append(Vector2(cos(shadow_angle) * 10.0, 9.0 + bob + sin(shadow_angle) * 3.0) * evolution_scale)
+	draw_colored_polygon(shadow_points, Color(0, 0, 0, 0.38))
 	if _pet_data.rarity_index >= 3:
 		draw_arc(Vector2(0, bob), 12.0 + float(_pet_data.rarity_index), _clock * 0.7, _clock * 0.7 + PI * 1.35, 22, Color(_pet_data.rarity_color, 0.24), 1.6)
 	draw_circle(Vector2(0, 7 + bob), 8.5 * evolution_scale, Color(color, 0.10))
