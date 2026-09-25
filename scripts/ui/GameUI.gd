@@ -250,8 +250,8 @@ func _sync_modal_blocker() -> void:
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(14, 40)
-	window.size = Vector2(612, 350)
+	window.position = Vector2(14, 8)
+	window.size = Vector2(612, 384)
 	window.z_index = 50
 	window.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), Color("506176"), 2, 3))
 	add_child(window)
@@ -321,7 +321,7 @@ func _build_bottom_panel() -> void:
 	_main_tabs = tabs
 	tabs.name = "MainTabs"
 	tabs.position = Vector2(8, 72)
-	tabs.size = Vector2(596, 266)
+	tabs.size = Vector2(596, 300)
 	tabs.tabs_visible = false
 	window.add_child(tabs)
 
@@ -496,6 +496,8 @@ func _sync_dock_buttons() -> void:
 	for index: Variant in _section_buttons.keys():
 		var button: Button = _section_buttons[index]
 		button.set_pressed_no_signal(_management_open and int(index) == _main_tabs.current_tab)
+	if _hud_panel != null:
+		_hud_panel.visible = GameManager.game_state != GameManager.GameState.CLASS_SELECTION and not _management_open
 	if _bottom_panel != null:
 		_bottom_panel.visible = GameManager.game_state != GameManager.GameState.CLASS_SELECTION and not _management_open
 
@@ -1499,7 +1501,7 @@ func _on_game_state_changed(state: GameManager.GameState) -> void:
 func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 	var show_game_ui: bool = state != GameManager.GameState.CLASS_SELECTION
 	if _hud_panel != null:
-		_hud_panel.visible = show_game_ui
+		_hud_panel.visible = show_game_ui and not _management_open
 	if _bottom_panel != null:
 		_bottom_panel.visible = show_game_ui and not _management_open
 	if not show_game_ui:
