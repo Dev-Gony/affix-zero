@@ -530,6 +530,10 @@ Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are notic
 - Theme:
   - Replaced most brown/red structural chrome with slate/blue-black panels.
   - Gold is used for selected/progression states rather than every border.
+- Class selection:
+  - Enlarged all six class cards.
+  - Unified card chrome with the V2 slate/gold language while preserving each class color as identity.
+  - Reframed the screen around "자동사냥 성장형 ARPG" rather than a generic selection modal.
 - Interaction:
   - ESC closes management only; a second ESC can then open pause/settings.
   - Top management navigation switches tabs without closing the hub.
@@ -557,6 +561,7 @@ Automated contracts cover:
 - Switching top tabs does not close management.
 - Closing management restores the compact dock.
 - Equipment cards remain >= 170px wide.
+- All six class choices remain visible in one screen with desktop-sized cards >= 180px wide.
 
 ### Before / After
 
@@ -570,6 +575,7 @@ Automated contracts cover:
 | Rebirth | Text summary + buttons | Explicit progression bar + permanent upgrades |
 | Color hierarchy | Brown/red chrome everywhere | Slate structure, gold progression, rarity colors reserved for loot |
 | ESC behavior | Close management then open pause immediately | One state transition per keypress |
+| Class selection | Separate older brown/red visual language | Same slate/gold hierarchy as management V2 |
 | Overall read | Functional debug overlay | Dedicated game management surface |
 
 ### Windows play approval
