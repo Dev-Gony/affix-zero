@@ -1835,8 +1835,7 @@ func _refresh_objective() -> void:
 func _on_boss_status_changed(name: String, hp_ratio: float, active: bool) -> void:
 	if _boss_bar == null:
 		return
-	var can_show: bool = active and not _management_open and not _pause_visible and GameManager.game_state == GameManager.GameState.RUNNING
-	_boss_bar.set_boss(name, hp_ratio, can_show)
+	_boss_bar.set_boss(name, hp_ratio, active)
 
 
 func _on_equipment_changed() -> void:
