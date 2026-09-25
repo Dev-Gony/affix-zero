@@ -73,11 +73,12 @@ func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bou
 	hp = max_hp
 	attack = data.base_atk * float(scaling.get("attack", 1.0)) + float(scaling.get("flat_attack", 0.0))
 	defense = data.base_def * float(scaling.get("defense", 1.0)) + float(scaling.get("flat_defense", 0.0))
-	move_speed = data.move_speed * minf(1.18, 1.0 + maxf(0.0, current_floor - 1) * 0.004)
-	attack_cooldown = maxf(0.58, data.attack_cooldown * maxf(0.82, 1.0 - maxf(0.0, current_floor - 1) * 0.0025))
+	var depth: float = maxf(0.0, current_floor - 1)
+	move_speed = data.move_speed * minf(1.65, 1.0 + depth * 0.010)
+	attack_cooldown = maxf(0.45, data.attack_cooldown * maxf(0.55, 1.0 - depth * 0.008))
 	behavior = data.behavior
-	attack_range = data.attack_range
-	_attack_windup_duration = data.attack_windup
+	attack_range = data.attack_range + minf(24.0, depth * 0.35)
+	_attack_windup_duration = data.attack_windup * maxf(0.50, 1.0 - depth * 0.006)
 	radius = data.radius
 	xp_reward = maxi(1, roundi(data.xp_reward * (1.0 + (current_floor - 1) * 0.12)))
 	gold_reward = maxi(1, roundi(data.gold_reward * (1.0 + (current_floor - 1) * 0.08)))
