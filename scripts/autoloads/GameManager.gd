@@ -381,7 +381,7 @@ func class_skill_definitions(class_id: String = selected_class) -> Array:
 
 func class_skill_level(skill_id: String, class_id: String = selected_class) -> int:
 	var levels: Dictionary = Dictionary(class_skill_levels.get(class_id, {}))
-	return int(levels.get(skill_id, 0))
+	return clampi(int(levels.get(skill_id, 0)), 0, CLASS_SKILL_MAX_LEVEL)
 
 
 func class_skill_effect(effect_name: String, class_id: String = selected_class) -> float:
