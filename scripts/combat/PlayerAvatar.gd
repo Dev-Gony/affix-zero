@@ -24,6 +24,8 @@ var _move_direction: Vector2 = Vector2.ZERO
 var _weapon_base_id: String = ""
 var _weapon_rarity_color: Color = Color("d7dde8")
 var _weapon_enhancement: int = 0
+const ATTACK_WINDUP: float = 0.12
+const ATTACK_DURATION: float = 0.36
 
 
 func configure(next_class_id: String, color: Color) -> void:
@@ -63,13 +65,14 @@ func _process(delta: float) -> void:
 func set_move_direction(direction: Vector2) -> void:
 	_move_direction = direction.normalized() if not direction.is_zero_approx() else Vector2.ZERO
 	if not _move_direction.is_zero_approx():
-		_facing = _move_direction
+		if _motion_kind == "idle":
+			_facing = _move_direction
 	queue_redraw()
 
 
 func play_attack(world_target: Vector2) -> void:
 	_face_target(world_target)
-	_start_motion("attack", 0.20)
+	_start_motion("attack", ATTACK_DURATION)
 
 
 func play_skill(skill_type: String, world_target: Vector2) -> void:
@@ -112,10 +115,19 @@ func _draw() -> void:
 	var motion_scale := Vector2.ONE
 	match _motion_kind:
 		"attack":
-			var strike: float = sin(smoothstep(0.0, 1.0, motion_progress) * PI)
-			motion_offset = _visual_facing * strike * 4.0
-			motion_rotation = lerpf(-0.08, 0.08, motion_progress)
-			_draw_attack_swing(motion_progress, strike)
+			var elapsed: float = motion_progress * ATTACK_DURATION
+			var strike: float = 0.0
+			if elapsed < ATTACK_WINDUP:
+				motion_offset = -_facing * (elapsed / ATTACK_WINDUP) * 2.5
+			else:
+				var release: float = clampf((elapsed - ATTACK_WINDUP) / (ATTACK_DURATION - ATTACK_WINDUP), 0.0, 1.0)
+				strike = pow(1.0 - release, 2.0)
+				motion_offset = _facing * strike * (2.0 if is_ranged() else 6.0)
+				if not is_ranged():
+					_draw_attack_swing(release, strike)
+			if is_ranged():
+				var charge: float = sin(motion_progress * PI)
+				draw_circle(_facing * 10.0 + Vector2(0, -7), 2.5 + charge * 2.0, Color(body_color, charge * 0.65))
 		"skill":
 			var charge: float = sin(motion_progress * PI)
 			motion_scale = Vector2(1.0 + charge * 0.08, 1.0 - charge * 0.05)
@@ -129,7 +141,6 @@ func _draw() -> void:
 	var horizontal_facing: float = -1.0 if _visual_facing.x < -0.08 else 1.0
 	draw_set_transform(motion_offset + Vector2(0, bob), motion_rotation, Vector2(horizontal_facing * motion_scale.x, motion_scale.y))
 	draw_texture_rect_region(CLASS_ATLAS, Rect2(-18, -26, 36, 36), source)
-	_draw_equipped_weapon(motion_progress)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
@@ -143,40 +154,14 @@ func _draw_attack_swing(progress: float, strength: float) -> void:
 	draw_arc(_visual_facing * 5.0, 17.0 + strength * 2.0, sweep_center - 0.34, sweep_center + 0.34, 10, Color(body_color, alpha * 0.55), 1.2, true)
 
 
-func _draw_equipped_weapon(motion_progress: float) -> void:
-	if _weapon_base_id.is_empty():
-		return
-	var color: Color = _weapon_visual_color()
-	var pivot := Vector2(8, -2)
-	var angle: float = -0.55
-	if _motion_kind == "attack":
-		angle = lerpf(-1.25, 1.05, smoothstep(0.0, 1.0, motion_progress))
-	elif _motion_kind == "skill":
-		angle = -0.35 + sin(motion_progress * PI) * 0.55
-	draw_set_transform(pivot, angle, Vector2.ONE)
-	if _weapon_base_id.contains("axe"):
-		draw_rect(Rect2(-1.5, -1, 3, 18), Color("82552f"), true)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(-1, -3), Vector2(9, -7), Vector2(10, 1), Vector2(0, 4)
-		]), color)
-	elif _weapon_base_id.contains("dagger"):
-		draw_rect(Rect2(-1.2, 0, 2.4, 11), Color("7a4a24"), true)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(-2.5, -1), Vector2(0, -13), Vector2(2.5, -1)
-		]), color)
-	else:
-		draw_rect(Rect2(-1.4, 0, 2.8, 11), Color("7a4a24"), true)
-		draw_rect(Rect2(-6, -1, 12, 2.5), Color("d3aa52"), true)
-		draw_colored_polygon(PackedVector2Array([
-			Vector2(-2.1, -1), Vector2(-2.8, -17), Vector2(0, -22), Vector2(2.8, -17), Vector2(2.1, -1)
-		]), color)
-		if _weapon_base_id.contains("magic"):
-			draw_circle(Vector2(0, -13), 2.4, Color("bf8bff"))
-		elif _weapon_base_id.contains("divine"):
-			draw_circle(Vector2(0, -13), 2.6, Color("fff4a8"))
-	if _weapon_enhancement >= 10:
-		draw_arc(Vector2(0, -9), 9.0, 0.0, TAU, 18, Color(_weapon_rarity_color, 0.18 + minf(0.35, float(_weapon_enhancement) * 0.012)), 1.2)
-	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+func is_ranged() -> bool:
+	return class_id in ["mage", "sage", "saint"]
+
+
+func _draw_equipped_weapon(_motion_progress: float) -> void:
+	# The approved atlas already includes the hero's weapon/staff.
+	# A second procedural weapon must not replace the character's attack identity.
+	pass
 
 
 func _weapon_visual_color() -> Color:

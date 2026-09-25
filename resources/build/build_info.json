@@ -1,9 +1,9 @@
 {
-  "version": "g6.1",
-  "stage": "GAMEPLAY-V6.1-ANIMATED-COMBAT",
+  "version": "g6.2-rc1",
+  "stage": "G6-PLAYTEST-RECOVERY-NOT-ART-APPROVED",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/gameplay-v5-pets-items",
+  "branch": "fix/g6-playtest-recovery",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }

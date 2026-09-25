@@ -1,9 +1,9 @@
 [gd_scene load_steps=7 format=3]
 
-[ext_resource type="Script" path="res://scripts/combat/BattleManager.gd" id="1_battle"]
+[ext_resource type="Script" path="res://scripts/combat/CombatDirector.gd" id="1_battle"]
 [ext_resource type="Script" path="res://scripts/combat/PlayerAvatar.gd" id="2_player"]
 [ext_resource type="Script" path="res://scripts/combat/EffectLayer.gd" id="3_effects"]
-[ext_resource type="Script" path="res://scripts/ui/GameUI.gd" id="4_ui"]
+[ext_resource type="Script" path="res://scripts/ui/GamePresentation.gd" id="4_ui"]
 [ext_resource type="Script" path="res://scripts/combat/PetCompanion.gd" id="6_pet"]
 [ext_resource type="Script" path="res://scripts/diagnostics/BuildDiagnostics.gd" id="5_build"]
 

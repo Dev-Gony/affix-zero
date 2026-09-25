@@ -8,6 +8,9 @@ var _last_position: Vector2 = Vector2.ZERO
 var _attack_left: float = 0.0
 var _support_left: float = 0.0
 var _attack_direction: Vector2 = Vector2.RIGHT
+const FOLLOW_OFFSET := Vector2(-30, 17)
+const MIN_PLAYER_SEPARATION: float = 25.0
+const BODY_SCALE: float = 0.78
 
 
 func _ready() -> void:
@@ -19,7 +22,7 @@ func _ready() -> void:
 func bind_player(player: Node2D) -> void:
 	player_target = player
 	if player_target != null:
-		global_position = player_target.global_position + Vector2(-18, -12)
+		global_position = player_target.global_position + FOLLOW_OFFSET
 		_last_position = global_position
 
 
@@ -31,10 +34,15 @@ func _process(delta: float) -> void:
 		visible = false
 		return
 	visible = true
-	var side: float = -1.0 if int(_clock / 3.0) % 2 == 0 else 1.0
-	var follow_offset := Vector2(side * _pet_data.follow_distance, -16.0 + sin(_clock * 3.0) * 3.0)
-	var desired: Vector2 = player_target.global_position + follow_offset
-	global_position = global_position.lerp(desired, 1.0 - exp(-delta * 7.5))
+	var desired: Vector2 = player_target.global_position + FOLLOW_OFFSET
+	if global_position.distance_to(desired) > 150.0:
+		global_position = desired
+	else:
+		global_position = global_position.lerp(desired, 1.0 - exp(-delta * 7.5))
+	var separation: Vector2 = global_position - player_target.global_position
+	if separation.length() < MIN_PLAYER_SEPARATION:
+		var away: Vector2 = separation.normalized() if not separation.is_zero_approx() else FOLLOW_OFFSET.normalized()
+		global_position = player_target.global_position + away * MIN_PLAYER_SEPARATION
 	_last_position = global_position
 	queue_redraw()
 
@@ -76,8 +84,7 @@ func _draw() -> void:
 	var color: Color = _pet_data.color
 	var bob: float = sin(_clock * 4.0) * 1.5
 	var stars: int = PetManager.stars_for(_pet_data.id)
-	var rarity_scale: float = 1.0 + float(_pet_data.rarity_index) * 0.035
-	var evolution_scale: float = (1.18 + float(stars - 1) * 0.07) * rarity_scale
+	var evolution_scale: float = BODY_SCALE
 	var aura_alpha: float = 0.06 + float(stars - 1) * 0.04 + float(_pet_data.rarity_index) * 0.012
 	var attack_progress: float = 1.0 - (_attack_left / 0.24) if _attack_left > 0.0 else 0.0
 	var attack_offset: Vector2 = _attack_direction * sin(attack_progress * PI) * 7.0 if _attack_left > 0.0 else Vector2.ZERO
@@ -87,15 +94,15 @@ func _draw() -> void:
 		var shadow_angle: float = TAU * float(shadow_index) / 18.0
 		shadow_points.append(Vector2(cos(shadow_angle) * 10.0, 9.0 + bob + sin(shadow_angle) * 3.0) * evolution_scale)
 	draw_colored_polygon(shadow_points, Color(0, 0, 0, 0.38))
-	if _pet_data.rarity_index >= 3:
+	if _pet_data.rarity_index >= 3 and _support_left > 0.0:
 		draw_arc(Vector2(0, bob), 12.0 + float(_pet_data.rarity_index), _clock * 0.7, _clock * 0.7 + PI * 1.35, 22, Color(_pet_data.rarity_color, 0.24), 1.6)
 	draw_circle(Vector2(0, 7 + bob), 8.5 * evolution_scale, Color(color, 0.10))
 	if support_pulse > 0.0:
 		draw_arc(Vector2.ZERO, 12.0 + support_pulse * 10.0, 0.0, TAU, 24, Color("8ff7c0", 0.55 * support_pulse), 2.0)
 		draw_arc(Vector2.ZERO, 18.0 + support_pulse * 7.0, 0.0, TAU, 24, Color(color, 0.28 * support_pulse), 1.0)
-	if stars >= 2:
+	if stars >= 2 and _support_left > 0.0:
 		draw_arc(Vector2(0, bob), 10.0 + stars * 1.5, 0.0, TAU, 20, Color(color, aura_alpha), 1.0 + stars * 0.18)
-	if stars >= 4:
+	if stars >= 4 and _support_left > 0.0:
 		draw_arc(Vector2(0, bob), 15.0 + sin(_clock * 3.0) * 1.5, -0.6, PI + 0.6, 22, Color(color.lightened(0.25), aura_alpha * 1.35), 1.2)
 	var attack_tilt: float = sin(attack_progress * PI) * 0.14 * signf(_attack_direction.x) if _attack_left > 0.0 else 0.0
 	draw_set_transform(attack_offset, attack_tilt, Vector2.ONE * evolution_scale)
@@ -115,10 +122,6 @@ func _draw() -> void:
 		_:
 			draw_circle(Vector2(0, bob), 6.0, color)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
-	if _attack_left > 0.0:
-		var tip: Vector2 = _attack_direction * (16.0 + sin(attack_progress * PI) * 10.0)
-		draw_line(Vector2.ZERO, tip, Color(_pet_data.rarity_color, 0.45 * sin(attack_progress * PI)), 2.2)
-		draw_circle(tip, 3.0, Color(_pet_data.rarity_color, 0.24 * sin(attack_progress * PI)))
 
 
 func _draw_fox(color: Color, bob: float) -> void:
