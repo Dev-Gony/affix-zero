@@ -146,6 +146,11 @@ func _run() -> void:
 	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
 	_check(WorldLayout.GRID_SIZE == Vector2i(5, 4), "Dungeon topology expands beyond the old 3x3 board")
 	_check(WorldLayout.DUNGEON_PATH.size() >= 12, "Dungeon uses a long winding expedition route")
+	_check(WorldLayout.encounter_kill_goal(81) <= 14, "Late-game rooms no longer demand 80+ stationary kills")
+	var wrap_floor: int = WorldLayout.FLOOR_TRAVERSAL.size()
+	var wrap_a: int = WorldLayout.room_index_for_floor(wrap_floor)
+	var wrap_b: int = WorldLayout.room_index_for_floor(wrap_floor + 1)
+	_check(not WorldLayout.travel_waypoints(wrap_a, wrap_b).is_empty(), "Repeated dungeon traversal wraps through an adjacent corridor")
 	_check(WorldLayout.connected_room_pairs().size() < WorldLayout.GRID_SIZE.x * WorldLayout.GRID_SIZE.y, "Dungeon graph is not a fully-connected room board")
 	var first_room: int = WorldLayout.DUNGEON_PATH[0]
 	var second_room: int = WorldLayout.DUNGEON_PATH[1]
@@ -155,7 +160,7 @@ func _run() -> void:
 	var objective := CombatObjective.new()
 	objective.size = Vector2(190, 58)
 	objective.sync_from_game()
-	_check(objective.kill_goal == 8 + GameManager.floor, "Objective tracker mirrors the floor kill target")
+	_check(objective.kill_goal == WorldLayout.encounter_kill_goal(GameManager.floor), "Objective tracker mirrors the short room encounter target")
 	_check(objective.floor_number == GameManager.floor, "Objective tracker mirrors current floor progress")
 	objective.queue_free()
 
