@@ -1,9 +1,9 @@
 {
-  "version": "g5.1",
-  "stage": "GAMEPLAY-V5.1",
+  "version": "g6.0",
+  "stage": "VISUAL-V6-DARK-ARPG",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/gameplay-v5-pets-items",
+  "branch": "dev/visual-v6-dark-arpg",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }

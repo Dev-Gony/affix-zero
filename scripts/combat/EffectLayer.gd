@@ -319,23 +319,107 @@ func show_elite_arrival(world_position: Vector2, elite_name: String, color: Colo
 	spawn_fragments(world_position, color, 12, 76.0)
 
 
-func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
+func show_attack(from: Vector2, to: Vector2, class_id: String, critical: bool) -> void:
 	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
 	var tangent := Vector2(-direction.y, direction.x)
-	var color := Color("ffd84d") if critical else Color("dbeafe")
-	_lines.append({"points": PackedVector2Array([from + tangent * 6.0, from + direction * 17.0, from + direction * 25.0 - tangent * 7.0]), "color": color, "life": 0.16, "duration": 0.16, "width": 2.0})
-	_lines.append({"points": PackedVector2Array([to - direction * 14.0 - tangent * 5.0, to + direction * 7.0 + tangent * 5.0]), "color": color, "life": 0.13, "duration": 0.13, "width": 2.5})
-	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
+	var impact_color := Color("ffd84d") if critical else Color("e6edf7")
+	match class_id:
+		"mage":
+			impact_color = Color("c084fc") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.42) + tangent * 7.0, from.lerp(to, 0.72) - tangent * 5.0, to]), "color": impact_color, "life": 0.20, "duration": 0.20, "width": 2.8})
+			_rings.append({"center": to, "radius": 4.0, "speed": 74.0, "color": Color(impact_color, 0.78), "life": 0.24, "duration": 0.24, "width": 2.0})
+		"sage":
+			impact_color = Color("79e7ff") if not critical else Color("fff08a")
+			var points := PackedVector2Array([from])
+			for index: int in 3:
+				var t: float = float(index + 1) / 4.0
+				points.append(from.lerp(to, t) + tangent * (6.0 if index % 2 == 0 else -6.0))
+			points.append(to)
+			_lines.append({"points": points, "color": impact_color, "life": 0.16, "duration": 0.16, "width": 2.4})
+			_lines.append({"points": points, "color": Color("f4fbff", 0.64), "life": 0.09, "duration": 0.09, "width": 1.0})
+		"saint":
+			impact_color = Color("fff2a1") if not critical else Color("ffffff")
+			_lines.append({"points": PackedVector2Array([from, to]), "color": impact_color, "life": 0.20, "duration": 0.20, "width": 2.5})
+			_rings.append({"center": to, "radius": 3.0, "speed": 62.0, "color": Color("fff7cc"), "life": 0.28, "duration": 0.28, "width": 2.2})
+			for index: int in 4:
+				var ray := Vector2.UP.rotated(TAU * float(index) / 4.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 3.0, to + ray * 12.0]), "color": Color("fff7cc", 0.82), "life": 0.16, "duration": 0.16, "width": 1.5})
+		"assassin":
+			impact_color = Color("ff6fbd") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([to - direction * 11.0 - tangent * 9.0, to + direction * 10.0 + tangent * 9.0]), "color": impact_color, "life": 0.13, "duration": 0.13, "width": 2.8})
+			_lines.append({"points": PackedVector2Array([to - direction * 8.0 + tangent * 10.0, to + direction * 9.0 - tangent * 10.0]), "color": Color(impact_color, 0.78), "life": 0.16, "duration": 0.16, "width": 1.8})
+		"knight":
+			impact_color = Color("8be0f1") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from + tangent * 5.0, from + direction * 18.0, to - tangent * 8.0]), "color": impact_color, "life": 0.17, "duration": 0.17, "width": 3.2})
+			_rings.append({"center": to, "radius": 3.0, "speed": 54.0, "color": Color(impact_color, 0.65), "life": 0.20, "duration": 0.20, "width": 1.8})
+		_:
+			impact_color = Color("ff9b6b") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from + tangent * 5.0, from + direction * 18.0, to - tangent * 8.0]), "color": impact_color, "life": 0.16, "duration": 0.16, "width": 3.0})
+			_lines.append({"points": PackedVector2Array([to - direction * 12.0 - tangent * 7.0, to + direction * 7.0 + tangent * 7.0]), "color": Color(impact_color, 0.76), "life": 0.12, "duration": 0.12, "width": 2.0})
+	spawn_fragments(to, impact_color, 5 if not critical else 9, 58.0)
 
 
-func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void:
+func show_enemy_telegraph(from: Vector2, to: Vector2, attack_kind: String, windup_duration: float) -> void:
+	var duration: float = maxf(0.12, windup_duration)
 	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
 	var tangent := Vector2(-direction.y, direction.x)
-	if ranged:
-		_lines.append({"points": PackedVector2Array([from, to]), "color": Color("b978ff"), "life": 0.24, "duration": 0.24, "width": 2.0})
-		spawn_fragments(to, Color("b978ff"), 5, 42.0)
-	else:
-		_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
+	match attack_kind:
+		"slam":
+			_rings.append({"center": from, "radius": 8.0, "speed": 28.0, "color": Color("ff765f", 0.52), "life": duration, "duration": duration, "width": 2.0})
+		"dive":
+			_lines.append({"points": PackedVector2Array([from, to]), "color": Color("ff6b6b", 0.40), "life": duration, "duration": duration, "width": 1.5})
+		"shadow_bolt":
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.5) + tangent * 5.0, to]), "color": Color("a96dff", 0.42), "life": duration, "duration": duration, "width": 1.8})
+			_rings.append({"center": from, "radius": 5.0, "speed": 18.0, "color": Color("c084fc", 0.42), "life": duration, "duration": duration, "width": 1.6})
+		"flame":
+			for spread: float in [-0.18, 0.0, 0.18]:
+				var ray: Vector2 = direction.rotated(spread)
+				_lines.append({"points": PackedVector2Array([from, from + ray * minf(82.0, from.distance_to(to))]), "color": Color("ff7b45", 0.34), "life": duration, "duration": duration, "width": 1.8})
+		"hellfire":
+			_rings.append({"center": to, "radius": 12.0, "speed": 24.0, "color": Color("ff3b55", 0.52), "life": duration, "duration": duration, "width": 2.4})
+			for index: int in 6:
+				var ray := Vector2.RIGHT.rotated(TAU * float(index) / 6.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 7.0, to + ray * 22.0]), "color": Color("ff725f", 0.34), "life": duration, "duration": duration, "width": 1.4})
+		_:
+			_lines.append({"points": PackedVector2Array([from + tangent * 7.0, to - tangent * 7.0]), "color": Color("ff5b61", 0.34), "life": duration, "duration": duration, "width": 1.5})
+
+
+func show_enemy_attack(from: Vector2, to: Vector2, attack_kind: String) -> void:
+	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var tangent := Vector2(-direction.y, direction.x)
+	match attack_kind:
+		"slam":
+			_rings.append({"center": from, "radius": 5.0, "speed": 120.0, "color": Color("ff765f"), "life": 0.28, "duration": 0.28, "width": 4.0})
+			spawn_fragments(to, Color("ff765f"), 7, 58.0)
+		"dive":
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.6) - tangent * 8.0, to]), "color": Color("ff6b6b"), "life": 0.18, "duration": 0.18, "width": 3.0})
+			_lines.append({"points": PackedVector2Array([to - tangent * 10.0, to + tangent * 10.0]), "color": Color("ffd0d0", 0.72), "life": 0.12, "duration": 0.12, "width": 2.0})
+		"shadow_bolt":
+			var points := PackedVector2Array([from, from.lerp(to, 0.33) + tangent * 7.0, from.lerp(to, 0.66) - tangent * 7.0, to])
+			_lines.append({"points": points, "color": Color("b978ff"), "life": 0.26, "duration": 0.26, "width": 3.4})
+			_rings.append({"center": to, "radius": 3.0, "speed": 76.0, "color": Color("d7a7ff"), "life": 0.25, "duration": 0.25, "width": 2.0})
+			spawn_fragments(to, Color("b978ff"), 8, 56.0)
+		"flame":
+			for spread: float in [-0.22, -0.10, 0.0, 0.10, 0.22]:
+				var ray: Vector2 = direction.rotated(spread)
+				_lines.append({"points": PackedVector2Array([from + ray * 6.0, to + ray * 10.0]), "color": Color("ff7a38", 0.82), "life": 0.22, "duration": 0.22, "width": 2.2})
+			spawn_fragments(to, Color("ff9f43"), 12, 76.0)
+		"hellfire":
+			_rings.append({"center": to, "radius": 4.0, "speed": 150.0, "color": Color("ff415c"), "life": 0.34, "duration": 0.34, "width": 5.0})
+			_rings.append({"center": from, "radius": 9.0, "speed": 85.0, "color": Color("9f2cff", 0.72), "life": 0.30, "duration": 0.30, "width": 2.5})
+			for index: int in 8:
+				var ray := Vector2.RIGHT.rotated(TAU * float(index) / 8.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 5.0, to + ray * 30.0]), "color": Color("ff725f", 0.78), "life": 0.20, "duration": 0.20, "width": 2.0})
+			spawn_fragments(to, Color("ff4f65"), 16, 86.0)
+		_:
+			_lines.append({"points": PackedVector2Array([to - direction * 9.0 - tangent * 9.0, to + direction * 7.0 + tangent * 9.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.4})
+			_lines.append({"points": PackedVector2Array([to - direction * 5.0 + tangent * 7.0, to + direction * 6.0 - tangent * 7.0]), "color": Color("ffc4c6", 0.58), "life": 0.10, "duration": 0.10, "width": 1.6})
 
 
 func show_melee_spin(center: Vector2) -> void:
@@ -463,25 +547,36 @@ func _draw() -> void:
 		var pulse: float = 1.0 + sin(float(pickup["age"]) * 10.0) * 0.12
 		var pickup_kind: String = String(pickup["kind"])
 		if pickup_kind == "xp":
-			var points := PackedVector2Array([
-				position + Vector2(0, -5) * pulse,
-				position + Vector2(4, 0) * pulse,
-				position + Vector2(0, 5) * pulse,
-				position + Vector2(-4, 0) * pulse,
-			])
-			draw_colored_polygon(points, color)
-			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
+			# XP now reads as crystal shards instead of anonymous green dots.
+			for shard_index: int in 3:
+				var offset := Vector2((shard_index - 1) * 4.0, absf(shard_index - 1) * 2.0)
+				var shard_center: Vector2 = position + offset
+				var shard_scale: float = pulse * (1.0 if shard_index == 1 else 0.72)
+				var points := PackedVector2Array([
+					shard_center + Vector2(0, -7) * shard_scale,
+					shard_center + Vector2(3.2, -1) * shard_scale,
+					shard_center + Vector2(1.5, 5) * shard_scale,
+					shard_center + Vector2(-2.8, 2) * shard_scale,
+				])
+				draw_colored_polygon(points, Color(color, 0.92))
+				draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.40), 1.0)
+			draw_circle(position, 9.0 * pulse, Color(color, 0.07))
 		elif pickup_kind == "pet_essence":
 			var star := PackedVector2Array()
 			for index: int in 10:
 				var angle: float = -PI * 0.5 + index * PI / 5.0
-				var radius: float = (5.2 if index % 2 == 0 else 2.4) * pulse
+				var radius: float = (6.5 if index % 2 == 0 else 2.8) * pulse
 				star.append(position + Vector2(cos(angle), sin(angle)) * radius)
 			draw_colored_polygon(star, color)
-			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.0)
+			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.2)
+			draw_circle(position, 9.0 * pulse, Color(color, 0.10))
 		else:
-			draw_circle(position, 4.5 * pulse, color)
-			draw_circle(position, 2.0 * pulse, color.lightened(0.30))
+			# Gold is rendered as a tiny coin stack, not a yellow point.
+			for coin_index: int in 3:
+				var coin_center := position + Vector2((coin_index - 1) * 3.4, -coin_index * 1.7)
+				draw_ellipse(coin_center, Vector2(4.2, 2.5) * pulse, Color("d69b22"))
+				draw_ellipse(coin_center + Vector2(0, -0.6), Vector2(3.2, 1.7) * pulse, Color("ffd65a"))
+				draw_circle(coin_center + Vector2(0, -0.7), 0.9 * pulse, Color("8f6113"))
 
 	for loot_icon: Dictionary in _loot_icons:
 		var life: float = float(loot_icon["life"])
@@ -500,8 +595,9 @@ func _draw() -> void:
 			draw_rect(Rect2(position + Vector2(-beam_width * 1.8, -beam_height * 0.72), Vector2(beam_width * 3.6, beam_height * 0.72)), Color(rarity_color, alpha * 0.06), true)
 		if rarity_index >= 4:
 			draw_rect(Rect2(position + Vector2(-beam_width * 3.0, -beam_height * 0.48), Vector2(beam_width * 6.0, beam_height * 0.48)), Color(rarity_color, alpha * 0.04), true)
-		draw_circle(position, 9.0 + rarity_index * 1.4, Color(rarity_color, alpha * (0.10 + rarity_index * 0.025)))
-		var icon_size: float = 18.0 + minf(4.0, float(rarity_index))
+		draw_circle(position, 11.0 + rarity_index * 1.8, Color(rarity_color, alpha * (0.12 + rarity_index * 0.030)))
+		draw_arc(position, 12.0 + rarity_index * 1.7, 0.0, TAU, 24, Color(rarity_color, alpha * 0.28), 1.0 + rarity_index * 0.16)
+		var icon_size: float = 22.0 + float(rarity_index) * 1.6
 		var icon_index: int = int(loot_icon.get("icon_index", -1))
 		if icon_index >= 0 and icon_index < 30:
 			var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
@@ -585,3 +681,11 @@ func _draw_loot_symbol(position: Vector2, slot: String, base_id: String, rarity_
 		_:
 			draw_circle(position, 5.0 * scale, accent)
 	draw_circle(position, 10.0 * scale, Color(rarity_color, alpha * 0.10))
+
+
+func draw_ellipse(center: Vector2, radii: Vector2, color: Color) -> void:
+	var points := PackedVector2Array()
+	for index: int in 20:
+		var angle: float = TAU * float(index) / 20.0
+		points.append(center + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
+	draw_colored_polygon(points, color)

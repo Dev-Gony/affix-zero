@@ -118,6 +118,15 @@ jobs:
           grep -q "GAMEPLAY_V5_PETS PASSED" build/gameplay-v5/pets.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v5/pets.log
 
+      - name: Verify V6 dark ARPG dungeon and combat contracts
+        shell: bash
+        run: |
+          mkdir -p build/visual-v6
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/visual_v6_dark_arpg.tscn -- --affix-test-mode 2>&1 | tee build/visual-v6/contracts.log
+          grep -q "VISUAL_V6 PASSED" build/visual-v6/contracts.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/visual-v6/contracts.log
+
       - name: Verify UIUX V2 management contracts
         shell: bash
         run: |
@@ -174,6 +183,7 @@ jobs:
             build/gameplay-v3/
             build/gameplay-v4/
             build/gameplay-v5/
+            build/visual-v6/
             build/uiux-v2/
           if-no-files-found: warn
 

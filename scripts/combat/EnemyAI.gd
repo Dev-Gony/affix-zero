@@ -48,6 +48,7 @@ const ELITE_AFFIXES: Dictionary = {
 
 signal died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int)
 signal attacked_player(enemy: EnemyAI, raw_damage: float)
+signal attack_started(enemy: EnemyAI, attack_kind: String, target_position: Vector2, windup_duration: float)
 signal damage_received(world_position: Vector2, damage: int, critical: bool)
 
 var enemy_data: EnemyData
@@ -76,6 +77,9 @@ var _spawn_reveal_left: float = 0.32
 var _motion_clock: float = 0.0
 var _attack_windup_left: float = 0.0
 var _attack_windup_duration: float = 0.22
+var _attack_anim_left: float = 0.0
+var _attack_anim_duration: float = 0.26
+var _last_attack_direction: Vector2 = Vector2.DOWN
 var _knockback_velocity: Vector2 = Vector2.ZERO
 var _death_time_left: float = 0.0
 var _death_duration: float = 0.28
@@ -169,6 +173,9 @@ func _process(delta: float) -> void:
 		_hit_flash_left = maxf(0.0, _hit_flash_left - delta)
 		queue_redraw()
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
+	if _attack_anim_left > 0.0:
+		_attack_anim_left = maxf(0.0, _attack_anim_left - delta)
+		queue_redraw()
 	if not _knockback_velocity.is_zero_approx():
 		global_position += _knockback_velocity * delta
 		_clamp_to_movement_bounds()
@@ -201,8 +208,32 @@ func _process(delta: float) -> void:
 		_move_with_behavior(move_direction, delta)
 	if distance <= effective_attack_range and _attack_time_left <= 0.0:
 		_attack_windup_left = _attack_windup_duration
+		_last_attack_direction = toward_target if not toward_target.is_zero_approx() else _last_attack_direction
+		attack_started.emit(self, attack_visual_kind(), target.global_position, _attack_windup_duration)
 		queue_redraw()
 
+
+
+func attack_visual_kind() -> String:
+	var enemy_id: String = enemy_data.id if enemy_data != null else ""
+	match enemy_id:
+		"slime":
+			return "slam"
+		"bat":
+			return "dive"
+		"skeleton", "goblin", "dark_knight":
+			return "slash"
+		"lich":
+			return "shadow_bolt"
+		"dragon":
+			return "flame"
+		"demon_lord":
+			return "hellfire"
+	if behavior == "caster":
+		return "shadow_bolt"
+	if behavior == "boss":
+		return "hellfire"
+	return "slash"
 
 func set_targeted(value: bool) -> void:
 	if _is_targeted == value:
@@ -301,7 +332,38 @@ func _draw() -> void:
 		var warning_progress: float = 1.0 - _attack_windup_left / _attack_windup_duration
 		draw_arc(Vector2.ZERO, sprite_size * 0.52, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
 	var death_scale_y: float = maxf(0.15, death_alpha) if _dead else 1.0
-	draw_set_transform(Vector2(0, bob), 0.0, Vector2(1.0, death_scale_y))
+	var pose_offset := Vector2(0, bob)
+	var pose_rotation: float = 0.0
+	var pose_scale := Vector2(1.0, death_scale_y)
+	var facing_x: float = -1.0 if _last_attack_direction.x < -0.05 else 1.0
+	if moving:
+		pose_rotation += step_wave * (0.035 if enemy_id in ["skeleton", "goblin", "dark_knight"] else 0.018)
+		if enemy_id == "slime":
+			pose_scale *= Vector2(1.0 + absf(step_wave) * 0.08, 1.0 - absf(step_wave) * 0.06)
+		elif enemy_id == "bat":
+			pose_scale.y *= 0.88 + absf(sin(_motion_clock * 12.0)) * 0.24
+			pose_rotation += sin(_motion_clock * 8.0) * 0.08
+		elif enemy_id in ["dragon", "demon_lord"]:
+			pose_offset.y += sin(_motion_clock * 2.8) * 2.5
+	if _attack_windup_left > 0.0:
+		var windup_progress: float = 1.0 - _attack_windup_left / maxf(0.01, _attack_windup_duration)
+		var crouch: float = sin(windup_progress * PI * 0.5)
+		pose_offset -= _last_attack_direction * crouch * (5.0 if behavior != "boss" else 8.0)
+		pose_scale *= Vector2(1.0 + crouch * 0.10, 1.0 - crouch * 0.08)
+		pose_rotation -= _last_attack_direction.x * crouch * 0.10
+	if _attack_anim_left > 0.0:
+		var attack_progress: float = 1.0 - _attack_anim_left / maxf(0.01, _attack_anim_duration)
+		var lunge: float = sin(attack_progress * PI)
+		pose_offset += _last_attack_direction * lunge * (10.0 if behavior != "boss" else 15.0)
+		pose_scale *= Vector2(1.0 - lunge * 0.04, 1.0 + lunge * 0.08)
+		pose_rotation += _last_attack_direction.x * lunge * 0.16
+	if _hit_flash_left > 0.0:
+		pose_rotation += sin(_motion_clock * 55.0) * 0.08
+		pose_scale *= Vector2(1.06, 0.94)
+	if _dead:
+		pose_rotation = lerpf(0.0, 0.65 * facing_x, 1.0 - death_alpha)
+		pose_offset.y += (1.0 - death_alpha) * 9.0
+	draw_set_transform(pose_offset, pose_rotation, Vector2(facing_x * pose_scale.x, pose_scale.y))
 	draw_texture_rect_region(
 		ENEMY_ATLAS,
 		Rect2(-sprite_size * 0.58, -sprite_size * 0.72, sprite_size * 1.16, sprite_size * 1.16),

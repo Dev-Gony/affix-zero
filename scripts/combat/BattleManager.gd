@@ -4,8 +4,8 @@ class_name BattleManager
 signal boss_status_changed(name: String, hp_ratio: float, active: bool)
 signal elite_status_changed(name: String, color: Color, active: bool)
 
-const WORLD_RECT := Rect2(0, 0, 1920, 1200)
-const PLAYER_POSITION := Vector2(960, 600)
+const WORLD_RECT: Rect2 = WorldLayout.WORLD_RECT
+const PLAYER_POSITION := Vector2(1600, 800)
 const BOSS_FLOOR_INTERVAL: int = 10
 const ELITE_START_FLOOR: int = 6
 const ELITE_AFFIX_IDS: Array[String] = ["brutal", "swift", "bulwark"]
@@ -14,7 +14,7 @@ const PLAYER_ACCELERATION: float = 360.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
-const LOOT_PICKUP_DELAY: float = 0.72
+const LOOT_PICKUP_DELAY: float = 0.95
 const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
 const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
 const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
@@ -116,42 +116,43 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	draw_rect(WORLD_RECT, Color("17131c"), true)
-	var floor_theme: int = floori(float(maxi(0, GameManager.floor - 1)) / 15.0) % 3
-	for room_index in 9:
+	var floor_theme: int = WorldLayout.dungeon_cycle_for_floor(GameManager.floor) % 3
+	for room_index: int in WorldLayout.active_room_indices():
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
+		var chamber := walk.grow(24.0)
 		var visual_theme: int = (room_index + floor_theme) % 3
-		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.22) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.24))
+		var backdrop_tint := Color(0.78, 0.36, 0.28, 0.42) if visual_theme == 0 else (Color(0.58, 0.43, 0.30, 0.38) if visual_theme == 1 else Color(0.28, 0.38, 0.56, 0.42))
 		match visual_theme:
 			0:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
-				_draw_tiled_rect(walk, BRICK_TILE, Color("80666d"))
-				_draw_room_walls(walk, WALL_TILE, Color("9aa0aa"))
+				_draw_tiled_rect(chamber, FLOOR_TILE, Color("211b20"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("514047"))
+				_draw_room_walls(walk, WALL_TILE, Color("555864"))
 				draw_texture_rect(SHRINE_TILE, Rect2(walk.get_center() - Vector2(20, 20), Vector2(40, 40)), false, Color("d6b36b"))
 				draw_arc(walk.get_center(), 58.0, 0.0, TAU, 36, Color(0.72, 0.22, 0.19, 0.28), 2.0)
 			1:
-				_draw_tiled_rect(room, SAND_FLOOR_TILE, Color("6b4c3e"))
-				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("b28767"))
-				_draw_room_walls(walk, WALL_TILE, Color("7e8792"))
+				_draw_tiled_rect(chamber, SAND_FLOOR_TILE, Color("2a211d"))
+				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("5e483a"))
+				_draw_room_walls(walk, WALL_TILE, Color("50545c"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.position + Vector2(58, 42), Vector2(42, 42)), false, Color("caa785"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.end - Vector2(106, 84), Vector2(38, 38)), false, Color("a37e66"))
 			_:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("303844"))
-				_draw_tiled_rect(walk, BRICK_TILE, Color("586579"))
-				_draw_room_walls(walk, BLUE_WALL_TILE, Color("9bb0c4"))
+				_draw_tiled_rect(chamber, FLOOR_TILE, Color("171d25"))
+				_draw_tiled_rect(walk, BRICK_TILE, Color("354253"))
+				_draw_room_walls(walk, BLUE_WALL_TILE, Color("536475"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
-		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
+		draw_texture_rect(DUNGEON_COURTYARD, chamber, false, backdrop_tint)
 		_draw_room_decor(room_index, walk, visual_theme)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
 		if corridor.size.is_zero_approx():
 			continue
 		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
-		var corridor_tint: Color = Color("6a5960") if pair.x % 2 == 0 else Color("9a735c")
-		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
-	draw_rect(WORLD_RECT, Color(0.015, 0.01, 0.02, 0.10), true)
+		var corridor_tint: Color = Color("3c3238") if pair.x % 2 == 0 else Color("4b392f")
+		_draw_dungeon_corridor(corridor, corridor_texture, corridor_tint)
+	draw_rect(WORLD_RECT, Color(0.012, 0.008, 0.018, 0.24), true)
 
 
 func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
@@ -164,6 +165,27 @@ func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
 			draw_texture_rect(texture, Rect2(Vector2(x, y), size), false, modulate)
 			x += tile_size.x
 		y += tile_size.y
+
+
+func _draw_dungeon_corridor(area: Rect2, texture: Texture2D, tint: Color) -> void:
+	var outer := area.grow(7.0)
+	draw_rect(outer, Color("09080c"), true)
+	_draw_tiled_rect(area, texture, tint)
+	var wall_color := Color("3a343c")
+	var edge_color := Color("6a4c42")
+	if area.size.x >= area.size.y:
+		draw_rect(Rect2(area.position + Vector2(0, -5), Vector2(area.size.x, 5)), wall_color, true)
+		draw_rect(Rect2(Vector2(area.position.x, area.end.y), Vector2(area.size.x, 5)), wall_color.darkened(0.18), true)
+		draw_line(area.position, Vector2(area.end.x, area.position.y), edge_color, 1.0)
+		draw_line(Vector2(area.position.x, area.end.y), area.end, edge_color.darkened(0.25), 1.0)
+	else:
+		draw_rect(Rect2(area.position + Vector2(-5, 0), Vector2(5, area.size.y)), wall_color, true)
+		draw_rect(Rect2(Vector2(area.end.x, area.position.y), Vector2(5, area.size.y)), wall_color.darkened(0.18), true)
+		draw_line(area.position, Vector2(area.position.x, area.end.y), edge_color, 1.0)
+		draw_line(Vector2(area.end.x, area.position.y), area.end, edge_color.darkened(0.25), 1.0)
+	var center := area.get_center()
+	draw_circle(center, 3.0, Color("b97a44", 0.16))
+	draw_arc(center, 8.0, 0.0, TAU, 16, Color("b97a44", 0.12), 1.0)
 
 
 func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
@@ -369,6 +391,7 @@ func _spawn_boss() -> void:
 func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
+	enemy.attack_started.connect(_on_enemy_attack_started)
 	enemy.damage_received.connect(_on_enemy_damage_received.bind(enemy))
 
 
@@ -384,6 +407,7 @@ func _update_pet_combat(delta: float) -> void:
 		if target != null and pet.global_position.distance_to(target.global_position) <= pet_data.attack_range:
 			var raw_damage: float = PetManager.active_attack_power(GameManager.atk)
 			var damage: int = maxi(1, roundi(raw_damage - target.defense * 0.18))
+			pet.play_attack(target.global_position)
 			effects.show_pet_attack(pet.global_position, target.global_position, pet.pet_color())
 			target.take_hit({"damage": damage, "critical": false})
 	if _pet_support_time_left <= 0.0:
@@ -392,6 +416,7 @@ func _update_pet_combat(delta: float) -> void:
 		if heal_percent > 0.0 and GameManager.hp < GameManager.max_hp:
 			var heal_amount: int = maxi(1, roundi(float(GameManager.max_hp) * heal_percent * 0.01))
 			var restored: int = GameManager.heal(heal_amount)
+			pet.play_support()
 			effects.show_pet_heal(player.global_position, restored, pet.pet_color())
 
 
@@ -405,7 +430,7 @@ func _perform_auto_attack() -> void:
 	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
 	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, crit_chance, false)
 	player.play_attack(target.global_position)
-	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+	effects.show_attack(player.global_position, target.global_position, GameManager.selected_class, bool(result.get("critical", false)))
 	target.take_hit(result)
 	AudioManager.play_sfx("critical_hit" if bool(result.get("critical", false)) else "basic_attack")
 	if bool(result.get("critical", false)):
@@ -555,17 +580,24 @@ func _cast_shield_charge() -> void:
 	var target: EnemyAI = _nearest_enemy()
 	if target == null:
 		return
-	var direction: Vector2 = player.global_position.direction_to(target.global_position)
-	var end_position: Vector2 = player.global_position + direction * 115.0
-	effects.show_shield_charge(player.global_position, end_position)
+	var start_position: Vector2 = player.global_position
+	var direction: Vector2 = start_position.direction_to(target.global_position)
+	var end_position: Vector2 = start_position + direction * 115.0
+	end_position = Vector2(
+		clampf(end_position.x, _combat_rect.position.x + 16.0, _combat_rect.end.x - 16.0),
+		clampf(end_position.y, _combat_rect.position.y + 18.0, _combat_rect.end.y - 16.0)
+	)
+	effects.show_shield_charge(start_position, end_position)
 	for enemy: EnemyAI in _enemies.duplicate():
 		if not is_instance_valid(enemy):
 			continue
-		var relative: Vector2 = enemy.global_position - player.global_position
+		var relative: Vector2 = enemy.global_position - start_position
 		var projection: float = relative.dot(direction)
 		var line_distance: float = absf(relative.cross(direction))
-		if projection >= 0.0 and projection <= 115.0 and line_distance <= 25.0:
-			_deal_skill_damage(enemy)
+		if projection >= 0.0 and projection <= start_position.distance_to(end_position) and line_distance <= 28.0:
+			_deal_skill_damage(enemy, 1.12)
+	player.global_position = end_position
+	_player_velocity = direction * PLAYER_BASE_MOVE_SPEED * 1.8
 
 
 func _cast_chain_lightning() -> void:
@@ -679,19 +711,26 @@ func _on_resource_collected(kind: String, amount: int) -> void:
 			effects.show_pet_essence(player.global_position, gained)
 
 
+func _on_enemy_attack_started(attacker: EnemyAI, attack_kind: String, target_position: Vector2, windup_duration: float) -> void:
+	if _respawning or not is_instance_valid(attacker):
+		return
+	effects.show_enemy_telegraph(attacker.global_position, target_position, attack_kind, windup_duration)
+
+
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	if _respawning:
 		return
 	player.play_hit()
-	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
-	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
+	var from: Vector2 = attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0
+	var attack_kind: String = attacker.attack_visual_kind() if is_instance_valid(attacker) else "slash"
+	effects.show_enemy_attack(from, player.global_position, attack_kind)
 	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
 	var reduction: float = clampf(PetManager.active_player_damage_reduction_percent(), 0.0, 80.0)
 	var reduced_damage: float = raw_damage * (1.0 - reduction * 0.01)
 	var damage: int = GameManager.take_damage(reduced_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
-	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
-	_start_shake(2.0, 0.12)
+	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(4, 7), 54.0)
+	_start_shake(3.0 if is_boss else 2.0, 0.16 if is_boss else 0.12)
 
 
 func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool, enemy: EnemyAI) -> void:
@@ -762,7 +801,9 @@ func _spawn_world_loot(world_position: Vector2) -> void:
 	if item.is_empty():
 		return
 	effects.show_drop(world_position, item)
-	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	var rarity_index: int = clampi(int(item.get("rarity_index", 0)), 0, 5)
+	var ground_read_time: float = LOOT_PICKUP_DELAY + float(rarity_index) * 0.12
+	await get_tree().create_timer(ground_read_time, false).timeout
 	if not is_inside_tree():
 		return
 	if LootManager.collect_item(item):
