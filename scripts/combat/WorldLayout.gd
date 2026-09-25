@@ -25,11 +25,11 @@ const FLOOR_TRAVERSAL: Array[int] = [
 # Small side chambers visually sell a dungeon instead of a board.
 const SIDE_CONNECTIONS: Array[Vector2i] = [
 	Vector2i(6, 5),
-	Vector2i(8, 13),
 	Vector2i(3, 2),
-	Vector2i(14, 15),
-	Vector2i(12, 16),
-	Vector2i(18, 17),
+	Vector2i(10, 15),
+	Vector2i(11, 16),
+	Vector2i(17, 16),
+	Vector2i(7, 2),
 ]
 
 
