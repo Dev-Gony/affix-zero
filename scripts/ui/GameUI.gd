@@ -251,14 +251,14 @@ func _sync_modal_blocker() -> void:
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(344, 38)
-	window.size = Vector2(290, 318)
+	window.position = Vector2(320, 8)
+	window.size = Vector2(316, 355)
 	window.z_index = 50
 	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
 	add_child(window)
 	var header := HBoxContainer.new()
 	header.position = Vector2(6, 4)
-	header.size = Vector2(278, 22)
+	header.size = Vector2(304, 22)
 	window.add_child(header)
 	_management_title = Label.new()
 	_management_title.text = MANAGEMENT_TITLES[0]
@@ -277,7 +277,7 @@ func _build_bottom_panel() -> void:
 	_main_tabs = tabs
 	tabs.name = "MainTabs"
 	tabs.position = Vector2(4, 28)
-	tabs.size = Vector2(282, 286)
+	tabs.size = Vector2(308, 323)
 	tabs.tabs_visible = false
 	window.add_child(tabs)
 
@@ -469,20 +469,28 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	_inventory_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	header.add_child(_inventory_count)
 	_loot_filter_option = OptionButton.new()
-	_loot_filter_option.custom_minimum_size = Vector2(90, 21)
+	_loot_filter_option.custom_minimum_size = Vector2(76, 21)
 	_loot_filter_option.tooltip_text = "이 등급 이상만 자동 획득"
-	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설만"]:
+	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽만"]:
 		_loot_filter_option.add_item(rarity_name)
 	_loot_filter_option.item_selected.connect(_on_loot_filter_selected)
 	header.add_child(_loot_filter_option)
+	var sell_normal := Button.new()
+	sell_normal.text = "일반"
+	sell_normal.custom_minimum_size = Vector2(48, 21)
+	sell_normal.add_theme_font_size_override("font_size", 6)
+	sell_normal.tooltip_text = "잠금 제외 일반 등급만 판매"
+	sell_normal.pressed.connect(_sell_all_normal)
+	header.add_child(sell_normal)
 	var sell_all := Button.new()
-	sell_all.text = "일반 판매"
-	sell_all.custom_minimum_size = Vector2(76, 21)
-	sell_all.add_theme_font_size_override("font_size", 7)
-	sell_all.pressed.connect(_sell_all_normal)
+	sell_all.text = "전체 판매"
+	sell_all.custom_minimum_size = Vector2(62, 21)
+	sell_all.add_theme_font_size_override("font_size", 6)
+	sell_all.tooltip_text = "잠금한 장비는 보호하고 가방의 나머지를 전부 판매"
+	sell_all.pressed.connect(_sell_all_unlocked)
 	header.add_child(sell_all)
 	var grid_panel := PanelContainer.new()
-	grid_panel.custom_minimum_size = Vector2(0, 184)
+	grid_panel.custom_minimum_size = Vector2(0, 150)
 	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0910"), Color("352b38"), 1, 0))
 	tab.add_child(grid_panel)
 	var grid_scroll := ScrollContainer.new()
@@ -512,9 +520,9 @@ func _build_inventory_tab(tabs: TabContainer) -> void:
 	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	detail_column.add_child(detail_scroll)
 	_inventory_detail = Label.new()
-	_inventory_detail.custom_minimum_size.x = 270
+	_inventory_detail.custom_minimum_size = Vector2(296, 96)
 	_inventory_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	_inventory_detail.add_theme_font_size_override("font_size", 6)
+	_inventory_detail.add_theme_font_size_override("font_size", 7)
 	detail_scroll.add_child(_inventory_detail)
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 3)
@@ -622,6 +630,7 @@ func _build_class_selection() -> void:
 
 func _connect_signals() -> void:
 	GameManager.stats_changed.connect(_on_stats_changed)
+	GameManager.class_selected.connect(_on_class_selected_ui)
 	GameManager.inventory_changed.connect(_refresh_inventory)
 	GameManager.equipment_changed.connect(_on_equipment_changed)
 	GameManager.skills_changed.connect(_refresh_skills)
@@ -726,12 +735,31 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 		item_label.text = "비어 있음"
 		item_label.add_theme_color_override("font_color", Color("70708a"))
 	else:
-		item_label.text = "%s · %d" % [String(item.get("base_name", item.get("name", ""))), int(item.get("item_level", 1))]
+		var enhancement_level: int = GameManager.equipment_enhancement_level(item)
+		var enhancement_text: String = " +%d" % enhancement_level if enhancement_level > 0 else ""
+		item_label.text = "%s%s · %d" % [String(item.get("base_name", item.get("name", ""))), enhancement_text, int(item.get("item_level", 1))]
 		item_label.tooltip_text = _format_item_details(item)
 		item_label.add_theme_color_override("font_color", border_color)
 	content.add_child(item_label)
+
+	var action_row := HBoxContainer.new()
+	action_row.add_theme_constant_override("separation", 2)
+	content.add_child(action_row)
+
+	var enhance_button := Button.new()
+	enhance_button.text = "강화"
+	enhance_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	enhance_button.custom_minimum_size.y = 17
+	enhance_button.add_theme_font_size_override("font_size", 5)
+	enhance_button.disabled = item.is_empty() or GameManager.equipment_enhancement_level(item) >= GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL
+	if not item.is_empty():
+		enhance_button.tooltip_text = "%s\n비용 %dG" % [GameManager.equipment_enhancement_risk_text(item), GameManager.equipment_enhancement_cost(item)]
+	enhance_button.pressed.connect(_enhance_equipped.bind(slot))
+	action_row.add_child(enhance_button)
+
 	var action := Button.new()
 	action.text = "해제"
+	action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action.custom_minimum_size.y = 17
 	action.add_theme_font_size_override("font_size", 5)
 	action.add_theme_stylebox_override("normal", _compact_style_box(Color("211720"), Color("69432f")))
@@ -741,7 +769,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	action.add_theme_stylebox_override("focus", _compact_style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2))
 	action.disabled = item.is_empty()
 	action.pressed.connect(_unequip.bind(slot))
-	content.add_child(action)
+	action_row.add_child(action)
 	return card
 
 
@@ -752,6 +780,7 @@ func _build_equipment_portrait() -> PanelContainer:
 	var column := VBoxContainer.new()
 	panel.add_child(column)
 	var portrait := TextureRect.new()
+	portrait.name = "ClassPortrait"
 	portrait.texture = _class_portrait_icon()
 	portrait.custom_minimum_size = Vector2(0, 54)
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
@@ -842,18 +871,14 @@ func _refresh_inventory_detail(items: Array[Dictionary]) -> void:
 		_inventory_sell_button.text = "판매"
 		return
 	var item_color := Color.from_string(String(selected.get("rarity_color", "ffffff")), Color.WHITE)
-	_inventory_detail.text = "[%s] %s\n%s · iLv.%d\n%s\n%s" % [
-		String(selected.get("rarity_name", "")), String(selected.get("name", "")),
-		String(SLOT_NAMES.get(String(selected.get("slot", "")), "")), int(selected.get("item_level", 1)),
-		_compact_stats(selected, true), _comparison_text(selected)
-	]
-	_inventory_detail.tooltip_text = _format_item_details(selected)
+	_inventory_detail.text = _format_item_details(selected)
+	_inventory_detail.tooltip_text = ""
 	_inventory_detail.add_theme_color_override("font_color", item_color)
 	_inventory_equip_button.disabled = false
 	_inventory_lock_button.disabled = false
 	_inventory_lock_button.text = "잠금 해제" if bool(selected.get("locked", false)) else "잠금"
 	_inventory_sell_button.disabled = bool(selected.get("locked", false))
-	_inventory_sell_button.text = "잠금됨" if bool(selected.get("locked", false)) else "판매 %dG" % int(selected.get("sell_value", 0))
+	_inventory_sell_button.text = "잠금됨" if bool(selected.get("locked", false)) else "판매 %dG" % GameManager.item_sell_value(selected)
 
 
 func _select_inventory_item(item_id: String) -> void:
@@ -975,7 +1000,9 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var base_cost: int = int(definition.get("base_cost", 100))
 	var cost_step: int = int(definition.get("cost_step", 80))
 	var level: int = GameManager.class_skill_level(skill_id)
-	var cost: int = base_cost + level * cost_step
+	var max_level: int = GameManager.class_skill_max_level()
+	var at_cap: bool = level >= max_level
+	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.y = 67
 	panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("59443a"), 1, 0))
@@ -998,7 +1025,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text_column)
 	var title_label := Label.new()
-	title_label.text = "%s  Lv.%d" % [title, level]
+	title_label.text = "%s  Lv.%d/%d%s" % [title, level, max_level, "  MAX" if at_cap else ""]
 	title_label.add_theme_font_size_override("font_size", 9)
 	text_column.add_child(title_label)
 	var description_label := Label.new()
@@ -1007,14 +1034,40 @@ func _add_skill_row(definition: Dictionary) -> void:
 	description_label.add_theme_font_size_override("font_size", 6)
 	description_label.add_theme_color_override("font_color", COLOR_MUTED)
 	text_column.add_child(description_label)
-	var button := Button.new()
-	button.text = "%dG\n강화" % cost
-	button.custom_minimum_size = Vector2(70, 53)
-	button.add_theme_font_size_override("font_size", 7)
-	button.disabled = GameManager.gold < cost
-	button.tooltip_text = "현재 골드: %dG" % GameManager.gold
-	button.pressed.connect(_buy_skill.bind(skill_id, base_cost, cost_step))
-	row.add_child(button)
+	var actions := VBoxContainer.new()
+	actions.custom_minimum_size = Vector2(78, 53)
+	actions.add_theme_constant_override("separation", 2)
+	row.add_child(actions)
+
+	var one_button := Button.new()
+	one_button.text = "+1  %dG" % cost
+	one_button.custom_minimum_size = Vector2(78, 16)
+	one_button.add_theme_font_size_override("font_size", 6)
+	one_button.disabled = at_cap or GameManager.gold < cost
+	one_button.tooltip_text = "1레벨 강화 · 환생할 때마다 최대 레벨 +%d · 현재 골드 %dG" % [GameManager.CLASS_SKILL_LEVELS_PER_REBIRTH, GameManager.gold]
+	one_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 1))
+	actions.add_child(one_button)
+
+	var ten_count: int = mini(10, GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step))
+	var ten_cost: int = GameManager.skill_upgrade_total_cost(skill_id, base_cost, cost_step, ten_count)
+	var ten_button := Button.new()
+	ten_button.text = "+%d  %dG" % [ten_count, ten_cost] if ten_count > 0 else "+10"
+	ten_button.custom_minimum_size = Vector2(78, 16)
+	ten_button.add_theme_font_size_override("font_size", 6)
+	ten_button.disabled = ten_count <= 0
+	ten_button.tooltip_text = "최대 10레벨 한 번에 강화"
+	ten_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 10))
+	actions.add_child(ten_button)
+
+	var max_count: int = GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
+	var max_button := Button.new()
+	max_button.text = "MAX +%d" % max_count if max_count > 0 else "MAX"
+	max_button.custom_minimum_size = Vector2(78, 16)
+	max_button.add_theme_font_size_override("font_size", 6)
+	max_button.disabled = max_count <= 0
+	max_button.tooltip_text = "현재 골드로 가능한 만큼 한 번에 강화"
+	max_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 0))
+	actions.add_child(max_button)
 
 
 func _refresh_rebirth() -> void:
@@ -1061,14 +1114,16 @@ func _add_permanent_button(parent: GridContainer, stat_name: String, benefit: St
 
 
 func _refresh_stats() -> void:
-	_stats_label.text = "모험 기록\n처치  %d     획득 골드  %dG\n최고 층  %d     환생  %d회     드롭  %d\n\n전투 능력\nATK  %d     DEF  %d\nHP  %d/%d     MP  %d/%d\nSPD  %.2f     CRIT  %.1f%%\n\n보조 능력\n흡혈  %.1f%%     경험치  +%.1f%%\n골드  +%.1f%%     관통  %.1f%%" % [
+	var enemy_scale: Dictionary = EnemyAI.floor_scaling(GameManager.floor)
+	_stats_label.text = "모험 기록\n처치  %d     획득 골드  %dG\n최고 층  %d     환생  %d회     드롭  %d\n\n전투 능력\nATK  %d     DEF  %d\nHP  %d/%d     MP  %d/%d\nSPD  %.2f     CRIT  %.1f%%\n\n현재 층 위협도\n몬스터 HP x%.1f   ATK x%.1f   DEF x%.1f\n\n보조 능력\n흡혈  %.1f%%     경험치  +%.1f%%\n골드  +%.1f%%     관통  %.1f%%" % [
 		int(GameManager.statistics.get("total_kills", 0)), int(GameManager.statistics.get("total_gold_earned", 0)),
 		int(GameManager.statistics.get("highest_floor", 1)), GameManager.rebirth_count,
 		int(GameManager.statistics.get("total_drops", 0)), GameManager.atk, GameManager.def,
 		GameManager.hp, GameManager.max_hp, GameManager.mp, GameManager.max_mp, GameManager.spd,
-		GameManager.crit, GameManager.vamp, GameManager.xp_bonus, GameManager.gold_bonus, GameManager.penetration
+		GameManager.crit,
+		float(enemy_scale.get("hp", 1.0)), float(enemy_scale.get("attack", 1.0)), float(enemy_scale.get("defense", 1.0)),
+		GameManager.vamp, GameManager.xp_bonus, GameManager.gold_bonus, GameManager.penetration
 	]
-
 
 func _compact_stats(item: Dictionary, include_affixes: bool = false) -> String:
 	var parts := PackedStringArray()
@@ -1083,9 +1138,12 @@ func _compact_stats(item: Dictionary, include_affixes: bool = false) -> String:
 
 
 func _format_item_details(item: Dictionary) -> String:
+	var enhancement_level: int = GameManager.equipment_enhancement_level(item)
+	var enhancement_multiplier: float = GameManager.equipment_enhancement_stat_multiplier(enhancement_level)
 	var lines := PackedStringArray([
-		"[%s] %s" % [String(item.get("rarity_name", "")), String(item.get("name", ""))],
+		"[%s] %s%s" % [String(item.get("rarity_name", "")), String(item.get("name", "")), " +%d" % enhancement_level if enhancement_level > 0 else ""],
 		"%s · 아이템 레벨 %d" % [String(SLOT_NAMES.get(String(item.get("slot", "")), "")), int(item.get("item_level", 1))],
+		"강화 보정: 기본 능력치 x%.2f" % enhancement_multiplier,
 		"기본: %s" % _compact_stats(item),
 	])
 	for affix_data: Variant in Array(item.get("affixes", [])):
@@ -1094,7 +1152,12 @@ func _format_item_details(item: Dictionary) -> String:
 				String(affix_data.get("name", "")), String(STAT_NAMES.get(String(affix_data.get("stat", "")), affix_data.get("stat", ""))),
 				_format_value(String(affix_data.get("stat", "")), float(affix_data.get("value", 0.0)))
 			])
-	lines.append("판매가: %dG%s" % [int(item.get("sell_value", 0)), " · 잠금" if bool(item.get("locked", false)) else ""])
+	if enhancement_level < GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		lines.append("다음 강화: %s" % GameManager.equipment_enhancement_risk_text(item))
+		lines.append("강화 비용: %dG" % GameManager.equipment_enhancement_cost(item))
+	else:
+		lines.append("다음 강화: 최대 강화 +%d" % GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL)
+	lines.append("판매가: %dG%s" % [GameManager.item_sell_value(item), " · 잠금" if bool(item.get("locked", false)) else ""])
 	lines.append("장착 비교: %s" % _comparison_text(item))
 	return "\n".join(lines)
 
@@ -1121,9 +1184,10 @@ func _comparison_text(item: Dictionary) -> String:
 
 func _item_stat_totals(item: Dictionary) -> Dictionary:
 	var totals: Dictionary = {}
+	var enhancement_multiplier: float = GameManager.equipment_enhancement_stat_multiplier(GameManager.equipment_enhancement_level(item))
 	var base_stats: Dictionary = item.get("base_stats", {})
 	for stat_name: Variant in base_stats.keys():
-		totals[String(stat_name)] = float(totals.get(String(stat_name), 0.0)) + float(base_stats[stat_name])
+		totals[String(stat_name)] = float(totals.get(String(stat_name), 0.0)) + float(base_stats[stat_name]) * enhancement_multiplier
 	for affix_data: Variant in Array(item.get("affixes", [])):
 		if affix_data is Dictionary:
 			var stat_name: String = String(affix_data.get("stat", ""))
@@ -1133,6 +1197,14 @@ func _item_stat_totals(item: Dictionary) -> Dictionary:
 
 func _format_value(stat_name: String, value: float) -> String:
 	return "%.2f" % value if stat_name == "SPD" else "%d" % roundi(value)
+
+
+func _on_class_selected_ui(_class_id: String) -> void:
+	# Class changes after rebirth must immediately refresh every class-dependent panel.
+	_refresh_hud()
+	_refresh_equipment()
+	_refresh_skills()
+	_refresh_stats()
 
 
 func _on_stats_changed() -> void:
@@ -1181,7 +1253,7 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 
 func _on_loot_filter_selected(index: int) -> void:
 	GameManager.set_loot_min_rarity(index)
-	_show_notification("앞으로 %s 등급만 자동 획득 · 기존 가방은 유지" % ["일반+", "마법+", "희귀+", "고유+", "전설"][GameManager.loot_min_rarity_index], COLOR_GOLD)
+	_show_notification("앞으로 %s 등급만 자동 획득 · 기존 가방은 유지" % ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽"][GameManager.loot_min_rarity_index], COLOR_GOLD)
 	SaveManager.save_game()
 
 
@@ -1255,6 +1327,11 @@ func _unequip(slot: String) -> void:
 	GameManager.unequip_item(slot)
 
 
+func _enhance_equipped(slot: String) -> void:
+	AudioManager.play_sfx("ui_click")
+	GameManager.enhance_equipped_item(slot)
+
+
 func _sell(item_id: String) -> void:
 	AudioManager.play_sfx("ui_click")
 	GameManager.sell_item(item_id)
@@ -1265,10 +1342,20 @@ func _sell_all_normal() -> void:
 	GameManager.sell_all_normal()
 
 
-func _buy_skill(skill_id: String, base_cost: int, cost_step: int) -> void:
+func _sell_all_unlocked() -> void:
 	AudioManager.play_sfx("ui_click")
-	if GameManager.buy_skill(skill_id, base_cost, cost_step):
-		_show_notification("%s 강화 완료" % skill_id, COLOR_GREEN)
+	GameManager.sell_all_unlocked()
+
+
+func _buy_skill_amount(skill_id: String, base_cost: int, cost_step: int, amount: int) -> void:
+	AudioManager.play_sfx("ui_click")
+	var purchased: int = GameManager.buy_skill_levels(skill_id, base_cost, cost_step, amount)
+	if purchased > 0:
+		_show_notification("%s  +%d 강화 완료" % [skill_id, purchased], COLOR_GREEN)
+
+
+func _buy_skill(skill_id: String, base_cost: int, cost_step: int) -> void:
+	_buy_skill_amount(skill_id, base_cost, cost_step, 1)
 
 
 func _rebirth() -> void:

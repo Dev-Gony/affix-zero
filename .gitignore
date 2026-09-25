@@ -7,3 +7,7 @@
 
 # Local export output
 build/
+
+# Default import sidecars generated locally for raw CC0 source art.
+# If a CC0 asset later needs custom import settings, force-add that specific .import file.
+assets/cc0/**/*.import

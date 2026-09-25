@@ -13,7 +13,7 @@ Current milestone: **PR-A / baseline, backup, build identification**. Runtime re
 ## Non-negotiable invariants
 
 - Godot 4.3-compatible GDScript. Keep static typing where supported.
-- Preserve 7 equipment slots, 60 inventory slots, 5 rarity IDs, 6 classes and x1/x2/x5.
+- Preserve 7 equipment slots, 60 inventory slots, 6 rarity IDs (Normal/Magic/Rare/Unique/Legendary/Epic), 6 classes and x1/x2/x5.
 - Rebirth preserves gold, inventory, equipped/locked items, class mastery, permanent progress and settings.
 - View filtering, future pickup policy, and selling existing items are separate actions. A filter change must never sell possessions.
 - Menus must eventually pause ALL simulation through a single coordinator; do not independently force GameState.RUNNING from every close handler.

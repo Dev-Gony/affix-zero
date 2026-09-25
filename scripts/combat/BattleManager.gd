@@ -477,7 +477,8 @@ func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	player.play_hit()
 	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
 	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
-	var damage: int = GameManager.take_damage(raw_damage)
+	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
+	var damage: int = GameManager.take_damage(raw_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
 	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
 	_start_shake(2.0, 0.12)

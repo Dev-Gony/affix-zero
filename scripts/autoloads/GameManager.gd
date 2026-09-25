@@ -56,36 +56,39 @@ var class_base_stats: Dictionary = {
 
 var inventory: Array[Dictionary] = []
 var equipment: Dictionary = {}
+const CLASS_SKILL_BASE_MAX_LEVEL: int = 20
+const CLASS_SKILL_LEVELS_PER_REBIRTH: int = 10
+const EQUIPMENT_ENHANCEMENT_MAX_LEVEL: int = 30
 const CLASS_SKILL_DEFINITIONS: Dictionary = {
 	"warrior": [
-		{"id": "warrior_fury", "name": "격노", "description": "모든 피해 +8% / Lv", "effect": "damage", "value": 0.08, "base_cost": 100, "cost_step": 80},
-		{"id": "warrior_iron_skin", "name": "강철 피부", "description": "받는 피해 -5% / Lv", "effect": "reduction", "value": 0.05, "base_cost": 120, "cost_step": 90},
-		{"id": "warrior_bloodlust", "name": "피의 갈증", "description": "처치 시 최대 HP 2% / Lv 회복", "effect": "heal_on_kill", "value": 2.0, "base_cost": 150, "cost_step": 100},
+		{"id": "warrior_fury", "name": "격노", "description": "모든 피해 +2.5% / Lv", "effect": "damage", "value": 0.025, "base_cost": 100, "cost_step": 80},
+		{"id": "warrior_iron_skin", "name": "강철 피부", "description": "받는 피해 -1.2% / Lv", "effect": "reduction", "value": 0.012, "base_cost": 120, "cost_step": 90},
+		{"id": "warrior_bloodlust", "name": "피의 갈증", "description": "처치 시 최대 HP 0.35% / Lv 회복", "effect": "heal_on_kill", "value": 0.35, "base_cost": 150, "cost_step": 100},
 	],
 	"mage": [
-		{"id": "mage_spell_power", "name": "주문 증폭", "description": "모든 피해 +10% / Lv", "effect": "damage", "value": 0.10, "base_cost": 110, "cost_step": 85},
-		{"id": "mage_arcane_focus", "name": "비전 집중", "description": "치명타 +2.5% / Lv", "effect": "crit", "value": 2.5, "base_cost": 130, "cost_step": 95},
-		{"id": "mage_quick_cast", "name": "고속 시전", "description": "공격 속도 +0.05 / Lv", "effect": "speed", "value": 0.05, "base_cost": 150, "cost_step": 105},
+		{"id": "mage_spell_power", "name": "주문 증폭", "description": "모든 피해 +2.8% / Lv", "effect": "damage", "value": 0.028, "base_cost": 110, "cost_step": 85},
+		{"id": "mage_arcane_focus", "name": "비전 집중", "description": "치명타 +0.8% / Lv", "effect": "crit", "value": 0.8, "base_cost": 130, "cost_step": 95},
+		{"id": "mage_quick_cast", "name": "고속 시전", "description": "공격 속도 +0.012 / Lv", "effect": "speed", "value": 0.012, "base_cost": 150, "cost_step": 105},
 	],
 	"knight": [
-		{"id": "knight_bulwark", "name": "철벽", "description": "받는 피해 -7% / Lv", "effect": "reduction", "value": 0.07, "base_cost": 120, "cost_step": 90},
-		{"id": "knight_fortitude", "name": "불굴", "description": "최대 HP +6% / Lv", "effect": "max_hp", "value": 0.06, "base_cost": 140, "cost_step": 100},
-		{"id": "knight_smite", "name": "심판의 일격", "description": "모든 피해 +6% / Lv", "effect": "damage", "value": 0.06, "base_cost": 160, "cost_step": 110},
+		{"id": "knight_bulwark", "name": "철벽", "description": "받는 피해 -1.5% / Lv", "effect": "reduction", "value": 0.015, "base_cost": 120, "cost_step": 90},
+		{"id": "knight_fortitude", "name": "불굴", "description": "최대 HP +1.8% / Lv", "effect": "max_hp", "value": 0.018, "base_cost": 140, "cost_step": 100},
+		{"id": "knight_smite", "name": "심판의 일격", "description": "모든 피해 +2.2% / Lv", "effect": "damage", "value": 0.022, "base_cost": 160, "cost_step": 110},
 	],
 	"sage": [
-		{"id": "sage_overload", "name": "마력 과부하", "description": "모든 피해 +9% / Lv", "effect": "damage", "value": 0.09, "base_cost": 130, "cost_step": 95},
-		{"id": "sage_insight", "name": "통찰", "description": "치명타 +3% / Lv", "effect": "crit", "value": 3.0, "base_cost": 150, "cost_step": 105},
-		{"id": "sage_flow", "name": "마력 순환", "description": "공격 속도 +0.04 / Lv", "effect": "speed", "value": 0.04, "base_cost": 170, "cost_step": 115},
+		{"id": "sage_overload", "name": "마력 과부하", "description": "모든 피해 +2.6% / Lv", "effect": "damage", "value": 0.026, "base_cost": 130, "cost_step": 95},
+		{"id": "sage_insight", "name": "통찰", "description": "치명타 +0.9% / Lv", "effect": "crit", "value": 0.9, "base_cost": 150, "cost_step": 105},
+		{"id": "sage_flow", "name": "마력 순환", "description": "공격 속도 +0.010 / Lv", "effect": "speed", "value": 0.010, "base_cost": 170, "cost_step": 115},
 	],
 	"assassin": [
-		{"id": "assassin_lethality", "name": "치명 숙련", "description": "치명타 +4% / Lv", "effect": "crit", "value": 4.0, "base_cost": 130, "cost_step": 95},
-		{"id": "assassin_execution", "name": "처형", "description": "모든 피해 +8% / Lv", "effect": "damage", "value": 0.08, "base_cost": 150, "cost_step": 105},
-		{"id": "assassin_momentum", "name": "가속", "description": "공격 속도 +0.07 / Lv", "effect": "speed", "value": 0.07, "base_cost": 170, "cost_step": 115},
+		{"id": "assassin_lethality", "name": "치명 숙련", "description": "치명타 +1.1% / Lv", "effect": "crit", "value": 1.1, "base_cost": 130, "cost_step": 95},
+		{"id": "assassin_execution", "name": "처형", "description": "모든 피해 +2.4% / Lv", "effect": "damage", "value": 0.024, "base_cost": 150, "cost_step": 105},
+		{"id": "assassin_momentum", "name": "가속", "description": "공격 속도 +0.014 / Lv", "effect": "speed", "value": 0.014, "base_cost": 170, "cost_step": 115},
 	],
 	"saint": [
-		{"id": "saint_blessing", "name": "수호의 축복", "description": "받는 피해 -4% / Lv", "effect": "reduction", "value": 0.04, "base_cost": 130, "cost_step": 95},
-		{"id": "saint_grace", "name": "은총", "description": "최대 HP +5% / Lv", "effect": "max_hp", "value": 0.05, "base_cost": 150, "cost_step": 105},
-		{"id": "saint_recovery", "name": "성스러운 회복", "description": "처치 시 최대 HP 2.5% / Lv 회복", "effect": "heal_on_kill", "value": 2.5, "base_cost": 170, "cost_step": 115},
+		{"id": "saint_blessing", "name": "수호의 축복", "description": "받는 피해 -1.2% / Lv", "effect": "reduction", "value": 0.012, "base_cost": 130, "cost_step": 95},
+		{"id": "saint_grace", "name": "은총", "description": "최대 HP +1.6% / Lv", "effect": "max_hp", "value": 0.016, "base_cost": 150, "cost_step": 105},
+		{"id": "saint_recovery", "name": "성스러운 회복", "description": "처치 시 최대 HP 0.45% / Lv 회복", "effect": "heal_on_kill", "value": 0.45, "base_cost": 170, "cost_step": 115},
 	],
 }
 
@@ -149,8 +152,8 @@ func set_game_state(next_state: GameState) -> void:
 
 
 func set_loot_min_rarity(index: int) -> void:
-	loot_min_rarity_index = clampi(index, 0, 4)
-	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설"][loot_min_rarity_index], Color("d9a441"))
+	loot_min_rarity_index = clampi(index, 0, 5)
+	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설", "에픽"][loot_min_rarity_index], Color("d9a441"))
 
 
 func set_master_volume(value: float) -> void:
@@ -210,9 +213,10 @@ func recalculate_stats(preserve_current: bool = true) -> void:
 
 
 func _apply_item_stats(item: Dictionary) -> void:
+	var enhancement_multiplier: float = equipment_enhancement_stat_multiplier(equipment_enhancement_level(item))
 	var base_stats: Dictionary = item.get("base_stats", {})
 	for stat_name: Variant in base_stats.keys():
-		_add_stat(String(stat_name), float(base_stats[stat_name]))
+		_add_stat(String(stat_name), float(base_stats[stat_name]) * enhancement_multiplier)
 	var affixes: Array = item.get("affixes", [])
 	for affix_data: Variant in affixes:
 		if affix_data is Dictionary:
@@ -233,15 +237,35 @@ func _add_stat(stat_name: String, value: float) -> void:
 		"PEN": penetration += value
 
 
-func take_damage(raw_damage: float) -> int:
-	var defense_reduction: float = clampf(class_skill_effect("reduction"), 0.0, 0.8)
-	var damage: int = maxi(1, int(round(maxf(1.0, raw_damage - def) * (1.0 - defense_reduction))))
+func enemy_armor_penetration(is_boss: bool = false) -> float:
+	var depth_penetration: float = maxf(0.0, float(floor - 10)) * (0.010 if not is_boss else 0.013)
+	return clampf(depth_penetration, 0.0, 0.45 if not is_boss else 0.68)
+
+
+func enemy_minimum_hit_ratio(is_boss: bool = false) -> float:
+	var depth: float = maxf(0.0, float(floor - 20))
+	if is_boss:
+		return clampf(0.04 + depth * 0.0008, 0.04, 0.10)
+	return clampf(depth * 0.00045, 0.0, 0.025)
+
+
+func enemy_maximum_hit_ratio(is_boss: bool = false) -> float:
+	return 0.60 if is_boss else 0.32
+
+
+func take_damage(raw_damage: float, is_boss: bool = false) -> int:
+	var defense_reduction: float = clampf(class_skill_effect("reduction"), 0.0, 0.60)
+	var effective_defense: float = float(def) * (1.0 - enemy_armor_penetration(is_boss))
+	var calculated: float = maxf(1.0, raw_damage - effective_defense) * (1.0 - defense_reduction)
+	var minimum_chip: float = float(max_hp) * enemy_minimum_hit_ratio(is_boss)
+	var maximum_hit: float = float(max_hp) * enemy_maximum_hit_ratio(is_boss)
+	var resolved_damage: float = clampf(maxf(calculated, minimum_chip), 1.0, maxf(1.0, maximum_hit))
+	var damage: int = maxi(1, int(round(resolved_damage)))
 	hp = maxi(0, hp - damage)
 	stats_changed.emit()
 	if hp <= 0:
 		player_died.emit()
 	return damage
-
 
 func heal_after_kill() -> void:
 	var heal_percent: float = vamp + class_skill_effect("heal_on_kill")
@@ -318,6 +342,22 @@ func unequip_item(slot: String) -> void:
 	equipment_changed.emit()
 
 
+func calculate_item_sell_value(item_level: int, rarity_index: int, enhancement_level: int = 0) -> int:
+	var rarity_multipliers: Array[float] = [1.0, 1.6, 2.5, 4.0, 7.0, 16.0]
+	var safe_rarity: int = clampi(rarity_index, 0, rarity_multipliers.size() - 1)
+	var base_value: float = 25.0 + float(maxi(1, item_level)) * 5.0
+	var enhancement_multiplier: float = 1.0 + float(maxi(0, enhancement_level)) * 0.15
+	return maxi(1, roundi(base_value * rarity_multipliers[safe_rarity] * enhancement_multiplier))
+
+
+func item_sell_value(item: Dictionary) -> int:
+	return calculate_item_sell_value(
+		int(item.get("item_level", 1)),
+		int(item.get("rarity_index", 0)),
+		equipment_enhancement_level(item)
+	)
+
+
 func sell_item(item_id: String) -> void:
 	var inventory_index: int = _find_inventory_index(item_id)
 	if inventory_index < 0:
@@ -327,7 +367,7 @@ func sell_item(item_id: String) -> void:
 		notification_requested.emit("잠금 아이템은 판매할 수 없습니다.", Color("ffb86b"))
 		return
 	inventory.pop_at(inventory_index)
-	add_gold(int(item.get("sell_value", 0)))
+	add_gold(item_sell_value(item))
 	inventory_changed.emit()
 
 
@@ -356,31 +396,63 @@ func sell_inventory_below_rarity(_min_rarity_index: int) -> Dictionary:
 func sell_all_normal() -> void:
 	var kept_items: Array[Dictionary] = []
 	var sale_total: int = 0
+	var sold_count: int = 0
 	var protected_count: int = 0
 	for item: Dictionary in inventory:
-		if String(item.get("rarity_id", "")) == "normal" and not bool(item.get("locked", false)):
-			sale_total += int(item.get("sell_value", 0))
+		var is_normal: bool = String(item.get("rarity_id", "")) == "normal"
+		if is_normal and not bool(item.get("locked", false)):
+			sale_total += item_sell_value(item)
+			sold_count += 1
 		else:
-			if String(item.get("rarity_id", "")) == "normal" and bool(item.get("locked", false)):
+			if is_normal and bool(item.get("locked", false)):
 				protected_count += 1
 			kept_items.append(item)
 	inventory = kept_items
 	if sale_total > 0:
 		add_gold(sale_total)
 		var protected_text: String = " · 잠금 %d개 보호" % protected_count if protected_count > 0 else ""
-		notification_requested.emit("일반 장비 판매 +%dG%s" % [sale_total, protected_text], Color("f6c85f"))
+		notification_requested.emit("일반 장비 %d개 판매 +%dG%s" % [sold_count, sale_total, protected_text], Color("f6c85f"))
 	elif protected_count > 0:
 		notification_requested.emit("판매할 일반 장비 없음 · 잠금 %d개 보호" % protected_count, Color("ffd166"))
 	inventory_changed.emit()
 
 
+func sell_all_unlocked() -> Dictionary:
+	var kept_items: Array[Dictionary] = []
+	var sale_total: int = 0
+	var sold_count: int = 0
+	var protected_count: int = 0
+	for item: Dictionary in inventory:
+		if bool(item.get("locked", false)):
+			protected_count += 1
+			kept_items.append(item)
+			continue
+		sale_total += item_sell_value(item)
+		sold_count += 1
+	inventory = kept_items
+	if sale_total > 0:
+		add_gold(sale_total)
+		notification_requested.emit("잠금 제외 전체 %d개 판매 +%dG · 잠금 %d개 보호" % [sold_count, sale_total, protected_count], Color("f6c85f"))
+	else:
+		notification_requested.emit("판매할 장비 없음 · 잠금 %d개 보호" % protected_count, Color("ffd166"))
+	inventory_changed.emit()
+	return {
+		"sold_count": sold_count,
+		"sale_total": sale_total,
+		"protected_count": protected_count,
+	}
+
 func class_skill_definitions(class_id: String = selected_class) -> Array:
 	return Array(CLASS_SKILL_DEFINITIONS.get(class_id, []))
 
 
+func class_skill_max_level() -> int:
+	return CLASS_SKILL_BASE_MAX_LEVEL + rebirth_count * CLASS_SKILL_LEVELS_PER_REBIRTH
+
+
 func class_skill_level(skill_id: String, class_id: String = selected_class) -> int:
 	var levels: Dictionary = Dictionary(class_skill_levels.get(class_id, {}))
-	return int(levels.get(skill_id, 0))
+	return clampi(int(levels.get(skill_id, 0)), 0, class_skill_max_level())
 
 
 func class_skill_effect(effect_name: String, class_id: String = selected_class) -> float:
@@ -397,19 +469,236 @@ func skill_damage_multiplier() -> float:
 	return 1.0 + class_skill_effect("damage")
 
 
-func buy_skill(skill_id: String, base_cost: int, cost_step: int) -> bool:
+func skill_upgrade_cost_for_level(base_cost: int, cost_step: int, level: int) -> int:
+	var linear_cost: float = float(base_cost + level * cost_step)
+	var level_escalation: float = pow(1.18, float(level))
+	var rebirth_escalation: float = 1.0 + float(rebirth_count) * 0.25
+	return maxi(base_cost, roundi(linear_cost * level_escalation * rebirth_escalation))
+
+
+func skill_upgrade_total_cost(skill_id: String, base_cost: int, cost_step: int, level_count: int, class_id: String = selected_class) -> int:
+	if level_count <= 0 or class_id.is_empty():
+		return 0
+	var current_level: int = class_skill_level(skill_id, class_id)
+	var count: int = mini(level_count, maxi(0, class_skill_max_level() - current_level))
+	var total: int = 0
+	for offset: int in count:
+		total += skill_upgrade_cost_for_level(base_cost, cost_step, current_level + offset)
+	return total
+
+
+func max_affordable_skill_upgrades(skill_id: String, base_cost: int, cost_step: int, max_levels: int = 9999) -> int:
+	if selected_class.is_empty() or gold <= 0:
+		return 0
+	var count: int = 0
+	var running_cost: int = 0
+	var current_level: int = class_skill_level(skill_id)
+	var remaining_levels: int = maxi(0, class_skill_max_level() - current_level)
+	var limit: int = mini(max_levels, remaining_levels)
+	while count < limit:
+		var next_cost: int = skill_upgrade_cost_for_level(base_cost, cost_step, current_level + count)
+		if running_cost + next_cost > gold:
+			break
+		running_cost += next_cost
+		count += 1
+	return count
+
+
+func buy_skill_levels(skill_id: String, base_cost: int, cost_step: int, requested_levels: int) -> int:
 	if selected_class.is_empty():
-		return false
+		return 0
+	var affordable: int = max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
+	var purchase_count: int = affordable if requested_levels <= 0 else mini(requested_levels, affordable)
+	if purchase_count <= 0:
+		return 0
+	var total_cost: int = skill_upgrade_total_cost(skill_id, base_cost, cost_step, purchase_count)
+	if not spend_gold(total_cost):
+		return 0
 	var levels: Dictionary = Dictionary(class_skill_levels.get(selected_class, {})).duplicate(true)
 	var current_level: int = int(levels.get(skill_id, 0))
-	var cost: int = base_cost + current_level * cost_step
-	if not spend_gold(cost):
-		return false
-	levels[skill_id] = current_level + 1
+	levels[skill_id] = mini(current_level + purchase_count, class_skill_max_level())
 	class_skill_levels[selected_class] = levels
 	recalculate_stats()
 	skills_changed.emit()
-	return true
+	return purchase_count
+
+
+func buy_skill(skill_id: String, base_cost: int, cost_step: int) -> bool:
+	return buy_skill_levels(skill_id, base_cost, cost_step, 1) == 1
+
+
+func equipment_enhancement_level(item: Dictionary) -> int:
+	return clampi(int(item.get("enhancement_level", 0)), 0, EQUIPMENT_ENHANCEMENT_MAX_LEVEL)
+
+
+func equipment_enhancement_stat_multiplier(level: int) -> float:
+	var safe_level: int = clampi(level, 0, EQUIPMENT_ENHANCEMENT_MAX_LEVEL)
+	var multiplier: float = 1.0 + float(safe_level) * 0.05
+	if safe_level >= 10:
+		multiplier += 0.25
+	if safe_level >= 20:
+		multiplier += 0.50
+	if safe_level >= 30:
+		multiplier += 1.00
+	return multiplier
+
+
+func equipment_enhancement_cost(item: Dictionary) -> int:
+	var level: int = equipment_enhancement_level(item)
+	if level >= EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		return 0
+	var item_level: int = maxi(1, int(item.get("item_level", 1)))
+	var target_level: int = level + 1
+	var base: float = float(item_level * 500 + target_level * 2500)
+	return maxi(1, roundi(base * pow(1.55, float(level))))
+
+
+func equipment_enhancement_success_rate(target_level: int) -> float:
+	match target_level:
+		1, 2, 3, 4:
+			return 100.0
+		5:
+			return 80.0
+		6:
+			return 65.0
+		7:
+			return 50.0
+		8:
+			return 35.0
+		9:
+			return 25.0
+		10:
+			return 5.0
+		11:
+			return 22.0
+		12:
+			return 18.0
+		13:
+			return 14.0
+		14:
+			return 10.0
+		15:
+			return 8.0
+		16:
+			return 6.0
+		17:
+			return 4.0
+		18:
+			return 2.5
+		19:
+			return 1.5
+		20:
+			return 0.3
+		21:
+			return 1.2
+		22:
+			return 1.0
+		23:
+			return 0.8
+		24:
+			return 0.6
+		25:
+			return 0.5
+		26:
+			return 0.4
+		27:
+			return 0.3
+		28:
+			return 0.2
+		29:
+			return 0.1
+		30:
+			return 0.01
+	return 0.0
+
+
+func equipment_enhancement_destroy_chance(target_level: int) -> float:
+	if target_level == 10:
+		return 3.0
+	if target_level == 20:
+		return 20.0
+	if target_level == 30:
+		return 60.0
+	if target_level >= 25:
+		return 10.0
+	if target_level >= 21:
+		return 5.0
+	if target_level >= 15:
+		return 1.0
+	return 0.0
+
+
+func equipment_enhancement_downgrade(target_level: int) -> int:
+	if target_level <= 4:
+		return 0
+	if target_level == 10:
+		return 3
+	if target_level == 20:
+		return 5
+	if target_level == 30:
+		return 10
+	if target_level >= 21:
+		return 3
+	if target_level >= 15:
+		return 2
+	return 1
+
+
+func equipment_enhancement_risk_text(item: Dictionary) -> String:
+	var current_level: int = equipment_enhancement_level(item)
+	if current_level >= EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		return "최대 강화"
+	var target_level: int = current_level + 1
+	var rate: float = equipment_enhancement_success_rate(target_level)
+	var downgrade: int = equipment_enhancement_downgrade(target_level)
+	var destroy: float = equipment_enhancement_destroy_chance(target_level)
+	var failure_text: String = "유지" if downgrade <= 0 else "-%d 하락" % downgrade
+	if destroy > 0.0:
+		failure_text += " · 파괴 %.2f%%" % destroy
+	return "+%d → +%d · 성공 %.2f%% · 실패 %s" % [current_level, target_level, rate, failure_text]
+
+
+func enhance_equipped_item(slot: String) -> Dictionary:
+	var item: Dictionary = Dictionary(equipment.get(slot, {})).duplicate(true)
+	if item.is_empty():
+		return {"status": "empty"}
+	var current_level: int = equipment_enhancement_level(item)
+	if current_level >= EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		return {"status": "max", "level": current_level}
+	var cost: int = equipment_enhancement_cost(item)
+	if gold < cost:
+		notification_requested.emit("강화 골드 부족 · 필요 %dG" % cost, Color("ffb86b"))
+		return {"status": "insufficient_gold", "cost": cost, "level": current_level}
+	gold -= cost
+	var target_level: int = current_level + 1
+	var success_rate: float = equipment_enhancement_success_rate(target_level)
+	if randf() * 100.0 < success_rate:
+		item["enhancement_level"] = target_level
+		equipment[slot] = item
+		recalculate_stats()
+		equipment_changed.emit()
+		stats_changed.emit()
+		notification_requested.emit("%s +%d 강화 성공" % [String(item.get("name", "장비")), target_level], Color("75e68a"))
+		return {"status": "success", "level": target_level, "cost": cost}
+
+	var destroy_chance: float = equipment_enhancement_destroy_chance(target_level)
+	if destroy_chance > 0.0 and randf() * 100.0 < destroy_chance:
+		equipment[slot] = {}
+		recalculate_stats()
+		equipment_changed.emit()
+		stats_changed.emit()
+		notification_requested.emit("%s 강화 실패 · 장비 파괴" % String(item.get("name", "장비")), Color("ff4d5a"))
+		return {"status": "destroyed", "level": current_level, "cost": cost}
+
+	var downgrade: int = equipment_enhancement_downgrade(target_level)
+	var next_level: int = maxi(0, current_level - downgrade)
+	item["enhancement_level"] = next_level
+	equipment[slot] = item
+	recalculate_stats()
+	equipment_changed.emit()
+	stats_changed.emit()
+	notification_requested.emit("%s 강화 실패 · +%d → +%d" % [String(item.get("name", "장비")), current_level, next_level], Color("ffb86b"))
+	return {"status": "failed", "level": next_level, "cost": cost}
 
 
 func record_kill() -> void:
@@ -542,7 +831,7 @@ func apply_save_dict(data: Dictionary) -> void:
 	hp = clampi(int(data.get("hp", max_hp)), 0, max_hp)
 	mp = clampi(int(data.get("mp", max_mp)), 0, max_mp)
 	set_speed_multiplier(float(data.get("speed_multiplier", 1.0)))
-	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 4)
+	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 5)
 	set_master_volume(float(data.get("master_volume", 1.0)))
 	set_fullscreen(bool(data.get("fullscreen_enabled", false)))
 	set_autosave(bool(data.get("autosave_enabled", true)))

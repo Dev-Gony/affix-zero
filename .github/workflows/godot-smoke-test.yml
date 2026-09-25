@@ -69,6 +69,15 @@ jobs:
           grep -q "PR_B_SAFETY PASSED" build/pr-b/safety.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/pr-b/safety.log
 
+      - name: Verify gameplay V3 balance contracts
+        shell: bash
+        run: |
+          mkdir -p build/gameplay-v3
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/gameplay_v3_balance.tscn -- --affix-test-mode 2>&1 | tee build/gameplay-v3/balance.log
+          grep -q "GAMEPLAY_V3_BALANCE PASSED" build/gameplay-v3/balance.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v3/balance.log
+
       - name: Run existing gameplay smoke test
         shell: bash
         run: |
@@ -113,6 +122,7 @@ jobs:
           path: |
             build/pr-a/
             build/pr-b/
+            build/gameplay-v3/
           if-no-files-found: warn
 
       - name: Upload Windows playable build

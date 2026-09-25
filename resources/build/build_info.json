@@ -1,9 +1,9 @@
 {
-  "version": "uiux-pr-b.1",
-  "stage": "PR-B",
+  "version": "g3.3",
+  "stage": "GAMEPLAY-V3",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/uiux-pr-b-safety",
+  "branch": "dev/gameplay-v3-balance",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }

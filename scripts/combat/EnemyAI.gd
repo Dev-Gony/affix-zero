@@ -43,23 +43,46 @@ var _death_duration: float = 0.28
 var _is_targeted: bool = false
 
 
+static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictionary:
+	var depth: float = maxf(0.0, current_floor - 1)
+	var hp_scale: float = 1.0 + depth * 0.22 + depth * depth * 0.025
+	var attack_scale: float = 1.0 + depth * 0.16 + depth * depth * 0.018
+	var defense_scale: float = 1.0 + depth * 0.12 + depth * depth * 0.010
+	if is_boss:
+		hp_scale *= 3.4
+		attack_scale *= 1.70
+		defense_scale *= 1.35
+	var late_depth: float = maxf(0.0, depth - 9.0)
+	return {
+		"hp": hp_scale,
+		"attack": attack_scale,
+		"defense": defense_scale,
+		# Flat pressure starts after floor 10 so the first run remains readable,
+		# while persistent rebirth gear cannot trivialize later floors forever.
+		"flat_attack": late_depth * 15.0,
+		"flat_defense": late_depth * 2.0,
+	}
+
+
 func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bounds: Rect2 = Rect2()) -> void:
 	enemy_data = data
 	target = player_target
 	movement_bounds = arena_bounds
-	var scale_factor: float = 1.0 + (current_floor - 1) * 0.3
-	max_hp = data.base_hp * scale_factor
+	var scaling: Dictionary = floor_scaling(current_floor, data.behavior == "boss")
+	max_hp = data.base_hp * float(scaling.get("hp", 1.0))
 	hp = max_hp
-	attack = data.base_atk * scale_factor
-	defense = data.base_def * scale_factor
-	move_speed = data.move_speed
-	attack_cooldown = data.attack_cooldown
+	attack = data.base_atk * float(scaling.get("attack", 1.0)) + float(scaling.get("flat_attack", 0.0))
+	defense = data.base_def * float(scaling.get("defense", 1.0)) + float(scaling.get("flat_defense", 0.0))
+	var depth: float = maxf(0.0, current_floor - 1)
+	move_speed = data.move_speed * minf(1.65, 1.0 + depth * 0.010)
+	attack_cooldown = maxf(0.45, data.attack_cooldown * maxf(0.55, 1.0 - depth * 0.008))
 	behavior = data.behavior
-	attack_range = data.attack_range
-	_attack_windup_duration = data.attack_windup
+	var base_attack_range: float = data.attack_range if data.attack_range > 0.0 else data.radius + 11.0
+	attack_range = base_attack_range + minf(24.0, depth * 0.35)
+	_attack_windup_duration = data.attack_windup * maxf(0.50, 1.0 - depth * 0.006)
 	radius = data.radius
 	xp_reward = maxi(1, roundi(data.xp_reward * (1.0 + (current_floor - 1) * 0.12)))
-	gold_reward = maxi(1, roundi(data.gold_reward * (1.0 + (current_floor - 1) * 0.10)))
+	gold_reward = maxi(1, roundi(data.gold_reward * (1.0 + (current_floor - 1) * 0.08)))
 	body_color = data.color
 	queue_redraw()
 
