@@ -455,3 +455,123 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are noticeable, Legendary/Epic feel exceptional, and x5 combat still remains readable.
+
+
+## 2026-09-25 — UIUX V2.0 Full Management Overhaul
+
+### Problem
+
+- The existing UI was functionally complete but visually read like a developer/admin overlay rather than a finished game interface.
+- Equipment, inventory, skills, rebirth and information all shared the same narrow side-modal treatment, so important systems lacked distinct hierarchy.
+- The equipment screen compressed seven slots, the character portrait, growth information and actions into tiny 3x3 cards.
+- The inventory stacked the item grid above the detail pane, forcing the player to scan vertically instead of comparing gear and details at the same time.
+- The brown/red border language competed with rarity colors and made nearly every panel look equally urgent.
+- The bottom dock, modal window, HUD and notifications all remained visually active at once, creating hierarchy noise.
+
+### Cause
+
+- The original UI was built incrementally around a 316px-wide management popup.
+- New features were added inside the existing shell instead of revisiting the shell itself.
+- The same compact card patterns were reused for desktop management even after inventory, enhancement and skill systems became denser.
+- Navigation treated the management window as a secondary popup, even though it had become the main place where players convert idle farming into progression.
+
+### Reference UX
+
+- **Survivor.io / 탕탕특공대**
+  - Character-centered equipment composition.
+  - Strong rarity-colored equipment cards.
+  - Dense inventory grid with clear upgrade affordances.
+  - Management screens feel like primary game surfaces, not debug popups.
+- **Hero Siege**
+  - Dark desktop-first management panels.
+  - Dense information without losing readability.
+  - Strong tab/system separation and detailed item inspection.
+- **AFFIX: ZERO direction**
+  - Keep the dark ARPG mood and information density of Hero Siege.
+  - Borrow the immediate equipment/inventory hierarchy and reward readability of Survivor.io.
+  - Do not copy either UI literally; preserve the game's own pixel-dungeon identity.
+
+### Decision
+
+- Replace the narrow right-side management popup with an almost full-width desktop management hub.
+- Keep combat running behind a stronger dim layer, preserving the idle-game identity while making management the visual focus.
+- Add dedicated in-window top navigation for 장비 / 가방 / 스킬 / 환생 / 정보.
+- Hide the compact bottom dock while the management hub is open and restore it after closing.
+- Keep the character portrait at the visual center of the equipment composition and enlarge all equipment cards.
+- Rebuild inventory as an **8-column grid + persistent right-side detail/comparison pane**.
+- Use slate/blue-black structural colors and reserve gold for selection/progression so rarity colors remain meaningful.
+- Make skills and rebirth visually communicate progression through bars, not text alone.
+- Show a green inventory upgrade arrow only when an item is a clean visible-stat improvement with no visible downgrade.
+- Fix ESC behavior so closing management does not immediately open the pause menu.
+
+### Implementation
+
+- Management hub expanded to roughly the full 640px desktop canvas:
+  - 612x346 primary panel.
+  - Dedicated header with section title, current gold and close affordance.
+  - Persistent five-section navigation row.
+  - 596px-wide content region.
+- Combat dock is now compact and visible only when management is closed.
+- Equipment:
+  - 3x3 centered composition preserved, but cards expanded from ~88px to ~176px.
+  - Character portrait stays in the center cell.
+  - Larger equipment icons, labels and enhancement actions.
+  - Strong rarity border color while structural chrome remains neutral.
+- Inventory:
+  - 8-column scrollable item grid.
+  - Persistent 188px detail/comparison pane on the right.
+  - Larger item cells and clearer filter/sell controls.
+  - Strict-upgrade green arrow derived from the existing comparison system.
+- Skills:
+  - Added visible level progress bars.
+  - Increased card/action widths for desktop readability.
+- Rebirth:
+  - Added explicit level-to-rebirth progress bar.
+- Theme:
+  - Replaced most brown/red structural chrome with slate/blue-black panels.
+  - Gold is used for selected/progression states rather than every border.
+- Interaction:
+  - ESC closes management only; a second ESC can then open pause/settings.
+  - Top management navigation switches tabs without closing the hub.
+- Added a dedicated `uiux_v2_overhaul` regression contract.
+- Build identity advanced to **uiux-v2.0**.
+
+### Failure / Revision
+
+- The previous incremental UI approach kept solving local clipping problems while preserving the larger hierarchy problem.
+- During V2 implementation, the old ESC flow was identified as a UX bug: pressing ESC while management was open closed management **and immediately opened pause/settings** in the same keypress.
+- V2 changes ESC to perform one state transition per keypress.
+- The redesign intentionally does not replace the existing game art or create a new asset pack yet; layout/hierarchy must be validated first before spending time on decorative art.
+
+### Verification
+
+Automated contracts cover:
+
+- Management hub width >= 600px and height >= 340px.
+- Hub positioned as a primary screen rather than a side popup.
+- Five in-window navigation buttons exist.
+- Inventory uses eight columns.
+- Inventory maintains a persistent detail pane >= 170px wide.
+- Character portrait remains in the equipment layout center.
+- Opening management hides the compact combat dock.
+- Switching top tabs does not close management.
+- Closing management restores the compact dock.
+- Equipment cards remain >= 170px wide.
+
+### Before / After
+
+| Area | Before | UIUX V2 |
+|---|---|---|
+| Management shell | 316px right-side popup | 612px primary desktop hub |
+| Navigation | Bottom dock only | In-window top navigation + compact closed-state dock |
+| Equipment | Tiny 3x3 admin-like cards | Large character-centered loadout composition |
+| Inventory | Grid stacked above details | 8-column grid + persistent right detail pane |
+| Skills | Text-heavy rows | Level bars + roomier actions |
+| Rebirth | Text summary + buttons | Explicit progression bar + permanent upgrades |
+| Color hierarchy | Brown/red chrome everywhere | Slate structure, gold progression, rarity colors reserved for loot |
+| ESC behavior | Close management then open pause immediately | One state transition per keypress |
+| Overall read | Functional debug overlay | Dedicated game management surface |
+
+### Windows play approval
+
+Pending. The critical review is now visual rather than mechanical: panel scale, information hierarchy, equipment/inventory scanning speed, management-vs-combat separation, and whether the larger desktop hub feels like a finished game screen rather than a developer overlay.
