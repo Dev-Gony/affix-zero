@@ -107,3 +107,44 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Boss separation: no elite-affix overlap observed
 - Bugs found: none in tested elite flow
 - Merge approval: gameplay validated; PR remains unmerged by policy
+
+
+## G4.1 — Boss Telegraph / Auto-Evade
+
+### Required capture set
+
+- [ ] **Ground Slam telegraph**
+  - Reach a boss floor.
+  - Capture the red `마왕 강타` danger circle before impact.
+  - Confirm the boss visibly pauses during the warning.
+
+- [ ] **Doom Mark telegraph**
+  - Capture the purple `파멸 표식` circle locked to the character's original position.
+  - Confirm the character immediately abandons normal chase movement and exits the marked area.
+
+- [ ] **Auto-evade result**
+  - Capture a successful `회피!` result.
+  - Confirm ordinary auto-hunt resumes immediately after the pattern resolves.
+
+- [ ] **x5 readability**
+  - Run the boss at x5.
+  - Confirm the warning circle/countdown is still understandable and the character's evasive movement remains visible.
+
+- [ ] **Fairness / danger**
+  - Confirm the boss still feels threatening.
+  - Confirm special attacks do not feel like unavoidable hits.
+  - Note whether the new cast pauses make the boss too easy.
+
+### G4.1 validation notes
+
+- Build commit:
+- Boss floor:
+- Ground Slam visibility:
+- Ground Slam evade:
+- Doom Mark visibility:
+- Doom Mark evade:
+- x5 readability:
+- Boss difficulty after change: Too easy / Good / Too hard
+- Unavoidable-looking hits:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
