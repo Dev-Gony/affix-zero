@@ -1316,6 +1316,7 @@ func _refresh_rebirth() -> void:
 	_rebirth_content.add_child(upgrade_title)
 
 	var upgrades := GridContainer.new()
+	upgrades.name = "PermanentUpgradeGrid"
 	upgrades.columns = 4
 	upgrades.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	upgrades.add_theme_constant_override("h_separation", 6)
