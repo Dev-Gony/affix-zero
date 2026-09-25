@@ -1,15 +1,16 @@
 extends Node2D
 class_name EnemyAI
 
-const ENEMY_TEXTURES := {
-	"slime": preload("res://assets/cc0/pixelboy/slime.png"),
-	"bat": preload("res://assets/cc0/pixelboy/bat.png"),
-	"skeleton": preload("res://assets/cc0/pixelboy/skeleton.png"),
-	"goblin": preload("res://assets/cc0/pixelboy/goblin.png"),
-	"dark_knight": preload("res://assets/cc0/pixelboy/dark_knight.png"),
-	"lich": preload("res://assets/cc0/pixelboy/lich.png"),
-	"dragon": preload("res://assets/cc0/pixelboy/dragon.png"),
-	"demon_lord": preload("res://assets/cc0/pixelboy/demon_lord.png"),
+const ENEMY_ATLAS: Texture2D = preload("res://assets/sprites/enemy_atlas_alpha.png")
+const ENEMY_REGIONS: Dictionary = {
+	"slime": Vector2i(0, 0),
+	"bat": Vector2i(1, 0),
+	"skeleton": Vector2i(2, 0),
+	"goblin": Vector2i(3, 0),
+	"dark_knight": Vector2i(0, 1),
+	"lich": Vector2i(1, 1),
+	"dragon": Vector2i(2, 1),
+	"demon_lord": Vector2i(3, 1),
 }
 
 const ELITE_AFFIXES: Dictionary = {
@@ -270,7 +271,9 @@ func _die() -> void:
 
 func _draw() -> void:
 	var enemy_id: String = enemy_data.id if enemy_data != null else "slime"
-	var texture: Texture2D = ENEMY_TEXTURES.get(enemy_id, ENEMY_TEXTURES["slime"])
+	var atlas_cell: Vector2i = ENEMY_REGIONS.get(enemy_id, Vector2i.ZERO)
+	var atlas_cell_size := Vector2(float(ENEMY_ATLAS.get_width()) / 4.0, float(ENEMY_ATLAS.get_height()) / 2.0)
+	var atlas_source := Rect2(Vector2(atlas_cell) * atlas_cell_size, atlas_cell_size)
 	var reveal: float = clampf(1.0 - _spawn_reveal_left / 0.32, 0.0, 1.0)
 	var death_alpha: float = clampf(_death_time_left / _death_duration, 0.0, 1.0) if _dead else 1.0
 	var alpha: float = reveal * death_alpha
@@ -299,7 +302,12 @@ func _draw() -> void:
 		draw_arc(Vector2.ZERO, sprite_size * 0.52, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
 	var death_scale_y: float = maxf(0.15, death_alpha) if _dead else 1.0
 	draw_set_transform(Vector2(0, bob), 0.0, Vector2(1.0, death_scale_y))
-	draw_texture_rect(texture, Rect2(-sprite_size * 0.5, -sprite_size * 0.62, sprite_size, sprite_size), false, sprite_modulate)
+	draw_texture_rect_region(
+		ENEMY_ATLAS,
+		Rect2(-sprite_size * 0.58, -sprite_size * 0.72, sprite_size * 1.16, sprite_size * 1.16),
+		atlas_source,
+		sprite_modulate
+	)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 	var bar_width: float = maxf(20.0, sprite_size * 0.72)
 	var bar_y: float = -sprite_size * 0.58 - 5.0
