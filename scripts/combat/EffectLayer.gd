@@ -213,6 +213,8 @@ func show_drop(world_position: Vector2, item: Dictionary) -> void:
 		_loot_icons.append({
 			"position": world_position,
 			"icon_index": icon_index,
+			"slot": String(item.get("slot", "")),
+			"base_id": String(item.get("base_id", "")),
 			"color": color,
 			"rarity_index": rarity_index,
 			"life": duration,
@@ -368,14 +370,75 @@ func _draw() -> void:
 		if rarity_index >= 4:
 			draw_rect(Rect2(position + Vector2(-beam_width * 3.0, -beam_height * 0.48), Vector2(beam_width * 6.0, beam_height * 0.48)), Color(rarity_color, alpha * 0.04), true)
 		draw_circle(position, 9.0 + rarity_index * 1.4, Color(rarity_color, alpha * (0.10 + rarity_index * 0.025)))
-		var icon_index: int = int(loot_icon["icon_index"])
-		var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
-		var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
-		var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
 		var icon_size: float = 18.0 + minf(4.0, float(rarity_index))
-		draw_texture_rect_region(ITEM_BASE_ATLAS, Rect2(position - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size), source, Color(1, 1, 1, alpha))
+		_draw_loot_symbol(
+			position,
+			String(loot_icon.get("slot", "")),
+			String(loot_icon.get("base_id", "")),
+			rarity_color,
+			alpha,
+			icon_size
+		)
 	for text_data: Dictionary in _texts:
 		var alpha: float = clampf(float(text_data["life"]) / float(text_data["duration"]), 0.0, 1.0)
 		var color: Color = text_data["color"]
 		color.a *= alpha
 		draw_string(ThemeDB.fallback_font, Vector2(text_data["position"]), String(text_data["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, int(text_data["size"]), color)
+
+
+func _draw_loot_symbol(position: Vector2, slot: String, base_id: String, rarity_color: Color, alpha: float, icon_size: float) -> void:
+	var accent: Color = Color("dbe5ef")
+	if base_id.contains("dragon") or base_id.contains("ruby"):
+		accent = Color("ff654f")
+	elif base_id.contains("magic"):
+		accent = Color("b076ff")
+	elif base_id.contains("divine") or base_id.contains("gold") or base_id.contains("gale"):
+		accent = Color("ffd86b")
+	elif base_id.contains("diamond") or base_id.contains("crystal") or base_id.contains("mithril"):
+		accent = Color("8eeaff")
+	elif base_id.contains("leather") or base_id.contains("sandals"):
+		accent = Color("b98255")
+	accent.a = alpha
+	var scale: float = icon_size / 20.0
+	match slot:
+		"weapon":
+			if base_id.contains("axe"):
+				draw_line(position + Vector2(-2, 7) * scale, position + Vector2(2, -8) * scale, Color("8b5a2b", alpha), 2.2 * scale)
+				draw_colored_polygon(PackedVector2Array([
+					position + Vector2(1, -8) * scale,
+					position + Vector2(9, -6) * scale,
+					position + Vector2(7, 1) * scale,
+					position + Vector2(0, -1) * scale,
+				]), accent)
+			else:
+				draw_line(position + Vector2(0, 8) * scale, position + Vector2(0, -9) * scale, accent, 3.0 * scale)
+				draw_line(position + Vector2(-5, 5) * scale, position + Vector2(5, 5) * scale, Color(rarity_color, alpha), 2.0 * scale)
+		"helmet":
+			draw_arc(position, 8.0 * scale, PI, TAU, 16, accent, 3.0 * scale, true)
+			draw_line(position + Vector2(-8, 1) * scale, position + Vector2(8, 1) * scale, accent, 3.0 * scale)
+		"armor":
+			draw_rect(Rect2(position + Vector2(-7, -8) * scale, Vector2(14, 16) * scale), Color(accent, alpha * 0.9), true)
+			draw_rect(Rect2(position + Vector2(-3, -8) * scale, Vector2(6, 16) * scale), Color(accent.lightened(0.15), alpha), true)
+		"gloves":
+			draw_rect(Rect2(position + Vector2(-6, -7) * scale, Vector2(11, 14) * scale), accent, true)
+			for i: int in 4:
+				draw_line(position + Vector2(-6 + i * 3, -7) * scale, position + Vector2(-6 + i * 3, -10) * scale, accent, 1.5 * scale)
+		"boots":
+			draw_rect(Rect2(position + Vector2(-8, -8) * scale, Vector2(6, 13) * scale), accent, true)
+			draw_rect(Rect2(position + Vector2(2, -8) * scale, Vector2(6, 13) * scale), accent, true)
+			draw_line(position + Vector2(-8, 5) * scale, position + Vector2(-1, 7) * scale, accent, 3.0 * scale)
+			draw_line(position + Vector2(2, 5) * scale, position + Vector2(9, 7) * scale, accent, 3.0 * scale)
+		"ring":
+			draw_arc(position, 7.0 * scale, 0.0, TAU, 18, accent, 3.0 * scale, true)
+			draw_circle(position + Vector2(0, -7) * scale, 2.5 * scale, Color(rarity_color, alpha))
+		"amulet":
+			draw_arc(position + Vector2(0, -2) * scale, 8.0 * scale, PI * 0.15, PI * 0.85, 16, Color(rarity_color, alpha), 1.5 * scale, true)
+			draw_colored_polygon(PackedVector2Array([
+				position + Vector2(-4, -1) * scale,
+				position + Vector2(0, -8) * scale,
+				position + Vector2(4, -1) * scale,
+				position + Vector2(0, 7) * scale,
+			]), accent)
+		_:
+			draw_circle(position, 5.0 * scale, accent)
+	draw_circle(position, 10.0 * scale, Color(rarity_color, alpha * 0.10))
