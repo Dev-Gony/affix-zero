@@ -1,0 +1,73 @@
+name: E0 Godot 4.7.2
+
+on:
+  push:
+    branches: [chore/r0-preservation]
+    paths:
+      - 'experiments/e0-godot/**'
+      - '.github/workflows/e0-godot-47.yml'
+  pull_request:
+    paths:
+      - 'experiments/e0-godot/**'
+      - '.github/workflows/e0-godot-47.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: e0-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  e0-contracts:
+    runs-on: ubuntu-latest
+    container:
+      image: barichello/godot-ci:4.7.2
+    timeout-minutes: 10
+    env:
+      XDG_DATA_HOME: /tmp/affix-e0-ci-data
+      XDG_CONFIG_HOME: /tmp/affix-e0-ci-config
+      LIBGL_ALWAYS_SOFTWARE: "1"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Install headless font dependency
+        shell: bash
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends fontconfig libfontconfig1
+      - name: Import isolated E0 project
+        shell: bash
+        run: |
+          set -o pipefail
+          godot --headless --editor --path experiments/e0-godot --import 2>&1 | tee /tmp/e0-import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script|No loader found for resource" /tmp/e0-import.log
+      - name: Run E0-C01 contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c01_test.tscn 2>&1 | tee /tmp/e0-c01.log
+          grep -q "E0_C01_TEST PASSED" /tmp/e0-c01.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c01.log
+      - name: Run E0-C02 contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c02_test.tscn 2>&1 | tee /tmp/e0-c02.log
+          grep -q "E0_C02_TEST PASSED" /tmp/e0-c02.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c02.log
+      - name: Run E0-C03 harness contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c03_test.tscn 2>&1 | tee /tmp/e0-c03.log
+          grep -q "E0_C03_TEST PASSED" /tmp/e0-c03.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c03.log
+      - name: Run V0 vertical slice smoke
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/v0_smoke_test.tscn 2>&1 | tee /tmp/v0-smoke.log
+          grep -q "V0_SMOKE_TEST PASSED" /tmp/v0-smoke.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/v0-smoke.log

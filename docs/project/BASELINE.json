@@ -1,0 +1,21 @@
+{
+  "schema_version": 2,
+  "recorded_date_kst": "2026-09-26",
+  "repository": "Dev-Gony/affix-zero",
+  "work_branch": "chore/r0-preservation",
+  "work_pr": 18,
+  "stage": "ART_RESET_01_REMOVAL_AND_IMAGE_FREE_STARTUP_PASS",
+  "reset_base_sha": "46ad2db3538734d3aed48a119856f32862f7c164",
+  "verified_code_sha": "137b92a9644d39a8374353b10291b991a3658618",
+  "verified_workflow_run": 36167970258,
+  "verification_file": "ART_RESET_RESULT.json",
+  "previous_art_status": "REJECTED_DO_NOT_REUSE",
+  "previous_visual_tests": "RETIRED_NOT_CLAIMED_PASSED",
+  "gameplay_code_policy": "EXISTING_FILES_BYTE_PRESERVED_RENDER_PATHS_DISABLED",
+  "legacy_save_touched": false,
+  "git_history_rewritten": false,
+  "engine": {"legacy": "Godot 4.3", "current_project_target": "Godot 4.7.2 Standard", "renderer": "gl_compatibility", "changed_in_this_task": false},
+  "new_art": {"direction": "bright outdoor casual top-down RPG", "primary_reference": "Tiny Swords", "candidate_for_public_repo": "author-provided TS_old version_CC0 Licensed, requires package inspection", "alternative": "Ninja Adventure CC0", "downloaded": false, "imported": false, "frame_validated": false, "user_approved": false},
+  "next_task": "ART-02: obtain original licensed archive, inspect animations, integrate first bright field without rejected assets",
+  "reload_remote_before_work": true
+}

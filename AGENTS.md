@@ -1,46 +1,27 @@
-# AFFIX: ZERO — implementation rules
+# AFFIX: ZERO 현재 개발 규칙
 
-## Authority and current milestone
+## 최우선 결정: ART-RESET-01
 
-This project is developed through ChatGPT + GitHub PRs. Codex CLI is not required.
-Read `docs/uiux-v1/README.md`, `docs/uiux-v1/spec_lock.json`, and `docs/uiux-v1/IMPLEMENTATION_ORDER.md` before editing.
-The user-approved **AFFIX_ZERO_UIUX_MASTER_v1.0.md** and its contracts/QA package are the design authority. Its exact package and document hashes are pinned in spec_lock.json. The package is a detached handoff, not an implemented game or a claim that all its files already exist in this repository. If implementing a later milestone without that handoff, obtain it before guessing missing details.
+2026-09-26 사용자는 기존 게임 이미지 전부 삭제 및 기존 다크 판타지 시각 방향 폐기를 명시적으로 요청했다. 이전 아틀라스, 배경, 아이콘, CC0 타일, E0 SVG를 재사용하거나 Git 과거에서 복원하지 않는다. 색 변경, 크롭, 재생성 참고 이미지로 재활용하는 것도 금지한다. 옛 이미지 경로가 남은 소스는 게임 규칙 보존용이지 디자인 참고 자료가 아니다.
 
-Precedence: explicit user change recorded in a decision record > approved v1.0 master/contracts > these engineering rules > stage-specific design pages. Files under `docs/uiux-v1/archive/` are historical evidence, not instructions.
+현재 진입점은 docs/project/HANDOFF.md, ART_RESET.md, ART_DIRECTION.md, ASSET_CANDIDATES.md, ASSET_INTAKE.md다. 이 결정이 과거 docs/history, docs/portfolio/archive, docs/project/archive 및 과거 엔진/아트 지침의 시각 관련 부분을 대체한다. 옛 설계 문서를 현재 승인 자료로 취급하지 않는다.
 
-Current milestone: **PR-A / baseline, backup, build identification**. Runtime remains 640x400, default window 1280x800 in PR-A. Target UI1280x720/world640x360 is implemented only in PR-C. Do not partially rescale the world, change movement ranges, or insert future UI while doing PR-A.
+## 보존할 것
 
-## Non-negotiable invariants
+자동사냥/핵앤슬래시/원정 선택의 플레이 방향, 전투 판정, 아이템·스킬 정의, 어픽스, 7슬롯 장비, 가방 60칸, 6등급/6직업, 강화/환생/펫/시즌 로드맵, 실제 사용자 저장 소유권은 유지한다. 이번 작업은 밸런스 변경이나 저장 초기화가 아니다. 기존 scripts/resources 및 E0/V0 규칙 소스는 바이트 보존하고 .gdignore로 과거 화면 실행 경로와 분리한다. 이 안의 옛 팔레트/그리기 코드를 새 화면으로 복원하지 않는다.
 
-- Godot 4.3-compatible GDScript. Keep static typing where supported.
-- Preserve 7 equipment slots, 60 inventory slots, 6 rarity IDs (Normal/Magic/Rare/Unique/Legendary/Epic), 6 classes and x1/x2/x5.
-- Rebirth preserves gold, inventory, equipped/locked items, class mastery, permanent progress and settings.
-- View filtering, future pickup policy, and selling existing items are separate actions. A filter change must never sell possessions.
-- Menus must eventually pause ALL simulation through a single coordinator; do not independently force GameState.RUNNING from every close handler.
-- A reward's ownership must not depend on the lifetime of a visual effect.
-- Save failure must not be presented as success. PR-A protects the original input with an immutable raw backup; full atomic saving and controlled exit belong to PR-B.
-- Never downgrade future save versions or silently discard legacy/unknown data.
-- No paid currencies, ads, shops, synthesis, offline rewards, or other scope additions.
-- Use existing approved art until a replacement has separate visual approval. Do not replace sprites with geometric stand-ins and call it an art upgrade.
+## 새 디자인
 
-## Implementation discipline
+밝은 야외 모험, 선명한 캐주얼 2D 탑다운 RPG. 무채색 던전, 붉은 균열, 폐허 배경, 칙칙한 다크 판타지 UI를 금지한다. Tiny Swords는 새 시각/애니메이션 구성의 1차 레퍼런스다. 실제 리소스 사용은 라이선스와 파일 검수 후 결정한다. 공개 저장소에는 재배포가 허용된 파일만 올린다. 마켓의 무료/상업 사용 가능 문구만으로 원본 공개 배포를 허용한다고 판단하지 않는다.
 
-- Use custom Resource/.tres data for balance. Do not duplicate formulas in UI strings.
-- Keep GameManager as a compatibility facade while moving responsibilities incrementally. Do not create an autoload for every helper.
-- Keep UI commands out of rendering callbacks. Use stable item IDs and signals.
-- Inspect the actual branch and HEAD; code search on the default branch is not evidence about a feature branch.
-- Stage changes in a dedicated PR branched from the verified development baseline. Do not mix PR-A through PR-H in a single change.
-- Do not merge into main without user play approval.
+새 캐릭터와 몬스터를 사각형/SVG 막대 그림으로 대신 만들어 완료 처리하지 않는다. 정지 스프라이트의 이동/반전/회전을 walk/attack 프레임 애니메이션이라고 보고하지 않는다. 기존 이미지가 없다고 옛 아틀라스를 자동으로 불러오는 fallback도 금지한다.
 
-## Verification and reporting
+## 현재 실행 상태
 
-- Existing `tests/smoke_test.gd` assertions must not be weakened to make a PR pass.
-- Launch tests with `-- --affix-test-mode` and an isolated XDG_DATA_HOME. This prevents autoload startup from loading/writing a real player save before the test scene can disable persistence.
-- PR-A adds `tests/pr_a_safety.tscn` and `tests/pr_a_capture.tscn`; CI publishes logs and actual rendered PNGs.
-- Report automation, actual render inspection and Windows play approval separately. A fixture is not a player's recovered data; a headless pass is not an art approval.
-- For local sync: close the game AND editor first. Preserve local changes with an explicitly named stash/commit. Use fast-forward-only pulls. Never default to reset --hard or git clean.
-- Run the project with F5, not an arbitrary current scene with F6.
+기존 이미지 제거 후 root와 experiments/e0-godot은 외부 이미지 없는 교체 상태 안내 화면만 연다. 이 화면은 플레이 가능한 MVP나 새로운 게임 아트가 아니다. 과거 게임 렌더 테스트는 이 시점에 중단하고 이력을 docs/history/ci에 남긴다. 새 audit의 PASS는 삭제/소스 보존만 의미한다.
 
-## Handoff format
+## 작업/보고
 
-State: changed items (max 3), tests actually run, unverified items, exact branch/commit, safe local commands, user checks (max 3), rollback. Never claim work continues in the background after the response ends.
+ChatGPT+GitHub로 개발하고 Codex 실행을 요구하지 않는다. 작은 변경, 정확한 SHA, 실제 실행 결과를 보고한다. main/다른 브랜치를 승인 없이 병합하거나 force push하지 않는다. 사용자 worktree/stash/save를 임의 삭제하지 않는다. 기존 branch의 Git history 삭제는 이번 범위가 아니다. 새 이미지 넣기 전 원본 ZIP/라이선스/프레임 개수/방향/pivot/impact를 검사한다.
+
+로컬 명령은 실제로 필요한 것만 제공한다. 실패한 다운로드나 실행을 완료라고 보고하지 않는다. 트러블슈팅은 문제 발생 지점 | 원인 분석 | 해결 방법 및 적용된 코드 개념 | 배운 점 표로 기록한다. 답변 마지막은 기존 3항목 진행 상황 체크포인트를 유지한다.

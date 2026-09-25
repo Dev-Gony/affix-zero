@@ -1,76 +1,17 @@
 # AFFIX: ZERO
 
-AFFIX: ZERO is a playable Godot 4.3 idle hack-and-slash prototype under active development. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
+핵앤슬래시 장비 성장 + 캐주얼 자동사냥 + 원정별 빌드 선택을 목표로 하는 게임입니다.
 
-## Run the game
+## 현재: 기존 아트 전면 삭제 / 새 디자인 재선정
 
-1. Open `project.godot` in Godot 4.3.
-2. Press **F6/F5** to run `scenes/main.tscn`.
-3. Select Warrior or Mage. The remaining four classes unlock through rebirths.
+기존 이미지와 다크 판타지 방향은 사용자 요청으로 폐기했습니다. 게임 규칙과 데이터는 유지합니다. 현재 F5는 **아트 교체 상태 안내**이며 플레이 빌드가 아닙니다. 이전 스크린샷, 아틀라스, E0 막대형 SVG를 다시 가져오지 않습니다.
 
-The internal pixel-art resolution is 640x400 and the default desktop window is 1280x800. The extra vertical room preserves the battle view while the compatibility renderer keeps the project suitable for desktop and web exports.
+- [삭제 범위/검증](docs/project/ART_RESET.md)
+- [새 아트 방향](docs/project/ART_DIRECTION.md)
+- [조사한 실제 리소스](docs/project/ASSET_CANDIDATES.md)
+- [리소스 검수와 다음 구현](docs/project/ASSET_INTAKE.md)
+- [현재 인수인계](docs/project/HANDOFF.md)
 
-Keyboard shortcuts: `1`-`5` open or close the equipment, inventory, skill, rebirth, and stats windows, while `Escape` closes the active window. `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
+새 시각 레퍼런스: Pixel Frog의 Tiny Swords. 실제 파일은 라이선스/프레임 검수 전이며 아직 반입하지 않았습니다. 기존 이미지 삭제와 새 아트 완성은 서로 다른 작업입니다.
 
-Every pull request CI run also publishes two downloadable playable artifacts:
-
-- `AFFIX-ZERO-windows`: unzip and run `AFFIX_ZERO.exe`.
-- `AFFIX-ZERO-web`: serve the extracted folder with any static HTTP server and open `index.html`.
-
-## Implemented systems
-
-- Fixed-center automatic combat with nearest-target attacks and 3-second class skills
-- Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
-- Six classes with distinct stats, unlock requirements, and skill visuals
-- Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
-- Diablo-style 3x3 equipment paper doll, 60-slot scrollable loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
-- Compact five-button management dock with focused right-side windows so combat remains visible while managing a build
-- Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
-- Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
-- Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
-- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, individual loot icons, and equipment comparison deltas
-- x1/x2/x5 combat speed control
-- Complete JSON save/load state with a real-time 30-second autosave interval
-- Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
-- Drop-in OGG overrides under `assets/bgm/` and `assets/sfx/` automatically replace procedural audio
-
-Procedural audio is active by default. Matching `.ogg` files placed in `assets/bgm/` and `assets/sfx/` override it automatically; expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
-
-## Project structure
-
-```text
-affix-zero/
-|-- project.godot
-|-- scenes/
-|   |-- main.tscn
-|   |-- battle/
-|   |-- ui/
-|   `-- effects/
-|-- scripts/
-|   |-- autoloads/       # State, save, loot, and audio managers
-|   |-- combat/          # Battle loop, enemies, damage, projectiles, effects
-|   |-- loot/            # Resource-driven item generation
-|   |-- progression/     # Level and rebirth systems
-|   `-- ui/              # HUD, tabs, inventory, and class selection
-|-- resources/
-|   |-- items/           # Item bases, rarities, and affixes
-|   |-- enemies/         # Eight enemy balance resources
-|   `-- classes/         # Six class balance resources
-|-- assets/
-|   |-- sprites/
-|   |-- sfx/
-|   `-- bgm/
-`-- tests/              # Automated smoke test and visual-QA capture scenes
-```
-
-## Validation
-
-Run the automated Godot smoke test from a terminal:
-
-```powershell
-godot --headless --path . res://tests/smoke_test.tscn
-```
-
-The test exercises automatic combat and floor progression, all six class skills, loot generation, equipment, JSON state serialization, rebirth, and UI loading. Persistence is disabled by the test runner, so it never overwrites the player's `user://save.json` file.
-
-Pull requests and pushes to `main` run the same smoke test through `.github/workflows/godot-smoke-test.yml` using Godot 4.3.
+현재 개발 브랜치: chore/r0-preservation. PR #18은 사용자 승인 전 병합하지 않습니다.
