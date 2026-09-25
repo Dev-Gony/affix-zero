@@ -977,6 +977,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var base_cost: int = int(definition.get("base_cost", 100))
 	var cost_step: int = int(definition.get("cost_step", 80))
 	var level: int = GameManager.class_skill_level(skill_id)
+	var at_cap: bool = level >= GameManager.CLASS_SKILL_MAX_LEVEL
 	var cost: int = base_cost + level * cost_step
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.y = 67
@@ -1000,7 +1001,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text_column)
 	var title_label := Label.new()
-	title_label.text = "%s  Lv.%d" % [title, level]
+	title_label.text = "%s  Lv.%d%s" % [title, level, "  MAX" if at_cap else ""]
 	title_label.add_theme_font_size_override("font_size", 9)
 	text_column.add_child(title_label)
 	var description_label := Label.new()
@@ -1018,7 +1019,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	one_button.text = "+1  %dG" % cost
 	one_button.custom_minimum_size = Vector2(78, 16)
 	one_button.add_theme_font_size_override("font_size", 6)
-	one_button.disabled = GameManager.gold < cost
+	one_button.disabled = at_cap or GameManager.gold < cost
 	one_button.tooltip_text = "1레벨 강화 · 현재 골드 %dG" % GameManager.gold
 	one_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 1))
 	actions.add_child(one_button)
