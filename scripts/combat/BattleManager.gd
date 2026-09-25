@@ -4,7 +4,7 @@ class_name BattleManager
 signal boss_status_changed(name: String, hp_ratio: float, active: bool)
 signal elite_status_changed(name: String, color: Color, active: bool)
 
-const WORLD_RECT := Rect2(0, 0, 1920, 1200)
+const WORLD_RECT := WorldLayout.WORLD_RECT
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
 const ELITE_START_FLOOR: int = 6
@@ -117,7 +117,7 @@ func _process(delta: float) -> void:
 func _draw() -> void:
 	draw_rect(WORLD_RECT, Color("17131c"), true)
 	var floor_theme: int = floori(float(maxi(0, GameManager.floor - 1)) / 15.0) % 3
-	for room_index in 9:
+	for room_index: int in WorldLayout.visible_rooms():
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
 		var visual_theme: int = (room_index + floor_theme) % 3
