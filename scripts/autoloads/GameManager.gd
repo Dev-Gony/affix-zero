@@ -281,6 +281,17 @@ func revive() -> void:
 	stats_changed.emit()
 
 
+func heal(amount: int) -> int:
+	if amount <= 0 or hp <= 0:
+		return 0
+	var before: int = hp
+	hp = mini(max_hp, hp + amount)
+	var restored: int = hp - before
+	if restored > 0:
+		stats_changed.emit()
+	return restored
+
+
 func add_gold(amount: int) -> void:
 	if amount <= 0:
 		return
