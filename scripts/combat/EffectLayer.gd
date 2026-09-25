@@ -547,25 +547,36 @@ func _draw() -> void:
 		var pulse: float = 1.0 + sin(float(pickup["age"]) * 10.0) * 0.12
 		var pickup_kind: String = String(pickup["kind"])
 		if pickup_kind == "xp":
-			var points := PackedVector2Array([
-				position + Vector2(0, -5) * pulse,
-				position + Vector2(4, 0) * pulse,
-				position + Vector2(0, 5) * pulse,
-				position + Vector2(-4, 0) * pulse,
-			])
-			draw_colored_polygon(points, color)
-			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
+			# XP now reads as crystal shards instead of anonymous green dots.
+			for shard_index: int in 3:
+				var offset := Vector2((shard_index - 1) * 4.0, absf(shard_index - 1) * 2.0)
+				var shard_center: Vector2 = position + offset
+				var shard_scale: float = pulse * (1.0 if shard_index == 1 else 0.72)
+				var points := PackedVector2Array([
+					shard_center + Vector2(0, -7) * shard_scale,
+					shard_center + Vector2(3.2, -1) * shard_scale,
+					shard_center + Vector2(1.5, 5) * shard_scale,
+					shard_center + Vector2(-2.8, 2) * shard_scale,
+				])
+				draw_colored_polygon(points, Color(color, 0.92))
+				draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.40), 1.0)
+			draw_circle(position, 9.0 * pulse, Color(color, 0.07))
 		elif pickup_kind == "pet_essence":
 			var star := PackedVector2Array()
 			for index: int in 10:
 				var angle: float = -PI * 0.5 + index * PI / 5.0
-				var radius: float = (5.2 if index % 2 == 0 else 2.4) * pulse
+				var radius: float = (6.5 if index % 2 == 0 else 2.8) * pulse
 				star.append(position + Vector2(cos(angle), sin(angle)) * radius)
 			draw_colored_polygon(star, color)
-			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.0)
+			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.2)
+			draw_circle(position, 9.0 * pulse, Color(color, 0.10))
 		else:
-			draw_circle(position, 4.5 * pulse, color)
-			draw_circle(position, 2.0 * pulse, color.lightened(0.30))
+			# Gold is rendered as a tiny coin stack, not a yellow point.
+			for coin_index: int in 3:
+				var coin_center := position + Vector2((coin_index - 1) * 3.4, -coin_index * 1.7)
+				draw_ellipse(coin_center, Vector2(4.2, 2.5) * pulse, Color("d69b22"))
+				draw_ellipse(coin_center + Vector2(0, -0.6), Vector2(3.2, 1.7) * pulse, Color("ffd65a"))
+				draw_circle(coin_center + Vector2(0, -0.7), 0.9 * pulse, Color("8f6113"))
 
 	for loot_icon: Dictionary in _loot_icons:
 		var life: float = float(loot_icon["life"])
@@ -669,3 +680,11 @@ func _draw_loot_symbol(position: Vector2, slot: String, base_id: String, rarity_
 		_:
 			draw_circle(position, 5.0 * scale, accent)
 	draw_circle(position, 10.0 * scale, Color(rarity_color, alpha * 0.10))
+
+
+func draw_ellipse(center: Vector2, radii: Vector2, color: Color) -> void:
+	var points := PackedVector2Array()
+	for index: int in 20:
+		var angle: float = TAU * float(index) / 20.0
+		points.append(center + Vector2(cos(angle) * radii.x, sin(angle) * radii.y))
+	draw_colored_polygon(points, color)
