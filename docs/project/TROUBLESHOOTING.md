@@ -29,4 +29,6 @@
 
 | V0 pull에서 `project.godot` 로컬 변경 때문에 ff-only merge 중단 | 사용자 worktree `e0-c01-local`의 `experiments/e0-godot/project.godot`에 미커밋 변경이 있어 원격 V0 main-scene 변경을 덮어쓸 수 있으므로 Git이 정상적으로 병합을 차단함. 로컬 변경의 정확한 내용/발생 원인은 아직 미검증 | 먼저 해당 파일 diff를 확인하고 patch로 백업한 뒤, 파일 하나만 이름 있는 stash에 보존. 그 상태에서 `git merge --ff-only origin/chore/r0-preservation` 수행. stash는 자동 pop하지 않고 별도 보존 | 개발용 worktree라도 Godot editor가 프로젝트 파일을 수정할 수 있으므로 pull 전에 dirty 상태를 확인하고, 사용자 변경을 삭제하지 않은 채 동기화해야 한다 |
 
+| Godot 4.7.2 에디터가 E0/V0 worktree를 반복적으로 dirty 처리 | editor가 `project.godot` 헤더/설정을 정규화하고 isolated project 내부에 `*.import`, `*.gd.uid` sidecar를 생성. 기존 repo가 이 4.7.2 저장형식/프로토타입 sidecar 정책을 반영하지 않아 매 pull마다 충돌 가능 | 원격 `project.godot`을 사용자 4.7.2 editor가 실제 저장한 형식으로 정규화하고 V0 main scene을 유지. `experiments/e0-godot/.gitignore`에서 이 격리 프로토타입의 default `*.import`/`*.uid`만 범위 한정 ignore | 엔진 업그레이드 후에는 코드만이 아니라 editor가 저장하는 프로젝트 메타 형식과 VCS 정책도 실제 로컬 동작에 맞춰야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
