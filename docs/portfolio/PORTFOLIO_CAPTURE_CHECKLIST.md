@@ -370,3 +370,47 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Visual noise: Low / Good / Too much
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## G5.0 — Pet System + Item Art Pipeline
+
+- [ ] **전투 펫**
+  - 청월호가 플레이어 옆을 자연스럽게 따라다니는지 확인
+  - 플레이어가 이동/방 이동할 때 순간이동하거나 벽에 박혀 보이지 않는지 확인
+  - x1 / x5에서 펫 자동 공격이 보이는지 확인
+
+- [ ] **펫 지원 효과**
+  - HP가 감소했을 때 청월호의 자동 회복 텍스트가 가끔 표시되는지 확인
+  - 회복이 전투를 방해할 정도로 과도하지 않은지 확인
+
+- [ ] **펫 탭**
+  - 상단 관리 메뉴에 펫이 장비/가방/스킬/환생/정보와 함께 표시되는지 확인
+  - 단축키 4가 펫, 5가 환생, 6이 정보 순서로 맞는지 확인
+  - 현재 출전 펫/레벨/역할/설명이 읽히는지 확인
+  - 해금되지 않은 펫은 요구 층수가 보이고 선택 불가인지 확인
+
+- [ ] **펫 해금**
+  - 현재 진행 층 기준으로 조건을 만족한 펫이 자동 해금되는지 확인
+  - 새 펫 해금 알림이 표시되는지 확인
+
+- [ ] **저장/불러오기**
+  - 활성 펫을 바꾼 뒤 저장
+  - 재실행/불러오기 후 같은 펫과 레벨이 유지되는지 확인
+
+- [ ] **아이템 아트 파이프라인**
+  - 기존 장비 아이콘이 아직 정상 표시되는지 확인
+  - dedicated icon 경로가 없는 기존 아이템은 atlas fallback으로 깨지지 않아야 함
+
+### G5.0 validation notes
+
+- Build commit:
+- Follower movement:
+- x1 pet attack:
+- x5 pet attack:
+- Healing support:
+- Pet tab readability:
+- Unlock behavior:
+- Save/load:
+- Existing item icons intact:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
