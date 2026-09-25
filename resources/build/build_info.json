@@ -1,6 +1,6 @@
 {
-  "version": "g6.0",
-  "stage": "GAMEPLAY-V6.0-DUNGEON-COMBAT",
+  "version": "g6.1",
+  "stage": "GAMEPLAY-V6.1-ANIMATED-COMBAT",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
   "branch": "dev/gameplay-v5-pets-items",
