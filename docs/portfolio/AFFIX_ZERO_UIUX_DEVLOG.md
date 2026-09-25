@@ -235,3 +235,87 @@ Observed in live play:
 - No elite/boss overlap bug was observed in the tested run.
 
 The supplied play captures show the elite aura clearly around enemies during normal auto-hunt. G4.0 is considered player-validated; reward-frequency tuning can continue opportunistically with longer idle runs.
+
+
+## 2026-09-25 — G4.1 Boss Telegraph / Auto-Evade
+
+### Problem
+
+- Live G4.0 testing repeatedly stalled at the next boss floor even though elite encounters were readable.
+- Bosses were statistically threatening, but their danger still came mainly from raw contact/attack pressure rather than understandable attack patterns.
+- In an idle auto-hunt game, requiring the player to manually dodge would contradict the core product direction.
+
+### Cause
+
+- The current boss AI only had ordinary chase/attack behavior with stronger scaling.
+- There was no danger telegraph layer, no special-cast pause, and no combat-AI response to boss hazards.
+- The existing auto-hunt always moved toward its target, including during dangerous boss windups.
+
+### Reference UX
+
+- **Survivor.io:** large dangerous attacks are telegraphed early enough to understand at a glance.
+- **ARPG boss design:** threatening damage feels fairer when the player can read the cause before impact.
+- **AFFIX: ZERO:** because movement is automated, boss telegraphs must be consumed by the character AI as well as by the player watching the run.
+
+### Decision
+
+- Add two alternating boss patterns:
+  - **마왕 강타 (Ground Slam):** large radius centered on the boss.
+  - **파멸 표식 (Doom Mark):** smaller radius locked to the player's position at cast start.
+- Give both patterns a **1.35 second** warning window.
+- Pause the boss's normal movement/attack while the special telegraph is active.
+- Temporarily override auto-hunt movement so the character moves toward a computed safe point.
+- Resume ordinary auto-hunt after the pattern resolves.
+- Keep pattern damage inside the existing boss maximum-hit safety cap rather than adding an uncapped damage path.
+- Leave several seconds of ordinary combat between patterns so the boss does not become a permanent hazard-animation loop.
+
+### Implementation
+
+- `EnemyAI.gd`
+  - Added special-cast pause state.
+  - Boss normal AI stops during a telegraphed special and resumes afterward.
+- `EffectLayer.gd`
+  - Added persistent danger circles with fill, boundary, countdown arc, and label.
+  - Added impact and successful-evade feedback.
+- `BattleManager.gd`
+  - Added boss pattern state machine.
+  - Alternates Ground Slam and Doom Mark.
+  - Added safe-target geometry constrained to the active room.
+  - Auto-hunt temporarily prioritizes hazard escape over target chasing.
+  - Boss special damage still routes through `GameManager.take_damage(..., true)`.
+- Added dedicated `gameplay_v4_boss_patterns` regression tests and CI step.
+- Build identity advanced to **g4.1**.
+
+### Failure / Revision
+
+- Initial design used a **1.05 second** telegraph.
+- Distance analysis showed a base-speed character accelerating from rest could fail to leave the Doom Mark radius even when the AI reacted immediately.
+- Increased the warning to **1.35 seconds** before player testing so the mechanic is physically escapable instead of merely visually announced.
+
+### Verification
+
+Automated contracts cover:
+
+- Minimum 1.30 second warning window.
+- Several seconds of ordinary combat between boss patterns.
+- Ground Slam radius > Doom Mark radius.
+- Pattern raw multipliers remain bounded.
+- Boss damage still inherits the global 60% maximum-hit cap.
+- Computed escape targets remain inside the room and outside the hazard radius when space allows.
+- Boss normal AI can be paused/resumed during special casting.
+- Telegraph radius and duration are registered in the effect layer.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Boss danger | Mostly raw stat pressure | Telegraph-driven special attacks |
+| Player movement | Always chases target | Temporarily auto-evades boss hazards |
+| Boss fairness | Damage can feel abrupt | Visible warning + movement response before impact |
+| Idle identity | Watching a stat check | Watching the character react to readable mechanics |
+| Boss DPS | Continuous normal pressure | Normal pressure interrupted during readable special casts |
+| Regression | No boss-pattern contract | Dedicated timing/geometry/damage CI contracts |
+
+### Windows play approval
+
+Pending. The critical play question is whether the character visibly exits both red/purple danger areas at x1 and x5, and whether the boss still feels dangerous after gaining fair recovery windows.
