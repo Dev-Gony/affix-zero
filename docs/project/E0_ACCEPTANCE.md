@@ -1,6 +1,6 @@
 # E0 최소 전투·에셋·엔진 시험 계약 v0.1
 
-작성: 2026-09-26 KST. 상태: E0-C01 자동 구현/검증 완료, 사용자 Windows 시각 승인은 대기. E0-C02 이후 항목과 성능 실측은 미실행. 사용자 Backup 실행 확인 전 기존 프로젝트에 통합하거나 새 엔진으로 변환하지 않는다. 이 문서는 첫 시험의 범위이며 완제품 콘텐츠 승인이 아니다.
+작성: 2026-09-26 KST. 상태: E0-C01 사용자 Windows 실행 확인, E0-C02 자동 구현/검증 완료. C02 사용자 시각 확인과 E0-C03 성능 실측은 대기. 사용자 Backup 실행 확인 전 기존 프로젝트에 통합하거나 새 엔진으로 변환하지 않는다. 이 문서는 첫 시험의 범위이며 완제품 콘텐츠 승인이 아니다.
 
 ## 1. 이번에 증명할 장면
 
@@ -83,6 +83,25 @@ E0-02 첫 작업은 작은 실제 에셋 세트의 출처/동작 검수와 독�
 - GitHub Actions: E0 Godot 4.7.2 run `36160446393`, conclusion success.
 - 확인 로그: Godot 4.7.2 import 성공, `E0_C01_TEST PASSED`.
 - E0-F01: PASS_AUTO. 양 actor가 실제 위치를 이동해 접근하고 전투 완료.
-- E0-F02: 피해 타이밍/중복 차단은 PASS_AUTO. 몸/무기 타격감의 사람 눈 시각 승인은 NOT_RUN.
-- E0-F07: 다중 프레임 계약은 PASS_AUTO. 임시 SVG 포즈 자산이므로 최종 PASS_ART/USER_ACCEPTED 아님.
+- E0-F02: 피해 타이밍/중복 차단 PASS_AUTO. 사용자가 Windows에서 C01 실행 화면을 확인했으나 최종 타격감/아트 승인은 별개.
+- E0-F07: 실제 texture non-null을 포함한 다중 프레임 계약 PASS_AUTO. 사용자가 Windows C01 실행을 확인했으나 임시 SVG이므로 최종 PASS_ART 아님.
 - E0-F03~F06, F08~F12: 범위별 후속 검증 필요.
+
+
+## 9. E0-C02 실제 결과
+
+- runtime/CI 기준 커밋: `4dc503d58961f668f13eacb5f724c948dad1370f`.
+- GitHub Actions: E0 Godot 4.7.2 run `36162170304`, job `108161582259`, conclusion success.
+- import / C01 regression / C02 contract 모두 success.
+- 확인 로그: `E0_C01_TEST PASSED`, `E0_C02_TEST PASSED`.
+- E0-F04: PASS_AUTO. 원거리 적 발사 요청은 실제 projectile node를 생성하고, 테스트에서는 projectile이 40px 초과 이동한 뒤 target과 충돌해야 피해가 인정된다.
+- E0-F05: PASS_AUTO 범위. melee/ranged 각각 death signal 1회, drop 1개씩, ledger collection 2회이며 같은 drop_id 재수령은 거부된다.
+- E0-F06: PARTIAL_AUTO. 적 사망 직후 ledger collection이 0임과 실제 pickup에서만 reward가 증가함은 확인. 시각효과 자체를 제거한 별도 fixture는 아직 NOT_RUN.
+- C02 reward fixture: melee 8 GOLD/4 XP + ranged 12 GOLD/6 XP = ledger 20 GOLD/10 XP.
+- 전사가 전투 종료 후 drop 위치까지 실제 좌표 이동한 뒤 collect한 것을 자동 검증한다.
+- C02 Windows 사용자 시각 확인은 NOT_RUN.
+- E0-C03 40적 x1 성능 측정은 NOT_RUN.
+
+### C01 사용자 로컬 확인
+
+2026-09-26 사용자 메시지에서 E0-C01 실행 완료를 명시했고 Windows 실행 화면을 제공했다. 화면에서 Godot 4.7.2 E0-C01 독립 프로젝트와 Warrior/MeleeEnemy의 APPROACH 상태가 렌더된 것을 확인했다. 단일 스크린샷만으로 시간축 애니메이션 품질이나 최종 아트 품질까지 승인됐다고 기록하지 않는다.
