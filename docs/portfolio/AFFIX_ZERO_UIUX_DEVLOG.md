@@ -506,6 +506,10 @@ Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are notic
 
 ### Implementation
 
+- Combat HUD:
+  - Removed always-visible 저장 / 종료 actions from active combat.
+  - Replaced them with one 메뉴 entry that opens pause/settings, where save/load/quit already belong.
+  - Reallocated HUD width to run-state and speed controls so active combat reads more like a game HUD and less like a debug toolbar.
 - Management hub expanded to roughly the full 640px desktop canvas:
   - 612x346 primary panel.
   - Dedicated header with section title, current gold and close affordance.
@@ -567,6 +571,7 @@ Automated contracts cover:
 
 | Area | Before | UIUX V2 |
 |---|---|---|
+| Combat HUD | Save/quit mixed into active combat controls | Run state + speed + one menu entry |
 | Management shell | 316px right-side popup | 612px primary desktop hub |
 | Navigation | Bottom dock only | In-window top navigation + compact closed-state dock |
 | Equipment | Tiny 3x3 admin-like cards | Large character-centered loadout composition |
