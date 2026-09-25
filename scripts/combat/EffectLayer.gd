@@ -479,22 +479,43 @@ func _draw() -> void:
 		var pulse: float = 1.0 + sin(float(pickup["age"]) * 10.0) * 0.12
 		var pickup_kind: String = String(pickup["kind"])
 		if pickup_kind == "xp":
-			var points := PackedVector2Array([
-				position + Vector2(0, -5) * pulse,
-				position + Vector2(4, 0) * pulse,
-				position + Vector2(0, 5) * pulse,
-				position + Vector2(-4, 0) * pulse,
+			var shard := PackedVector2Array([
+				position + Vector2(0, -7) * pulse,
+				position + Vector2(4, -1) * pulse,
+				position + Vector2(2, 6) * pulse,
+				position + Vector2(-3, 5) * pulse,
+				position + Vector2(-5, -1) * pulse,
 			])
-			draw_colored_polygon(points, color)
-			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
-		elif pickup_kind == "pet_essence" or pickup_kind == "summon_crystal":
-			var star := PackedVector2Array()
-			for index: int in 10:
-				var angle: float = -PI * 0.5 + index * PI / 5.0
-				var radius: float = (5.2 if index % 2 == 0 else 2.4) * pulse
-				star.append(position + Vector2(cos(angle), sin(angle)) * radius)
-			draw_colored_polygon(star, color)
-			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.0)
+			draw_colored_polygon(shard, color)
+			draw_polyline(shard + PackedVector2Array([shard[0]]), color.lightened(0.42), 1.0)
+			draw_line(position + Vector2(-1, -4), position + Vector2(1, 3), Color("d7fff0", 0.45), 1.0)
+		elif pickup_kind == "gold":
+			draw_circle(position + Vector2(1, 1), 5.6 * pulse, Color("8a5a17"))
+			draw_circle(position, 5.2 * pulse, color)
+			draw_arc(position, 3.2 * pulse, 0.0, TAU, 16, color.lightened(0.35), 1.0)
+			draw_string(ThemeDB.fallback_font, position + Vector2(-2.6, 2.8), "G", HORIZONTAL_ALIGNMENT_LEFT, -1, 6, Color("fff0a8"))
+		elif pickup_kind == "pet_essence":
+			var essence := PackedVector2Array([
+				position + Vector2(0, -7) * pulse,
+				position + Vector2(5, -2) * pulse,
+				position + Vector2(3, 6) * pulse,
+				position + Vector2(-3, 6) * pulse,
+				position + Vector2(-5, -2) * pulse,
+			])
+			draw_colored_polygon(essence, color)
+			draw_polyline(essence + PackedVector2Array([essence[0]]), color.lightened(0.30), 1.0)
+			draw_circle(position, 1.8, Color("f0d7ff"))
+		elif pickup_kind == "summon_crystal":
+			var crystal := PackedVector2Array([
+				position + Vector2(0, -8) * pulse,
+				position + Vector2(5, -2) * pulse,
+				position + Vector2(2, 7) * pulse,
+				position + Vector2(-4, 3) * pulse,
+				position + Vector2(-5, -2) * pulse,
+			])
+			draw_colored_polygon(crystal, color)
+			draw_polyline(crystal + PackedVector2Array([crystal[0]]), color.lightened(0.35), 1.0)
+			draw_line(position + Vector2(0, -5), position + Vector2(1, 4), Color("e0f7ff", 0.55), 1.0)
 		else:
 			draw_circle(position, 4.5 * pulse, color)
 			draw_circle(position, 2.0 * pulse, color.lightened(0.30))
