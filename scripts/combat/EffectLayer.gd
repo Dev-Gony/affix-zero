@@ -201,7 +201,7 @@ func show_drop(world_position: Vector2, item: Dictionary) -> void:
 	var flash_alpha: float = loot_screen_flash_alpha(rarity_index)
 	if flash_alpha > 0.0:
 		_flash_alpha = maxf(_flash_alpha, flash_alpha)
-		spawn_fragments(Vector2(320, 105), color, 20 + rarity_index * 4, 92.0 + rarity_index * 7.0)
+		spawn_fragments(world_position, color, 20 + rarity_index * 4, 92.0 + rarity_index * 7.0)
 
 
 func show_pickup(from: Vector2, to: Vector2, item: Dictionary) -> void:
@@ -282,7 +282,7 @@ func clear_effects() -> void:
 
 func _draw() -> void:
 	if _flash_alpha > 0.0:
-		draw_rect(Rect2(0, 0, 640, 356), Color(1.0, 0.76, 0.15, _flash_alpha), true)
+		draw_rect(Rect2(-128, -128, 2176, 1456), Color(1.0, 1.0, 1.0, _flash_alpha * 0.32), true)
 	for particle: Dictionary in _particles:
 		var alpha: float = clampf(float(particle["life"]) / float(particle["duration"]), 0.0, 1.0)
 		var color: Color = particle["color"]
