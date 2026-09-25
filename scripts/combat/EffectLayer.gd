@@ -9,6 +9,7 @@ var _particles: Array[Dictionary] = []
 var _texts: Array[Dictionary] = []
 var _rings: Array[Dictionary] = []
 var _lines: Array[Dictionary] = []
+var _telegraphs: Array[Dictionary] = []
 var _loot_icons: Array[Dictionary] = []
 var _resource_pickups: Array[Dictionary] = []
 var _pickup_target_position: Vector2 = Vector2.ZERO
@@ -40,6 +41,11 @@ func _process(delta: float) -> void:
 	for index: int in range(_lines.size() - 1, -1, -1):
 		if float(_lines[index]["life"]) <= 0.0:
 			_lines.remove_at(index)
+	for telegraph: Dictionary in _telegraphs:
+		telegraph["life"] = float(telegraph["life"]) - delta
+	for index: int in range(_telegraphs.size() - 1, -1, -1):
+		if float(_telegraphs[index]["life"]) <= 0.0:
+			_telegraphs.remove_at(index)
 	for loot_icon: Dictionary in _loot_icons:
 		loot_icon["life"] = float(loot_icon["life"]) - delta
 	for index: int in range(_loot_icons.size() - 1, -1, -1):
@@ -178,6 +184,26 @@ func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void
 		_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
 
 
+func show_boss_telegraph(center: Vector2, radius: float, duration: float, color: Color, label: String) -> void:
+	_telegraphs.append({
+		"center": center,
+		"radius": radius,
+		"color": color,
+		"life": duration,
+		"duration": duration,
+		"label": label,
+	})
+
+
+func show_boss_impact(center: Vector2, radius: float, color: Color) -> void:
+	_rings.append({"center": center, "radius": radius * 0.30, "speed": radius * 2.4, "color": color, "life": 0.34, "duration": 0.34, "width": 5.0})
+	spawn_fragments(center, color, 14, 88.0)
+
+
+func show_boss_evade(world_position: Vector2) -> void:
+	_texts.append({"position": world_position + Vector2(-16, -24), "text": "회피!", "color": Color("8be0f1"), "life": 0.72, "duration": 0.72, "size": 12})
+
+
 func show_melee_spin(center: Vector2) -> void:
 	_rings.append({"center": center, "radius": 18.0, "speed": 150.0, "color": Color("ff8066"), "life": 0.34, "duration": 0.34, "width": 5.0})
 
@@ -212,6 +238,7 @@ func clear_effects() -> void:
 	_texts.clear()
 	_rings.clear()
 	_lines.clear()
+	_telegraphs.clear()
 	_loot_icons.clear()
 	_resource_pickups.clear()
 	_flash_alpha = 0.0
@@ -227,6 +254,18 @@ func _draw() -> void:
 		color.a *= alpha
 		var size: float = float(particle["size"])
 		draw_rect(Rect2(Vector2(particle["position"]) - Vector2.ONE * size * 0.5, Vector2.ONE * size), color, true)
+	for telegraph: Dictionary in _telegraphs:
+		var life: float = float(telegraph["life"])
+		var duration: float = maxf(0.001, float(telegraph["duration"]))
+		var alpha: float = clampf(life / duration, 0.0, 1.0)
+		var progress: float = 1.0 - alpha
+		var center: Vector2 = Vector2(telegraph["center"])
+		var radius: float = float(telegraph["radius"])
+		var color: Color = telegraph["color"]
+		draw_circle(center, radius, Color(color, 0.07 + progress * 0.09))
+		draw_arc(center, radius, 0.0, TAU, 48, Color(color, 0.72), 2.0, true)
+		draw_arc(center, radius * (0.38 + alpha * 0.62), -PI * 0.5, -PI * 0.5 + TAU * progress, 36, Color(color, 0.96), 3.0, true)
+		draw_string(ThemeDB.fallback_font, center + Vector2(-radius * 0.45, -radius - 8.0), String(telegraph.get("label", "위험")), HORIZONTAL_ALIGNMENT_LEFT, -1, 11, Color(color, 0.92))
 	for ring: Dictionary in _rings:
 		var alpha: float = clampf(float(ring["life"]) / float(ring["duration"]), 0.0, 1.0)
 		var color: Color = ring["color"]
