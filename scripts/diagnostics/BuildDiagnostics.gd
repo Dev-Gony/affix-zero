@@ -33,7 +33,7 @@ func _ready() -> void:
 	add_child(_panel)
 	_details = Label.new()
 	_details.custom_minimum_size = Vector2(292, 144)
-	_details.autowrap_mode = TextServer.AUTOWRAP_ANYWHERE
+	_details.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
 	_details.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_details.add_theme_font_size_override("font_size", 8)
 	_panel.add_child(_details)
