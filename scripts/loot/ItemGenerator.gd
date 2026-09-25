@@ -107,24 +107,43 @@ func icon_index_for_base(base_id: String) -> int:
 	return -1
 
 
-func _roll_rarity(current_floor: int, rebirth_count: int) -> RarityData:
-	var boost: float = (current_floor - 1) * 0.015 + rebirth_count * 0.08
+func rarity_probabilities(current_floor: int, rebirth_count: int) -> Dictionary:
+	var progression: float = clampf(maxf(0.0, current_floor - 1) * 0.004 + maxf(0.0, rebirth_count) * 0.02, 0.0, 0.6)
 	var adjusted_weights: Array[float] = []
 	var total_weight: float = 0.0
 	for rarity: RarityData in _rarities:
-		var weight: float
-		if rarity.index == 0:
-			weight = maxf(5.0, rarity.drop_weight / (1.0 + boost))
-		else:
-			weight = rarity.drop_weight * (1.0 + boost * rarity.index)
-		adjusted_weights.append(weight)
-		total_weight += weight
-	var roll: float = randf() * total_weight
-	var cursor: float = 0.0
+		var weight: float = rarity.drop_weight
+		match rarity.index:
+			0:
+				weight *= maxf(0.72, 1.0 - progression * 0.25)
+			1:
+				weight *= 1.0
+			2:
+				weight *= 1.0 + progression * 0.40
+			3:
+				weight *= 1.0 + progression * 0.55
+			4:
+				# Legendary stays legendary. Progression helps slightly, but never explodes with floor/rebirth.
+				weight *= 0.65 + progression * 0.35
+		adjusted_weights.append(maxf(0.0, weight))
+		total_weight += maxf(0.0, weight)
+
+	var probabilities: Dictionary = {}
+	if total_weight <= 0.0:
+		return probabilities
 	for index: int in _rarities.size():
-		cursor += adjusted_weights[index]
+		probabilities[_rarities[index].id] = adjusted_weights[index] / total_weight
+	return probabilities
+
+
+func _roll_rarity(current_floor: int, rebirth_count: int) -> RarityData:
+	var probabilities: Dictionary = rarity_probabilities(current_floor, rebirth_count)
+	var roll: float = randf()
+	var cursor: float = 0.0
+	for rarity: RarityData in _rarities:
+		cursor += float(probabilities.get(rarity.id, 0.0))
 		if roll <= cursor:
-			return _rarities[index]
+			return rarity
 	return _rarities.back()
 
 
