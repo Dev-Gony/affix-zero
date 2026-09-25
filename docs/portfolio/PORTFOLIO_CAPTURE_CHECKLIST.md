@@ -484,3 +484,64 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - x5 skill VFX:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## G6.0 — Dungeon / Animation / Pet Gacha Direction Lock
+
+- [ ] **던전 구조**
+  - 기존 3x3 정사각형 보드가 보이지 않는지 확인
+  - 미니맵이 5x4 캔버스의 구불구불한 방/통로 구조로 보이는지 확인
+  - 층 진행 시 캐릭터가 실제 통로를 통해 다음 방으로 이동하는지 확인
+  - 방마다 폭/높이가 달라 반복 사각형 느낌이 줄었는지 확인
+  - 화면 밖 빈 셀 때문에 거대한 검은 공백이 노출되지 않는지 확인
+
+- [ ] **몬스터 애니메이션**
+  - 이동 시 좌/우 방향을 바라보는지 확인
+  - 걷는 동안 미세한 squash/stretch가 보여 단순 이미지 슬라이딩처럼 보이지 않는지 확인
+  - 공격 전 몸이 준비 동작을 하고 공격 순간 앞으로 튀어나오는지 확인
+  - 공격 후 원위치로 돌아오는 recovery가 보이는지 확인
+  - 엘리트/보스에서도 애니메이션이 깨지지 않는지 확인
+
+- [ ] **몬스터 공격**
+  - 근접 몬스터는 실제 베기 동작 후 피해가 들어오는지 확인
+  - caster 몬스터는 보라/속성 투사체가 실제로 날아오는지 확인
+  - 보스 원거리 공격은 일반 caster보다 크고 무겁게 보이는지 확인
+  - 투사체가 플레이어에게 닿기 전에 피해가 먼저 들어오지 않는지 확인
+  - x5에서도 투사체 수가 화면을 완전히 덮지 않는지 확인
+
+- [ ] **펫 가챠**
+  - 펫 탭에서 소환석 / pity / 1회 / 10회 소환 UI가 보이는지 확인
+  - 신규 소환 시 미보유 펫이 보유 상태로 바뀌는지 확인
+  - 중복 소환 시 신규 펫이 하나 더 생기는 대신 조각으로 전환되는지 확인
+  - 10회 소환 결과에 영웅 이상이 최소 1개 포함되는지 확인
+  - pity 직전 상태에서 다음 소환이 전설 이상인지 확인
+  - 기존 층수만 올린다고 미보유 펫이 자동 해금되지 않는지 확인
+  - 저장/불러오기 후 소환석 / pity / 보유 펫 / 조각 유지 확인
+
+- [ ] **펫 전투 애니메이션**
+  - 펫 공격 시 적 방향으로 짧게 돌진하는지 확인
+  - 회복/지원 발동 시 펫 주변에 support pulse가 보이는지 확인
+  - 진화 별 개수가 높아져도 크기/오라가 지나치게 커지지 않는지 확인
+
+- [ ] **방향성 판정**
+  - 맵/캐릭터/몬스터/펫/아이템이 동일한 다크 판타지 계열로 느껴지는지 확인
+  - Survivor 계열 요소는 UI 가독성과 드랍 강조에만 남아 있는지 확인
+  - “귀여운 모바일 게임 맵에 다크 캐릭터가 올라간 느낌”이 남아 있으면 Reject
+
+### G6.0 validation notes
+
+- Build commit:
+- Dungeon topology:
+- Corridor travel:
+- Enemy walk animation:
+- Enemy melee animation:
+- Enemy caster projectile:
+- Boss projectile:
+- Pet summon UI:
+- 10-pull guarantee:
+- Pity:
+- Duplicate shards:
+- Pet combat animation:
+- Visual direction consistency:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
