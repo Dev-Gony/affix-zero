@@ -646,6 +646,7 @@ Pending. The critical review is now visual rather than mechanical: panel scale, 
 
 - The screenshots showed that V2.0 solved the major shell problem but exposed a second-order issue: enlarging old content does not automatically make it feel designed for the new canvas.
 - V2.1 therefore changes content hierarchy rather than merely adding more spacing or decoration.
+- The first V2.1 CI run then exposed one more legacy contract: Gameplay V3 still reached directly into the removed raw `_stats_label`. The product behavior was intact, but the test was coupled to the old widget implementation. The contract was migrated to the new current-floor threat dashboard label and still verifies the same player-facing information.
 
 ### Verification
 
