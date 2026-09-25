@@ -21,4 +21,6 @@
 
 | E0-C03 성능 수치 해석 | CI headless/Linux 측정은 Windows GTX1050 렌더 성능과 환경이 다르며 그대로 비교하면 거짓 결론 가능 | CI는 40적/x1/percentile/report 파이프라인 계약만 검사하고 실제 성능 판정은 visible Windows run의 JSON/CSV로 분리 | 성능 테스트는 숫자보다 먼저 측정 환경과 workload 동일성을 고정해야 한다 |
 
+| E0-C03 Windows runner에서 GodotExe not found | 사용자가 예시 경로 `C:\Users\Gwony\Downloads\Godot_v4.7.2-stable_win64.exe`를 전달했지만 실제 exe가 그 위치에 없음 | runner의 `-GodotExe`를 선택값으로 바꾸고 Desktop/Downloads 재귀검색 및 PATH 자동탐지 추가. 여러 개면 후보를 출력하고 명시 선택 요구 | 로컬 실행 안내에 예시 경로를 실제 경로처럼 고정하면 불필요한 실패가 생긴다. 가능한 경우 실행기를 스스로 탐지하게 만든다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
