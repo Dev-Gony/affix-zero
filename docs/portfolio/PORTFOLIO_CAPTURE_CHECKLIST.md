@@ -246,6 +246,11 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
   - Close management.
   - Confirm the compact bottom dock returns and keyboard shortcuts 1-5 still work.
 
+- [ ] **Combat HUD cleanup**
+  - Confirm active combat no longer shows separate 저장 / 종료 buttons.
+  - Confirm the single 메뉴 button opens pause/settings.
+  - Verify save/load/quit remain available inside the dedicated menu/info surfaces.
+
 ### UIUX V2.0 validation notes
 
 - Build commit:
@@ -260,6 +265,7 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Top navigation:
 - ESC behavior:
 - Combat dock restore:
+- Combat HUD menu/readability:
 - Clipping / overlap:
 - Overall visual direction: Reject / Iterate / Accept
 - Bugs found:
