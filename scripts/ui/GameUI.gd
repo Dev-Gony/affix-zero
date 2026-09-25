@@ -12,13 +12,10 @@ const COLOR_GREEN := Color("57d88b")
 const COLOR_GOLD := Color("f0b84b")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
-const CLASS_TEXTURES := {
-	"warrior": preload("res://assets/cc0/tiny_dungeon/warrior.png"),
-	"mage": preload("res://assets/cc0/tiny_dungeon/mage.png"),
-	"knight": preload("res://assets/cc0/tiny_dungeon/knight.png"),
-	"sage": preload("res://assets/cc0/tiny_dungeon/sage.png"),
-	"assassin": preload("res://assets/cc0/tiny_dungeon/assassin.png"),
-	"saint": preload("res://assets/cc0/tiny_dungeon/saint.png"),
+const CLASS_ATLAS: Texture2D = preload("res://assets/sprites/class_atlas_alpha.png")
+const CLASS_REGIONS: Dictionary = {
+	"warrior": Vector2i(0, 0), "mage": Vector2i(1, 0), "knight": Vector2i(2, 0),
+	"sage": Vector2i(0, 1), "assassin": Vector2i(1, 1), "saint": Vector2i(2, 1),
 }
 const EQUIPMENT_REGIONS: Dictionary = {
 	"weapon": Vector2i(0, 0), "helmet": Vector2i(1, 0), "armor": Vector2i(2, 0), "gloves": Vector2i(3, 0),
@@ -1028,7 +1025,12 @@ func _build_equipment_summary() -> PanelContainer:
 
 
 func _class_portrait_icon() -> Texture2D:
-	return CLASS_TEXTURES.get(GameManager.selected_class, CLASS_TEXTURES["warrior"])
+	var atlas_cell: Vector2i = CLASS_REGIONS.get(GameManager.selected_class, Vector2i.ZERO)
+	var cell_size := Vector2(float(CLASS_ATLAS.get_width()) / 3.0, float(CLASS_ATLAS.get_height()) / 2.0)
+	var icon := AtlasTexture.new()
+	icon.atlas = CLASS_ATLAS
+	icon.region = Rect2(Vector2(atlas_cell) * cell_size, cell_size)
+	return icon
 
 
 func _refresh_inventory() -> void:
