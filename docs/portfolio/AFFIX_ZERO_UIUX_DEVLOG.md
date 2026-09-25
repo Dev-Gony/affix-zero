@@ -1014,3 +1014,92 @@ Automated contracts now cover:
 ### Windows play approval
 
 Pending. This is now a visual/play-feel checkpoint: verify item art, hero/enemy atlas quality, boss/elite readability, pet essence/evolution, pet passives, floor themes, minimap/objective placement and x1/x5 skill-effect density before merge.
+
+
+## 2026-09-25 — G6.0 Dungeon Combat Direction Lock
+
+### Problem
+
+Windows G5.1 play validation exposed a style mismatch: the new character/enemy art had more detail than the repeated rectangular map, enemies still read like flat images sliding toward the player, field rewards had weak physical identity, and the pet visuals/system did not match the intended long-term progression depth.
+
+### Cause
+
+- The world still used a fully connected 3x3 room board. Even with extra props, the topology read as test arenas rather than a dungeon.
+- Enemy motion relied mostly on positional movement and a static atlas cell; attacks resolved instantly for casters, which reinforced the “image moving across the floor” impression.
+- Pets were originally designed as floor-unlock companions, while the product direction now calls for a collectible rarity/gacha system similar to transformation/pet collections in long-running RPGs.
+- Visual direction had not been locked strongly enough between the bright readability of Survivor-style combat and the darker ARPG identity of Hero Siege/Diablo-like dungeons.
+
+### Reference UX
+
+- **Hero Siege / dark ARPG:** dungeon topology, connected chambers, corridors, dark materials, readable but hostile ambience, equipment that feels like loot.
+- **Survivor-style readability:** combat remains automatic and effects must remain readable at x5 speed.
+- **Collection RPG gacha:** pets use rarity, pity, duplicates and long-term collection value instead of being granted simply for reaching a floor.
+
+### Decision
+
+AFFIX: ZERO now locks its primary art/gameplay direction to **dark fantasy ARPG dungeon presentation**, while preserving Survivor-style clarity for combat information. It will not pursue a cute/cartoon overworld direction.
+
+The rule is:
+- world / monsters / equipment / pets = dark fantasy ARPG
+- readability / drop emphasis / speed controls / automatic combat feedback = Survivor-style
+- progression = idle farming + ARPG loot + collection/gacha depth
+
+### Implementation
+
+- Replaced the old 3x3 world board with a 5x4 dungeon canvas and a 14-room winding expedition route.
+- Only route/side-chamber connections are rendered; the map is no longer a fully connected board.
+- Room interior margins now vary, producing wide halls, narrow chambers and smaller side rooms.
+- Minimap was rewritten to render the dungeon graph and corridor connections instead of nine equal squares.
+- Enemy animation layer added:
+  - directional facing
+  - walk squash/stretch
+  - attack windup pose
+  - forward lunge and recovery
+  - melee slash pose
+  - caster charge pose
+  - boss attack arc
+- Caster and boss attacks now create real traveling enemy projectiles. Damage resolves on projectile impact instead of immediately at attack signal time.
+- Pet combat animation added for autonomous attack lunges and support-cast pulses.
+- Pet acquisition direction changed from floor auto-unlock to gacha:
+  - summon crystal currency
+  - 1-pull / discounted 10-pull
+  - 30-pull legendary pity
+  - 10-pull heroic-or-higher guarantee
+  - pet rarity metadata
+  - duplicate conversion into pet shards
+  - summon state persistence
+  - elite/boss farming can award summon crystals
+- Pet tab now exposes summon currency, pity counter and summon controls.
+
+### Failure / Revision
+
+- The previous G5.1 dungeon styling work improved texture density but did not solve the structural problem. A prettier 3x3 board was still a 3x3 board, so G6 changes topology rather than merely recoloring tiles.
+- The previous pet direction treated companions as unlock rewards. This was discarded because it capped collection depth too early and did not support the requested long-term rarity chase.
+- Static enemy art was not discarded, but it is now animated through combat-state transforms until dedicated multi-frame animation sheets are introduced. This removes the immediate sliding-card feel without blocking gameplay work on final art production.
+
+### Verification
+
+Automated coverage is being expanded for:
+- 5x4 dungeon topology and winding route
+- corridor travel between consecutive dungeon rooms
+- summon-only pet acquisition
+- pity guarantee and 10-pull guarantee
+- summon currency spending
+- pet combat animation states
+- existing G3/G4/G5 regression contracts
+
+### Before / After
+
+| Area | Before | G6.0 |
+|---|---|---|
+| World topology | fully connected 3x3 arena board | winding 5x4 dungeon graph with side chambers |
+| Room silhouette | repeated same-size rectangles | varied chamber shapes and corridors |
+| Enemy movement | static image translated toward target | facing + gait + windup + lunge + recovery |
+| Enemy ranged attack | instant damage with line VFX | physical projectile with travel and impact |
+| Pet acquisition | automatic floor unlock | rarity gacha + pity + duplicate shards |
+| Pet combat | floating follower + beam | attack/support animation states |
+| Art direction | mixed ARPG / cute readability | dark fantasy ARPG world with Survivor-style information clarity |
+
+### Windows play approval
+
+Pending. Do not merge until the new dungeon route, enemy animation, ranged projectiles and pet summon flow are played in Godot 4.3 on Windows.
