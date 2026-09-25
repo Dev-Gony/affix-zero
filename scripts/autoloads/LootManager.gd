@@ -55,13 +55,13 @@ func drop_boss_reward() -> Dictionary:
 			item = candidate
 	if not item.is_empty():
 		item["boss_reward"] = true
-		item["sell_value"] = maxi(int(item.get("sell_value", 0)), GameManager.floor * 10)
+		item["sell_value"] = maxi(GameManager.item_sell_value(item), GameManager.floor * 10)
 		if passes_loot_filter(item):
 			if GameManager.add_inventory_item(item):
 				item_dropped.emit(item)
 				return item
 		else:
-			var filtered_gold: int = maxi(int(item.get("sell_value", 0)), GameManager.floor * 15)
+			var filtered_gold: int = maxi(GameManager.item_sell_value(item), GameManager.floor * 15)
 			GameManager.add_gold(filtered_gold)
 			return {"name": "필터 판매 %dG" % filtered_gold, "fallback_gold": filtered_gold, "filtered": true}
 	var fallback_gold: int = maxi(50, GameManager.floor * 25)
