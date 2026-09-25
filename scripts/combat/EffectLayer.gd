@@ -339,32 +339,92 @@ func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void
 
 
 func show_melee_spin(center: Vector2) -> void:
-	_rings.append({"center": center, "radius": 18.0, "speed": 150.0, "color": Color("ff8066"), "life": 0.34, "duration": 0.34, "width": 5.0})
+	_rings.append({"center": center, "radius": 15.0, "speed": 170.0, "color": Color("ff8066"), "life": 0.36, "duration": 0.36, "width": 5.5})
+	_rings.append({"center": center, "radius": 24.0, "speed": 120.0, "color": Color("ffd2b8"), "life": 0.28, "duration": 0.28, "width": 2.0})
+	for index: int in 6:
+		var angle: float = TAU * float(index) / 6.0
+		var tangent := Vector2.RIGHT.rotated(angle)
+		_lines.append({
+			"points": PackedVector2Array([center + tangent * 8.0, center + tangent * 34.0]),
+			"color": Color("ff9a76", 0.88),
+			"life": 0.18 + index * 0.015,
+			"duration": 0.28,
+			"width": 2.2,
+		})
+	spawn_fragments(center, Color("ff8066"), 10, 72.0)
 
 
 func show_fireball_explosion(center: Vector2) -> void:
-	_rings.append({"center": center, "radius": 4.0, "speed": 180.0, "color": Color("ff7b2e"), "life": 0.35, "duration": 0.35, "width": 6.0})
-	spawn_fragments(center, Color("ff9f43"), 12, 90.0)
+	_rings.append({"center": center, "radius": 4.0, "speed": 210.0, "color": Color("ff7b2e"), "life": 0.38, "duration": 0.38, "width": 6.5})
+	_rings.append({"center": center, "radius": 9.0, "speed": 135.0, "color": Color("ffd166"), "life": 0.31, "duration": 0.31, "width": 3.0})
+	for index: int in 8:
+		var direction := Vector2.RIGHT.rotated(TAU * float(index) / 8.0)
+		_lines.append({
+			"points": PackedVector2Array([center + direction * 6.0, center + direction * 30.0]),
+			"color": Color("ffb347"),
+			"life": 0.20,
+			"duration": 0.20,
+			"width": 2.2,
+		})
+	spawn_fragments(center, Color("ff9f43"), 18, 105.0)
 
 
 func show_shield_charge(from: Vector2, to: Vector2) -> void:
-	_lines.append({"points": PackedVector2Array([from, to]), "color": Color("8be0f1"), "life": 0.38, "duration": 0.38, "width": 8.0})
-	_rings.append({"center": to, "radius": 5.0, "speed": 110.0, "color": Color("b8f0ff"), "life": 0.35, "duration": 0.35, "width": 4.0})
+	var direction: Vector2 = from.direction_to(to)
+	var normal := Vector2(-direction.y, direction.x)
+	_lines.append({"points": PackedVector2Array([from, to]), "color": Color("8be0f1"), "life": 0.40, "duration": 0.40, "width": 8.0})
+	_lines.append({"points": PackedVector2Array([from + normal * 7.0, to + normal * 7.0]), "color": Color("d2f7ff", 0.72), "life": 0.28, "duration": 0.28, "width": 2.0})
+	_lines.append({"points": PackedVector2Array([from - normal * 7.0, to - normal * 7.0]), "color": Color("d2f7ff", 0.72), "life": 0.28, "duration": 0.28, "width": 2.0})
+	_rings.append({"center": to, "radius": 5.0, "speed": 135.0, "color": Color("b8f0ff"), "life": 0.38, "duration": 0.38, "width": 4.5})
+	spawn_fragments(to, Color("8be0f1"), 10, 68.0)
 
 
 func show_chain_lightning(points: PackedVector2Array) -> void:
-	_lines.append({"points": points, "color": Color("c9a7ff"), "life": 0.32, "duration": 0.32, "width": 4.0})
+	if points.size() < 2:
+		return
+	var jagged := PackedVector2Array([points[0]])
+	for index: int in range(points.size() - 1):
+		var start: Vector2 = points[index]
+		var finish: Vector2 = points[index + 1]
+		var direction: Vector2 = start.direction_to(finish)
+		var normal := Vector2(-direction.y, direction.x)
+		jagged.append(start.lerp(finish, 0.33) + normal * (6.0 if index % 2 == 0 else -6.0))
+		jagged.append(start.lerp(finish, 0.66) - normal * (5.0 if index % 2 == 0 else -5.0))
+		jagged.append(finish)
+	_lines.append({"points": jagged, "color": Color("c9a7ff"), "life": 0.34, "duration": 0.34, "width": 4.2})
+	_lines.append({"points": jagged, "color": Color("f0e2ff", 0.72), "life": 0.18, "duration": 0.18, "width": 1.4})
+	for point: Vector2 in points:
+		spawn_fragments(point, Color("b98cff"), 4, 42.0)
 
 
 func show_multi_slash(center: Vector2) -> void:
-	for index: int in 6:
-		var offset: Vector2 = Vector2(randf_range(-26, 26), randf_range(-18, 18))
-		_lines.append({"points": PackedVector2Array([center + offset - Vector2(13, 8), center + offset + Vector2(13, 8)]), "color": Color("ff72b6"), "life": 0.24 + index * 0.035, "duration": 0.42, "width": 2.0})
+	_rings.append({"center": center, "radius": 9.0, "speed": 70.0, "color": Color("ff72b6", 0.62), "life": 0.34, "duration": 0.34, "width": 1.4})
+	for index: int in 9:
+		var offset: Vector2 = Vector2(randf_range(-30, 30), randf_range(-21, 21))
+		var slash_dir := Vector2(15, 9).rotated(randf_range(-0.55, 0.55))
+		_lines.append({
+			"points": PackedVector2Array([center + offset - slash_dir, center + offset + slash_dir]),
+			"color": Color("ff72b6") if index % 2 == 0 else Color("ffd0ea"),
+			"life": 0.22 + index * 0.025,
+			"duration": 0.44,
+			"width": 2.4 if index % 3 == 0 else 1.7,
+		})
+	spawn_fragments(center, Color("ff72b6"), 8, 64.0)
 
 
 func show_holy_nova(center: Vector2) -> void:
-	_rings.append({"center": center, "radius": 4.0, "speed": 240.0, "color": Color("fff2a1"), "life": 0.52, "duration": 0.52, "width": 7.0})
-	spawn_fragments(center, Color("fff2a1"), 18, 72.0)
+	_rings.append({"center": center, "radius": 4.0, "speed": 250.0, "color": Color("fff2a1"), "life": 0.54, "duration": 0.54, "width": 7.0})
+	_rings.append({"center": center, "radius": 18.0, "speed": 145.0, "color": Color("ffffff", 0.72), "life": 0.42, "duration": 0.42, "width": 2.4})
+	for index: int in 10:
+		var direction := Vector2.UP.rotated(TAU * float(index) / 10.0)
+		_lines.append({
+			"points": PackedVector2Array([center + direction * 10.0, center + direction * 48.0]),
+			"color": Color("fff8c9", 0.75),
+			"life": 0.30,
+			"duration": 0.30,
+			"width": 1.8,
+		})
+	spawn_fragments(center, Color("fff2a1"), 24, 82.0)
 
 
 func clear_effects() -> void:
