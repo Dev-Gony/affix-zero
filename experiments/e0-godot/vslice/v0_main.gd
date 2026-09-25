@@ -33,6 +33,7 @@ var damage_texts: Array[Dictionary] = []
 
 func _ready() -> void:
 	randomize()
+	y_sort_enabled = true
 	background = Loader.load_repo_texture("assets/sprites/dungeon_courtyard.png")
 	class_atlas = Loader.load_repo_texture("assets/sprites/class_atlas_alpha.png")
 	enemy_atlas = Loader.load_repo_texture("assets/sprites/enemy_atlas_alpha.png")
@@ -58,6 +59,7 @@ func _process(delta: float) -> void:
 	spawn_timer -= delta
 	_update_effects(delta)
 	_cleanup_lists()
+	_clamp_actors()
 
 	if not player.dead and not boss_dead:
 		_assign_player_target()
@@ -137,6 +139,20 @@ func _assign_player_target() -> void:
 			best = d
 			nearest = enemy
 	player.set_target(nearest)
+
+func _clamp_actors() -> void:
+	if player != null:
+		player.global_position = Vector2(
+			clampf(player.global_position.x, ARENA.position.x + 16.0, ARENA.end.x - 16.0),
+			clampf(player.global_position.y, ARENA.position.y + 18.0, ARENA.end.y - 14.0)
+		)
+	for enemy in enemies:
+		if enemy == null or not is_instance_valid(enemy):
+			continue
+		enemy.global_position = Vector2(
+			clampf(enemy.global_position.x, ARENA.position.x + 8.0, ARENA.end.x - 8.0),
+			clampf(enemy.global_position.y, ARENA.position.y + 10.0, ARENA.end.y - 8.0)
+		)
 
 func separation_for(self_enemy: V0Enemy) -> Vector2:
 	var push := Vector2.ZERO
