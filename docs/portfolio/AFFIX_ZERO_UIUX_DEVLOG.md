@@ -743,3 +743,70 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate whether the loadout feels calmer, skill rows lose the placeholder feel, and permanent growth reads more clearly without increasing visual clutter.
+
+
+## 2026-09-25 — UIUX V2.2 Final Polish
+
+### Problem
+
+- V2.1 Windows captures confirmed the new structure and visual hierarchy, but a few states still looked unfinished.
+- An empty bag still rendered as a large field of blank slots, which read like missing content rather than an intentional state.
+- Progression actions used nearly identical button styling whether they were affordable, premium or blocked.
+- Rebirth progress used the same warning-like accent color even when the player had already met the requirement.
+
+### Cause
+
+- V2.1 focused on removing visual noise and placeholder elements, not on semantic state feedback.
+- The UI theme treated most actions uniformly and left context to text alone.
+
+### Reference UX
+
+- **Survivor.io:** empty/locked states explain what the player should expect next instead of presenting dead space.
+- **ARPG management screens:** upgrade-ready actions are visually distinguishable from utility actions without requiring the player to read every cost.
+- **AFFIX: ZERO:** because play is automated, management screens should make 'what can I do now?' obvious at a glance.
+
+### Decision
+
+- Preserve the validated V2.1 layout.
+- Add a centered, filter-aware empty-bag message over the slot grid.
+- Give affordable equipment/skill upgrade buttons a restrained gold affordance.
+- Give MAX skill spending and ready-to-rebirth actions a green affordance.
+- Use semantic gold/green progress colors for rebirth instead of warning red.
+- Keep destructive/utility actions neutral.
+
+### Implementation
+
+- Added `_inventory_empty_hint` with the active loot-filter context.
+- Affordable equipment enhancement buttons now receive gold border emphasis.
+- Affordable +1 skill upgrades use gold emphasis; MAX spending uses green emphasis.
+- Rebirth progress uses gold while progressing and green when the requirement is met.
+- Ready-to-rebirth button receives a green primary action treatment.
+- Added a UIUX regression check for the filter-aware empty inventory state.
+- Build identity advanced to **uiux-v2.2**.
+
+### Failure / Revision
+
+- No new layout was introduced. V2.2 deliberately avoids another redesign after V2.1 already solved the structural problems.
+- The pass is limited to semantic affordance and empty-state polish so the UI does not enter an endless redesign loop.
+
+### Verification
+
+Automated contracts cover:
+
+- Empty inventory still reports the active loot filter.
+- Empty inventory now exposes a centered filter-aware message instead of only blank slots.
+- Existing V2/V2.1 layout, navigation, rarity-strip and full-screen-management contracts remain active.
+
+### Before / After
+
+| Area | V2.1 | V2.2 |
+|---|---|---|
+| Empty bag | 60 blank slots + explanation at right | Centered filter-aware message over the grid |
+| Affordable enhancement | Same visual weight as utility actions | Gold action affordance |
+| MAX skill spend | Same visual weight as other buttons | Green growth affordance |
+| Rebirth progress | Generic accent | Gold while progressing, green when ready |
+| Rebirth action | Text-only readiness | Green primary action when available |
+
+### Windows play approval
+
+Pending. Validate that the empty bag no longer feels broken, affordable growth actions stand out without becoming noisy, and ready-to-rebirth state reads immediately.
