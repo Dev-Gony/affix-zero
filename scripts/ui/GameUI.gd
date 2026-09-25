@@ -1,15 +1,15 @@
 extends Control
 class_name GameUI
 
-const COLOR_BACKGROUND := Color("0b0910")
-const COLOR_PANEL := Color("141019")
-const COLOR_PANEL_ALT := Color("1c1520")
-const COLOR_BORDER := Color("69432f")
-const COLOR_TEXT := Color("f3f4ff")
-const COLOR_MUTED := Color("c5b4a8")
-const COLOR_ACCENT := Color("dc3d33")
-const COLOR_GREEN := Color("4fd675")
-const COLOR_GOLD := Color("d9a441")
+const COLOR_BACKGROUND := Color("07090d")
+const COLOR_PANEL := Color("10151c")
+const COLOR_PANEL_ALT := Color("151c25")
+const COLOR_BORDER := Color("354456")
+const COLOR_TEXT := Color("edf2f7")
+const COLOR_MUTED := Color("97a4b5")
+const COLOR_ACCENT := Color("d75a5a")
+const COLOR_GREEN := Color("57d88b")
+const COLOR_GOLD := Color("f0b84b")
 const EQUIPMENT_ATLAS: Texture2D = preload("res://assets/sprites/equipment_atlas_alpha.png")
 const ITEM_BASE_ATLAS: Texture2D = preload("res://assets/sprites/item_base_atlas_v2.png")
 const CLASS_TEXTURES := {
@@ -37,7 +37,7 @@ const RARITY_BADGES: Dictionary = {
 	"normal": "일반", "magic": "마법", "rare": "희귀", "unique": "고유", "legend": "전설", "epic": "에픽",
 }
 const MANAGEMENT_TITLES: Array[String] = ["장비", "가방", "스킬", "환생", "정보"]
-const EQUIPMENT_LAYOUT: Array[String] = ["amulet", "helmet", "ring", "weapon", "portrait", "gloves", "boots", "armor", "summary"]
+const EQUIPMENT_LAYOUT: Array[String] = ["helmet", "amulet", "ring", "weapon", "portrait", "gloves", "boots", "armor", "summary"]
 
 var _hp_bar: ProgressBar
 var _mp_bar: ProgressBar
@@ -64,8 +64,10 @@ var _bottom_panel: Panel
 var _main_tabs: TabContainer
 var _management_window: Panel
 var _management_title: Label
+var _management_gold: Label
 var _management_open: bool = false
 var _dock_buttons: Dictionary = {}
+var _section_buttons: Dictionary = {}
 var _modal_blocker: ColorRect
 var _pause_panel: Panel
 var _pause_visible: bool = false
@@ -100,16 +102,16 @@ func _create_theme() -> Theme:
 	game_theme.set_color("font_hover_color", "Button", Color.WHITE)
 	game_theme.set_color("font_pressed_color", "Button", Color.WHITE)
 	game_theme.set_color("font_disabled_color", "Button", Color("64647a"))
-	game_theme.set_stylebox("panel", "Panel", _style_box(COLOR_PANEL, COLOR_BORDER, 2, 0))
-	game_theme.set_stylebox("panel", "PanelContainer", _style_box(COLOR_PANEL_ALT, COLOR_BORDER, 1, 0))
-	game_theme.set_stylebox("normal", "Button", _style_box(Color("211720"), Color("69432f"), 1, 0))
-	game_theme.set_stylebox("hover", "Button", _style_box(Color("38202a"), Color("c17a43"), 1, 0))
-	game_theme.set_stylebox("pressed", "Button", _style_box(Color("4b1f28"), Color("e04f46"), 2, 0))
-	game_theme.set_stylebox("disabled", "Button", _style_box(Color("100d13"), Color("35271f"), 1, 0))
-	game_theme.set_stylebox("focus", "Button", _style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2, 0))
-	game_theme.set_stylebox("panel", "TabContainer", _style_box(COLOR_PANEL, COLOR_BORDER, 1, 0))
-	game_theme.set_stylebox("tab_selected", "TabContainer", _style_box(Color("4a1c25"), COLOR_GOLD, 2, 0))
-	game_theme.set_stylebox("tab_unselected", "TabContainer", _style_box(Color("171018"), COLOR_BORDER, 1, 0))
+	game_theme.set_stylebox("panel", "Panel", _style_box(COLOR_PANEL, COLOR_BORDER, 2, 2))
+	game_theme.set_stylebox("panel", "PanelContainer", _style_box(COLOR_PANEL_ALT, COLOR_BORDER, 1, 2))
+	game_theme.set_stylebox("normal", "Button", _style_box(Color("141a22"), Color("39495c"), 1, 2))
+	game_theme.set_stylebox("hover", "Button", _style_box(Color("202a36"), Color("6e849d"), 1, 2))
+	game_theme.set_stylebox("pressed", "Button", _style_box(Color("29313d"), COLOR_GOLD, 2, 2))
+	game_theme.set_stylebox("disabled", "Button", _style_box(Color("0c1016"), Color("252e39"), 1, 2))
+	game_theme.set_stylebox("focus", "Button", _style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2, 2))
+	game_theme.set_stylebox("panel", "TabContainer", _style_box(COLOR_PANEL, COLOR_BORDER, 1, 2))
+	game_theme.set_stylebox("tab_selected", "TabContainer", _style_box(Color("252d38"), COLOR_GOLD, 2, 2))
+	game_theme.set_stylebox("tab_unselected", "TabContainer", _style_box(Color("11161d"), COLOR_BORDER, 1, 2))
 	game_theme.set_color("font_selected_color", "TabContainer", Color.WHITE)
 	game_theme.set_color("font_unselected_color", "TabContainer", COLOR_MUTED)
 	game_theme.set_constant("side_margin", "TabContainer", 5)
@@ -147,12 +149,12 @@ func _build_hud() -> void:
 	var panel := Panel.new()
 	_hud_panel = panel
 	panel.position = Vector2.ZERO
-	panel.size = Vector2(640, 34)
-	panel.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.025, 0.045, 0.74), Color("6f4934"), 1, 0))
+	panel.size = Vector2(640, 36)
+	panel.add_theme_stylebox_override("panel", _style_box(Color(0.025, 0.035, 0.050, 0.88), Color("334256"), 1, 0))
 	add_child(panel)
 	var row := HBoxContainer.new()
-	row.position = Vector2(7, 2)
-	row.size = Vector2(626, 29)
+	row.position = Vector2(8, 3)
+	row.size = Vector2(624, 29)
 	row.add_theme_constant_override("separation", 8)
 	panel.add_child(row)
 
@@ -236,7 +238,7 @@ func _build_modal_blocker() -> void:
 	_modal_blocker = ColorRect.new()
 	_modal_blocker.position = Vector2.ZERO
 	_modal_blocker.size = Vector2(640, 400)
-	_modal_blocker.color = Color(0.0, 0.0, 0.0, 0.28)
+	_modal_blocker.color = Color(0.0, 0.0, 0.0, 0.62)
 	_modal_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
 	_modal_blocker.z_index = 40
 	_modal_blocker.visible = false
@@ -251,33 +253,69 @@ func _sync_modal_blocker() -> void:
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
-	window.position = Vector2(320, 8)
-	window.size = Vector2(316, 355)
+	window.position = Vector2(14, 40)
+	window.size = Vector2(612, 346)
 	window.z_index = 50
-	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
+	window.add_theme_stylebox_override("panel", _style_box(Color("0b0f15"), Color("506176"), 2, 3))
 	add_child(window)
+
 	var header := HBoxContainer.new()
-	header.position = Vector2(6, 4)
-	header.size = Vector2(304, 22)
+	header.position = Vector2(10, 7)
+	header.size = Vector2(592, 27)
+	header.add_theme_constant_override("separation", 8)
 	window.add_child(header)
+
 	_management_title = Label.new()
 	_management_title.text = MANAGEMENT_TITLES[0]
 	_management_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_management_title.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	_management_title.add_theme_font_size_override("font_size", 11)
+	_management_title.add_theme_font_size_override("font_size", 14)
 	_management_title.add_theme_color_override("font_color", COLOR_GOLD)
 	header.add_child(_management_title)
+
+	_management_gold = Label.new()
+	_management_gold.text = "0G"
+	_management_gold.custom_minimum_size = Vector2(112, 24)
+	_management_gold.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_management_gold.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_management_gold.add_theme_font_size_override("font_size", 9)
+	_management_gold.add_theme_color_override("font_color", COLOR_GOLD)
+	header.add_child(_management_gold)
+
 	var close_button := Button.new()
-	close_button.text = "닫기"
-	close_button.custom_minimum_size = Vector2(74, 22)
+	close_button.text = "닫기  ESC"
+	close_button.custom_minimum_size = Vector2(86, 24)
 	close_button.add_theme_font_size_override("font_size", 7)
 	close_button.pressed.connect(_close_management)
 	header.add_child(close_button)
+
+	var section_panel := Panel.new()
+	section_panel.position = Vector2(8, 38)
+	section_panel.size = Vector2(596, 29)
+	section_panel.add_theme_stylebox_override("panel", _compact_style_box(Color("0e131a"), Color("2f3b4b")))
+	window.add_child(section_panel)
+
+	var section_row := HBoxContainer.new()
+	section_row.position = Vector2(4, 3)
+	section_row.size = Vector2(588, 23)
+	section_row.add_theme_constant_override("separation", 4)
+	section_panel.add_child(section_row)
+	for index: int in MANAGEMENT_TITLES.size():
+		var section_button := Button.new()
+		section_button.text = MANAGEMENT_TITLES[index]
+		section_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		section_button.custom_minimum_size = Vector2(0, 23)
+		section_button.toggle_mode = true
+		section_button.add_theme_font_size_override("font_size", 8)
+		section_button.pressed.connect(_switch_management_tab.bind(index))
+		section_row.add_child(section_button)
+		_section_buttons[index] = section_button
+
 	var tabs := TabContainer.new()
 	_main_tabs = tabs
 	tabs.name = "MainTabs"
-	tabs.position = Vector2(4, 28)
-	tabs.size = Vector2(308, 323)
+	tabs.position = Vector2(8, 72)
+	tabs.size = Vector2(596, 266)
 	tabs.tabs_visible = false
 	window.add_child(tabs)
 
@@ -290,22 +328,24 @@ func _build_bottom_panel() -> void:
 
 	var dock := Panel.new()
 	_bottom_panel = dock
-	dock.position = Vector2(142, 366)
-	dock.size = Vector2(356, 32)
+	dock.position = Vector2(154, 366)
+	dock.size = Vector2(332, 31)
 	dock.z_index = 30
-	dock.add_theme_stylebox_override("panel", _style_box(Color(0.04, 0.03, 0.05, 0.72), Color("6f4934"), 1, 0))
+	dock.add_theme_stylebox_override("panel", _style_box(Color(0.035, 0.045, 0.060, 0.88), Color("334256"), 1, 2))
 	add_child(dock)
 	var dock_row := HBoxContainer.new()
-	dock_row.position = Vector2(6, 3)
-	dock_row.size = Vector2(344, 26)
-	dock_row.add_theme_constant_override("separation", 4)
+	dock_row.position = Vector2(5, 3)
+	dock_row.size = Vector2(322, 25)
+	dock_row.add_theme_constant_override("separation", 3)
 	dock.add_child(dock_row)
 	for index: int in MANAGEMENT_TITLES.size():
 		var dock_button := Button.new()
 		dock_button.text = "%d %s" % [index + 1, MANAGEMENT_TITLES[index]]
-		dock_button.custom_minimum_size = Vector2(65, 24)
+		dock_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		dock_button.custom_minimum_size = Vector2(0, 23)
 		dock_button.toggle_mode = true
-		dock_button.tooltip_text = "%s 창 열기/닫기 · 단축키 %d" % [MANAGEMENT_TITLES[index], index + 1]
+		dock_button.add_theme_font_size_override("font_size", 7)
+		dock_button.tooltip_text = "%s · 단축키 %d" % [MANAGEMENT_TITLES[index], index + 1]
 		dock_button.pressed.connect(_toggle_management.bind(index))
 		dock_row.add_child(dock_button)
 		_dock_buttons[index] = dock_button
@@ -394,6 +434,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 	if event.keycode == KEY_ESCAPE:
 		if _management_open:
 			_close_management(false)
+			return
 		_toggle_pause_menu()
 		return
 	if GameManager.game_state != GameManager.GameState.RUNNING or _pause_visible:
@@ -417,11 +458,18 @@ func _toggle_management(tab_index: int) -> void:
 		_close_management(false)
 		return
 	_management_open = true
-	_main_tabs.current_tab = tab_index
-	_management_title.text = MANAGEMENT_TITLES[tab_index]
+	_switch_management_tab(tab_index, false)
 	_management_window.visible = true
 	_sync_dock_buttons()
 	_sync_modal_blocker()
+
+
+func _switch_management_tab(tab_index: int, play_sound: bool = true) -> void:
+	if play_sound:
+		AudioManager.play_sfx("ui_click")
+	_main_tabs.current_tab = clampi(tab_index, 0, MANAGEMENT_TITLES.size() - 1)
+	_management_title.text = MANAGEMENT_TITLES[_main_tabs.current_tab]
+	_sync_dock_buttons()
 
 
 func _close_management(play_sound: bool = true) -> void:
@@ -439,110 +487,147 @@ func _sync_dock_buttons() -> void:
 	for index: Variant in _dock_buttons.keys():
 		var button: Button = _dock_buttons[index]
 		button.set_pressed_no_signal(_management_open and int(index) == _main_tabs.current_tab)
+	for index: Variant in _section_buttons.keys():
+		var button: Button = _section_buttons[index]
+		button.set_pressed_no_signal(_management_open and int(index) == _main_tabs.current_tab)
+	if _bottom_panel != null:
+		_bottom_panel.visible = GameManager.game_state != GameManager.GameState.CLASS_SELECTION and not _management_open
 
 
 func _build_equipment_tab(tabs: TabContainer) -> void:
 	var tab := MarginContainer.new()
 	tab.name = "장비"
-	tab.add_theme_constant_override("margin_left", 6)
-	tab.add_theme_constant_override("margin_right", 6)
-	tab.add_theme_constant_override("margin_top", 4)
-	tab.add_theme_constant_override("margin_bottom", 4)
+	tab.add_theme_constant_override("margin_left", 8)
+	tab.add_theme_constant_override("margin_right", 8)
+	tab.add_theme_constant_override("margin_top", 3)
+	tab.add_theme_constant_override("margin_bottom", 3)
 	tabs.add_child(tab)
 	_equipment_row = GridContainer.new()
 	_equipment_row.columns = 3
-	_equipment_row.add_theme_constant_override("h_separation", 4)
-	_equipment_row.add_theme_constant_override("v_separation", 4)
+	_equipment_row.add_theme_constant_override("h_separation", 7)
+	_equipment_row.add_theme_constant_override("v_separation", 6)
 	tab.add_child(_equipment_row)
 
 
 func _build_inventory_tab(tabs: TabContainer) -> void:
 	var tab := VBoxContainer.new()
 	tab.name = "가방"
-	tab.add_theme_constant_override("separation", 2)
+	tab.add_theme_constant_override("separation", 5)
 	tabs.add_child(tab)
+
 	var header := HBoxContainer.new()
-	header.custom_minimum_size.y = 22
+	header.custom_minimum_size.y = 26
+	header.add_theme_constant_override("separation", 4)
 	tab.add_child(header)
+
 	_inventory_count = Label.new()
 	_inventory_count.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_inventory_count.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	_inventory_count.add_theme_font_size_override("font_size", 8)
 	header.add_child(_inventory_count)
+
 	_loot_filter_option = OptionButton.new()
-	_loot_filter_option.custom_minimum_size = Vector2(76, 21)
+	_loot_filter_option.custom_minimum_size = Vector2(92, 24)
 	_loot_filter_option.tooltip_text = "이 등급 이상만 자동 획득"
 	for rarity_name: String in ["일반+", "마법+", "희귀+", "고유+", "전설+", "에픽만"]:
 		_loot_filter_option.add_item(rarity_name)
 	_loot_filter_option.item_selected.connect(_on_loot_filter_selected)
 	header.add_child(_loot_filter_option)
+
 	var sell_normal := Button.new()
-	sell_normal.text = "일반"
-	sell_normal.custom_minimum_size = Vector2(48, 21)
-	sell_normal.add_theme_font_size_override("font_size", 6)
+	sell_normal.text = "일반 판매"
+	sell_normal.custom_minimum_size = Vector2(64, 24)
+	sell_normal.add_theme_font_size_override("font_size", 7)
 	sell_normal.tooltip_text = "잠금 제외 일반 등급만 판매"
 	sell_normal.pressed.connect(_sell_all_normal)
 	header.add_child(sell_normal)
+
 	var sell_all := Button.new()
 	sell_all.text = "전체 판매"
-	sell_all.custom_minimum_size = Vector2(62, 21)
-	sell_all.add_theme_font_size_override("font_size", 6)
-	sell_all.tooltip_text = "잠금한 장비는 보호하고 가방의 나머지를 전부 판매"
+	sell_all.custom_minimum_size = Vector2(72, 24)
+	sell_all.add_theme_font_size_override("font_size", 7)
+	sell_all.tooltip_text = "잠금한 장비는 보호하고 나머지를 모두 판매"
 	sell_all.pressed.connect(_sell_all_unlocked)
 	header.add_child(sell_all)
+
+	var body := HBoxContainer.new()
+	body.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	body.add_theme_constant_override("separation", 7)
+	tab.add_child(body)
+
 	var grid_panel := PanelContainer.new()
-	grid_panel.custom_minimum_size = Vector2(0, 150)
-	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("0b0910"), Color("352b38"), 1, 0))
-	tab.add_child(grid_panel)
+	grid_panel.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	grid_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	grid_panel.add_theme_stylebox_override("panel", _style_box(Color("080c11"), Color("2d3948"), 1, 2))
+	body.add_child(grid_panel)
+
 	var grid_scroll := ScrollContainer.new()
 	grid_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	grid_scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
 	grid_panel.add_child(grid_scroll)
+
 	var grid_margin := MarginContainer.new()
-	grid_margin.add_theme_constant_override("margin_left", 3)
-	grid_margin.add_theme_constant_override("margin_right", 3)
-	grid_margin.add_theme_constant_override("margin_top", 3)
-	grid_margin.add_theme_constant_override("margin_bottom", 3)
+	grid_margin.add_theme_constant_override("margin_left", 5)
+	grid_margin.add_theme_constant_override("margin_right", 5)
+	grid_margin.add_theme_constant_override("margin_top", 5)
+	grid_margin.add_theme_constant_override("margin_bottom", 5)
 	grid_scroll.add_child(grid_margin)
+
 	_inventory_grid = GridContainer.new()
-	_inventory_grid.columns = 6
-	_inventory_grid.add_theme_constant_override("h_separation", 2)
-	_inventory_grid.add_theme_constant_override("v_separation", 2)
+	_inventory_grid.columns = 8
+	_inventory_grid.add_theme_constant_override("h_separation", 3)
+	_inventory_grid.add_theme_constant_override("v_separation", 3)
 	grid_margin.add_child(_inventory_grid)
+
 	var detail_panel := PanelContainer.new()
+	detail_panel.custom_minimum_size = Vector2(188, 0)
 	detail_panel.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	detail_panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("69432f"), 1, 0))
-	tab.add_child(detail_panel)
+	detail_panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("405168"), 1, 2))
+	body.add_child(detail_panel)
+
 	var detail_column := VBoxContainer.new()
-	detail_column.add_theme_constant_override("separation", 2)
+	detail_column.add_theme_constant_override("separation", 5)
 	detail_panel.add_child(detail_column)
+
+	var detail_title := Label.new()
+	detail_title.text = "선택 아이템"
+	detail_title.add_theme_font_size_override("font_size", 9)
+	detail_title.add_theme_color_override("font_color", COLOR_GOLD)
+	detail_column.add_child(detail_title)
+
 	var detail_scroll := ScrollContainer.new()
 	detail_scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	detail_scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
 	detail_column.add_child(detail_scroll)
+
 	_inventory_detail = Label.new()
-	_inventory_detail.custom_minimum_size = Vector2(296, 96)
+	_inventory_detail.custom_minimum_size = Vector2(172, 170)
 	_inventory_detail.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_inventory_detail.add_theme_font_size_override("font_size", 7)
 	detail_scroll.add_child(_inventory_detail)
+
 	var actions := HBoxContainer.new()
 	actions.add_theme_constant_override("separation", 3)
 	detail_column.add_child(actions)
+
 	_inventory_equip_button = Button.new()
 	_inventory_equip_button.text = "장착"
 	_inventory_equip_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inventory_equip_button.custom_minimum_size.y = 22
+	_inventory_equip_button.custom_minimum_size.y = 24
 	_inventory_equip_button.pressed.connect(_equip_selected_inventory)
 	actions.add_child(_inventory_equip_button)
+
 	_inventory_lock_button = Button.new()
 	_inventory_lock_button.text = "잠금"
 	_inventory_lock_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inventory_lock_button.custom_minimum_size.y = 22
+	_inventory_lock_button.custom_minimum_size.y = 24
 	_inventory_lock_button.pressed.connect(_toggle_selected_inventory_lock)
 	actions.add_child(_inventory_lock_button)
+
 	_inventory_sell_button = Button.new()
 	_inventory_sell_button.text = "판매"
 	_inventory_sell_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	_inventory_sell_button.custom_minimum_size.y = 22
+	_inventory_sell_button.custom_minimum_size.y = 24
 	_inventory_sell_button.pressed.connect(_sell_selected_inventory)
 	actions.add_child(_inventory_sell_button)
 
@@ -668,6 +753,8 @@ func _refresh_hud() -> void:
 	_mp_bar.value = GameManager.mp
 	_xp_bar.max_value = LevelManager.xp_needed(GameManager.level)
 	_xp_bar.value = GameManager.xp
+	if _management_gold != null:
+		_management_gold.text = "%dG" % GameManager.gold
 	_hud_info.text = "◆ %d층  ·  Lv.%d  ·  %dG\nAUTO  처치 %d/%d  ·  %s" % [
 		GameManager.floor, GameManager.level, GameManager.gold, GameManager.kills_on_floor,
 		8 + GameManager.floor, GameManager.selected_class_name if not GameManager.selected_class_name.is_empty() else "직업 선택"
@@ -694,10 +781,10 @@ func _refresh_equipment() -> void:
 func _build_equipment_card(slot: String) -> PanelContainer:
 	var item: Dictionary = GameManager.equipment.get(slot, {})
 	var card := PanelContainer.new()
-	card.custom_minimum_size = Vector2(88, 90)
+	card.custom_minimum_size = Vector2(176, 80)
 	card.set_meta("equipment_slot", slot)
 	var border_color := Color("34345b") if item.is_empty() else Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-	card.add_theme_stylebox_override("panel", _compact_style_box(Color("151018"), border_color))
+	card.add_theme_stylebox_override("panel", _style_box(Color("111720"), border_color, 1, 2))
 	var card_row := HBoxContainer.new()
 	card_row.add_theme_constant_override("separation", 2)
 	card.add_child(card_row)
@@ -712,12 +799,12 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	var slot_label := Label.new()
 	slot_label.text = String(SLOT_NAMES.get(slot, slot))
 	slot_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	slot_label.add_theme_font_size_override("font_size", 6)
+	slot_label.add_theme_font_size_override("font_size", 7)
 	slot_label.add_theme_color_override("font_color", COLOR_MUTED)
 	content.add_child(slot_label)
 	var icon := TextureRect.new()
 	icon.texture = _item_icon(item) if not item.is_empty() else _equipment_icon(slot)
-	icon.custom_minimum_size = Vector2(0, 24)
+	icon.custom_minimum_size = Vector2(0, 28)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -730,7 +817,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	item_label.custom_minimum_size.y = 14
 	item_label.clip_text = true
 	item_label.text_overrun_behavior = TextServer.OVERRUN_TRIM_ELLIPSIS
-	item_label.add_theme_font_size_override("font_size", 5)
+	item_label.add_theme_font_size_override("font_size", 7)
 	if item.is_empty():
 		item_label.text = "비어 있음"
 		item_label.add_theme_color_override("font_color", Color("70708a"))
@@ -744,7 +831,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 
 	var enhancement_hint := Label.new()
 	enhancement_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	enhancement_hint.add_theme_font_size_override("font_size", 5)
+	enhancement_hint.add_theme_font_size_override("font_size", 6)
 	if item.is_empty():
 		enhancement_hint.text = "장비 획득 대기"
 		enhancement_hint.add_theme_color_override("font_color", Color("70708a"))
@@ -767,8 +854,8 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	var enhance_button := Button.new()
 	enhance_button.text = "강화"
 	enhance_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	enhance_button.custom_minimum_size.y = 17
-	enhance_button.add_theme_font_size_override("font_size", 5)
+	enhance_button.custom_minimum_size.y = 19
+	enhance_button.add_theme_font_size_override("font_size", 6)
 	enhance_button.disabled = item.is_empty() or GameManager.equipment_enhancement_level(item) >= GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL
 	if not item.is_empty():
 		var button_preview: Dictionary = GameManager.equipment_enhancement_preview(item)
@@ -790,8 +877,8 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	var action := Button.new()
 	action.text = "해제"
 	action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	action.custom_minimum_size.y = 17
-	action.add_theme_font_size_override("font_size", 5)
+	action.custom_minimum_size.y = 19
+	action.add_theme_font_size_override("font_size", 6)
 	action.add_theme_stylebox_override("normal", _compact_style_box(Color("211720"), Color("69432f")))
 	action.add_theme_stylebox_override("hover", _compact_style_box(Color("38202a"), Color("c17a43")))
 	action.add_theme_stylebox_override("pressed", _compact_style_box(Color("4b1f28"), Color("e04f46"), 2))
@@ -805,14 +892,14 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 
 func _build_equipment_portrait() -> PanelContainer:
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size = Vector2(88, 90)
-	panel.add_theme_stylebox_override("panel", _compact_style_box(Color("0d0a10"), Color("9a6240"), 2))
+	panel.custom_minimum_size = Vector2(176, 80)
+	panel.add_theme_stylebox_override("panel", _style_box(Color("0b1016"), COLOR_GOLD.darkened(0.35), 2, 2))
 	var column := VBoxContainer.new()
 	panel.add_child(column)
 	var portrait := TextureRect.new()
 	portrait.name = "ClassPortrait"
 	portrait.texture = _class_portrait_icon()
-	portrait.custom_minimum_size = Vector2(0, 54)
+	portrait.custom_minimum_size = Vector2(0, 48)
 	portrait.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	portrait.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	portrait.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -820,7 +907,7 @@ func _build_equipment_portrait() -> PanelContainer:
 	var class_label := Label.new()
 	class_label.text = GameManager.selected_class_name
 	class_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	class_label.add_theme_font_size_override("font_size", 7)
+	class_label.add_theme_font_size_override("font_size", 9)
 	class_label.add_theme_color_override("font_color", COLOR_GOLD)
 	column.add_child(class_label)
 	return panel
@@ -829,7 +916,7 @@ func _build_equipment_portrait() -> PanelContainer:
 func _build_equipment_summary() -> PanelContainer:
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size = Vector2(88, 90)
-	panel.add_theme_stylebox_override("panel", _compact_style_box(Color("171119"), Color("59443a")))
+	panel.add_theme_stylebox_override("panel", _style_box(Color("121821"), Color("405168"), 1, 2))
 	var growth: Dictionary = GameManager.growth_opportunity_summary()
 	var label := Label.new()
 	label.text = "전투력\nATK %d · DEF %d\n강화 가능 %d\n스킬 가능 %d" % [
@@ -851,7 +938,7 @@ func _class_portrait_icon() -> Texture2D:
 
 
 func _refresh_inventory() -> void:
-	_inventory_count.text = "가방  %d/%d · 6열 보관함" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
+	_inventory_count.text = "가방  %d/%d · 등급순 자동 정렬" % [GameManager.inventory.size(), GameManager.INVENTORY_CAPACITY]
 	_clear_container(_inventory_grid)
 	var sorted_items: Array[Dictionary] = GameManager.inventory.duplicate(true)
 	sorted_items.sort_custom(func(a: Dictionary, b: Dictionary) -> bool:
@@ -868,7 +955,7 @@ func _refresh_inventory() -> void:
 			var item: Dictionary = sorted_items[index]
 			var item_color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
 			var slot_button := Button.new()
-			slot_button.custom_minimum_size = Vector2(42, 42)
+			slot_button.custom_minimum_size = Vector2(45, 45)
 			slot_button.icon = _item_icon(item)
 			slot_button.expand_icon = true
 			slot_button.tooltip_text = "%s\n\n더블클릭 또는 E: 장착" % _format_item_details(item)
@@ -885,7 +972,7 @@ func _refresh_inventory() -> void:
 			_inventory_grid.add_child(slot_button)
 		else:
 			var empty_slot := Panel.new()
-			empty_slot.custom_minimum_size = Vector2(42, 42)
+			empty_slot.custom_minimum_size = Vector2(45, 45)
 			empty_slot.add_theme_stylebox_override("panel", _style_box(Color("0d0b11"), Color("2e2938"), 1, 0))
 			_inventory_grid.add_child(empty_slot)
 	_refresh_inventory_detail(sorted_items)
@@ -942,37 +1029,37 @@ func _on_inventory_slot_input(event: InputEvent, item_id: String) -> void:
 func _add_inventory_slot_labels(button: Button, item: Dictionary, selected: bool) -> void:
 	var rarity_badge := Label.new()
 	rarity_badge.position = Vector2(2, 1)
-	rarity_badge.size = Vector2(38, 10)
+	rarity_badge.size = Vector2(41, 10)
 	rarity_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	rarity_badge.text = String(RARITY_BADGES.get(String(item.get("rarity_id", "normal")), "일반"))
-	rarity_badge.add_theme_font_size_override("font_size", 5)
+	rarity_badge.add_theme_font_size_override("font_size", 6)
 	rarity_badge.add_theme_color_override("font_color", Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE))
 	button.add_child(rarity_badge)
 	var level_badge := Label.new()
-	level_badge.position = Vector2(22, 29)
-	level_badge.size = Vector2(20, 10)
+	level_badge.position = Vector2(24, 32)
+	level_badge.size = Vector2(19, 10)
 	level_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	level_badge.text = "i%d" % int(item.get("item_level", 1))
 	level_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-	level_badge.add_theme_font_size_override("font_size", 5)
+	level_badge.add_theme_font_size_override("font_size", 6)
 	level_badge.add_theme_color_override("font_color", COLOR_MUTED)
 	button.add_child(level_badge)
 	if bool(item.get("locked", false)):
 		var lock_badge := Label.new()
-		lock_badge.position = Vector2(2, 19)
+		lock_badge.position = Vector2(2, 22)
 		lock_badge.size = Vector2(20, 9)
 		lock_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		lock_badge.text = "잠금"
-		lock_badge.add_theme_font_size_override("font_size", 5)
+		lock_badge.add_theme_font_size_override("font_size", 6)
 		lock_badge.add_theme_color_override("font_color", COLOR_GOLD)
 		button.add_child(lock_badge)
 	if selected:
 		var selected_badge := Label.new()
-		selected_badge.position = Vector2(2, 29)
+		selected_badge.position = Vector2(2, 32)
 		selected_badge.size = Vector2(18, 10)
 		selected_badge.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		selected_badge.text = "선택"
-		selected_badge.add_theme_font_size_override("font_size", 5)
+		selected_badge.add_theme_font_size_override("font_size", 6)
 		selected_badge.add_theme_color_override("font_color", COLOR_GOLD)
 		button.add_child(selected_badge)
 
@@ -1041,21 +1128,21 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var at_cap: bool = level >= max_level
 	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
-	panel.custom_minimum_size.y = 67
+	panel.custom_minimum_size.y = 72
 	panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("59443a"), 1, 0))
 	_skills_list.add_child(panel)
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 5)
 	panel.add_child(row)
 	var mark_panel := PanelContainer.new()
-	mark_panel.custom_minimum_size = Vector2(50, 53)
+	mark_panel.custom_minimum_size = Vector2(58, 58)
 	mark_panel.add_theme_stylebox_override("panel", _style_box(Color("251722"), COLOR_GOLD.darkened(0.28), 1, 0))
 	row.add_child(mark_panel)
 	var mark_label := Label.new()
 	mark_label.text = title.substr(0, mini(2, title.length()))
 	mark_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	mark_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	mark_label.add_theme_font_size_override("font_size", 8)
+	mark_label.add_theme_font_size_override("font_size", 9)
 	mark_label.add_theme_color_override("font_color", COLOR_GOLD)
 	mark_panel.add_child(mark_label)
 	var text_column := VBoxContainer.new()
@@ -1063,22 +1150,22 @@ func _add_skill_row(definition: Dictionary) -> void:
 	row.add_child(text_column)
 	var title_label := Label.new()
 	title_label.text = "%s  Lv.%d/%d%s" % [title, level, max_level, "  MAX" if at_cap else ""]
-	title_label.add_theme_font_size_override("font_size", 9)
+	title_label.add_theme_font_size_override("font_size", 10)
 	text_column.add_child(title_label)
 	var description_label := Label.new()
 	description_label.text = description
 	description_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
-	description_label.add_theme_font_size_override("font_size", 6)
+	description_label.add_theme_font_size_override("font_size", 7)
 	description_label.add_theme_color_override("font_color", COLOR_MUTED)
 	text_column.add_child(description_label)
 	var actions := VBoxContainer.new()
-	actions.custom_minimum_size = Vector2(78, 53)
+	actions.custom_minimum_size = Vector2(104, 58)
 	actions.add_theme_constant_override("separation", 2)
 	row.add_child(actions)
 
 	var one_button := Button.new()
 	one_button.text = "+1  %dG" % cost
-	one_button.custom_minimum_size = Vector2(78, 16)
+	one_button.custom_minimum_size = Vector2(104, 17)
 	one_button.add_theme_font_size_override("font_size", 6)
 	one_button.disabled = at_cap or GameManager.gold < cost
 	one_button.tooltip_text = "1레벨 강화 · 환생할 때마다 최대 레벨 +%d · 현재 골드 %dG" % [GameManager.CLASS_SKILL_LEVELS_PER_REBIRTH, GameManager.gold]
@@ -1089,7 +1176,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var ten_cost: int = GameManager.skill_upgrade_total_cost(skill_id, base_cost, cost_step, ten_count)
 	var ten_button := Button.new()
 	ten_button.text = "+%d  %dG" % [ten_count, ten_cost] if ten_count > 0 else "+10"
-	ten_button.custom_minimum_size = Vector2(78, 16)
+	ten_button.custom_minimum_size = Vector2(104, 17)
 	ten_button.add_theme_font_size_override("font_size", 6)
 	ten_button.disabled = ten_count <= 0
 	ten_button.tooltip_text = "최대 10레벨 한 번에 강화"
@@ -1099,7 +1186,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var max_count: int = GameManager.max_affordable_skill_upgrades(skill_id, base_cost, cost_step)
 	var max_button := Button.new()
 	max_button.text = "MAX +%d" % max_count if max_count > 0 else "MAX"
-	max_button.custom_minimum_size = Vector2(78, 16)
+	max_button.custom_minimum_size = Vector2(104, 17)
 	max_button.add_theme_font_size_override("font_size", 6)
 	max_button.disabled = max_count <= 0
 	max_button.tooltip_text = "현재 골드로 가능한 만큼 한 번에 강화"
@@ -1293,7 +1380,7 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 	if _hud_panel != null:
 		_hud_panel.visible = show_game_ui
 	if _bottom_panel != null:
-		_bottom_panel.visible = show_game_ui
+		_bottom_panel.visible = show_game_ui and not _management_open
 	if not show_game_ui:
 		if _management_open:
 			_management_open = false
