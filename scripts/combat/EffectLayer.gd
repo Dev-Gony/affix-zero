@@ -79,6 +79,20 @@ func show_gold(world_position: Vector2, amount: int) -> void:
 	_texts.append({"position": world_position + Vector2(-8, 8), "text": "+%dG" % amount, "color": Color("f6c85f"), "life": 0.85, "duration": 0.85, "size": 10})
 
 
+func show_pet_essence(world_position: Vector2, amount: int) -> void:
+	if amount <= 0:
+		return
+	_texts.append({
+		"position": world_position + Vector2(-20, 2),
+		"text": "펫 정수 +%d" % amount,
+		"color": Color("c084fc"),
+		"life": 1.05,
+		"duration": 1.05,
+		"size": 9,
+	})
+	spawn_fragments(world_position, Color("c084fc"), 7, 52.0)
+
+
 func show_pet_attack(from: Vector2, to: Vector2, color: Color) -> void:
 	var midpoint: Vector2 = from.lerp(to, 0.52) + Vector2(0, -8)
 	_lines.append({
@@ -118,7 +132,11 @@ func set_pickup_target(world_position: Vector2) -> void:
 
 
 func spawn_resource_pickup(world_position: Vector2, kind: String, amount: int) -> void:
-	var color := Color("61e58b") if kind == "xp" else Color("ffd45c")
+	var color := Color("61e58b")
+	if kind == "gold":
+		color = Color("ffd45c")
+	elif kind == "pet_essence":
+		color = Color("c084fc")
 	var launch := Vector2(randf_range(-22.0, 22.0), randf_range(-28.0, -12.0))
 	_resource_pickups.append({
 		"kind": kind,
@@ -383,7 +401,8 @@ func _draw() -> void:
 		var position: Vector2 = Vector2(pickup["position"])
 		var color: Color = pickup["color"]
 		var pulse: float = 1.0 + sin(float(pickup["age"]) * 10.0) * 0.12
-		if String(pickup["kind"]) == "xp":
+		var pickup_kind: String = String(pickup["kind"])
+		if pickup_kind == "xp":
 			var points := PackedVector2Array([
 				position + Vector2(0, -5) * pulse,
 				position + Vector2(4, 0) * pulse,
@@ -392,6 +411,14 @@ func _draw() -> void:
 			])
 			draw_colored_polygon(points, color)
 			draw_polyline(points + PackedVector2Array([points[0]]), color.lightened(0.35), 1.0)
+		elif pickup_kind == "pet_essence":
+			var star := PackedVector2Array()
+			for index: int in 10:
+				var angle: float = -PI * 0.5 + index * PI / 5.0
+				var radius: float = (5.2 if index % 2 == 0 else 2.4) * pulse
+				star.append(position + Vector2(cos(angle), sin(angle)) * radius)
+			draw_colored_polygon(star, color)
+			draw_polyline(star + PackedVector2Array([star[0]]), color.lightened(0.30), 1.0)
 		else:
 			draw_circle(position, 4.5 * pulse, color)
 			draw_circle(position, 2.0 * pulse, color.lightened(0.30))
