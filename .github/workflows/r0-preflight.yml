@@ -1,7 +1,7 @@
 name: R0 preservation tool
 on:
   push:
-    branches: [chore/r0-preservation]
+    branches: ['chore/r0-preservation']
     paths:
       - 'tools/local/**'
       - 'tests/local/**'
@@ -17,14 +17,14 @@ jobs:
   windows-safety:
     runs-on: windows-latest
     timeout-minutes: 10
-    strategy:
-      fail-fast: false
-      matrix:
-        shell: [powershell, pwsh]
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
-      - name: Synthetic preservation and CLI tests
-        shell: ${{ matrix.shell }}
+      - name: Windows PowerShell 5.1 synthetic preservation tests
+        shell: powershell
+        run: ./tests/local/r0_preflight_test.ps1
+      - name: PowerShell 7 synthetic preservation tests
+        if: always()
+        shell: pwsh
         run: ./tests/local/r0_preflight_test.ps1
