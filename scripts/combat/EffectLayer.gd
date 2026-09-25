@@ -257,6 +257,50 @@ func show_level_up(world_position: Vector2) -> void:
 	spawn_fragments(world_position, Color("ffd84d"), 15, 85.0)
 
 
+func show_boss_arrival(world_position: Vector2, boss_name: String) -> void:
+	_texts.append({
+		"position": world_position + Vector2(-42, -36),
+		"text": "BOSS · %s" % boss_name,
+		"color": Color("ff7480"),
+		"life": 1.55,
+		"duration": 1.55,
+		"size": 14,
+	})
+	for index: int in 3:
+		_rings.append({
+			"center": world_position,
+			"radius": 12.0 + index * 10.0,
+			"speed": 70.0 + index * 28.0,
+			"color": Color("ff5260", 0.82 - index * 0.16),
+			"life": 0.80 + index * 0.12,
+			"duration": 0.80 + index * 0.12,
+			"width": 3.8 - index * 0.65,
+		})
+	spawn_fragments(world_position, Color("ff5b67"), 26, 110.0)
+	_flash_alpha = maxf(_flash_alpha, 0.32)
+
+
+func show_elite_arrival(world_position: Vector2, elite_name: String, color: Color) -> void:
+	_texts.append({
+		"position": world_position + Vector2(-30, -28),
+		"text": "ELITE · %s" % elite_name,
+		"color": color,
+		"life": 1.15,
+		"duration": 1.15,
+		"size": 11,
+	})
+	_rings.append({
+		"center": world_position,
+		"radius": 8.0,
+		"speed": 70.0,
+		"color": Color(color, 0.80),
+		"life": 0.62,
+		"duration": 0.62,
+		"width": 2.4,
+	})
+	spawn_fragments(world_position, color, 12, 76.0)
+
+
 func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
 	var direction: Vector2 = from.direction_to(to)
 	var tangent := Vector2(-direction.y, direction.x)
