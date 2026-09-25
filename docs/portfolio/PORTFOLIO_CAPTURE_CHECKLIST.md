@@ -308,6 +308,10 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 
 ## UIUX V2.1 — Visual Hierarchy Polish
 
+- [ ] 관리 화면 프레이밍
+  - 관리창을 열면 상단 전투 HUD와 하단 독이 모두 숨는지 확인
+  - 관리창이 거의 전체 화면을 사용하고 별도 게임 화면처럼 느껴지는지 확인
+
 - [ ] 장비 화면
   - 고등급 장비가 여러 개 있어도 화면 전체가 빨간 테두리 벽처럼 보이지 않는지 확인
   - 희귀도는 좌측 얇은 스트립 + 아이템명 색으로 충분히 읽히는지 확인
