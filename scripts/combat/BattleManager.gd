@@ -14,7 +14,7 @@ const PLAYER_ACCELERATION: float = 360.0
 const MELEE_ATTACK_RANGE: float = 42.0
 const RANGED_ATTACK_RANGE: float = 112.0
 const WANDER_RESELECT_TIME: float = 1.8
-const LOOT_PICKUP_DELAY: float = 0.72
+const LOOT_PICKUP_DELAY: float = 0.95
 const FLOOR_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/floor.png")
 const BRICK_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/brick_floor.png")
 const WALL_TILE: Texture2D = preload("res://assets/cc0/tiny_dungeon/wall.png")
@@ -779,7 +779,9 @@ func _spawn_world_loot(world_position: Vector2) -> void:
 	if item.is_empty():
 		return
 	effects.show_drop(world_position, item)
-	await get_tree().create_timer(LOOT_PICKUP_DELAY, false).timeout
+	var rarity_index: int = clampi(int(item.get("rarity_index", 0)), 0, 5)
+	var ground_read_time: float = LOOT_PICKUP_DELAY + float(rarity_index) * 0.12
+	await get_tree().create_timer(ground_read_time, false).timeout
 	if not is_inside_tree():
 		return
 	if LootManager.collect_item(item):
