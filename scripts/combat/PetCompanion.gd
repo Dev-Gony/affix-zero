@@ -76,11 +76,15 @@ func _draw() -> void:
 	var color: Color = _pet_data.color
 	var bob: float = sin(_clock * 4.0) * 1.5
 	var stars: int = PetManager.stars_for(_pet_data.id)
-	var evolution_scale: float = 1.0 + float(stars - 1) * 0.07
-	var aura_alpha: float = 0.05 + float(stars - 1) * 0.035
+	var rarity_scale: float = 1.0 + float(_pet_data.rarity_index) * 0.035
+	var evolution_scale: float = (1.18 + float(stars - 1) * 0.07) * rarity_scale
+	var aura_alpha: float = 0.06 + float(stars - 1) * 0.04 + float(_pet_data.rarity_index) * 0.012
 	var attack_progress: float = 1.0 - (_attack_left / 0.24) if _attack_left > 0.0 else 0.0
 	var attack_offset: Vector2 = _attack_direction * sin(attack_progress * PI) * 7.0 if _attack_left > 0.0 else Vector2.ZERO
 	var support_pulse: float = sin((1.0 - _support_left / 0.42) * PI) if _support_left > 0.0 else 0.0
+	draw_ellipse(Vector2(0, 9 + bob), Vector2(10.0, 3.0) * evolution_scale, Color(0, 0, 0, 0.38))
+	if _pet_data.rarity_index >= 3:
+		draw_arc(Vector2(0, bob), 12.0 + float(_pet_data.rarity_index), _clock * 0.7, _clock * 0.7 + PI * 1.35, 22, Color(_pet_data.rarity_color, 0.24), 1.6)
 	draw_circle(Vector2(0, 7 + bob), 8.5 * evolution_scale, Color(color, 0.10))
 	if support_pulse > 0.0:
 		draw_arc(Vector2.ZERO, 12.0 + support_pulse * 10.0, 0.0, TAU, 24, Color("8ff7c0", 0.55 * support_pulse), 2.0)
@@ -107,6 +111,10 @@ func _draw() -> void:
 		_:
 			draw_circle(Vector2(0, bob), 6.0, color)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if _attack_left > 0.0:
+		var tip: Vector2 = _attack_direction * (16.0 + sin(attack_progress * PI) * 10.0)
+		draw_line(Vector2.ZERO, tip, Color(_pet_data.rarity_color, 0.45 * sin(attack_progress * PI)), 2.2)
+		draw_circle(tip, 3.0, Color(_pet_data.rarity_color, 0.24 * sin(attack_progress * PI)))
 
 
 func _draw_fox(color: Color, bob: float) -> void:
@@ -117,19 +125,23 @@ func _draw_fox(color: Color, bob: float) -> void:
 	]),dark)
 	draw_colored_polygon(PackedVector2Array([Vector2(-5,-4+bob),Vector2(-4,-12+bob),Vector2(-1,-6+bob)]),light)
 	draw_colored_polygon(PackedVector2Array([Vector2(5,-4+bob),Vector2(4,-12+bob),Vector2(1,-6+bob)]),light)
-	draw_circle(Vector2(-2,-1+bob),1.0,Color("e8fbff"))
-	draw_circle(Vector2(2,-1+bob),1.0,Color("e8fbff"))
+	draw_circle(Vector2(-2,-1+bob),1.15,Color("e8fbff"))
+	draw_circle(Vector2(2,-1+bob),1.15,Color("e8fbff"))
+	draw_circle(Vector2(-2,-1+bob),0.45,Color("3bd9ff"))
+	draw_circle(Vector2(2,-1+bob),0.45,Color("3bd9ff"))
+	draw_colored_polygon(PackedVector2Array([Vector2(-2,3+bob),Vector2(0,5+bob),Vector2(2,3+bob),Vector2(0,7+bob)]),Color(light,0.72))
 	for i: int in 3:
 		draw_arc(Vector2(-3+i,5+bob),8.0+i*1.4,-1.0+i*0.24,0.32+i*0.28,9,Color(light,0.72),2.0)
 
 
 func _draw_drake(color: Color, bob: float) -> void:
 	var dark := color.darkened(0.48)
+	var flap: float = sin(_clock * 9.0) * 3.0
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(-4,1+bob),Vector2(-14,-7+bob),Vector2(-11,6+bob),Vector2(-6,7+bob)
+		Vector2(-4,1+bob),Vector2(-16,-9-flap+bob),Vector2(-12,6+bob),Vector2(-6,7+bob)
 	]),dark)
 	draw_colored_polygon(PackedVector2Array([
-		Vector2(4,1+bob),Vector2(14,-7+bob),Vector2(11,6+bob),Vector2(6,7+bob)
+		Vector2(4,1+bob),Vector2(16,-9-flap+bob),Vector2(12,6+bob),Vector2(6,7+bob)
 	]),dark)
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-6,-3+bob),Vector2(0,-10+bob),Vector2(6,-3+bob),Vector2(5,7+bob),Vector2(-5,7+bob)
@@ -137,6 +149,8 @@ func _draw_drake(color: Color, bob: float) -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(-3,-7+bob),Vector2(0,-15+bob),Vector2(2,-7+bob)]),color.lightened(0.22))
 	draw_circle(Vector2(-2,-2+bob),1.0,Color("fff0a0"))
 	draw_circle(Vector2(2,-2+bob),1.0,Color("fff0a0"))
+	draw_circle(Vector2(0,8+bob),3.0,Color("ff7a2f",0.18))
+	draw_colored_polygon(PackedVector2Array([Vector2(-2,8+bob),Vector2(0,14+bob),Vector2(2,8+bob)]),Color("ff9f43",0.82))
 
 
 func _draw_slime(color: Color, bob: float) -> void:
@@ -157,6 +171,8 @@ func _draw_golem(color: Color, bob: float) -> void:
 	draw_colored_polygon(PackedVector2Array([Vector2(-6,-7+bob),Vector2(-2,-11+bob),Vector2(5,-10+bob),Vector2(6,-7+bob)]),color.lightened(0.12))
 	draw_circle(Vector2(0,-1+bob),2.1,Color("3ddcff",0.55))
 	draw_circle(Vector2(0,-1+bob),0.9,Color("c4f8ff"))
+	draw_line(Vector2(-5,-6+bob),Vector2(-1,-2+bob),Color("86eaff",0.38),1.0)
+	draw_line(Vector2(4,5+bob),Vector2(1,1+bob),Color("86eaff",0.32),1.0)
 
 
 func _draw_bat(color: Color, bob: float) -> void:
@@ -171,6 +187,8 @@ func _draw_bat(color: Color, bob: float) -> void:
 	draw_colored_polygon(PackedVector2Array([
 		Vector2(-4,-4+bob),Vector2(0,-8+bob),Vector2(4,-4+bob),Vector2(4,6+bob),Vector2(0,8+bob),Vector2(-4,6+bob)
 	]),color.darkened(0.42))
+	draw_line(Vector2(-4,0+bob),Vector2(-11,-4-flap+bob),Color(color.lightened(0.22),0.36),1.0)
+	draw_line(Vector2(4,0+bob),Vector2(11,-4-flap+bob),Color(color.lightened(0.22),0.36),1.0)
 	draw_circle(Vector2(-1.5,-2+bob),0.9,Color("ff555d"))
 	draw_circle(Vector2(1.5,-2+bob),0.9,Color("ff555d"))
 
@@ -184,3 +202,7 @@ func _draw_fairy(color: Color, bob: float) -> void:
 	]),color.darkened(0.12))
 	draw_circle(Vector2(0,-4+bob),2.4,color.lightened(0.18))
 	draw_circle(Vector2(-0.7,-4.5+bob),0.5,Color("ffffff"))
+	for index: int in 3:
+		var angle: float = _clock * 1.8 + TAU * float(index) / 3.0
+		var sparkle: Vector2 = Vector2(cos(angle), sin(angle)) * 11.0 + Vector2(0,bob)
+		draw_circle(sparkle,1.0,Color("d7ffd9",0.55))
