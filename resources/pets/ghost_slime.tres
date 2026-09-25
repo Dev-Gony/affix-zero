@@ -17,5 +17,6 @@ attack_range = 155.0
 follow_distance = 20.0
 support_heal_percent = 0.6
 support_interval = 9.0
+player_gold_bonus_percent = 12.0
 unlock_floor = 8
 description = "죽었는지 살았는지 본인도 모르는 슬라임."
