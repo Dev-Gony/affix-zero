@@ -1,0 +1,190 @@
+extends Node
+
+signal pet_state_changed
+signal active_pet_changed(pet_id: String)
+signal pet_unlocked(pet_id: String)
+
+const PET_RESOURCE_PATHS: Array[String] = [
+	"res://resources/pets/spirit_fox.tres",
+	"res://resources/pets/ember_drake.tres",
+	"res://resources/pets/ghost_slime.tres",
+	"res://resources/pets/stone_golem.tres",
+	"res://resources/pets/night_bat.tres",
+	"res://resources/pets/meadow_fairy.tres",
+]
+const STARTER_PET_ID: String = "spirit_fox"
+const MAX_LEVEL: int = 75
+const MAX_STARS: int = 5
+
+var _catalog: Dictionary = {}
+var owned_pets: Dictionary = {}
+var active_pet_id: String = ""
+
+
+func _ready() -> void:
+	_load_catalog()
+	_ensure_starter_pet()
+
+
+func _load_catalog() -> void:
+	_catalog.clear()
+	for path: String in PET_RESOURCE_PATHS:
+		var resource: Resource = load(path)
+		if resource is PetData:
+			var pet := resource as PetData
+			_catalog[pet.id] = pet
+	if _catalog.size() != PET_RESOURCE_PATHS.size():
+		push_error("Pet catalog incomplete: %d/%d" % [_catalog.size(), PET_RESOURCE_PATHS.size()])
+
+
+func _ensure_starter_pet() -> void:
+	if not owned_pets.has(STARTER_PET_ID):
+		owned_pets[STARTER_PET_ID] = {
+			"level": 1,
+			"xp": 0,
+			"stars": 1,
+		}
+	if active_pet_id.is_empty() or not owned_pets.has(active_pet_id):
+		active_pet_id = STARTER_PET_ID
+
+
+func all_pet_ids() -> Array[String]:
+	var ids: Array[String] = []
+	for path: String in PET_RESOURCE_PATHS:
+		var resource: Resource = load(path)
+		if resource is PetData:
+			ids.append((resource as PetData).id)
+	return ids
+
+
+func get_pet_data(pet_id: String) -> PetData:
+	return _catalog.get(pet_id, null) as PetData
+
+
+func active_pet_data() -> PetData:
+	return get_pet_data(active_pet_id)
+
+
+func pet_state(pet_id: String) -> Dictionary:
+	return Dictionary(owned_pets.get(pet_id, {})).duplicate(true)
+
+
+func is_owned(pet_id: String) -> bool:
+	return owned_pets.has(pet_id)
+
+
+func set_active_pet(pet_id: String) -> bool:
+	if not is_owned(pet_id) or get_pet_data(pet_id) == null:
+		return false
+	if active_pet_id == pet_id:
+		return true
+	active_pet_id = pet_id
+	active_pet_changed.emit(active_pet_id)
+	pet_state_changed.emit()
+	return true
+
+
+func unlock_pet(pet_id: String) -> bool:
+	if get_pet_data(pet_id) == null:
+		return false
+	if is_owned(pet_id):
+		return false
+	owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1}
+	pet_unlocked.emit(pet_id)
+	pet_state_changed.emit()
+	return true
+
+
+func level_for(pet_id: String) -> int:
+	return clampi(int(pet_state(pet_id).get("level", 1)), 1, MAX_LEVEL)
+
+
+func stars_for(pet_id: String) -> int:
+	return clampi(int(pet_state(pet_id).get("stars", 1)), 1, MAX_STARS)
+
+
+func xp_needed(level: int) -> int:
+	var safe_level: int = clampi(level, 1, MAX_LEVEL)
+	return 40 + safe_level * 18 + safe_level * safe_level * 3
+
+
+func add_xp(pet_id: String, amount: int) -> int:
+	if amount <= 0 or not is_owned(pet_id):
+		return 0
+	var state: Dictionary = pet_state(pet_id)
+	var level: int = clampi(int(state.get("level", 1)), 1, MAX_LEVEL)
+	var xp: int = maxi(0, int(state.get("xp", 0))) + amount
+	var gained: int = 0
+	while level < MAX_LEVEL:
+		var needed: int = xp_needed(level)
+		if xp < needed:
+			break
+		xp -= needed
+		level += 1
+		gained += 1
+	state["level"] = level
+	state["xp"] = 0 if level >= MAX_LEVEL else xp
+	owned_pets[pet_id] = state
+	if gained > 0:
+		pet_state_changed.emit()
+	return gained
+
+
+func active_attack_power(player_attack: float) -> float:
+	var data: PetData = active_pet_data()
+	if data == null:
+		return 0.0
+	var level: int = level_for(active_pet_id)
+	var stars: int = stars_for(active_pet_id)
+	var pet_scale: float = 1.0 + float(level - 1) * 0.07 + float(stars - 1) * 0.16
+	return maxf(1.0, data.base_attack * pet_scale + player_attack * 0.18)
+
+
+func active_attack_interval() -> float:
+	var data: PetData = active_pet_data()
+	if data == null:
+		return 999.0
+	var level_bonus: float = maxf(0.72, 1.0 - float(level_for(active_pet_id) - 1) * 0.003)
+	return maxf(0.45, data.attack_interval * level_bonus)
+
+
+func active_support_heal_percent() -> float:
+	var data: PetData = active_pet_data()
+	if data == null:
+		return 0.0
+	return data.support_heal_percent * (1.0 + float(stars_for(active_pet_id) - 1) * 0.12)
+
+
+func active_support_interval() -> float:
+	var data: PetData = active_pet_data()
+	return data.support_interval if data != null else 999.0
+
+
+func try_unlock_for_floor(floor_number: int) -> Array[String]:
+	var unlocked: Array[String] = []
+	for pet_id: String in _catalog.keys():
+		if is_owned(pet_id):
+			continue
+		var data: PetData = get_pet_data(pet_id)
+		if data != null and floor_number >= data.unlock_floor:
+			owned_pets[pet_id] = {"level": 1, "xp": 0, "stars": 1}
+			unlocked.append(pet_id)
+			pet_unlocked.emit(pet_id)
+	if not unlocked.is_empty():
+		pet_state_changed.emit()
+	return unlocked
+
+
+func to_save_dict() -> Dictionary:
+	return {
+		"active_pet_id": active_pet_id,
+		"owned_pets": owned_pets.duplicate(true),
+	}
+
+
+func apply_save_dict(data: Dictionary) -> void:
+	owned_pets = Dictionary(data.get("owned_pets", {})).duplicate(true)
+	active_pet_id = String(data.get("active_pet_id", ""))
+	_ensure_starter_pet()
+	pet_state_changed.emit()
+	active_pet_changed.emit(active_pet_id)
