@@ -590,3 +590,85 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. The critical review is now visual rather than mechanical: panel scale, information hierarchy, equipment/inventory scanning speed, management-vs-combat separation, and whether the larger desktop hub feels like a finished game screen rather than a developer overlay.
+
+
+## 2026-09-25 — UIUX V2.1 Playtest Polish
+
+### Problem
+
+- Windows playtest confirmed the new full-width management shell works, but several secondary screens still looked like stretched developer panels.
+- The Info tab was a large raw text wall with duplicated save/load/quit actions even though those actions had already moved to the pause menu.
+- The Rebirth tab used only the top-left portion of the available desktop canvas, leaving large dead space around a 2x2 button block.
+- An empty inventory could look broken or content-less because the UI did not explain that a strict acquisition filter such as Epic-only was active.
+- While management correctly leaves idle combat running, the dimmed background made that rule easy to miss.
+
+### Cause
+
+- V2.0 primarily solved shell/layout hierarchy first; several old tab internals were simply enlarged inside the new container.
+- Save/quit utilities remained duplicated in Info from the pre-overhaul information architecture.
+- Rebirth and statistics were still text-first layouts designed for the old narrow popup.
+- Empty-state copy described only what would happen after acquiring an item, not why the current inventory could remain empty.
+
+### Reference UX
+
+- **Survivor.io:** progression screens use distinct cards and large at-a-glance status blocks instead of raw system text.
+- **Hero Siege:** dense statistics are grouped by system so the player can scan categories without reading one long paragraph.
+- **AFFIX: ZERO:** management must clearly communicate that auto-hunt is still running in the background because this is an idle-first ARPG.
+
+### Decision
+
+- Keep the V2.0 combat HUD, primary management shell, equipment composition and 8-column inventory structure.
+- Convert Info into a four-card dashboard: adventure history, combat stats, current-floor threat and auxiliary bonuses.
+- Remove duplicate save/load/quit actions from Info; keep those utilities only in the pause/settings menu.
+- Rebuild Rebirth around a large progression card plus one full-width row of four permanent-upgrade cards.
+- Surface the active loot acquisition filter directly in the inventory header and empty-state copy.
+- Add a green 자동사냥 계속 indicator to the management header.
+- Give equipped item cards a subtle rarity-tinted background and stronger rarity border while keeping structural chrome neutral.
+- Enrich the center equipment portrait with current level and rebirth count.
+
+### Implementation
+
+- Management header now includes ● 자동사냥 계속.
+- Equipment cards use a subtle rarity tint and 2px rarity border when occupied.
+- Character portrait now shows class, current level and rebirth count.
+- Inventory header includes current acquisition threshold, e.g. 획득 에픽만.
+- Empty inventory detail now explicitly explains the active loot filter and that lower tiers are skipped.
+- Info tab now uses a 2x2 dashboard card layout and no longer duplicates save/load/quit.
+- Rebirth tab now uses:
+  - large rebirth/progression card,
+  - current permanent point count,
+  - explicit levels remaining until rebirth,
+  - full-width four-card permanent growth row.
+- Added V2.1 regression contracts for management-live state, info dashboard, rebirth grid and empty-inventory filter context.
+- Build identity advanced to **uiux-v2.1**.
+
+### Failure / Revision
+
+- The screenshots showed that V2.0 solved the major shell problem but exposed a second-order issue: enlarging old content does not automatically make it feel designed for the new canvas.
+- V2.1 therefore changes content hierarchy rather than merely adding more spacing or decoration.
+
+### Verification
+
+Automated contracts cover:
+
+- Management header states that auto-hunt continues.
+- Info contains exactly four dashboard cards in a 2-column layout.
+- Rebirth contains four permanent-growth cards in one row.
+- Epic-only acquisition state is visible in the inventory header.
+- Empty inventory explains the active acquisition filter.
+- Existing full-width hub, 8-column inventory, center portrait and management-open/close behavior remain intact.
+
+### Before / After
+
+| Area | V2.0 playtest | V2.1 |
+|---|---|---|
+| Info | Large raw text wall + duplicate utilities | Four category cards, menu owns utilities |
+| Rebirth | Top-left content + large dead area | Progression hero card + four full-width upgrades |
+| Empty inventory | Looks merely empty | Explains active acquisition threshold |
+| Management state | Combat continues but subtly | Explicit green idle-combat indicator |
+| Equipment rarity | Border-only emphasis | Subtle rarity surface tint + stronger border |
+| Center portrait | Class only | Class + level + rebirth context |
+
+### Windows play approval
+
+Pending. Validate card density, text wrapping, permanent-upgrade row width, Info readability and whether the management-live indicator is helpful rather than distracting.
