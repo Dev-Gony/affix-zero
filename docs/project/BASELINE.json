@@ -2,7 +2,7 @@
   "schema_version": 1,
   "recorded_date_kst": "2026-09-26",
   "repository": "Dev-Gony/affix-zero",
-  "stage": "Engine and architecture selected; next E0-C01 isolated implementation",
+  "stage": "E0-C02 automated PASS; awaiting Windows visual check before E0-C03 performance harness",
   "work_branch": "chore/r0-preservation",
   "work_pr": 18,
   "decision_parent_sha": "6e5452bf7c7141d4522ce6d2fcf071fdba57c94a",
@@ -13,7 +13,7 @@
   "development_branch": "dev/gameplay-v5-pets-items",
   "development_sha": "433948879fdfd23cf1cccaa0ae0c8ce3a0784eae",
   "main_sha": "a1418ad6a52f1a9e41607e29c7ecb56edbb96ab0",
-  "game_runtime_changed": false,
+  "game_runtime_changed": true,
   "user_local_evidence": {
     "source": "user-uploaded share-summary.json; raw file not in public repository",
     "captured_utc": "2026-09-25T15:47:42.4675842Z",
@@ -33,7 +33,7 @@
   "attachment_is_verified_local_backup": false,
   "backup_blocks_isolated_implementation": false,
   "backup_required_before_legacy_migration_or_overwrite": true,
-  "user_windows_play_approval": "NOT_RUN",
+  "user_windows_play_approval": "E0_C01_LOCAL_RUN_CONFIRMED_FINAL_ART_NOT_APPROVED",
   "engine": {
     "legacy": "Godot 4.3",
     "user_reported_executable": "Godot_v4.3-stable_win64.exe",
@@ -46,7 +46,7 @@
     "decision_record": "ADR-001_ENGINE_ARCHITECTURE.md",
     "selection_basis": "Requirements and documented capabilities, not measured engine superiority",
     "comparison": "NOT_RUN",
-    "new_engine_runtime_validation": "NOT_RUN"
+    "new_engine_runtime_validation": "E0_C01_USER_LOCAL_CONFIRMED_AND_E0_C02_CI_PASS"
   },
   "target_test_pc": {
     "source": "user inspection report; not a performance measurement",
@@ -63,13 +63,16 @@
     "normalization_verified": true
   },
   "last_verified_ci": {
-    "source_head": "5409a1f41d50cf4df2fc4d2a95c9856bfbabf7a8",
-    "r0_run": 36155964584,
-    "r0_result": "success",
-    "godot_run": 36155964770,
-    "godot_result": "success",
-    "scope": "historical workflow results only; not current decision commit or E0 evidence"
+    "source_head": "4dc503d58961f668f13eacb5f724c948dad1370f",
+    "e0_run": 36162170304,
+    "e0_job": 108161582259,
+    "e0_result": "success",
+    "contracts": [
+      "E0_C01_TEST PASSED",
+      "E0_C02_TEST PASSED"
+    ],
+    "scope": "Godot 4.7.2 isolated E0 import and C01/C02 automated contracts; not Windows performance evidence"
   },
-  "next_task": "E0-C01 isolated Godot4.7.2 project and actual warrior/melee animation plus combat; do not repeat R0 requests",
+  "next_task": "User pulls E0-C02 and visually checks ranged projectile/drop/reward flow; then E0-C03 40-enemy x1 performance harness",
   "reload_remote_before_work": true
 }
