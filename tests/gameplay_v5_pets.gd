@@ -192,6 +192,43 @@ func _run() -> void:
 	basic_projectile.queue_free()
 	dummy_enemy.queue_free()
 
+	var projectile_target := Node2D.new()
+	projectile_target.global_position = Vector2(120, 0)
+	add_child(projectile_target)
+	for projectile_kind: String in ["orb", "shadow", "fire", "meteor", "bone"]:
+		var enemy_projectile := EnemyProjectile.new()
+		add_child(enemy_projectile)
+		enemy_projectile.setup(Vector2.ZERO, projectile_target, 10.0, projectile_kind == "meteor", Color("c084fc"), projectile_kind)
+		_check(enemy_projectile.projectile_kind == projectile_kind, "Enemy projectile supports %s attack identity" % projectile_kind)
+		enemy_projectile.queue_free()
+	projectile_target.queue_free()
+
+	var animated_enemy_data := EnemyData.new()
+	animated_enemy_data.id = "dragon"
+	animated_enemy_data.display_name = "시험 드래곤"
+	animated_enemy_data.base_hp = 100.0
+	animated_enemy_data.base_atk = 10.0
+	animated_enemy_data.base_def = 0.0
+	animated_enemy_data.move_speed = 20.0
+	animated_enemy_data.attack_cooldown = 1.0
+	animated_enemy_data.attack_windup = 0.2
+	animated_enemy_data.behavior = "charger"
+	animated_enemy_data.radius = 12.0
+	animated_enemy_data.xp_reward = 1
+	animated_enemy_data.gold_reward = 1
+	var animated_target := Node2D.new()
+	animated_target.global_position = Vector2(32, 0)
+	add_child(animated_target)
+	var animated_enemy := EnemyAI.new()
+	add_child(animated_enemy)
+	animated_enemy.setup(animated_enemy_data, 1, animated_target, Rect2(-200, -200, 400, 400))
+	animated_enemy._attack_windup_left = 0.1
+	animated_enemy._process(0.016)
+	_check(animated_enemy._attack_pose > 0.0, "Enemy attack windup drives a visible animation pose")
+	_check(animated_enemy._stride_phase > 0.0, "Enemy movement animation has an advancing stride phase")
+	animated_enemy.queue_free()
+	animated_target.queue_free()
+
 	var avatar := PlayerAvatar.new()
 	add_child(avatar)
 	avatar.set_equipment_visual({
