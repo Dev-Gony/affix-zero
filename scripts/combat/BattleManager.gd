@@ -697,7 +697,7 @@ func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 		var projectile := EnemyProjectile.new()
 		projectiles_root.add_child(projectile)
 		var projectile_color: Color = Color("ff6b6b") if attacker.behavior == "boss" else attacker.body_color.lightened(0.18)
-		projectile.setup(attacker.global_position, player.global_position, raw_damage, attacker.behavior == "boss", projectile_color)
+		projectile.setup(attacker.global_position, player, raw_damage, attacker.behavior == "boss", projectile_color)
 		projectile.impacted.connect(_on_enemy_projectile_impacted)
 		return
 	_apply_enemy_damage(raw_damage, false)
