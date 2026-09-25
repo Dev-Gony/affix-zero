@@ -1,6 +1,9 @@
 extends Node2D
 class_name BattleManager
 
+signal boss_status_changed(name: String, hp_ratio: float, active: bool)
+signal elite_status_changed(name: String, color: Color, active: bool)
+
 const WORLD_RECT := Rect2(0, 0, 1920, 1200)
 const PLAYER_POSITION := Vector2(960, 600)
 const BOSS_FLOOR_INTERVAL: int = 10
@@ -317,6 +320,8 @@ func _spawn_wave() -> void:
 			spawned_elite = enemy
 	if spawned_elite != null:
 		GameManager.notification_requested.emit("엘리트 출현 · %s" % spawned_elite.elite_title(), spawned_elite.elite_color)
+		elite_status_changed.emit(spawned_elite.elite_title(), spawned_elite.elite_color, true)
+		effects.show_elite_arrival(spawned_elite.global_position, spawned_elite.elite_title(), spawned_elite.elite_color)
 	elif wave_size > 0:
 		GameManager.notification_requested.emit("적 증원 %d마리 접근" % wave_size, Color("e5b06a"))
 
@@ -344,12 +349,14 @@ func _spawn_boss() -> void:
 	_connect_enemy(boss)
 	_enemies.append(boss)
 	GameManager.notification_requested.emit("보스 출현 · %s" % _boss_resource.display_name, Color("ff6b6b"))
+	boss_status_changed.emit(_boss_resource.display_name, 1.0, true)
+	effects.show_boss_arrival(boss.global_position, _boss_resource.display_name)
 
 
 func _connect_enemy(enemy: EnemyAI) -> void:
 	enemy.died.connect(_on_enemy_died)
 	enemy.attacked_player.connect(_on_enemy_attack)
-	enemy.damage_received.connect(_on_enemy_damage_received)
+	enemy.damage_received.connect(_on_enemy_damage_received.bind(enemy))
 
 
 func _update_pet_combat(delta: float) -> void:
@@ -609,6 +616,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
+		boss_status_changed.emit("", 0.0, false)
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
 		if boss_reward.has("rarity_id"):
@@ -619,6 +627,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 		return
 	if defeated_elite:
+		elite_status_changed.emit(elite_name, enemy.elite_color, false)
 		var elite_reward: Dictionary = LootManager.try_elite_drop()
 		if not elite_reward.is_empty():
 			effects.show_drop(world_position, elite_reward)
@@ -656,8 +665,11 @@ func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	_start_shake(2.0, 0.12)
 
 
-func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool) -> void:
+func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: bool, enemy: EnemyAI) -> void:
 	effects.show_damage(world_position, damage, critical)
+	if is_instance_valid(enemy) and enemy.behavior == "boss":
+		var display_name: String = enemy.enemy_data.display_name if enemy.enemy_data != null else "보스"
+		boss_status_changed.emit(display_name, clampf(enemy.hp / maxf(1.0, enemy.max_hp), 0.0, 1.0), true)
 
 
 func _on_player_died() -> void:
@@ -750,6 +762,7 @@ func _valid_enemies_sorted() -> Array[EnemyAI]:
 
 
 func _clear_enemies() -> void:
+	boss_status_changed.emit("", 0.0, false)
 	for enemy: EnemyAI in _enemies:
 		if is_instance_valid(enemy):
 			enemy.queue_free()
