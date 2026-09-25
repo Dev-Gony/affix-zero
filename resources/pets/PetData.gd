@@ -5,6 +5,9 @@ class_name PetData
 @export var display_name: String = ""
 @export_range(0, 5, 1) var rarity_index: int = 0
 @export var rarity_name: String = "일반"
+@export var rarity_color: Color = Color("b8c0cc")
+@export var summon_weight: float = 60.0
+@export var duplicate_shards: int = 8
 @export var role: String = "공격형"
 @export var element: String = "무속성"
 @export var color: Color = Color.WHITE
