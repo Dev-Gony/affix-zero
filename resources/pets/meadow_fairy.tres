@@ -17,5 +17,6 @@ attack_range = 165.0
 follow_distance = 20.0
 support_heal_percent = 3.0
 support_interval = 6.0
+player_xp_bonus_percent = 15.0
 unlock_floor = 55
 description = "전투보다 회복을 더 좋아하지만 필요하면 때리기도 한다."
