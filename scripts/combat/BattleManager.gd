@@ -7,6 +7,7 @@ const BOSS_FLOOR_INTERVAL: int = 10
 const BOSS_PATTERN_INITIAL_DELAY: float = 3.2
 const BOSS_PATTERN_INTERVAL: float = 5.6
 const BOSS_PATTERN_WARNING: float = 1.35
+const BOSS_RETRY_KILLS: int = 5
 const BOSS_SLAM_RADIUS: float = 82.0
 const BOSS_MARK_RADIUS: float = 58.0
 const ELITE_START_FLOOR: int = 6
@@ -665,13 +666,20 @@ func _on_enemy_damage_received(world_position: Vector2, damage: int, critical: b
 func _on_player_died() -> void:
 	if _respawning:
 		return
+	var died_on_boss_floor: bool = is_boss_floor()
 	_respawning = true
 	_reset_boss_pattern_state()
 	GameManager.set_game_state(GameManager.GameState.PAUSED)
 	_clear_enemies()
-	GameManager.notification_requested.emit("쓰러졌습니다 · 1층 후퇴 후 자동 부활", Color("ff6b6b"))
+	if died_on_boss_floor:
+		GameManager.notification_requested.emit("보스 실패 · 1층 후퇴 · %d킬 후 재도전" % BOSS_RETRY_KILLS, Color("ff8a72"))
+	else:
+		GameManager.notification_requested.emit("쓰러졌습니다 · 1층 후퇴 후 자동 부활", Color("ff6b6b"))
 	await get_tree().create_timer(0.75).timeout
 	GameManager.retreat_floor()
+	if died_on_boss_floor:
+		var retry_threshold: int = 8 + GameManager.floor
+		GameManager.kills_on_floor = maxi(0, retry_threshold - BOSS_RETRY_KILLS)
 	GameManager.revive()
 	effects.clear_effects()
 	_current_room = WorldLayout.room_index_for_floor(GameManager.floor)
