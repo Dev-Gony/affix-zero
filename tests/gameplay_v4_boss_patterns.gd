@@ -27,6 +27,8 @@ func _run() -> void:
 	_check(BattleManager.boss_pattern_damage_multiplier("ground_slam") <= 1.30, "Ground slam adds pattern pressure without extreme raw damage")
 	_check(BattleManager.boss_pattern_damage_multiplier("doom_mark") <= 1.15, "Doom mark remains a readable punishment rather than a one-shot multiplier")
 	_check(GameManager.enemy_maximum_hit_ratio(true) <= 0.60, "Boss pattern damage still inherits the global 60 percent max-hit cap")
+	_check(BattleManager.BOSS_RETRY_KILLS == 5, "Failed boss attempts require only five normal kills before retry")
+	_check(BattleManager.boss_retry_progress_for_floor(49) == 52, "Floor 49 retry progress starts five kills before its 57-kill threshold")
 
 	var arena := Rect2(100, 100, 500, 360)
 	var hazard := Vector2(350, 280)
