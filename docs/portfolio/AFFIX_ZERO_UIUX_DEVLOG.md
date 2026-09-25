@@ -235,3 +235,59 @@ Observed in live play:
 - No elite/boss overlap bug was observed in the tested run.
 
 The supplied play captures show the elite aura clearly around enemies during normal auto-hunt. G4.0 is considered player-validated; reward-frequency tuning can continue opportunistically with longer idle runs.
+
+
+## 2026-09-25 — G4.1 Direction Revision: Boss Patterns Rejected
+
+### Problem
+
+- G4.0 live play exposed a boss wall around the current high-floor progression.
+- A first response was prototyped around telegraphed boss patterns and automatic evasion.
+
+### Cause
+
+- The boss wall was initially interpreted as a combat-readability problem.
+- After reviewing the actual product loop, that interpretation conflicted with the game's core identity: the character should keep hunting on its own, accumulate resources and gear, grow stronger, and eventually clear the wall.
+
+### Reference UX
+
+- **Idle RPG progression:** a boss wall acts as a stat/progression check, not necessarily a dexterity check.
+- **AFFIX: ZERO direction:** repeated hunting should create the resources and equipment needed to break through progression walls without requiring manual dodge mastery.
+
+### Decision
+
+- Reject the boss-pattern / auto-evade prototype before merge.
+- Keep bosses as progression gates rather than pattern-learning encounters.
+- Keep the existing defeat setback and boss stat profile for now.
+- Redirect development effort toward the loop that actually resolves a wall:
+  - hunt repeatedly,
+  - collect gold/items,
+  - improve skills/equipment,
+  - retry automatically,
+  - eventually break through.
+
+### Implementation
+
+- Draft PR #8 (Gameplay V4.1: 보스 텔레그래프와 자동 회피) was closed without merge.
+- Its implementation branch is retained only as historical prototype evidence.
+- No boss-pattern code is included in the accepted G4.0 line.
+
+### Failure / Revision
+
+- The prototype was technically viable but product-directionally wrong.
+- This is an intentional rejection, not a failed implementation: adding more combat mechanics would have increased complexity while weakening the idle-game identity.
+
+### Verification
+
+- Decision is based on the Windows G4.0 play session where elites worked as intended and the boss behaved as a progression wall.
+- The accepted branch remains dev/gameplay-v4-elites; no boss-pattern changes were merged.
+
+### Before / After
+
+| Area | Prototype direction | Accepted direction |
+|---|---|---|
+| Boss wall | Read/evade special patterns | Grow stats until the wall breaks |
+| Player attention | Watch and interpret hazards | Let auto-hunt continue producing growth |
+| Failure response | Shortened retry + evade logic | Preserve progression pressure |
+| Development priority | More combat mechanics | Better farming / upgrade / equipment UX |
+| Idle identity | Weakened | Preserved |
