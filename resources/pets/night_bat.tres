@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="PetData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/pets/PetData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "night_bat"
+display_name = "밤그림자"
+rarity_index = 2
+rarity_name = "희귀"
+role = "공격형"
+element = "암흑"
+color = Color(0.62, 0.32, 0.88, 1)
+base_attack = 14.0
+attack_interval = 0.82
+attack_range = 180.0
+follow_distance = 28.0
+unlock_floor = 40
+description = "빠른 연속 공격으로 적의 뒤를 물어뜯는 박쥐."
