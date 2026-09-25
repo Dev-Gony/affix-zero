@@ -80,6 +80,7 @@ var _fullscreen_check: CheckBox
 var _autosave_check: CheckBox
 var _minimap: GameMiniMap
 var _objective: CombatObjective
+var _boss_bar: BossStatusBar
 
 
 func _ready() -> void:
@@ -226,6 +227,14 @@ func _build_hud() -> void:
 	_objective.z_index = 24
 	_objective.sync_from_game()
 	add_child(_objective)
+
+	_boss_bar = BossStatusBar.new()
+	_boss_bar.position = Vector2(210, 42)
+	_boss_bar.size = Vector2(330, 38)
+	_boss_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_boss_bar.z_index = 25
+	_boss_bar.visible = false
+	add_child(_boss_bar)
 
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
@@ -815,6 +824,9 @@ func _connect_signals() -> void:
 	RebirthManager.rebirth_completed.connect(func(_count: int) -> void: _on_rebirth_changed())
 	RebirthManager.permanent_upgrade_purchased.connect(func(_stat: String) -> void: _on_rebirth_changed())
 	PetManager.pet_state_changed.connect(_refresh_pets)
+	var battle := get_tree().current_scene.get_node_or_null("BattleArea") as BattleManager
+	if battle != null:
+		battle.boss_status_changed.connect(_on_boss_status_changed)
 
 
 func _refresh_all() -> void:
@@ -1795,6 +1807,13 @@ func _on_stats_changed() -> void:
 func _refresh_objective() -> void:
 	if _objective != null:
 		_objective.sync_from_game()
+
+
+func _on_boss_status_changed(name: String, hp_ratio: float, active: bool) -> void:
+	if _boss_bar == null:
+		return
+	var can_show: bool = active and not _management_open and not _pause_visible and GameManager.game_state == GameManager.GameState.RUNNING
+	_boss_bar.set_boss(name, hp_ratio, can_show)
 
 
 func _on_equipment_changed() -> void:
