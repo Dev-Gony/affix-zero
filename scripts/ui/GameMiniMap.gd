@@ -17,50 +17,54 @@ func _process(delta: float) -> void:
 
 func _draw() -> void:
 	var panel := Rect2(Vector2.ZERO, size)
-	draw_rect(panel, Color(0.025, 0.035, 0.05, 0.88), true)
+	draw_rect(panel, Color(0.025, 0.035, 0.05, 0.90), true)
 	draw_rect(panel, Color("405168"), false, 1.0)
 
 	var pad := 6.0
 	var gap := 2.0
 	var available := size - Vector2(pad * 2.0, pad * 2.0)
 	var cell := Vector2(
-		(available.x - gap * 2.0) / 3.0,
-		(available.y - gap * 2.0) / 3.0
+		(available.x - gap * float(WorldLayout.GRID_SIZE.x - 1)) / float(WorldLayout.GRID_SIZE.x),
+		(available.y - gap * float(WorldLayout.GRID_SIZE.y - 1)) / float(WorldLayout.GRID_SIZE.y)
 	)
 	var current_room: int = WorldLayout.room_index_for_floor(current_floor)
-	var next_room: int = WorldLayout.room_index_for_floor(current_floor + 1)
-	var previous_room: int = WorldLayout.room_index_for_floor(maxi(1, current_floor - 1))
+	var current_route_pos: int = WorldLayout.route_position(current_room)
 
-	for room_index: int in 9:
+	# Corridors first, so the minimap reads like a dungeon graph rather than a board.
+	for pair: Vector2i in WorldLayout.connected_room_pairs():
+		var a_grid := WorldLayout.room_grid(pair.x)
+		var b_grid := WorldLayout.room_grid(pair.y)
+		var a_center := Vector2(
+			pad + a_grid.x * (cell.x + gap) + cell.x * 0.5,
+			pad + a_grid.y * (cell.y + gap) + cell.y * 0.5
+		)
+		var b_center := Vector2(
+			pad + b_grid.x * (cell.x + gap) + cell.x * 0.5,
+			pad + b_grid.y * (cell.y + gap) + cell.y * 0.5
+		)
+		draw_line(a_center, b_center, Color("314156"), maxf(1.0, minf(cell.x, cell.y) * 0.22))
+
+	for room_index: int in WorldLayout.visible_rooms():
 		var grid := WorldLayout.room_grid(room_index)
 		var pos := Vector2(pad + grid.x * (cell.x + gap), pad + grid.y * (cell.y + gap))
 		var rect := Rect2(pos, cell)
+		var route_pos: int = WorldLayout.route_position(room_index)
 		var fill := Color("111821")
-		var border := Color("2c3a49")
-		if room_index == previous_room and current_floor > 1:
+		var border := Color("263545")
+		if route_pos >= 0 and current_route_pos >= 0 and route_pos < current_route_pos:
 			fill = Color("18202a")
 			border = Color("4d647d")
-		if room_index == next_room:
+		elif route_pos == current_route_pos + 1:
 			fill = Color("18243a")
 			border = Color("5e8fb9")
 		if room_index == current_room:
-			var pulse_alpha: float = 0.82 + sin(pulse * 5.0) * 0.12
+			var pulse_alpha: float = 0.84 + sin(pulse * 5.0) * 0.10
 			fill = Color("4a3516")
 			border = Color("f0b84b", pulse_alpha)
 		draw_rect(rect, fill, true)
 		draw_rect(rect, border, false, 1.0)
-
 		if room_index == current_room:
-			draw_circle(rect.get_center(), minf(cell.x, cell.y) * 0.18, Color("f5d06f"))
-		elif room_index == next_room:
-			var c := rect.get_center()
-			draw_colored_polygon(PackedVector2Array([
-				c + Vector2(0, -3),
-				c + Vector2(3, 2),
-				c + Vector2(-3, 2),
-			]), Color("72c6ff"))
+			draw_circle(rect.get_center(), minf(cell.x, cell.y) * 0.20, Color("f5d06f"))
 
 	if current_floor % 10 == 0:
-		draw_rect(Rect2(size.x - 12, 3, 8, 8), Color("5c1118"), true)
-		draw_rect(Rect2(size.x - 12, 3, 8, 8), Color("ff5b67"), false, 1.0)
-		draw_circle(Vector2(size.x - 8, 7), 1.5, Color("ffced2"))
+		draw_circle(Vector2(size.x - 8, 8), 4.0, Color("ff5b67"))
