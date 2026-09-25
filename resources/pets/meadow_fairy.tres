@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="PetData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/pets/PetData.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = "meadow_fairy"
+display_name = "초원의 요정"
+rarity_index = 3
+rarity_name = "영웅"
+role = "치유형"
+element = "자연"
+color = Color(0.48, 0.94, 0.48, 1)
+base_attack = 7.0
+attack_interval = 1.55
+attack_range = 165.0
+follow_distance = 20.0
+support_heal_percent = 3.0
+support_interval = 6.0
+unlock_floor = 55
+description = "전투보다 회복을 더 좋아하지만 필요하면 때리기도 한다."
