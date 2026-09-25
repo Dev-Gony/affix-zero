@@ -810,3 +810,99 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate that the empty bag no longer feels broken, affordable growth actions stand out without becoming noisy, and ready-to-rebirth state reads immediately.
+
+
+## 2026-09-25 — G5.0 Pet System + Item Art Pipeline
+
+### Problem
+
+- The project had reached a much stronger UI structure, but the actual game layer still lacked a second progression axis beyond character/gear/skills.
+- The combat fantasy reference direction called for a visible companion system, while the current equipment pipeline was still tightly coupled to one shared atlas index.
+- Replacing every item visually later would require touching UI/combat code repeatedly unless the data model first accepted per-item art.
+
+### Cause
+
+- There was no persistent pet catalog, no active-pet state, no combat companion node, no pet progression save contract and no pet management screen.
+- Generated equipment dictionaries only carried `icon_index`, so art replacement was effectively locked to the existing 6x5 atlas.
+
+### Reference UX
+
+- **Survivor-style progression:** pets/companions create another clear long-term growth lane while combat remains automatic.
+- **ARPG equipment identity:** individual items need strong art identity instead of looking like anonymous atlas cells.
+- **AFFIX: ZERO:** the pet should fight and support automatically, preserving the idle-first direction rather than becoming another manual-control system.
+
+### Decision
+
+- Add pets as a fully automatic combat/progression system.
+- Launch with six companions and one guaranteed starter pet.
+- Unlock additional pets by floor progression for the first implementation rather than adding gacha/currency immediately.
+- Give pets autonomous attacks, optional periodic healing support, XP/levels, active selection and persistence.
+- Add a dedicated Pet management tab between Skills and Rebirth.
+- Add `icon_texture_path` / generated `icon_path` support so every equipment base can move to dedicated sprite art without rewriting inventory/equipment UI.
+
+### Implementation
+
+- Added `PetData` Resource schema and six launch pets:
+  - 청월호 / spirit fox
+  - 화염룡 / ember drake
+  - 유령 슬라임
+  - 수호 골렘
+  - 밤그림자 박쥐
+  - 초원의 요정
+- Added `PetManager` autoload:
+  - catalog loading
+  - owned roster
+  - active pet
+  - levels / XP / stars
+  - floor unlocks
+  - attack/support scaling
+  - save/load payload
+- Added `PetCompanion` world node:
+  - follows the player automatically
+  - hides outside active gameplay
+  - renders a distinct procedural pixel silhouette per pet until dedicated sprites replace it
+- Added BattleManager integration:
+  - automatic pet attacks
+  - pet support healing
+  - pet XP from enemy kills
+  - floor-based pet unlock notifications
+- Added pet combat VFX for projectiles/impact and healing feedback.
+- Added Pet tab to the management hub and keyboard shortcut 6.
+- Added reusable `PetPortrait` UI renderer.
+- Added per-item sprite-path support while retaining atlas fallback compatibility.
+- Added dedicated G5 pet/item-art CI contracts.
+
+### Failure / Revision
+
+- The first reaction to the graphics push was to generate visual mockups instead of shipping playable systems. That was the wrong execution order.
+- G5.0 corrects that by treating the mockup only as direction and moving immediately to persistent gameplay code and data contracts.
+- Dedicated binary sprite assets are intentionally not faked into the repo from screenshot mockups. The item/pet code now supports real dedicated art assets cleanly when those are produced.
+
+### Verification
+
+Automated contracts cover:
+
+- six-pet catalog availability
+- guaranteed starter pet ownership/selection
+- autonomous attack contribution and cadence
+- starter support healing
+- pet level/star/active state persistence
+- floor-progression unlocks
+- visible companion binding to the player
+- generated equipment carrying an overrideable art path
+- item base resources accepting dedicated sprite paths
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Companion system | None | Persistent active pet with auto combat/support |
+| Pet progression | None | XP, level, stars, floor unlock roster |
+| Combat presence | Player + enemies only | Player + visible following combat companion |
+| Management | 5 growth tabs | 6 tabs including dedicated Pet screen |
+| Item artwork | Shared atlas index only | Dedicated sprite-path override + atlas fallback |
+| Save data | Character/gear/progression only | Pet roster + active companion persisted |
+
+### Windows play approval
+
+Pending. Validate follower movement, pet attack readability at x1/x5, healing feedback, pet tab switching, floor unlock behavior and save/load persistence before merge.
