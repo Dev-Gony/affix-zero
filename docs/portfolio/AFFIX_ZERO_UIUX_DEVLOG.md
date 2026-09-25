@@ -380,3 +380,75 @@ Observed in live play:
 - The enlarged equipment layout remained readable without problematic clipping.
 
 G4.1 growth-loop UX is considered player-validated. PR remains unmerged by policy.
+
+
+## 2026-09-25 — G4.2 Rarity-Scaled Loot Feedback
+
+### Problem
+
+- Field equipment drops were mechanically functional but visually too similar across rarity tiers.
+- In a mostly automated game, rare rewards need to be recognizable during passive observation without opening the bag.
+- Boss and elite bonus equipment entered the inventory immediately, so the strongest reward moments could happen with little or no world-space celebration.
+
+### Cause
+
+- The existing drop effect used one short icon bounce and a thin fixed beam for every rarity.
+- Only Legendary triggered a global flash, and Epic had no stronger presentation despite being the chase tier above Legendary.
+- Boss/elite equipment rewards bypassed the field-drop visual path because they were collected directly.
+
+### Reference UX
+
+- **Survivor.io:** drops use immediate, readable reward feedback during crowded combat.
+- **ARPG loot language:** beam height, width, color and persistence communicate value before the player reads item text.
+- **AFFIX: ZERO:** because drops are intentionally scarce, strong visual hierarchy can be used without turning every wave into a fireworks display.
+
+### Decision
+
+- Scale drop presentation by rarity rather than giving every item the same visual weight.
+- Keep Normal restrained and progressively increase beam height, width and duration through Magic, Rare, Unique, Legendary and Epic.
+- Give Rare+ an expanding ring, Unique+ additional particles, Legendary a screen flash, and Epic a stronger flash plus the tallest/widest beam.
+- Include `[등급] 아이템명` in the world label.
+- Reuse the same celebration for direct Elite and Boss equipment rewards.
+- Do not change drop probabilities, loot-filter logic or item stats in this stage.
+
+### Implementation
+
+- Added deterministic loot-visual profile helpers to `EffectLayer.gd`.
+- Light-pillar height now rises from a subtle Normal marker to a 100px+ Epic pillar.
+- Beam width and effect duration also scale by rarity.
+- Rare/Unique/Legendary/Epic tiers add progressively stronger rings, particles and screen feedback.
+- Boss and Elite equipment rewards now call the same world-space drop presentation even though the item is already collected.
+- Added dedicated `gameplay_v4_loot_feedback` tests and CI coverage.
+- Build identity advanced to **g4.2**.
+
+### Failure / Revision
+
+- No Windows visual revision yet. Automated tests validate hierarchy and data contracts, but actual screen clutter and x5 readability still require play validation.
+
+### Verification
+
+Automated contracts cover:
+
+- Every higher rarity has a taller beam than the tier below it.
+- Higher rarity never has a shorter celebration duration.
+- Normal remains visually restrained.
+- Epic uses a 100px+ light pillar.
+- Unique and below do not flash the full screen.
+- Legendary flashes the screen; Epic flashes more strongly.
+- Epic beam width is materially larger than Rare.
+- `show_drop()` preserves rarity index, creates an icon/beam payload, primes Epic flash and includes the player-facing rarity name in the drop label.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Normal drop | Same basic presentation | Small, short marker |
+| Rare/Unique | Mostly color difference | Taller beam + ring/particles |
+| Legendary | Gold-ish flash + same beam size | Strong red-tier beam + flash |
+| Epic | No unique premium treatment | Tallest/widest purple pillar + strongest flash |
+| Boss/Elite gear | Inventory reward with weak world feedback | Same rarity-scaled celebration in the field |
+| Player reading | Check bag/notification | Rarity visible immediately in combat |
+
+### Windows play approval
+
+Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are noticeable, Legendary/Epic feel exceptional, and x5 combat still remains readable.
