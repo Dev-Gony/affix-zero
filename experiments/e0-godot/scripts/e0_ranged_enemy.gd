@@ -7,7 +7,8 @@ enum State { IDLE, APPROACH, WINDUP, ACTIVE, RECOVERY, HIT, DEAD }
 
 @export var move_speed: float = 45.0
 @export var attack_range: float = 205.0
-@export var preferred_min_range: float = 118.0\n@export var movement_bounds: Rect2 = Rect2(42, 108, 556, 176)
+@export var preferred_min_range: float = 118.0
+@export var movement_bounds: Rect2 = Rect2(42, 108, 556, 176)
 @export var attack_damage: int = 10
 
 @onready var sprite: AnimatedSprite2D = $Sprite
@@ -63,6 +64,10 @@ func _physics_process(delta: float) -> void:
 			if not move_direction.is_zero_approx():
 				var step := move_direction * move_speed * delta
 				global_position += step
+				global_position = Vector2(
+					clampf(global_position.x, movement_bounds.position.x, movement_bounds.end.x),
+					clampf(global_position.y, movement_bounds.position.y, movement_bounds.end.y)
+				)
 				distance_travelled += step.length()
 				_play_if_needed("walk")
 		State.WINDUP, State.ACTIVE, State.RECOVERY, State.HIT:
