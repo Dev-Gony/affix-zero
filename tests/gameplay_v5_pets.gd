@@ -138,8 +138,11 @@ func _run() -> void:
 	_check(minimap.current_floor == 12, "HUD minimap tracks the current floor")
 	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
 	_check(WorldLayout.GRID_SIZE == Vector2i(5, 4), "Dungeon world no longer uses the old 3x3 arena board")
-	_check(WorldLayout.active_room_indices().size() == 15, "Dungeon route exposes a fifteen-room winding circuit")
-	_check(WorldLayout.connected_room_pairs().size() == 14, "Dungeon minimap follows only actual corridor connections")
+	_check(WorldLayout.active_room_indices().size() == 16, "Dungeon route exposes a sixteen-room winding circuit")
+	_check(WorldLayout.connected_room_pairs().size() == 16, "Dungeon minimap follows the closed corridor circuit")
+	var final_room: int = WorldLayout.room_index_for_floor(WorldLayout.FLOOR_PATH.size())
+	var wrapped_room: int = WorldLayout.room_index_for_floor(WorldLayout.FLOOR_PATH.size() + 1)
+	_check(not WorldLayout.travel_waypoints(final_room, wrapped_room).is_empty(), "Dungeon theme-cycle wrap still travels through a real corridor")
 	minimap.queue_free()
 
 	var objective := CombatObjective.new()
