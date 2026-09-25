@@ -14,4 +14,9 @@
 
 | E0-C01 Godot 4.7.2 parse error | E0 helper `draw_ellipse(center, radius, color)`가 Godot 4.7.2의 새 native `CanvasItem.draw_ellipse()`와 이름 충돌. warning-as-error까지 발생 | 전사/근접 적 양쪽 헬퍼를 `_draw_shadow_ellipse()`로 변경. E0 run 36160446393에서 import + contract 통과, `E0_C01_TEST PASSED` 확인 | 엔진 마이너/메이저 전환 시 새 native API와 로컬 헬퍼 이름 충돌까지 회귀검사해야 한다 |
 
+| E0-C02 CI에서 SVG texture loader 오류 | editor import를 `--quit-after 3`으로 종료해 filesystem scan/import가 완료되기 전에 프로세스가 끝남. 기존 frame contract는 슬롯 개수만 세어 null texture도 PASS 가능 | import 명령을 `--import`로 변경하고 모든 required frame texture가 non-null인지 검사. 최신 run 36162170304에서 import/C01/C02 모두 success | 테스트가 자료구조 개수만 검사하면 실제 렌더 리소스가 없어도 거짓 PASS가 날 수 있다 |
+| E0-C02 전투 완료 timeout | 최초 실패 당시 SVG import 오류와 함께 combat completion도 timeout. 원거리 적의 무제한 카이팅 가능성도 있어 단일 원인을 분리 확정하기 어려웠음 | 원거리 적 movement bounds를 전투장으로 제한하고 timeout 시 actor/HP/drop/projectile snapshot을 출력하도록 보강. 후속 C02 contract 통과 | 실패를 바로 밸런스 문제로 단정하지 말고 재현 정보와 공간 경계를 함께 고정해야 한다 |
+| C02 코드 패치 중 설정 줄에 literal `\\n` 삽입 | 텍스트 기반 자동 패치에서 escape 문자열을 실제 개행으로 잘못 처리 | 원격 파일을 다시 읽어 literal escape를 실제 줄바꿈으로 수정하고 movement bounds 코드가 실제 삽입됐는지 재검토 | AI가 만든 패치도 적용 결과 파일을 다시 읽어 검증해야 한다 |
+| E0 Actions가 push와 PR에서 중복 실행 | concurrency key가 push ref와 PR number를 달리 사용해 같은 head를 두 번 검증 | `github.head_ref || github.ref_name` 기반 branch key로 통일, cancel-in-progress 유지 | CI 병렬성보다 같은 변경의 중복 실행 제거가 빠른 피드백에 더 중요할 때가 있다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
