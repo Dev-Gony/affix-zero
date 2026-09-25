@@ -165,8 +165,10 @@ func _on_enemy_died(enemy: V0Enemy, reward_xp: int, reward_gold: int, world_posi
 	kills += 1
 	player.kills = kills
 	_spawn_hit_sparks(world_position, Color("f5c46b"), 10 if enemy.is_boss else 5)
-	for i in maxi(1, mini(4, reward_xp / 4)):
-		_spawn_pickup(&"xp", maxi(1, reward_xp / maxi(1, mini(4, reward_xp / 4))), world_position + Vector2(randf_range(-6,6),randf_range(-4,4)))
+	var orb_count := maxi(1, mini(4, ceili(float(reward_xp) / 4.0)))
+	var xp_per_orb := maxi(1, ceili(float(reward_xp) / float(orb_count)))
+	for i in orb_count:
+		_spawn_pickup(&"xp", xp_per_orb, world_position + Vector2(randf_range(-6,6),randf_range(-4,4)))
 	if reward_gold > 0:
 		_spawn_pickup(&"gold", reward_gold, world_position)
 	if enemy.is_boss:
