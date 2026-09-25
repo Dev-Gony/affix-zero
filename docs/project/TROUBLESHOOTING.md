@@ -27,4 +27,6 @@
 
 | E0-C03 화면이 실제 게임처럼 보이지 않음 | 성능 fixture를 너무 오래 기본 실행화면/개발 진척처럼 취급함. 40적을 중앙에 몰아넣고 임시 SVG/진단 HUD를 그대로 노출해 Hero Siege+Survivor 방향과 무관한 화면이 됨 | E0를 테스트 전용으로 격리하고 기본 main scene을 V0 Vertical Slice로 교체. 본게임 dungeon/class/enemy assets, edge spawn, separation, combat/pickup/elite loop를 사용 | 기술 검증 씬은 제품 vertical slice를 대체하지 못한다. 사용자에게 보여줄 기본 실행은 항상 실제 게임 경험을 대표해야 한다 |
 
+| V0 pull에서 `project.godot` 로컬 변경 때문에 ff-only merge 중단 | 사용자 worktree `e0-c01-local`의 `experiments/e0-godot/project.godot`에 미커밋 변경이 있어 원격 V0 main-scene 변경을 덮어쓸 수 있으므로 Git이 정상적으로 병합을 차단함. 로컬 변경의 정확한 내용/발생 원인은 아직 미검증 | 먼저 해당 파일 diff를 확인하고 patch로 백업한 뒤, 파일 하나만 이름 있는 stash에 보존. 그 상태에서 `git merge --ff-only origin/chore/r0-preservation` 수행. stash는 자동 pop하지 않고 별도 보존 | 개발용 worktree라도 Godot editor가 프로젝트 파일을 수정할 수 있으므로 pull 전에 dirty 상태를 확인하고, 사용자 변경을 삭제하지 않은 채 동기화해야 한다 |
+
 실제 사용자 백업/게임 실행에서 새 문제가 확인되면 정확한 보고서 상태와 코드 SHA를 추가한다. 개인 저장이나 토큰은 로그에 첨부하지 않는다. 지금 사용자 Backup은 아직 NOT_RUN이다.
