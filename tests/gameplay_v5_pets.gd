@@ -85,6 +85,27 @@ func _run() -> void:
 
 	_check(GameUI.MANAGEMENT_TITLES.size() == 6, "Management hub now includes six growth sections")
 	_check(GameUI.MANAGEMENT_TITLES[3] == "펫", "Pet management sits between skills and rebirth")
+	_check(PlayerAvatar.CLASS_ATLAS != null, "Combat heroes use the generated class atlas")
+	_check(EnemyAI.ENEMY_ATLAS != null, "Combat enemies use the generated enemy atlas")
+	_check(BattleManager.DUNGEON_COURTYARD != null, "Combat rooms layer the generated dungeon courtyard art")
+
+	var minimap := GameMiniMap.new()
+	minimap.size = Vector2(78, 58)
+	minimap.set_floor(12)
+	_check(minimap.current_floor == 12, "HUD minimap tracks the current floor")
+	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
+	minimap.queue_free()
+
+	var avatar := PlayerAvatar.new()
+	add_child(avatar)
+	avatar.set_equipment_visual({
+		"base_id": "weapon_magic_sword",
+		"rarity_color": "b56dff",
+		"enhancement_level": 12,
+	})
+	_check(avatar._weapon_base_id == "weapon_magic_sword", "Combat avatar mirrors the equipped weapon identity")
+	_check(avatar._weapon_enhancement == 12, "Combat avatar mirrors weapon enhancement glow")
+	avatar.queue_free()
 
 	var dummy_player := Node2D.new()
 	dummy_player.visible = true
@@ -114,7 +135,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "pet catalog, active companion, progression unlock, persistence, combat contribution, item-art override contract"
+			"scope": "pets, training/evolution, persistent companion, generated hero/enemy/dungeon art, minimap, item visuals, equipped weapon rendering"
 		}, "\t"))
 		report.close()
 	print("GAMEPLAY_V5_PETS %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
