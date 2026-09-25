@@ -135,6 +135,7 @@ func _draw() -> void:
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
+		_draw_room_decor(room_index, walk)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
 		if corridor.size.is_zero_approx():
@@ -163,6 +164,101 @@ func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
 	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.end.y), Vector2(walk.size.x + wall * 2.0, wall)), texture, tint.darkened(0.12))
 	_draw_tiled_rect(Rect2(Vector2(walk.position.x - wall, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
 	_draw_tiled_rect(Rect2(Vector2(walk.end.x, walk.position.y), Vector2(wall, walk.size.y)), texture, tint)
+
+
+func _draw_room_decor(room_index: int, walk: Rect2) -> void:
+	var center: Vector2 = walk.get_center()
+	var theme_index: int = room_index % 3
+
+	# Corner pillars anchor each combat room so the arena reads like a place,
+	# not just a rectangle full of tiles.
+	var pillar_points: Array[Vector2] = [
+		walk.position + Vector2(28, 28),
+		Vector2(walk.end.x - 28, walk.position.y + 28),
+		Vector2(walk.position.x + 28, walk.end.y - 28),
+		walk.end - Vector2(28, 28),
+	]
+	for p: Vector2 in pillar_points:
+		_draw_stone_pillar(p, theme_index)
+
+	# Fixed pseudo-random debris. Deterministic math avoids flickering redraws.
+	for index: int in 9:
+		var seed_value: float = float((room_index + 3) * 97 + index * 53)
+		var px: float = walk.position.x + 44.0 + fmod(seed_value * 17.0, maxf(1.0, walk.size.x - 88.0))
+		var py: float = walk.position.y + 42.0 + fmod(seed_value * 29.0, maxf(1.0, walk.size.y - 84.0))
+		var p := Vector2(px, py)
+		if p.distance_to(center) < 54.0:
+			continue
+		match theme_index:
+			0:
+				_draw_crack(p, Color("2a2024"))
+			1:
+				_draw_bone_debris(p, Color("d3b891"))
+			_:
+				_draw_arcane_rune(p, Color("4da6c8"))
+
+	# Torch pairs create Hero-Siege-like warm/cold depth without requiring a new tileset.
+	var torch_y: float = walk.position.y + 22.0
+	if theme_index == 0:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("ff8a3d"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("ff8a3d"))
+	elif theme_index == 1:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("ffc66d"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("ffc66d"))
+	else:
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.32, torch_y), Color("55c8ff"))
+		_draw_torch(Vector2(walk.position.x + walk.size.x * 0.68, torch_y), Color("55c8ff"))
+
+	# Subtle center sigil makes the fight area visually legible underneath enemy swarms.
+	var sigil_color: Color = Color("a84646", 0.10) if theme_index == 0 else (Color("d6a45a", 0.08) if theme_index == 1 else Color("4f9cca", 0.10))
+	draw_arc(center, 34.0, 0.0, TAU, 28, sigil_color, 1.2)
+	draw_line(center + Vector2(-22, 0), center + Vector2(22, 0), sigil_color, 1.0)
+	draw_line(center + Vector2(0, -22), center + Vector2(0, 22), sigil_color, 1.0)
+
+
+func _draw_stone_pillar(position: Vector2, theme_index: int) -> void:
+	var base_color: Color = Color("5a5054") if theme_index == 0 else (Color("7f6857") if theme_index == 1 else Color("495b6d"))
+	draw_rect(Rect2(position + Vector2(-7, -10), Vector2(14, 20)), base_color.darkened(0.18), true)
+	draw_rect(Rect2(position + Vector2(-6, -12), Vector2(12, 18)), base_color, true)
+	draw_rect(Rect2(position + Vector2(-8, -13), Vector2(16, 4)), base_color.lightened(0.12), true)
+	draw_rect(Rect2(position + Vector2(-8, 6), Vector2(16, 5)), base_color.darkened(0.22), true)
+
+
+func _draw_torch(position: Vector2, flame_color: Color) -> void:
+	draw_rect(Rect2(position + Vector2(-1.5, -2), Vector2(3, 12)), Color("5d3a24"), true)
+	var pulse_value: float = 0.82 + sin(float(Time.get_ticks_msec()) * 0.008 + position.x * 0.01) * 0.12
+	draw_circle(position + Vector2(0, -5), 8.0, Color(flame_color, 0.07 * pulse_value))
+	draw_circle(position + Vector2(0, -6), 4.0, Color(flame_color, 0.42 * pulse_value))
+	draw_colored_polygon(PackedVector2Array([
+		position + Vector2(-3, -5),
+		position + Vector2(0, -13),
+		position + Vector2(3, -5),
+		position + Vector2(0, -2),
+	]), Color(flame_color.lightened(0.16), 0.92))
+
+
+func _draw_crack(position: Vector2, color: Color) -> void:
+	draw_polyline(PackedVector2Array([
+		position + Vector2(-8, -2),
+		position + Vector2(-3, 1),
+		position + Vector2(0, -1),
+		position + Vector2(4, 4),
+		position + Vector2(9, 2),
+	]), color, 1.2)
+	draw_line(position + Vector2(0, -1), position + Vector2(2, -6), Color(color, 0.7), 1.0)
+
+
+func _draw_bone_debris(position: Vector2, color: Color) -> void:
+	draw_line(position + Vector2(-6, -3), position + Vector2(6, 3), color, 2.0)
+	draw_circle(position + Vector2(-7, -4), 2.2, color)
+	draw_circle(position + Vector2(7, 4), 2.2, color)
+	draw_line(position + Vector2(-4, 5), position + Vector2(4, -5), Color(color, 0.72), 1.4)
+
+
+func _draw_arcane_rune(position: Vector2, color: Color) -> void:
+	draw_arc(position, 6.0, 0.0, TAU, 12, Color(color, 0.30), 1.0)
+	draw_line(position + Vector2(-5, 0), position + Vector2(5, 0), Color(color, 0.25), 1.0)
+	draw_line(position + Vector2(0, -5), position + Vector2(0, 5), Color(color, 0.25), 1.0)
 
 
 func _start_battle() -> void:
