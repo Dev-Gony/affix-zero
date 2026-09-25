@@ -79,6 +79,7 @@ var _volume_slider: HSlider
 var _fullscreen_check: CheckBox
 var _autosave_check: CheckBox
 var _minimap: GameMiniMap
+var _objective: CombatObjective
 
 
 func _ready() -> void:
@@ -217,6 +218,14 @@ func _build_hud() -> void:
 	_minimap.z_index = 24
 	_minimap.set_floor(GameManager.floor)
 	add_child(_minimap)
+
+	_objective = CombatObjective.new()
+	_objective.position = Vector2(12, 42)
+	_objective.size = Vector2(190, 58)
+	_objective.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_objective.z_index = 24
+	_objective.sync_from_game()
+	add_child(_objective)
 
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
@@ -477,6 +486,8 @@ func _toggle_management(tab_index: int) -> void:
 	_management_window.visible = true
 	if _minimap != null:
 		_minimap.visible = false
+	if _objective != null:
+		_objective.visible = false
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -498,6 +509,8 @@ func _close_management(play_sound: bool = true) -> void:
 	_management_window.visible = false
 	if _minimap != null:
 		_minimap.visible = GameManager.game_state == GameManager.GameState.RUNNING and not _pause_visible
+	if _objective != null:
+		_objective.visible = GameManager.game_state == GameManager.GameState.RUNNING and not _pause_visible
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -785,6 +798,7 @@ func _build_class_selection() -> void:
 
 func _connect_signals() -> void:
 	GameManager.stats_changed.connect(_on_stats_changed)
+	GameManager.statistics_changed.connect(_refresh_objective)
 	GameManager.class_selected.connect(_on_class_selected_ui)
 	GameManager.inventory_changed.connect(_refresh_inventory)
 	GameManager.equipment_changed.connect(_on_equipment_changed)
@@ -793,6 +807,7 @@ func _connect_signals() -> void:
 		_refresh_hud()
 		if _minimap != null:
 			_minimap.set_floor(next_floor)
+		_refresh_objective()
 	)
 	GameManager.speed_changed.connect(_refresh_speed_buttons)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
@@ -806,6 +821,7 @@ func _refresh_all() -> void:
 	_refresh_hud()
 	if _minimap != null:
 		_minimap.set_floor(GameManager.floor)
+	_refresh_objective()
 	_refresh_speed_buttons(GameManager.speed_multiplier)
 	if _loot_filter_option != null:
 		_loot_filter_option.select(GameManager.loot_min_rarity_index)
@@ -1773,6 +1789,12 @@ func _on_stats_changed() -> void:
 	_refresh_skills()
 	_refresh_rebirth()
 	_refresh_stats()
+	_refresh_objective()
+
+
+func _refresh_objective() -> void:
+	if _objective != null:
+		_objective.sync_from_game()
 
 
 func _on_equipment_changed() -> void:
@@ -1800,6 +1822,8 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 		_bottom_panel.visible = show_game_ui and not _management_open
 	if _minimap != null:
 		_minimap.visible = show_game_ui and not _management_open and not _pause_visible
+	if _objective != null:
+		_objective.visible = show_game_ui and not _management_open and not _pause_visible
 	if not show_game_ui:
 		if _management_open:
 			_management_open = false
@@ -1833,6 +1857,8 @@ func _toggle_pause_menu() -> void:
 		GameManager.set_game_state(GameManager.GameState.RUNNING)
 	if _minimap != null:
 		_minimap.visible = not _pause_visible and not _management_open and GameManager.game_state != GameManager.GameState.CLASS_SELECTION
+	if _objective != null:
+		_objective.visible = not _pause_visible and not _management_open and GameManager.game_state != GameManager.GameState.CLASS_SELECTION
 	_sync_modal_blocker()
 	AudioManager.play_sfx("ui_click")
 
