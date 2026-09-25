@@ -109,6 +109,15 @@ jobs:
           grep -q "GAMEPLAY_V4_LOOT PASSED" build/gameplay-v4/loot-feedback.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v4/loot-feedback.log
 
+      - name: Verify gameplay V5 pet and item-art contracts
+        shell: bash
+        run: |
+          mkdir -p build/gameplay-v5
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/gameplay_v5_pets.tscn -- --affix-test-mode 2>&1 | tee build/gameplay-v5/pets.log
+          grep -q "GAMEPLAY_V5_PETS PASSED" build/gameplay-v5/pets.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v5/pets.log
+
       - name: Verify UIUX V2 management contracts
         shell: bash
         run: |
@@ -164,6 +173,7 @@ jobs:
             build/pr-b/
             build/gameplay-v3/
             build/gameplay-v4/
+            build/gameplay-v5/
             build/uiux-v2/
           if-no-files-found: warn
 
