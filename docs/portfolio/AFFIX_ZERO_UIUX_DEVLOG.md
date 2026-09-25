@@ -1146,6 +1146,7 @@ Pending. Do not merge until the new dungeon route, enemy animation, ranged proje
   - boss meteor
   - bone projectile contract for future ranged skeleton variants
 - Enemy attack VFX now vary by enemy id.
+- Player auto-attacks now vary by class: warrior cleave, knight impact, assassin multi-cut, mage arcane orb, sage lightning bolt, saint holy orb.
 - Lich, dragon and demon lord use distinct projectile handling in BattleManager.
 - Companion combat art:
   - larger rarity-scaled body
