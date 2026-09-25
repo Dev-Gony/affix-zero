@@ -385,6 +385,7 @@ func _update_pet_combat(delta: float) -> void:
 		if target != null and pet.global_position.distance_to(target.global_position) <= pet_data.attack_range:
 			var raw_damage: float = PetManager.active_attack_power(GameManager.atk)
 			var damage: int = maxi(1, roundi(raw_damage - target.defense * 0.18))
+			pet.play_attack(target.global_position)
 			effects.show_pet_attack(pet.global_position, target.global_position, pet.pet_color())
 			target.take_hit({"damage": damage, "critical": false})
 	if _pet_support_time_left <= 0.0:
@@ -393,6 +394,7 @@ func _update_pet_combat(delta: float) -> void:
 		if heal_percent > 0.0 and GameManager.hp < GameManager.max_hp:
 			var heal_amount: int = maxi(1, roundi(float(GameManager.max_hp) * heal_percent * 0.01))
 			var restored: int = GameManager.heal(heal_amount)
+			pet.play_support()
 			effects.show_pet_heal(player.global_position, restored, pet.pet_color())
 
 
