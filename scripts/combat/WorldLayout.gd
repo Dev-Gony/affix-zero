@@ -10,13 +10,14 @@ const WORLD_RECT := Rect2(Vector2.ZERO, Vector2(ROOM_SIZE.x * GRID_SIZE.x, ROOM_
 const WALK_MARGIN := Vector2(58, 46)
 const CORRIDOR_HALF_WIDTH: float = 27.0
 
-# One 15-room dungeon circuit. Floor 16 starts the next themed circuit.
-# Every consecutive pair is orthogonally adjacent so AUTO travel remains real
-# movement through corridors instead of teleporting between combat boxes.
+# One closed 16-room dungeon circuit. The final room is adjacent to the first,
+# so a new theme cycle still begins through a real corridor instead of a
+# diagonal teleport across the void.
 const FLOOR_PATH: Array[int] = [
-	10, 11, 6, 1, 2,
-	3, 8, 13, 12, 17,
-	18, 19, 14, 9, 4,
+	10, 11, 6, 5,
+	0, 1, 2, 3,
+	4, 9, 14, 19,
+	18, 17, 16, 15,
 ]
 
 
@@ -116,6 +117,7 @@ static func connected_room_pairs() -> Array[Vector2i]:
 	var pairs: Array[Vector2i] = []
 	for index: int in FLOOR_PATH.size() - 1:
 		pairs.append(Vector2i(FLOOR_PATH[index], FLOOR_PATH[index + 1]))
+	pairs.append(Vector2i(FLOOR_PATH.back(), FLOOR_PATH.front()))
 	return pairs
 
 
