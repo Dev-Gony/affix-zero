@@ -24,6 +24,8 @@ func _run() -> void:
 	var original_owned: Dictionary = PetManager.owned_pets.duplicate(true)
 	var original_active: String = PetManager.active_pet_id
 	var original_essence: int = PetManager.essence
+	var original_summon_crystals: int = PetManager.summon_crystals
+	var original_summon_pity: int = PetManager.summon_pity
 	var original_gold: int = GameManager.gold
 
 	_check(PetManager.all_pet_ids().size() == 6, "Pet catalog exposes six launch companions")
@@ -61,11 +63,29 @@ func _run() -> void:
 	_check(PetManager.active_pet_id == "spirit_fox", "Active pet survives save round-trip")
 	_check(PetManager.essence == saved_essence, "Pet essence survives save round-trip")
 
+	var owned_before_floor: int = PetManager.owned_pets.size()
 	var unlocked: Array[String] = PetManager.try_unlock_for_floor(60)
-	_check(PetManager.is_owned("ember_drake"), "Floor progression unlocks Ember Drake")
-	_check(PetManager.is_owned("stone_golem"), "Floor progression unlocks Stone Golem")
-	_check(PetManager.is_owned("meadow_fairy"), "Late-floor progression unlocks Meadow Fairy")
-	_check(unlocked.size() >= 5, "High-floor migration unlocks all eligible companions")
+	_check(unlocked.is_empty(), "Floor progression no longer grants gacha pets directly")
+	_check(PetManager.owned_pets.size() == owned_before_floor, "Floor progression preserves the summon-only pet economy")
+
+	PetManager.summon_crystals = 100000
+	PetManager.summon_pity = PetManager.LEGENDARY_PITY - 1
+	var pity_result: Dictionary = PetManager.summon_once()
+	_check(not pity_result.is_empty(), "Pet gacha spends summon crystals and returns a result")
+	_check(int(pity_result.get("rarity_index", 0)) >= 4, "Legendary pity guarantees legendary or mythic")
+	_check(PetManager.summon_pity == 0, "Legendary pity resets after a high-rarity summon")
+	var ten_results: Array[Dictionary] = PetManager.summon_ten()
+	_check(ten_results.size() == 10, "Ten-pull returns ten pet results")
+	var ten_has_heroic: bool = false
+	for result: Dictionary in ten_results:
+		if int(result.get("rarity_index", 0)) >= 3:
+			ten_has_heroic = true
+	_check(ten_has_heroic, "Ten-pull guarantees at least heroic rarity")
+	_check(PetManager.summon_crystals < 100000, "Summoning consumes persistent summon currency")
+
+	for pet_id: String in PetManager.all_pet_ids():
+		if not PetManager.is_owned(pet_id):
+			PetManager.unlock_pet(pet_id)
 
 	PetManager.set_active_pet("ember_drake")
 	_check(PetManager.active_player_damage_bonus_percent() > 0.0, "Ember Drake grants a player damage passive")
@@ -124,6 +144,12 @@ func _run() -> void:
 	minimap.set_floor(12)
 	_check(minimap.current_floor == 12, "HUD minimap tracks the current floor")
 	_check(WorldLayout.room_index_for_floor(minimap.current_floor) == WorldLayout.room_index_for_floor(12), "HUD minimap uses the shared room path")
+	_check(WorldLayout.GRID_SIZE == Vector2i(5, 4), "Dungeon topology expands beyond the old 3x3 board")
+	_check(WorldLayout.DUNGEON_PATH.size() >= 12, "Dungeon uses a long winding expedition route")
+	_check(WorldLayout.connected_room_pairs().size() < WorldLayout.GRID_SIZE.x * WorldLayout.GRID_SIZE.y, "Dungeon graph is not a fully-connected room board")
+	var first_room: int = WorldLayout.DUNGEON_PATH[0]
+	var second_room: int = WorldLayout.DUNGEON_PATH[1]
+	_check(not WorldLayout.travel_waypoints(first_room, second_room).is_empty(), "Dungeon route exposes real corridor traversal")
 	minimap.queue_free()
 
 	var objective := CombatObjective.new()
@@ -153,12 +179,18 @@ func _run() -> void:
 	companion._process(0.016)
 	_check(companion.visible, "Combat companion is visible beside an active player")
 	_check(not companion.pet_id().is_empty(), "Combat companion reflects the active pet id")
+	companion.play_attack(Vector2(30, 0))
+	_check(companion._attack_left > 0.0, "Combat pet has a visible attack animation state")
+	companion.play_support()
+	_check(companion._support_left > 0.0, "Combat pet has a visible support-cast animation state")
 	companion.queue_free()
 	dummy_player.queue_free()
 
 	PetManager.owned_pets = original_owned
 	PetManager.active_pet_id = original_active
 	PetManager.essence = original_essence
+	PetManager.summon_crystals = original_summon_crystals
+	PetManager.summon_pity = original_summon_pity
 	GameManager.gold = original_gold
 	PetManager.apply_save_dict(PetManager.to_save_dict())
 	_finish()
@@ -173,7 +205,7 @@ func _finish() -> void:
 			"checks": _checks,
 			"failures": _failures,
 			"status": "PASS" if _failures.is_empty() else "FAIL",
-			"scope": "pets, training/evolution, persistent companion, generated hero/enemy/dungeon art, actual 29-item atlas, boss/elite presentation, minimap, equipped weapon rendering"
+			"scope": "dungeon topology, animated combat, enemy projectiles, pet gacha/pity/duplicates, companion animation, item art, boss/elite presentation"
 		}, "\t"))
 		report.close()
 	print("GAMEPLAY_V5_PETS %s: %d checks, %d failures" % ["PASSED" if _failures.is_empty() else "FAILED", _checks, _failures.size()])
