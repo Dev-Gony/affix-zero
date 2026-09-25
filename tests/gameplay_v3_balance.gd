@@ -160,7 +160,7 @@ func _run() -> void:
 
 	GameManager.floor = 30
 	ui._refresh_stats()
-	_check(ui._stats_label.text.contains("현재 층 위협도"), "Info panel exposes enemy threat scaling to the player")
+	_check(ui._stats_threat_label.text.contains("30층 기준"), "Info dashboard exposes current-floor enemy threat scaling to the player")
 
 	main.queue_free()
 	await get_tree().process_frame
