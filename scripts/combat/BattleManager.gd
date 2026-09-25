@@ -72,6 +72,7 @@ func _ready() -> void:
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	LevelManager.level_up.connect(_on_level_up)
 	LootManager.item_dropped.connect(_on_item_dropped)
+	effects.resource_collected.connect(_on_resource_collected)
 	queue_redraw()
 	if GameManager.game_state == GameManager.GameState.RUNNING and not GameManager.selected_class.is_empty():
 		call_deferred("_start_battle")
@@ -81,6 +82,7 @@ func _process(delta: float) -> void:
 	_update_camera_shake(delta)
 	if _respawning or GameManager.game_state != GameManager.GameState.RUNNING:
 		return
+	effects.set_pickup_target(player.global_position)
 	if _traveling:
 		_update_room_travel(delta)
 		return
@@ -180,7 +182,7 @@ func _spawn_wave() -> void:
 			eligible.append(enemy_resource)
 	if eligible.is_empty():
 		return
-	var wave_size: int = mini(3 + floori(GameManager.floor * 0.5), 12)
+	var wave_size: int = mini(6 + floori(GameManager.floor * 0.8), 20)
 	for index: int in wave_size:
 		var enemy := EnemyAI.new()
 		enemy.name = "Enemy_%d_%d" % [GameManager.floor, index]
@@ -439,10 +441,10 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
-	LevelManager.add_xp(xp_reward)
+	var adjusted_xp: int = maxi(1, int(round(xp_reward * (1.0 + GameManager.xp_bonus * 0.01))))
 	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
-	GameManager.add_gold(adjusted_gold)
-	effects.show_gold(world_position, adjusted_gold)
+	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
+	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
 		var boss_reward: Dictionary = LootManager.drop_boss_reward()
 		var reward_text: String = String(boss_reward.get("name", "보상 골드"))
@@ -458,6 +460,15 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
 	elif _enemies.is_empty():
 		_spawn_wave()
+
+
+func _on_resource_collected(kind: String, amount: int) -> void:
+	match kind:
+		"xp":
+			LevelManager.add_xp(amount)
+		"gold":
+			GameManager.add_gold(amount)
+			effects.show_gold(player.global_position, amount)
 
 
 func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
