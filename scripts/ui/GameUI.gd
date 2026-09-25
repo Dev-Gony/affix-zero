@@ -1296,6 +1296,53 @@ func _refresh_pets() -> void:
 	ten_summon.pressed.connect(_summon_pets.bind(10))
 	summon_row.add_child(ten_summon)
 
+	if not PetManager.last_summon_results.is_empty():
+		var result_title := Label.new()
+		result_title.text = "최근 소환 결과"
+		result_title.add_theme_font_size_override("font_size", 7)
+		result_title.add_theme_color_override("font_color", COLOR_MUTED)
+		_pet_content.add_child(result_title)
+		var result_grid := GridContainer.new()
+		result_grid.columns = 5
+		result_grid.add_theme_constant_override("h_separation", 4)
+		result_grid.add_theme_constant_override("v_separation", 4)
+		_pet_content.add_child(result_grid)
+		for result: Dictionary in PetManager.last_summon_results:
+			var result_id: String = String(result.get("pet_id", ""))
+			var result_data: PetData = PetManager.get_pet_data(result_id)
+			if result_data == null:
+				continue
+			var result_color: Color = PetManager.rarity_color(result_data.rarity_index)
+			var result_card := PanelContainer.new()
+			result_card.custom_minimum_size = Vector2(108, 48)
+			result_card.add_theme_stylebox_override("panel", _style_box(Color("10151d").lerp(result_color, 0.08), result_color.darkened(0.12), 1, 2))
+			result_grid.add_child(result_card)
+			var result_row := HBoxContainer.new()
+			result_row.add_theme_constant_override("separation", 3)
+			result_card.add_child(result_row)
+			var result_portrait := PetPortrait.new()
+			result_portrait.custom_minimum_size = Vector2(38, 38)
+			result_portrait.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			result_portrait.configure(result_id, result_data.color)
+			result_row.add_child(result_portrait)
+			var result_text := VBoxContainer.new()
+			result_text.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+			result_row.add_child(result_text)
+			var result_name := Label.new()
+			result_name.text = result_data.display_name
+			result_name.add_theme_font_size_override("font_size", 6)
+			result_name.add_theme_color_override("font_color", result_color)
+			result_text.add_child(result_name)
+			var result_state := Label.new()
+			if bool(result.get("new", false)):
+				result_state.text = "NEW · %s" % result_data.rarity_name
+				result_state.add_theme_color_override("font_color", COLOR_GOLD)
+			else:
+				result_state.text = "중복 · 조각 +%d" % int(result.get("fragments", 0))
+				result_state.add_theme_color_override("font_color", COLOR_MUTED)
+			result_state.add_theme_font_size_override("font_size", 5)
+			result_text.add_child(result_state)
+
 	var active_data: PetData = PetManager.active_pet_data()
 	var active_panel := PanelContainer.new()
 	active_panel.custom_minimum_size.y = 98
