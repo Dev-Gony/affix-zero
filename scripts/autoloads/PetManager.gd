@@ -160,6 +160,62 @@ func active_support_interval() -> float:
 	return data.support_interval if data != null else 999.0
 
 
+func training_cost(pet_id: String) -> int:
+	var level: int = level_for(pet_id)
+	var stars: int = stars_for(pet_id)
+	return maxi(500, roundi((700.0 + level * 420.0) * (1.0 + float(stars - 1) * 0.45)))
+
+
+func train_pet(pet_id: String) -> bool:
+	if not is_owned(pet_id):
+		return false
+	var level: int = level_for(pet_id)
+	if level >= MAX_LEVEL:
+		return false
+	var cost: int = training_cost(pet_id)
+	if not GameManager.spend_gold(cost):
+		return false
+	var state: Dictionary = pet_state(pet_id)
+	var missing_xp: int = maxi(1, xp_needed(level) - int(state.get("xp", 0)))
+	add_xp(pet_id, missing_xp)
+	pet_state_changed.emit()
+	return true
+
+
+func evolution_required_level(pet_id: String) -> int:
+	var stars: int = stars_for(pet_id)
+	if stars >= MAX_STARS:
+		return MAX_LEVEL
+	return mini(MAX_LEVEL, 5 + stars * 12)
+
+
+func evolution_cost(pet_id: String) -> int:
+	var stars: int = stars_for(pet_id)
+	return roundi(12000.0 * pow(5.0, float(maxi(0, stars - 1))))
+
+
+func can_evolve(pet_id: String) -> bool:
+	if not is_owned(pet_id):
+		return false
+	var stars: int = stars_for(pet_id)
+	if stars >= MAX_STARS:
+		return false
+	return level_for(pet_id) >= evolution_required_level(pet_id) and GameManager.gold >= evolution_cost(pet_id)
+
+
+func evolve_pet(pet_id: String) -> bool:
+	if not can_evolve(pet_id):
+		return false
+	var cost: int = evolution_cost(pet_id)
+	if not GameManager.spend_gold(cost):
+		return false
+	var state: Dictionary = pet_state(pet_id)
+	state["stars"] = mini(MAX_STARS, int(state.get("stars", 1)) + 1)
+	owned_pets[pet_id] = state
+	pet_state_changed.emit()
+	return true
+
+
 func try_unlock_for_floor(floor_number: int) -> Array[String]:
 	var unlocked: Array[String] = []
 	for pet_id: String in _catalog.keys():
