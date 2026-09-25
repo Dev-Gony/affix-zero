@@ -354,6 +354,41 @@ func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void
 		_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
 
 
+func show_enemy_archetype_attack(enemy_id: String, from: Vector2, to: Vector2) -> void:
+	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var tangent := Vector2(-direction.y, direction.x)
+	match enemy_id:
+		"slime":
+			_rings.append({"center": from, "radius": 7.0, "speed": 75.0, "color": Color("7de2a1", 0.65), "life": 0.24, "duration": 0.24, "width": 2.0})
+			spawn_fragments(to, Color("7de2a1"), 4, 34.0)
+		"bat":
+			_lines.append({"points": PackedVector2Array([from - tangent * 8.0, to, from + tangent * 8.0]), "color": Color("c08aff", 0.82), "life": 0.18, "duration": 0.18, "width": 2.2})
+		"skeleton":
+			_lines.append({"points": PackedVector2Array([from + direction * 6.0, to + tangent * 6.0]), "color": Color("e6e0d2"), "life": 0.16, "duration": 0.16, "width": 2.6})
+			_lines.append({"points": PackedVector2Array([from + direction * 5.0, to - tangent * 4.0]), "color": Color("ffffff", 0.46), "life": 0.11, "duration": 0.11, "width": 1.0})
+		"goblin":
+			_lines.append({"points": PackedVector2Array([from, from + direction * 18.0, to]), "color": Color("b7dd6c"), "life": 0.14, "duration": 0.14, "width": 2.2})
+		"dark_knight":
+			var angle: float = direction.angle()
+			_rings.append({"center": from, "radius": 12.0, "speed": 95.0, "color": Color("ff704f", 0.70), "life": 0.25, "duration": 0.25, "width": 3.0})
+			_lines.append({"points": PackedVector2Array([from + Vector2.RIGHT.rotated(angle - 0.55) * 12.0, to, from + Vector2.RIGHT.rotated(angle + 0.55) * 12.0]), "color": Color("ff9a78"), "life": 0.20, "duration": 0.20, "width": 3.4})
+		"lich":
+			_rings.append({"center": from, "radius": 8.0, "speed": 60.0, "color": Color("a879ff", 0.62), "life": 0.40, "duration": 0.40, "width": 2.0})
+		"dragon":
+			for index: int in 5:
+				var spread: float = lerpf(-0.34, 0.34, float(index) / 4.0)
+				var ray: Vector2 = direction.rotated(spread)
+				_lines.append({"points": PackedVector2Array([from + ray * 8.0, from + ray * 58.0]), "color": Color("ff6a2e", 0.72 - index * 0.05), "life": 0.22, "duration": 0.22, "width": 4.0 - index * 0.35})
+			spawn_fragments(to, Color("ff8b3d"), 10, 58.0)
+		"demon_lord":
+			_rings.append({"center": from, "radius": 16.0, "speed": 130.0, "color": Color("ff345e", 0.72), "life": 0.42, "duration": 0.42, "width": 4.0})
+			_rings.append({"center": to, "radius": 8.0, "speed": 110.0, "color": Color("9b5cff", 0.55), "life": 0.34, "duration": 0.34, "width": 2.0})
+		_:
+			show_enemy_attack(from, to, false)
+
+
 func show_melee_spin(center: Vector2) -> void:
 	_rings.append({"center": center, "radius": 15.0, "speed": 170.0, "color": Color("ff8066"), "life": 0.36, "duration": 0.36, "width": 5.5})
 	_rings.append({"center": center, "radius": 24.0, "speed": 120.0, "color": Color("ffd2b8"), "life": 0.28, "duration": 0.28, "width": 2.0})
