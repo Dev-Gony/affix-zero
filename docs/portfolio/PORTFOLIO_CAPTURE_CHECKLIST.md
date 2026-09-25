@@ -155,3 +155,49 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Existing retreat/retry behavior unchanged: PASS
 - Bugs found: none in tested flow
 - Merge approval: gameplay validated; PR remains unmerged by policy
+
+
+## G4.2 — Rarity-Scaled Loot VFX
+
+### Required capture set
+
+Editor-only comparison shortcut: **Ctrl+Shift+8** spawns Normal → Epic sample drop VFX around the player for deterministic visual validation. It does not add items or change progression.
+
+- [ ] **Normal / Magic restraint**
+  - Capture ordinary field equipment if naturally encountered.
+  - Normal should not create a tall light pillar.
+  - Magic may show a small beam but should not dominate combat.
+
+- [ ] **Rare+ hierarchy**
+  - Capture a Rare or higher equipment event.
+  - Confirm beam height/glow/ring strength is clearly greater than Magic.
+  - Confirm the item rarity/name remains readable near the drop.
+
+- [ ] **Boss / Elite reward accent**
+  - Capture equipment from a boss or elite bonus reward.
+  - Confirm the rarity-colored effect also receives the extra reward ring.
+
+- [ ] **x5 readability**
+  - Run at x5 until an equipment drop appears.
+  - Confirm the drop does not vanish too quickly to identify.
+  - Confirm the effect remains brief enough not to stack into visual clutter.
+
+- [ ] **Pickup cleanup**
+  - Watch a field item auto-pickup.
+  - Confirm the beam collapses/fades rather than remaining as a ghost pillar after collection.
+
+- [ ] **Combat clarity**
+  - Confirm beams do not obscure nearby monsters, elite auras, damage numbers, or the player silhouette.
+
+### G4.2 validation notes
+
+- Build commit:
+- Normal visibility:
+- Magic visibility:
+- Rare+ hierarchy:
+- Boss/elite accent:
+- x5 readability:
+- Pickup cleanup:
+- Combat clutter:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected

@@ -100,6 +100,15 @@ jobs:
           grep -q "GAMEPLAY_V4_GROWTH PASSED" build/gameplay-v4/growth-ux.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v4/growth-ux.log
 
+      - name: Verify gameplay V4 loot-VFX contracts
+        shell: bash
+        run: |
+          mkdir -p build/gameplay-v4
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/gameplay_v4_loot_vfx.tscn -- --affix-test-mode 2>&1 | tee build/gameplay-v4/loot-vfx.log
+          grep -q "GAMEPLAY_V4_LOOT_VFX PASSED" build/gameplay-v4/loot-vfx.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/gameplay-v4/loot-vfx.log
+
       - name: Run existing gameplay smoke test
         shell: bash
         run: |

@@ -380,3 +380,88 @@ Observed in live play:
 - The enlarged equipment layout remained readable without problematic clipping.
 
 G4.1 growth-loop UX is considered player-validated. PR remains unmerged by policy.
+
+
+## 2026-09-25 — G4.2 Rarity-Scaled Loot VFX
+
+### Problem
+
+- Combat readability improved with elites and the growth loop is now clear, but equipment drops still lack enough emotional hierarchy.
+- A normal item and a chase-tier item can appear too similarly during automated combat, especially at x5 speed.
+- Boss/elite bonus equipment is already mechanically valuable but does not yet feel distinct enough at the moment it appears.
+
+### Cause
+
+- The existing drop effect used essentially one small light line and icon treatment for every rarity.
+- Drop labels/effects use normal game-time delta, so x5 compresses the visual event into a fraction of a second.
+- Epic uses the ordinary item-drop sound path because the audio check only recognized the legacy Legendary id.
+- Boss and elite bonus equipment is added directly to inventory without showing the same world-drop celebration used by field equipment.
+
+### Reference UX
+
+- **ARPG loot:** valuable drops create immediate rarity recognition through beam height, glow and color before the player reads text.
+- **Survivor.io reward readability:** stronger rewards get stronger but brief visual feedback without obscuring the ongoing automated fight.
+- **AFFIX: ZERO:** the player should be able to glance at an idle run and notice a meaningful equipment event without stopping combat.
+
+### Decision
+
+- Scale loot presentation by rarity index instead of hard-coding only Legendary.
+- Keep Normal visually quiet.
+- Introduce a small beam for Magic, then progressively stronger beam/glow/rings for Rare and above.
+- Legendary and higher may trigger a restrained screen flash; Epic is stronger than Legendary.
+- Keep the profile generic enough to scale when the planned 12-tier rarity system is implemented later.
+- Loot-VFX lifetime uses real-time-style compensation so x5 does not erase the event instantly.
+- Auto-pickup delay remains short but increases slightly for rarer items, capped below one second.
+- Boss/elite bonus equipment receives the same rarity VFX plus a special reward ring.
+- Loot rejected by the acquisition filter is not rendered as if it were collectible.
+
+### Implementation
+
+- Added EffectLayer.loot_visual_profile() with bounded beam height, width, glow, rings, duration, flash and fragment counts.
+- Added rarity-aware real-time pickup-delay contract.
+- Loot icon lifetime is compensated against the current game-speed multiplier for x5 readability.
+- Item labels now live with the loot visual instead of the generic combat text lifetime.
+- Pickup collapses the remaining beam so collected items do not leave long ghost pillars.
+- Boss and elite equipment rewards now render at the defeated enemy position.
+- Legendary and Epic both use the chase-drop audio path through rarity index >= 4.
+- Existing acquisition filter is checked before field-drop VFX is rendered.
+- Added dedicated gameplay_v4_loot_vfx regression tests and CI coverage.
+- Added editor-only **Ctrl+Shift+8** comparison showcase that spawns Normal → Epic sample VFX without adding items or changing progression.
+- Build identity advanced to **g4.2**.
+
+### Failure / Revision
+
+- The previous implementation treated Legendary as the only exceptional rarity and used a fixed world-space flash region near the original view.
+- G4.2 replaces that one-off check with a rarity-index profile and expands the flash draw region so high-floor camera positions can still receive the feedback.
+- The profile is deliberately bounded so future rarity tiers do not create absurd skyscraper beams across the dungeon.
+
+### Verification
+
+Automated contracts cover:
+
+- Normal has no light pillar.
+- Magic introduces a small beam.
+- Rare is stronger than Magic and adds a ground-ring accent.
+- Unique has more visual weight than Rare.
+- Legendary triggers restrained flash feedback.
+- Epic is more dramatic and not shorter-lived than Legendary.
+- Future high rarity indices remain capped to a safe beam height.
+- Common items auto-collect faster than Rare/Epic while chase drops remain below one second of added delay.
+- Boss/elite reward items receive the special reward accent.
+- Pickup collapses the remaining beam instead of leaving a ghost pillar.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Normal loot | Same basic beam family | Quiet icon/glow, no pillar |
+| Rare+ loot | Limited hierarchy | Progressive beam, rings, glow and label weight |
+| Legendary/Epic | Legendary-only special case | Rarity-index chase feedback; Epic > Legendary |
+| x5 | Drop moment heavily compressed | Loot visual lifetime compensated for speed |
+| Boss/elite gear | Inventory reward with notification | World-space rarity celebration at kill position |
+| Filtered loot | Could visually appear before rejection | Hidden when acquisition filter rejects it |
+| Future rarity expansion | One-off checks | Bounded generic profile ready for more tiers |
+
+### Windows play approval
+
+Pending. Validate at x1 and x5 that Normal/Magic remain unobtrusive, Rare+ beams are immediately recognizable, boss/elite reward rings are readable, and the effect does not obscure enemies or damage numbers.
