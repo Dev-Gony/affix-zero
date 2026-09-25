@@ -1,9 +1,9 @@
 {
-  "version": "g4.1",
+  "version": "g4.2",
   "stage": "GAMEPLAY-V4",
   "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
-  "branch": "dev/gameplay-v4-growth-ux",
+  "branch": "dev/gameplay-v4-loot-feedback",
   "built_at_utc": "unstamped-local-checkout",
   "dirty": false
 }

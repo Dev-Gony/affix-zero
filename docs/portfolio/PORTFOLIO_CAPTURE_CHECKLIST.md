@@ -155,3 +155,43 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Existing retreat/retry behavior unchanged: PASS
 - Bugs found: none in tested flow
 - Merge approval: gameplay validated; PR remains unmerged by policy
+
+
+## G4.2 — Rarity-Scaled Loot Feedback
+
+### Required capture set
+
+- [ ] **Normal / Magic restraint**
+  - Let the game run at x5 until lower-rarity equipment drops.
+  - Confirm the pillar is visible but does not dominate combat.
+
+- [ ] **Rare / Unique escalation**
+  - Capture a Rare or Unique drop if one appears naturally.
+  - Confirm the beam is clearly taller than low tiers and the ring/particle layer is readable.
+
+- [ ] **Legendary / Epic premium moment**
+  - Capture if naturally available from field, elite or boss reward.
+  - Confirm Legendary triggers a strong screen cue.
+  - Confirm Epic is visibly stronger than Legendary and uses the tallest purple pillar.
+  - Do not force or rebalance rarity solely to obtain this capture.
+
+- [ ] **Elite / Boss reward reuse**
+  - When an Elite or Boss grants equipment, confirm the same rarity-scaled world effect appears at the death position.
+
+- [ ] **x5 readability**
+  - Confirm beams are recognizable at x5 without covering enemies, damage numbers or movement paths.
+
+### G4.2 validation notes
+
+- Build commit:
+- Normal clutter: Low / Good / Too much
+- Magic readability:
+- Rare readability:
+- Unique readability:
+- Legendary feedback:
+- Epic feedback:
+- Elite reward effect:
+- Boss reward effect:
+- x5 combat readability:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected

@@ -125,21 +125,83 @@ func _update_resource_pickups(delta: float) -> void:
 			_resource_pickups.remove_at(index)
 
 
+static func loot_beam_height(rarity_index: int) -> float:
+	match clampi(rarity_index, 0, 5):
+		0: return 16.0
+		1: return 26.0
+		2: return 42.0
+		3: return 60.0
+		4: return 86.0
+		5: return 112.0
+	return 16.0
+
+
+static func loot_effect_duration(rarity_index: int) -> float:
+	match clampi(rarity_index, 0, 5):
+		0: return 0.85
+		1: return 1.00
+		2: return 1.20
+		3: return 1.45
+		4: return 1.90
+		5: return 2.35
+	return 0.85
+
+
+static func loot_beam_width(rarity_index: int) -> float:
+	return 1.0 + float(clampi(rarity_index, 0, 5)) * 0.65
+
+
+static func loot_screen_flash_alpha(rarity_index: int) -> float:
+	if rarity_index >= 5:
+		return 0.68
+	if rarity_index >= 4:
+		return 0.48
+	return 0.0
+
+
 func show_drop(world_position: Vector2, item: Dictionary) -> void:
 	var color := Color.from_string(String(item.get("rarity_color", "ffffff")), Color.WHITE)
-	_texts.append({"position": world_position + Vector2(-30, -18), "text": String(item.get("name", "아이템")), "color": color, "life": 1.4, "duration": 1.4, "size": 11})
+	var rarity_index: int = clampi(int(item.get("rarity_index", 0)), 0, 5)
+	var duration: float = loot_effect_duration(rarity_index)
+	var rarity_name: String = String(item.get("rarity_name", ""))
+	var display_name: String = String(item.get("name", "아이템"))
+	var label: String = "[%s] %s" % [rarity_name, display_name] if not rarity_name.is_empty() else display_name
+	_texts.append({
+		"position": world_position + Vector2(-34, -22),
+		"text": label,
+		"color": color,
+		"life": duration,
+		"duration": duration,
+		"size": 10 + mini(rarity_index, 3),
+	})
 	var icon_index: int = int(item.get("icon_index", -1))
 	if icon_index >= 0 and icon_index < 30:
 		_loot_icons.append({
 			"position": world_position,
 			"icon_index": icon_index,
 			"color": color,
-			"life": 1.2,
-			"duration": 1.2,
+			"rarity_index": rarity_index,
+			"life": duration,
+			"duration": duration,
+			"beam_height": loot_beam_height(rarity_index),
+			"beam_width": loot_beam_width(rarity_index),
 		})
-	if String(item.get("rarity_id", "")) == "legend":
-		_flash_alpha = 0.58
-		spawn_fragments(Vector2(320, 105), Color("ffd700"), 28, 105.0)
+	if rarity_index >= 2:
+		_rings.append({
+			"center": world_position,
+			"radius": 5.0,
+			"speed": 32.0 + rarity_index * 9.0,
+			"color": Color(color, 0.90),
+			"life": minf(duration, 0.85 + rarity_index * 0.10),
+			"duration": minf(duration, 0.85 + rarity_index * 0.10),
+			"width": 1.0 + rarity_index * 0.45,
+		})
+	if rarity_index >= 3:
+		spawn_fragments(world_position, color, 4 + rarity_index * 2, 42.0 + rarity_index * 10.0)
+	var flash_alpha: float = loot_screen_flash_alpha(rarity_index)
+	if flash_alpha > 0.0:
+		_flash_alpha = maxf(_flash_alpha, flash_alpha)
+		spawn_fragments(world_position, color, 20 + rarity_index * 4, 92.0 + rarity_index * 7.0)
 
 
 func show_pickup(from: Vector2, to: Vector2, item: Dictionary) -> void:
@@ -220,7 +282,7 @@ func clear_effects() -> void:
 
 func _draw() -> void:
 	if _flash_alpha > 0.0:
-		draw_rect(Rect2(0, 0, 640, 356), Color(1.0, 0.76, 0.15, _flash_alpha), true)
+		draw_rect(Rect2(-128, -128, 2176, 1456), Color(1.0, 1.0, 1.0, _flash_alpha * 0.32), true)
 	for particle: Dictionary in _particles:
 		var alpha: float = clampf(float(particle["life"]) / float(particle["duration"]), 0.0, 1.0)
 		var color: Color = particle["color"]
@@ -259,16 +321,25 @@ func _draw() -> void:
 		var duration: float = float(loot_icon["duration"])
 		var alpha: float = clampf(life / duration, 0.0, 1.0)
 		var progress: float = 1.0 - alpha
+		var rarity_index: int = int(loot_icon.get("rarity_index", 0))
 		var position: Vector2 = Vector2(loot_icon["position"]) + Vector2(0, -6.0 - sin(progress * PI) * 7.0)
 		var rarity_color: Color = loot_icon["color"]
-		rarity_color.a = alpha * 0.45
-		draw_rect(Rect2(position + Vector2(-1, -29), Vector2(2, 31)), rarity_color, true)
-		draw_circle(position, 11.0, Color(rarity_color, alpha * 0.16))
+		var beam_height: float = float(loot_icon.get("beam_height", 24.0))
+		var beam_width: float = float(loot_icon.get("beam_width", 2.0))
+		var pulse: float = 0.82 + sin(Time.get_ticks_msec() * 0.012 + rarity_index) * 0.18
+		var beam_color := Color(rarity_color, alpha * (0.24 + rarity_index * 0.08) * pulse)
+		draw_rect(Rect2(position + Vector2(-beam_width * 0.5, -beam_height), Vector2(beam_width, beam_height + 2.0)), beam_color, true)
+		if rarity_index >= 2:
+			draw_rect(Rect2(position + Vector2(-beam_width * 1.8, -beam_height * 0.72), Vector2(beam_width * 3.6, beam_height * 0.72)), Color(rarity_color, alpha * 0.06), true)
+		if rarity_index >= 4:
+			draw_rect(Rect2(position + Vector2(-beam_width * 3.0, -beam_height * 0.48), Vector2(beam_width * 6.0, beam_height * 0.48)), Color(rarity_color, alpha * 0.04), true)
+		draw_circle(position, 9.0 + rarity_index * 1.4, Color(rarity_color, alpha * (0.10 + rarity_index * 0.025)))
 		var icon_index: int = int(loot_icon["icon_index"])
 		var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
 		var atlas_cell := Vector2i(icon_index % 6, floori(float(icon_index) / 6.0))
 		var source := Rect2(Vector2(atlas_cell) * cell_size, cell_size)
-		draw_texture_rect_region(ITEM_BASE_ATLAS, Rect2(position - Vector2(9, 9), Vector2(18, 18)), source, Color(1, 1, 1, alpha))
+		var icon_size: float = 18.0 + minf(4.0, float(rarity_index))
+		draw_texture_rect_region(ITEM_BASE_ATLAS, Rect2(position - Vector2.ONE * icon_size * 0.5, Vector2.ONE * icon_size), source, Color(1, 1, 1, alpha))
 	for text_data: Dictionary in _texts:
 		var alpha: float = clampf(float(text_data["life"]) / float(text_data["duration"]), 0.0, 1.0)
 		var color: Color = text_data["color"]
