@@ -76,6 +76,9 @@ var _autosave_check: CheckBox
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().paused = false
+	_management_open = false
+	_pause_visible = false
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = _create_theme()
 	_build_hud()
