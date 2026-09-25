@@ -67,3 +67,43 @@ Record after Windows play:
 **Problem → Cause → Reference UX → Decision → Implementation → Failure/Revision → Verification → Before/After**
 
 For G3.3, the important story is not merely “added Epic.” The portfolio evidence should show that rarity depth, combat readability, and inventory economy were changed together, then guarded by regression tests after the sixth rarity exposed a stale five-tier smoke assumption.
+
+
+## G4.0 — Elite Monsters
+
+### Required capture set
+
+- [ ] **Elite first-read**
+  - Reach floor 6+ and capture the first elite encounter.
+  - The elite should be distinguishable from normal enemies without reading a menu.
+  - Capture the larger body and pulsing colored aura.
+
+- [ ] **Three elite archetypes**
+  - Capture Brutal / Swift / Bulwark when naturally encountered.
+  - Brutal should feel damage-focused, Swift should move/attack faster, Bulwark should take longer to kill.
+
+- [ ] **x5 readability**
+  - Run at x5 speed in a crowded wave.
+  - Confirm the elite aura remains visible without obscuring attacks or normal enemy silhouettes.
+
+- [ ] **Reward feel**
+  - Compare normal and elite XP/gold pickups.
+  - Record whether the elite feels worth noticing even when no bonus equipment drops.
+
+- [ ] **Boss separation**
+  - Reach a boss floor after seeing elites.
+  - Confirm bosses remain visually and mechanically distinct and never show normal elite affixes.
+
+### G4.0 validation notes
+
+- Build commit:
+- Floor / rebirth:
+- Elite frequency: Too rare / Good / Too frequent
+- Brutal feel:
+- Swift feel:
+- Bulwark feel:
+- x5 readability:
+- Reward feel:
+- Boss separation:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
