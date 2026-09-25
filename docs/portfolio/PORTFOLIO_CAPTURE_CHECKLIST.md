@@ -144,14 +144,14 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 
 ### G4.1 validation notes
 
-- Build commit:
-- Equipment card readability:
-- Enhancement cost/rate visibility:
-- Very-low-rate formatting:
-- Growth summary refresh:
-- Skill header refresh:
-- Epic badge:
-- Boss defeat loop message:
-- Existing retreat/retry behavior unchanged:
-- Bugs found:
-- Merge approval: Pending / Approved / Rejected
+- Build commit: d2664d4 lineage / G4.1
+- Equipment card readability: PASS
+- Enhancement cost/rate visibility: PASS
+- Very-low-rate formatting: implementation/CI PASS; live milestone item not required
+- Growth summary refresh: PASS
+- Skill header refresh: PASS
+- Epic badge: implementation/CI PASS
+- Boss defeat loop message: PASS
+- Existing retreat/retry behavior unchanged: PASS
+- Bugs found: none in tested flow
+- Merge approval: gameplay validated; PR remains unmerged by policy
