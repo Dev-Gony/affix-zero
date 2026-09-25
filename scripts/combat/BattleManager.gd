@@ -120,29 +120,30 @@ func _draw() -> void:
 	for room_index: int in WorldLayout.active_room_indices():
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
+		var chamber := walk.grow(24.0)
 		var visual_theme: int = (room_index + floor_theme) % 3
 		var backdrop_tint := Color(0.78, 0.36, 0.28, 0.42) if visual_theme == 0 else (Color(0.58, 0.43, 0.30, 0.38) if visual_theme == 1 else Color(0.28, 0.38, 0.56, 0.42))
 		match visual_theme:
 			0:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("211b20"))
+				_draw_tiled_rect(chamber, FLOOR_TILE, Color("211b20"))
 				_draw_tiled_rect(walk, BRICK_TILE, Color("514047"))
 				_draw_room_walls(walk, WALL_TILE, Color("555864"))
 				draw_texture_rect(SHRINE_TILE, Rect2(walk.get_center() - Vector2(20, 20), Vector2(40, 40)), false, Color("d6b36b"))
 				draw_arc(walk.get_center(), 58.0, 0.0, TAU, 36, Color(0.72, 0.22, 0.19, 0.28), 2.0)
 			1:
-				_draw_tiled_rect(room, SAND_FLOOR_TILE, Color("2a211d"))
+				_draw_tiled_rect(chamber, SAND_FLOOR_TILE, Color("2a211d"))
 				_draw_tiled_rect(walk, SAND_FLOOR_TILE, Color("5e483a"))
 				_draw_room_walls(walk, WALL_TILE, Color("50545c"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.position + Vector2(58, 42), Vector2(42, 42)), false, Color("caa785"))
 				draw_texture_rect(SAND_DETAIL_TILE, Rect2(walk.end - Vector2(106, 84), Vector2(38, 38)), false, Color("a37e66"))
 			_:
-				_draw_tiled_rect(room, FLOOR_TILE, Color("171d25"))
+				_draw_tiled_rect(chamber, FLOOR_TILE, Color("171d25"))
 				_draw_tiled_rect(walk, BRICK_TILE, Color("354253"))
 				_draw_room_walls(walk, BLUE_WALL_TILE, Color("536475"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.position + Vector2(48, 46), Vector2(30, 30)), false, Color("9ba8b5"))
 				draw_texture_rect(RUBBLE_TILE, Rect2(walk.end - Vector2(86, 72), Vector2(26, 26)), false, Color("7e8b97"))
 				draw_arc(walk.get_center(), 46.0, 0.0, TAU, 32, Color(0.24, 0.55, 0.72, 0.22), 2.0)
-		draw_texture_rect(DUNGEON_COURTYARD, room, false, backdrop_tint)
+		draw_texture_rect(DUNGEON_COURTYARD, chamber, false, backdrop_tint)
 		_draw_room_decor(room_index, walk, visual_theme)
 	for pair: Vector2i in WorldLayout.connected_room_pairs():
 		var corridor := WorldLayout.corridor_rect(pair.x, pair.y)
