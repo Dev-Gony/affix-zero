@@ -870,6 +870,8 @@ Pending. Validate that the empty bag no longer feels broken, affordable growth a
 - Added Pet tab to the management hub and keyboard shortcut 6.
 - Added reusable `PetPortrait` UI renderer.
 - Added per-item sprite-path support while retaining atlas fallback compatibility.
+- Added `ItemVisualIcon` procedural pixel-art renderer so all 29 current equipment bases immediately receive distinct slot/base silhouettes and material colors in equipment/inventory UI instead of waiting for final binary art assets.
+- Dedicated art paths remain the preferred final pipeline; procedural icons are the playable bridge, not a permanent asset lock-in.
 - Added dedicated G5 pet/item-art CI contracts.
 
 ### Failure / Revision
@@ -900,7 +902,7 @@ Automated contracts cover:
 | Pet progression | None | XP, level, stars, floor unlock roster |
 | Combat presence | Player + enemies only | Player + visible following combat companion |
 | Management | 5 growth tabs | 6 tabs including dedicated Pet screen |
-| Item artwork | Shared atlas index only | Dedicated sprite-path override + atlas fallback |
+| Item artwork | Shared atlas index only | Distinct procedural pixel identities now + dedicated sprite-path override for final assets |
 | Save data | Character/gear/progression only | Pet roster + active companion persisted |
 
 ### Windows play approval
