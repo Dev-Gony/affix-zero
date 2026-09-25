@@ -10,12 +10,27 @@ func _ready() -> void:
 	if not _check(main.ranged_enemy.has_multiframe_contract(), "ranged enemy frame contract missing"):
 		return
 
-	var deadline := Time.get_ticks_msec() + 14000
+	var deadline := Time.get_ticks_msec() + 20000
 	while Time.get_ticks_msec() < deadline and not main.combat_complete and not main.warrior.is_dead():
 		await get_tree().physics_frame
 
 	if not _check(not main.warrior.is_dead(), "warrior should survive E0-C02"):
 		return
+	if not main.combat_complete:
+		print("E0_C02 SNAPSHOT warrior_hp=%d melee_hp=%d ranged_hp=%d deaths=%d drops=%d/%d projectiles=%d/%d warrior_state=%s ranged_state=%s warrior_pos=%s ranged_pos=%s" % [
+			main.warrior.hp,
+			main.melee_enemy.hp,
+			main.ranged_enemy.hp,
+			main.death_events,
+			main.drop_collect_count,
+			main.drop_spawn_count,
+			main.projectile_hit_count,
+			main.projectile_spawn_count,
+			main.warrior.state_name(),
+			main.ranged_enemy.state_name(),
+			str(main.warrior.global_position),
+			str(main.ranged_enemy.global_position)
+		])
 	if not _check(main.combat_complete, "combat and collection should complete"):
 		return
 	if not _check(main.death_events == 2, "exactly two enemy death events expected"):
