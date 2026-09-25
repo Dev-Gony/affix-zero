@@ -72,6 +72,7 @@ func _ready() -> void:
 	camera.limit_bottom = int(WORLD_RECT.end.y)
 	player.visible = not GameManager.selected_class.is_empty()
 	GameManager.class_selected.connect(_on_class_selected)
+	GameManager.equipment_changed.connect(_on_equipment_visual_changed)
 	GameManager.player_died.connect(_on_player_died)
 	GameManager.floor_changed.connect(_on_floor_changed)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
@@ -174,6 +175,7 @@ func _start_battle() -> void:
 	_player_velocity = Vector2.ZERO
 	player.set_move_direction(Vector2.ZERO)
 	_configure_player_visual()
+	_on_equipment_visual_changed()
 	_attack_time_left = 0.15
 	_skill_time_left = 3.0
 	_pet_attack_time_left = 0.35
@@ -661,6 +663,12 @@ func _configure_player_visual() -> void:
 	var class_resource: ClassData = load("res://resources/classes/%s.tres" % GameManager.selected_class)
 	if class_resource != null:
 		player.configure(class_resource.id, class_resource.color)
+
+
+func _on_equipment_visual_changed() -> void:
+	if player == null:
+		return
+	player.set_equipment_visual(Dictionary(GameManager.equipment.get("weapon", {})))
 
 
 func _load_enemy_resources() -> void:
