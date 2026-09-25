@@ -694,7 +694,7 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 		else:
 			GameManager.notification_requested.emit("엘리트 격파 · %s · 보너스 경험치/골드" % elite_name, Color("f6c85f"))
 	_spawn_world_loot(world_position)
-	if GameManager.kills_on_floor >= 8 + GameManager.floor:
+	if GameManager.kills_on_floor >= WorldLayout.encounter_kill_goal(GameManager.floor):
 		var previous_room: int = _current_room
 		GameManager.advance_floor()
 		_begin_room_travel(previous_room, WorldLayout.room_index_for_floor(GameManager.floor))
