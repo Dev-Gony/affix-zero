@@ -270,3 +270,38 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Overall visual direction: Reject / Iterate / Accept
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## UIUX V2.1 — Playtest Polish
+
+- [ ] **Management live state**
+  - Open any management tab during active combat.
+  - Confirm the header shows 자동사냥 계속 and combat is still visibly running behind the dim layer.
+
+- [ ] **Equipment hierarchy**
+  - Confirm occupied cards have subtle rarity tint + stronger rarity border without making the whole screen look neon.
+  - Confirm center portrait shows class, current level and rebirth count.
+
+- [ ] **Empty inventory context**
+  - With a strict filter such as 에픽만 and an empty bag, confirm both header and detail pane explain the active acquisition filter.
+
+- [ ] **Rebirth layout**
+  - Confirm the top progression card fills the width cleanly.
+  - Confirm all four permanent upgrades are presented in one balanced row.
+  - Confirm long remaining-level text does not clip.
+
+- [ ] **Info dashboard**
+  - Confirm 모험 기록 / 전투 능력 / 현재 층 위협도 / 보조 능력 appear as four balanced cards.
+  - Confirm save/load/quit are absent from Info and remain available only in 메뉴.
+
+### UIUX V2.1 validation notes
+
+- Build commit:
+- Management-live indicator:
+- Equipment rarity treatment:
+- Empty inventory explanation:
+- Rebirth card balance:
+- Info dashboard readability:
+- Text clipping:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
