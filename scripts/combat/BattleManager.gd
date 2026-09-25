@@ -151,7 +151,7 @@ func _draw() -> void:
 			continue
 		var corridor_texture: Texture2D = BRICK_TILE if pair.x % 2 == 0 else SAND_FLOOR_TILE
 		var corridor_tint: Color = Color("3c3238") if pair.x % 2 == 0 else Color("4b392f")
-		_draw_tiled_rect(corridor, corridor_texture, corridor_tint)
+		_draw_dungeon_corridor(corridor, corridor_texture, corridor_tint)
 	draw_rect(WORLD_RECT, Color(0.012, 0.008, 0.018, 0.24), true)
 
 
@@ -165,6 +165,27 @@ func _draw_tiled_rect(area: Rect2, texture: Texture2D, modulate: Color) -> void:
 			draw_texture_rect(texture, Rect2(Vector2(x, y), size), false, modulate)
 			x += tile_size.x
 		y += tile_size.y
+
+
+func _draw_dungeon_corridor(area: Rect2, texture: Texture2D, tint: Color) -> void:
+	var outer := area.grow(7.0)
+	draw_rect(outer, Color("09080c"), true)
+	_draw_tiled_rect(area, texture, tint)
+	var wall_color := Color("3a343c")
+	var edge_color := Color("6a4c42")
+	if area.size.x >= area.size.y:
+		draw_rect(Rect2(area.position + Vector2(0, -5), Vector2(area.size.x, 5)), wall_color, true)
+		draw_rect(Rect2(Vector2(area.position.x, area.end.y), Vector2(area.size.x, 5)), wall_color.darkened(0.18), true)
+		draw_line(area.position, Vector2(area.end.x, area.position.y), edge_color, 1.0)
+		draw_line(Vector2(area.position.x, area.end.y), area.end, edge_color.darkened(0.25), 1.0)
+	else:
+		draw_rect(Rect2(area.position + Vector2(-5, 0), Vector2(5, area.size.y)), wall_color, true)
+		draw_rect(Rect2(Vector2(area.end.x, area.position.y), Vector2(5, area.size.y)), wall_color.darkened(0.18), true)
+		draw_line(area.position, Vector2(area.position.x, area.end.y), edge_color, 1.0)
+		draw_line(Vector2(area.end.x, area.position.y), area.end, edge_color.darkened(0.25), 1.0)
+	var center := area.get_center()
+	draw_circle(center, 3.0, Color("b97a44", 0.16))
+	draw_arc(center, 8.0, 0.0, TAU, 16, Color("b97a44", 0.12), 1.0)
 
 
 func _draw_room_walls(walk: Rect2, texture: Texture2D, tint: Color) -> void:
