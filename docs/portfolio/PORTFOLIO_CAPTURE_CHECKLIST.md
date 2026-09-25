@@ -207,6 +207,11 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
   - Confirm combat is visually dimmed behind it and the bottom combat dock is hidden.
   - Confirm top navigation shows 장비 / 가방 / 스킬 / 환생 / 정보.
 
+- [ ] **Class selection V2**
+  - Trigger the class-selection screen from a fresh/rebirth flow.
+  - Confirm all six class cards fit in one screen.
+  - Confirm each card remains readable at desktop scale and class color is used as identity rather than full UI chrome.
+
 - [ ] **Equipment composition**
   - Open 장비.
   - Confirm the character portrait sits in the center of the 3x3 composition.
@@ -245,6 +250,7 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 
 - Build commit:
 - Management scale: Too small / Good / Too large
+- Class selection readability:
 - Equipment scan speed:
 - Inventory grid readability:
 - Detail pane readability:
