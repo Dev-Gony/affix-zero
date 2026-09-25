@@ -44,7 +44,7 @@ func refresh() -> void:
 			continue
 		var unlocked: bool = GameManager.unlocked_classes.has(class_data.id)
 		var card := Button.new()
-		card.custom_minimum_size = Vector2(178, 94)
+		card.custom_minimum_size = Vector2(242, 142)
 		card.disabled = not unlocked
 		card.text = _class_card_text(class_data, unlocked)
 		card.icon = _make_class_icon(class_data)
@@ -56,7 +56,7 @@ func refresh() -> void:
 		]
 		card.add_theme_color_override("font_color", class_data.color if unlocked else Color("65657c"))
 		card.add_theme_color_override("font_disabled_color", Color("65657c"))
-		card.add_theme_font_size_override("font_size", 8)
+		card.add_theme_font_size_override("font_size", 14)
 		card.add_theme_stylebox_override("normal", _card_style(Color("1c131b"), class_data.color.darkened(0.22), 1))
 		card.add_theme_stylebox_override("hover", _card_style(Color("38202a"), class_data.color, 2))
 		card.add_theme_stylebox_override("pressed", _card_style(Color("4b1f28"), Color("f0b45f"), 2))
@@ -80,37 +80,38 @@ func _focus_card(card: Button) -> void:
 func _build_layout() -> void:
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	outer.position = Vector2(-285, -163)
-	outer.size = Vector2(570, 326)
-	outer.add_theme_constant_override("separation", 8)
+	outer.position = Vector2(-390, -250)
+	outer.size = Vector2(780, 500)
+	outer.add_theme_constant_override("separation", 14)
 	add_child(outer)
 
 	var title := Label.new()
 	title.text = "AFFIX: ZERO"
-	title.custom_minimum_size.y = 30
+	title.custom_minimum_size.y = 54
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 24)
+	title.add_theme_font_size_override("font_size", 40)
 	title.add_theme_color_override("font_color", Color("e2544d"))
 	outer.add_child(title)
 
 	var subtitle := Label.new()
 	subtitle.text = "영웅을 선택하세요  ·  전투는 자동으로 시작됩니다"
-	subtitle.custom_minimum_size.y = 18
+	subtitle.custom_minimum_size.y = 30
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	subtitle.add_theme_font_size_override("font_size", 17)
 	subtitle.add_theme_color_override("font_color", Color("a9abc4"))
 	outer.add_child(subtitle)
 
 	_grid = GridContainer.new()
 	_grid.columns = 3
 	_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_grid.add_theme_constant_override("h_separation", 8)
-	_grid.add_theme_constant_override("v_separation", 8)
+	_grid.add_theme_constant_override("h_separation", 14)
+	_grid.add_theme_constant_override("v_separation", 14)
 	outer.add_child(_grid)
 
 	var hint := Label.new()
 	hint.text = "첫 플레이 추천: 전사 / 마법사   ·   환생으로 새로운 직업 해금"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	hint.add_theme_font_size_override("font_size", 9)
+	hint.add_theme_font_size_override("font_size", 14)
 	hint.add_theme_color_override("font_color", Color("8b8da8"))
 	outer.add_child(hint)
 

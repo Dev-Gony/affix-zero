@@ -11,15 +11,15 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_info = BuildInfo.read_info()
 	_badge = Button.new()
-	_badge.position = Vector2(6, 378)
-	_badge.size = Vector2(130, 18)
-	_badge.add_theme_font_size_override("font_size", 7)
+	_badge.position = Vector2(14, 682)
+	_badge.size = Vector2(224, 26)
+	_badge.add_theme_font_size_override("font_size", 12)
 	_badge.tooltip_text = "빌드 / 백업 진단 · Ctrl+Shift+9 (진단 표시는 전투를 정지하지 않습니다)"
 	_badge.pressed.connect(toggle_details)
 	add_child(_badge)
 	_panel = PanelContainer.new()
-	_panel.position = Vector2(6, 204)
-	_panel.custom_minimum_size = Vector2(308, 162)
+	_panel.position = Vector2(14, 430)
+	_panel.custom_minimum_size = Vector2(620, 238)
 	_panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	var style := StyleBoxFlat.new()
 	style.bg_color = Color(0.04, 0.06, 0.09, 0.97)
@@ -32,10 +32,10 @@ func _ready() -> void:
 	_panel.add_theme_stylebox_override("panel", style)
 	add_child(_panel)
 	_details = Label.new()
-	_details.custom_minimum_size = Vector2(292, 144)
+	_details.custom_minimum_size = Vector2(600, 220)
 	_details.autowrap_mode = TextServer.AUTOWRAP_ARBITRARY
 	_details.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	_details.add_theme_font_size_override("font_size", 8)
+	_details.add_theme_font_size_override("font_size", 13)
 	_panel.add_child(_details)
 	_panel.visible = false
 	SaveManager.save_blocked.connect(_on_save_blocked)

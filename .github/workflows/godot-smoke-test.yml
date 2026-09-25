@@ -69,6 +69,15 @@ jobs:
           grep -q "PR_B_SAFETY PASSED" build/pr-b/safety.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/pr-b/safety.log
 
+      - name: Verify PR-C 720p HUD and navigation
+        shell: bash
+        run: |
+          mkdir -p build/pr-c
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/pr_c_ui_test.tscn -- --affix-test-mode 2>&1 | tee build/pr-c/ui.log
+          grep -q "PR_C_UI PASSED" build/pr-c/ui.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/pr-c/ui.log
+
       - name: Run existing gameplay smoke test
         shell: bash
         run: |
@@ -113,6 +122,7 @@ jobs:
           path: |
             build/pr-a/
             build/pr-b/
+            build/pr-c/
           if-no-files-found: warn
 
       - name: Upload Windows playable build
