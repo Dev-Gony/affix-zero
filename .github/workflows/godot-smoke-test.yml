@@ -60,6 +60,15 @@ jobs:
           grep -q "PR_A_SAFETY PASSED" build/pr-a/safety.log
           ! grep -E "SCRIPT ERROR|Parse Error" build/pr-a/safety.log
 
+      - name: Verify PR-B pause, filter and atomic-save safety
+        shell: bash
+        run: |
+          mkdir -p build/pr-b
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/pr_b_safety.tscn -- --affix-test-mode 2>&1 | tee build/pr-b/safety.log
+          grep -q "PR_B_SAFETY PASSED" build/pr-b/safety.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/pr-b/safety.log
+
       - name: Run existing gameplay smoke test
         shell: bash
         run: |
@@ -100,8 +109,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: AFFIX-ZERO-pr-a-evidence
-          path: build/pr-a/
+          name: AFFIX-ZERO-uiux-evidence
+          path: |
+            build/pr-a/
+            build/pr-b/
           if-no-files-found: warn
 
       - name: Upload Windows playable build

@@ -66,6 +66,7 @@ var _management_window: Panel
 var _management_title: Label
 var _management_open: bool = false
 var _dock_buttons: Dictionary = {}
+var _modal_blocker: ColorRect
 var _pause_panel: Panel
 var _pause_visible: bool = false
 var _volume_slider: HSlider
@@ -75,9 +76,13 @@ var _autosave_check: CheckBox
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	get_tree().paused = false
+	_management_open = false
+	_pause_visible = false
 	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	theme = _create_theme()
 	_build_hud()
+	_build_modal_blocker()
 	_build_bottom_panel()
 	_build_pause_menu()
 	_build_notification()
@@ -227,12 +232,28 @@ func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> Progre
 	return bar
 
 
+func _build_modal_blocker() -> void:
+	_modal_blocker = ColorRect.new()
+	_modal_blocker.position = Vector2.ZERO
+	_modal_blocker.size = Vector2(640, 400)
+	_modal_blocker.color = Color(0.0, 0.0, 0.0, 0.28)
+	_modal_blocker.mouse_filter = Control.MOUSE_FILTER_STOP
+	_modal_blocker.z_index = 40
+	_modal_blocker.visible = false
+	add_child(_modal_blocker)
+
+
+func _sync_modal_blocker() -> void:
+	if _modal_blocker != null:
+		_modal_blocker.visible = _management_open or _pause_visible
+
+
 func _build_bottom_panel() -> void:
 	var window := Panel.new()
 	_management_window = window
 	window.position = Vector2(344, 38)
 	window.size = Vector2(290, 318)
-	window.z_index = 20
+	window.z_index = 50
 	window.add_theme_stylebox_override("panel", _style_box(Color(0.045, 0.032, 0.050, 0.98), Color("9a6240"), 2, 0))
 	add_child(window)
 	var header := HBoxContainer.new()
@@ -247,7 +268,7 @@ func _build_bottom_panel() -> void:
 	_management_title.add_theme_color_override("font_color", COLOR_GOLD)
 	header.add_child(_management_title)
 	var close_button := Button.new()
-	close_button.text = "닫기  ESC"
+	close_button.text = "닫기"
 	close_button.custom_minimum_size = Vector2(74, 22)
 	close_button.add_theme_font_size_override("font_size", 7)
 	close_button.pressed.connect(_close_management)
@@ -372,9 +393,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	if event.keycode == KEY_ESCAPE:
 		if _management_open:
-			_close_management()
-		else:
-			_toggle_pause_menu()
+			_close_management(false)
+		_toggle_pause_menu()
 		return
 	if GameManager.game_state != GameManager.GameState.RUNNING or _pause_visible:
 		return
@@ -390,6 +410,8 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _toggle_management(tab_index: int) -> void:
+	if _pause_visible or GameManager.game_state == GameManager.GameState.CLASS_SELECTION:
+		return
 	AudioManager.play_sfx("ui_click")
 	if _management_open and _main_tabs.current_tab == tab_index:
 		_close_management(false)
@@ -399,6 +421,7 @@ func _toggle_management(tab_index: int) -> void:
 	_management_title.text = MANAGEMENT_TITLES[tab_index]
 	_management_window.visible = true
 	_sync_dock_buttons()
+	_sync_modal_blocker()
 
 
 func _close_management(play_sound: bool = true) -> void:
@@ -409,6 +432,7 @@ func _close_management(play_sound: bool = true) -> void:
 	_management_open = false
 	_management_window.visible = false
 	_sync_dock_buttons()
+	_sync_modal_blocker()
 
 
 func _sync_dock_buttons() -> void:
@@ -1142,22 +1166,22 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 	if _bottom_panel != null:
 		_bottom_panel.visible = show_game_ui
 	if not show_game_ui:
-		_management_open = false
+		if _management_open:
+			_management_open = false
+		if _pause_visible:
+			_pause_visible = false
+			_pause_panel.visible = false
+			get_tree().paused = false
+			GameManager.set_game_state(GameManager.GameState.RUNNING)
 	if _management_window != null:
 		_management_window.visible = show_game_ui and _management_open
 	_sync_dock_buttons()
+	_sync_modal_blocker()
 
 
 func _on_loot_filter_selected(index: int) -> void:
 	GameManager.set_loot_min_rarity(index)
-	var cleanup: Dictionary = GameManager.sell_inventory_below_rarity(GameManager.loot_min_rarity_index)
-	var sold_count: int = int(cleanup.get("sold_count", 0))
-	var sale_total: int = int(cleanup.get("sale_total", 0))
-	var protected_count: int = int(cleanup.get("protected_count", 0))
-	if sold_count > 0:
-		_show_notification("필터 미만 장비 %d개 자동 판매 +%dG" % [sold_count, sale_total], COLOR_GOLD)
-	elif protected_count > 0:
-		_show_notification("필터 미만 잠금 장비 %d개는 보관" % protected_count, COLOR_GOLD)
+	_show_notification("앞으로 %s 등급만 자동 획득 · 기존 가방은 유지" % ["일반+", "마법+", "희귀+", "고유+", "전설"][GameManager.loot_min_rarity_index], COLOR_GOLD)
 	SaveManager.save_game()
 
 
@@ -1167,12 +1191,12 @@ func _toggle_pause_menu() -> void:
 	_pause_visible = not _pause_visible
 	_pause_panel.visible = _pause_visible
 	if _pause_visible:
-		_close_management(false)
 		GameManager.set_game_state(GameManager.GameState.PAUSED)
 		get_tree().paused = true
 	else:
 		get_tree().paused = false
 		GameManager.set_game_state(GameManager.GameState.RUNNING)
+	_sync_modal_blocker()
 	AudioManager.play_sfx("ui_click")
 
 
@@ -1208,8 +1232,11 @@ func _manual_load() -> void:
 
 
 func _save_and_quit() -> void:
+	var error: Error = SaveManager.save_game()
+	if error != OK:
+		_show_notification("저장 실패 · 종료하지 않았습니다.", Color("ff6b6b"))
+		return
 	get_tree().paused = false
-	SaveManager.save_game()
 	get_tree().quit()
 
 
