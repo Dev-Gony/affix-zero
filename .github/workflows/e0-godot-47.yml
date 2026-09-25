@@ -57,3 +57,10 @@ jobs:
           timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c02_test.tscn 2>&1 | tee /tmp/e0-c02.log
           grep -q "E0_C02_TEST PASSED" /tmp/e0-c02.log
           ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c02.log
+      - name: Run E0-C03 harness contract
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c03_test.tscn 2>&1 | tee /tmp/e0-c03.log
+          grep -q "E0_C03_TEST PASSED" /tmp/e0-c03.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c03.log
