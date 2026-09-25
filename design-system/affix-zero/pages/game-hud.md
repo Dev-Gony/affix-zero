@@ -1,35 +1,9 @@
-# Game HUD Override
+# Game HUD — staged migration
 
-This page override adapts the project-wide pixel-art direction to the Godot 4.3 runtime.
+The former fixed-center-player and permanent 640x400 design rules are archived. Authority: the approved v1.0 handoff pinned in docs/uiux-v1/spec_lock.json.
 
-## Layout
+PR-A does NOT resize the viewport or rearrange combat UI. It adds a small build badge and F8 read-only diagnostics, without affecting combat or save data.
 
-- Treat 640x400 as the source viewport and verify the default 1280x800 2x presentation.
-- Reserve y=0..41 for the combat HUD and y=356..399 for a compact management dock. The arena remains visible behind management windows.
-- Management is progressive disclosure: open one focused window at a time over the right side of the arena; clicking its dock button again or pressing Escape closes it.
-- Hide the runtime HUD, dock, and management windows while class selection is open.
-- Equipment uses a three-by-three paper-doll layout with the class portrait at its center and all seven slots visible without scrolling.
-- Inventory holds 60 items in a six-column scrollable grid, matching the density of a loot-heavy ARPG. Keep selected-item comparison and equip/sell actions fixed below the grid.
-- Skills, rebirth, and statistics use dedicated windows rather than sharing permanent vertical space with combat.
-
-## Visual language
-
-- Use crisp, square edges and disable anti-aliasing on UI style boxes.
-- Use near-black plum surfaces, aged bronze borders, blood-red selection states, loot-grade accents, and green equipped markers.
-- Keep normal Korean text readable at the 2x presentation. Use 7px only for compact equipment metadata; use 9-11px for actions and primary information.
-- Preserve a quiet circular combat area around the fixed-center player. Props belong near the arena edges.
-- Management windows use opaque near-black surfaces so item silhouettes and Korean text remain readable over combat.
-- Combat notifications stay in the left battle column and never cover a management-window title or close action.
-
-## Interaction
-
-- Every button needs normal, hover, pressed, disabled, and visible keyboard-focus states.
-- Number keys 1-5 open or switch management windows; pressing the active number or Escape closes it. Z/X/C select x1/x2/x5 combat speed.
-- Class selection must focus the first unlocked class for keyboard play.
-- Color cannot be the only state indicator: include grade names, arrows/signs for comparisons, and text labels for locked states.
-
-## Motion
-
-- Keep hit flashes and button feedback immediate.
-- Use short 150-350ms combat and notification effects; avoid layout-moving animations.
-- Camera shake must remain subtle enough that UI text stays stable.
+PR-C target: UI1280x720/world640x360. HUD left(16,16,304,72), run(384,16,336,64), tools(880,16,384,48), XP(16,96,1248,8), active(16,576,300,56), dock(352,656,576,48). Internal contents use containers, not independent absolute positions for every child.
+Tools: AUTO, x1/x2/x5, settings. Save moves to Ctrl+S and ESC; exit stays in ESC. Boss floors show 0/1 and boss health, not the normal kill denominator. UI remains camera-independent.
+Management uses the unified workspace defined in the handoff. Never shrink text to conceal an overflow. Inspect 1280x720/800,1366x768,1920x1080,2560x1440 and Windows DPI100/125/150 at PR-C.
