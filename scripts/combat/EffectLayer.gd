@@ -319,23 +319,107 @@ func show_elite_arrival(world_position: Vector2, elite_name: String, color: Colo
 	spawn_fragments(world_position, color, 12, 76.0)
 
 
-func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
+func show_attack(from: Vector2, to: Vector2, class_id: String, critical: bool) -> void:
 	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
 	var tangent := Vector2(-direction.y, direction.x)
-	var color := Color("ffd84d") if critical else Color("dbeafe")
-	_lines.append({"points": PackedVector2Array([from + tangent * 6.0, from + direction * 17.0, from + direction * 25.0 - tangent * 7.0]), "color": color, "life": 0.16, "duration": 0.16, "width": 2.0})
-	_lines.append({"points": PackedVector2Array([to - direction * 14.0 - tangent * 5.0, to + direction * 7.0 + tangent * 5.0]), "color": color, "life": 0.13, "duration": 0.13, "width": 2.5})
-	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
+	var impact_color := Color("ffd84d") if critical else Color("e6edf7")
+	match class_id:
+		"mage":
+			impact_color = Color("c084fc") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.42) + tangent * 7.0, from.lerp(to, 0.72) - tangent * 5.0, to]), "color": impact_color, "life": 0.20, "duration": 0.20, "width": 2.8})
+			_rings.append({"center": to, "radius": 4.0, "speed": 74.0, "color": Color(impact_color, 0.78), "life": 0.24, "duration": 0.24, "width": 2.0})
+		"sage":
+			impact_color = Color("79e7ff") if not critical else Color("fff08a")
+			var points := PackedVector2Array([from])
+			for index: int in 3:
+				var t: float = float(index + 1) / 4.0
+				points.append(from.lerp(to, t) + tangent * (6.0 if index % 2 == 0 else -6.0))
+			points.append(to)
+			_lines.append({"points": points, "color": impact_color, "life": 0.16, "duration": 0.16, "width": 2.4})
+			_lines.append({"points": points, "color": Color("f4fbff", 0.64), "life": 0.09, "duration": 0.09, "width": 1.0})
+		"saint":
+			impact_color = Color("fff2a1") if not critical else Color("ffffff")
+			_lines.append({"points": PackedVector2Array([from, to]), "color": impact_color, "life": 0.20, "duration": 0.20, "width": 2.5})
+			_rings.append({"center": to, "radius": 3.0, "speed": 62.0, "color": Color("fff7cc"), "life": 0.28, "duration": 0.28, "width": 2.2})
+			for index: int in 4:
+				var ray := Vector2.UP.rotated(TAU * float(index) / 4.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 3.0, to + ray * 12.0]), "color": Color("fff7cc", 0.82), "life": 0.16, "duration": 0.16, "width": 1.5})
+		"assassin":
+			impact_color = Color("ff6fbd") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([to - direction * 11.0 - tangent * 9.0, to + direction * 10.0 + tangent * 9.0]), "color": impact_color, "life": 0.13, "duration": 0.13, "width": 2.8})
+			_lines.append({"points": PackedVector2Array([to - direction * 8.0 + tangent * 10.0, to + direction * 9.0 - tangent * 10.0]), "color": Color(impact_color, 0.78), "life": 0.16, "duration": 0.16, "width": 1.8})
+		"knight":
+			impact_color = Color("8be0f1") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from + tangent * 5.0, from + direction * 18.0, to - tangent * 8.0]), "color": impact_color, "life": 0.17, "duration": 0.17, "width": 3.2})
+			_rings.append({"center": to, "radius": 3.0, "speed": 54.0, "color": Color(impact_color, 0.65), "life": 0.20, "duration": 0.20, "width": 1.8})
+		_:
+			impact_color = Color("ff9b6b") if not critical else Color("ffe06b")
+			_lines.append({"points": PackedVector2Array([from + tangent * 5.0, from + direction * 18.0, to - tangent * 8.0]), "color": impact_color, "life": 0.16, "duration": 0.16, "width": 3.0})
+			_lines.append({"points": PackedVector2Array([to - direction * 12.0 - tangent * 7.0, to + direction * 7.0 + tangent * 7.0]), "color": Color(impact_color, 0.76), "life": 0.12, "duration": 0.12, "width": 2.0})
+	spawn_fragments(to, impact_color, 5 if not critical else 9, 58.0)
 
 
-func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void:
+func show_enemy_telegraph(from: Vector2, to: Vector2, attack_kind: String, windup_duration: float) -> void:
+	var duration: float = maxf(0.12, windup_duration)
 	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
 	var tangent := Vector2(-direction.y, direction.x)
-	if ranged:
-		_lines.append({"points": PackedVector2Array([from, to]), "color": Color("b978ff"), "life": 0.24, "duration": 0.24, "width": 2.0})
-		spawn_fragments(to, Color("b978ff"), 5, 42.0)
-	else:
-		_lines.append({"points": PackedVector2Array([to - direction * 8.0 - tangent * 7.0, to + direction * 5.0 + tangent * 7.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.0})
+	match attack_kind:
+		"slam":
+			_rings.append({"center": from, "radius": 8.0, "speed": 28.0, "color": Color("ff765f", 0.52), "life": duration, "duration": duration, "width": 2.0})
+		"dive":
+			_lines.append({"points": PackedVector2Array([from, to]), "color": Color("ff6b6b", 0.40), "life": duration, "duration": duration, "width": 1.5})
+		"shadow_bolt":
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.5) + tangent * 5.0, to]), "color": Color("a96dff", 0.42), "life": duration, "duration": duration, "width": 1.8})
+			_rings.append({"center": from, "radius": 5.0, "speed": 18.0, "color": Color("c084fc", 0.42), "life": duration, "duration": duration, "width": 1.6})
+		"flame":
+			for spread: float in [-0.18, 0.0, 0.18]:
+				var ray: Vector2 = direction.rotated(spread)
+				_lines.append({"points": PackedVector2Array([from, from + ray * minf(82.0, from.distance_to(to))]), "color": Color("ff7b45", 0.34), "life": duration, "duration": duration, "width": 1.8})
+		"hellfire":
+			_rings.append({"center": to, "radius": 12.0, "speed": 24.0, "color": Color("ff3b55", 0.52), "life": duration, "duration": duration, "width": 2.4})
+			for index: int in 6:
+				var ray := Vector2.RIGHT.rotated(TAU * float(index) / 6.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 7.0, to + ray * 22.0]), "color": Color("ff725f", 0.34), "life": duration, "duration": duration, "width": 1.4})
+		_:
+			_lines.append({"points": PackedVector2Array([from + tangent * 7.0, to - tangent * 7.0]), "color": Color("ff5b61", 0.34), "life": duration, "duration": duration, "width": 1.5})
+
+
+func show_enemy_attack(from: Vector2, to: Vector2, attack_kind: String) -> void:
+	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var tangent := Vector2(-direction.y, direction.x)
+	match attack_kind:
+		"slam":
+			_rings.append({"center": from, "radius": 5.0, "speed": 120.0, "color": Color("ff765f"), "life": 0.28, "duration": 0.28, "width": 4.0})
+			spawn_fragments(to, Color("ff765f"), 7, 58.0)
+		"dive":
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to, 0.6) - tangent * 8.0, to]), "color": Color("ff6b6b"), "life": 0.18, "duration": 0.18, "width": 3.0})
+			_lines.append({"points": PackedVector2Array([to - tangent * 10.0, to + tangent * 10.0]), "color": Color("ffd0d0", 0.72), "life": 0.12, "duration": 0.12, "width": 2.0})
+		"shadow_bolt":
+			var points := PackedVector2Array([from, from.lerp(to, 0.33) + tangent * 7.0, from.lerp(to, 0.66) - tangent * 7.0, to])
+			_lines.append({"points": points, "color": Color("b978ff"), "life": 0.26, "duration": 0.26, "width": 3.4})
+			_rings.append({"center": to, "radius": 3.0, "speed": 76.0, "color": Color("d7a7ff"), "life": 0.25, "duration": 0.25, "width": 2.0})
+			spawn_fragments(to, Color("b978ff"), 8, 56.0)
+		"flame":
+			for spread: float in [-0.22, -0.10, 0.0, 0.10, 0.22]:
+				var ray: Vector2 = direction.rotated(spread)
+				_lines.append({"points": PackedVector2Array([from + ray * 6.0, to + ray * 10.0]), "color": Color("ff7a38", 0.82), "life": 0.22, "duration": 0.22, "width": 2.2})
+			spawn_fragments(to, Color("ff9f43"), 12, 76.0)
+		"hellfire":
+			_rings.append({"center": to, "radius": 4.0, "speed": 150.0, "color": Color("ff415c"), "life": 0.34, "duration": 0.34, "width": 5.0})
+			_rings.append({"center": from, "radius": 9.0, "speed": 85.0, "color": Color("9f2cff", 0.72), "life": 0.30, "duration": 0.30, "width": 2.5})
+			for index: int in 8:
+				var ray := Vector2.RIGHT.rotated(TAU * float(index) / 8.0)
+				_lines.append({"points": PackedVector2Array([to + ray * 5.0, to + ray * 30.0]), "color": Color("ff725f", 0.78), "life": 0.20, "duration": 0.20, "width": 2.0})
+			spawn_fragments(to, Color("ff4f65"), 16, 86.0)
+		_:
+			_lines.append({"points": PackedVector2Array([to - direction * 9.0 - tangent * 9.0, to + direction * 7.0 + tangent * 9.0]), "color": Color("ff5b61"), "life": 0.16, "duration": 0.16, "width": 3.4})
+			_lines.append({"points": PackedVector2Array([to - direction * 5.0 + tangent * 7.0, to + direction * 6.0 - tangent * 7.0]), "color": Color("ffc4c6", 0.58), "life": 0.10, "duration": 0.10, "width": 1.6})
 
 
 func show_melee_spin(center: Vector2) -> void:
