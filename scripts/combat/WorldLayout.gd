@@ -37,6 +37,12 @@ static func room_index_for_floor(floor_number: int) -> int:
 	return FLOOR_TRAVERSAL[(maxi(1, floor_number) - 1) % FLOOR_TRAVERSAL.size()]
 
 
+static func encounter_kill_goal(floor_number: int) -> int:
+	# A room is a short ARPG encounter, not an 80+ kill stationary arena.
+	# Difficulty rises mostly through enemy stats/elite chance, while traversal remains frequent.
+	return 8 + mini(6, floori(float(maxi(1, floor_number) - 1) / 15.0))
+
+
 static func room_grid(room_index: int) -> Vector2i:
 	return Vector2i(room_index % GRID_SIZE.x, floori(float(room_index) / float(GRID_SIZE.x)))
 
