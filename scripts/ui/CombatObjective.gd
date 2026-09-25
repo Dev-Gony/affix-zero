@@ -20,17 +20,9 @@ func sync_from_game() -> void:
 
 
 func _resolve_next_pet() -> void:
+	# Kept for compatibility. Pets are acquired through summons, not floor unlocks.
 	next_pet_floor = 0
 	next_pet_name = ""
-	for pet_id: String in PetManager.all_pet_ids():
-		var data: PetData = PetManager.get_pet_data(pet_id)
-		if data == null or PetManager.is_owned(pet_id):
-			continue
-		if data.unlock_floor <= floor_number:
-			continue
-		if next_pet_floor == 0 or data.unlock_floor < next_pet_floor:
-			next_pet_floor = data.unlock_floor
-			next_pet_name = data.display_name
 
 
 func _draw() -> void:
@@ -56,5 +48,5 @@ func _draw() -> void:
 	elif next_pet_floor > 0:
 		footer = "보스 %d층 남음 · %s %d층 해금" % [boss_in, next_pet_name, next_pet_floor]
 	else:
-		footer = "보스 %d층 남음 · 모든 펫 해금 완료" % boss_in
+		footer = "보스 %d층 남음 · 소환석은 엘리트/보스에서 획득" % boss_in
 	draw_string(ThemeDB.fallback_font, Vector2(8, 51), footer, HORIZONTAL_ALIGNMENT_LEFT, -1, 6, Color("95a3b5"))

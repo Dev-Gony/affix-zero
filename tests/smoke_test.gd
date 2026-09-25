@@ -49,7 +49,9 @@ func _run() -> void:
 	_check(battle.player._motion_kind == "attack", "Automatic attacks trigger the player combat animation")
 	var expected_facing: Vector2 = battle.player.global_position.direction_to(animation_target.global_position)
 	_check(battle.player._facing.dot(expected_facing) > 0.99, "Player attack motion faces the selected enemy")
-	_check(animation_target._hit_flash_left > 0.0, "Enemy hits trigger readable impact feedback")
+	# Damage is resolved on the release beat, not on the first anticipation frame.
+	await get_tree().create_timer(PlayerAvatar.ATTACK_WINDUP + 0.025).timeout
+	_check(animation_target._hit_flash_left > 0.0, "Enemy hits trigger readable impact feedback after attack release")
 	var contact_enemy: EnemyAI = battle._enemies[0] if battle._enemies[0] != animation_target else battle._enemies[1]
 	contact_enemy.global_position = battle.player.global_position + Vector2(contact_enemy.radius + 8.0, 0)
 	contact_enemy._spawn_reveal_left = 0.0

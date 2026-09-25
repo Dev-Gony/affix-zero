@@ -34,6 +34,9 @@ var active_pet_id: String = ""
 var essence: int = 0
 var summon_crystals: int = 3000
 var summon_pity: int = 0
+var last_summon_error: String = ""
+var last_summon_receipt: Dictionary = {}
+var _summon_in_progress: bool = false
 
 
 func _ready() -> void:
@@ -124,49 +127,73 @@ func shards_for(pet_id: String) -> int:
 
 
 func summon_once(free: bool = false, minimum_rarity: int = 0) -> Dictionary:
-	if not free:
-		if summon_crystals < SUMMON_COST:
-			return {}
-		summon_crystals -= SUMMON_COST
-	var forced_minimum: int = minimum_rarity
-	if summon_pity + 1 >= LEGENDARY_PITY:
-		forced_minimum = maxi(forced_minimum, 4)
-	var pet_id: String = _roll_pet_id(forced_minimum)
-	if pet_id.is_empty():
-		return {}
-	var result: Dictionary = _grant_summon_result(pet_id)
-	if int(result.get("rarity_index", 0)) >= 4:
-		summon_pity = 0
-	else:
-		summon_pity += 1
-	result["pity"] = summon_pity
-	pet_summoned.emit(result)
-	pet_state_changed.emit()
-	return result
+	var results: Array[Dictionary] = _summon_batch(1, 0 if free else SUMMON_COST, minimum_rarity)
+	return results[0] if not results.is_empty() else {}
 
 
 func summon_ten() -> Array[Dictionary]:
+	return _summon_batch(10, TEN_SUMMON_COST, 0)
+
+
+func _summon_batch(count: int, cost: int, minimum_rarity: int) -> Array[Dictionary]:
 	var results: Array[Dictionary] = []
-	if summon_crystals < TEN_SUMMON_COST:
+	if _summon_in_progress:
+		last_summon_error = "busy"
 		return results
-	summon_crystals -= TEN_SUMMON_COST
-	for index: int in 10:
-		var minimum_rarity: int = 3 if index == 9 else 0
-		var forced_minimum: int = minimum_rarity
-		if summon_pity + 1 >= LEGENDARY_PITY:
-			forced_minimum = maxi(forced_minimum, 4)
-		var pet_id: String = _roll_pet_id(forced_minimum)
-		if pet_id.is_empty():
-			continue
-		var result: Dictionary = _grant_summon_result(pet_id)
-		if int(result.get("rarity_index", 0)) >= 4:
-			summon_pity = 0
+	last_summon_error = ""
+	if summon_crystals < cost:
+		last_summon_error = "insufficient_crystals"
+		return results
+	if _catalog.size() != PET_RESOURCE_PATHS.size():
+		last_summon_error = "catalog_unavailable"
+		return results
+	# Prepare the complete batch without changing currency, ownership or pity.
+	# A missing resource on the tenth draw must not charge for nine results.
+	_summon_in_progress = true
+	var next_owned: Dictionary = owned_pets.duplicate(true)
+	var next_pity: int = summon_pity
+	for index: int in count:
+		var floor_rarity: int = maxi(minimum_rarity, 3 if count == 10 and index == 9 else 0)
+		if next_pity + 1 >= LEGENDARY_PITY:
+			floor_rarity = maxi(floor_rarity, 4)
+		var pet_id: String = _roll_pet_id(floor_rarity)
+		var data: PetData = get_pet_data(pet_id)
+		if data == null:
+			last_summon_error = "catalog_unavailable"
+			_summon_in_progress = false
+			return []
+		var duplicate: bool = next_owned.has(pet_id)
+		var shards: int = maxi(1, data.duplicate_shards) if duplicate else 0
+		if duplicate:
+			var state: Dictionary = Dictionary(next_owned[pet_id]).duplicate(true)
+			state["shards"] = maxi(0, int(state.get("shards", 0))) + shards
+			next_owned[pet_id] = state
 		else:
-			summon_pity += 1
-		result["pity"] = summon_pity
-		results.append(result)
-		pet_summoned.emit(result)
+			next_owned[pet_id] = {"level": 1, "xp": 0, "stars": 1, "shards": 0}
+		next_pity = 0 if data.rarity_index >= 4 else next_pity + 1
+		results.append({
+			"pet_id": pet_id, "name": data.display_name,
+			"rarity_index": data.rarity_index, "rarity_name": data.rarity_name,
+			"rarity_color": data.rarity_color.to_html(false),
+			"duplicate": duplicate, "shards": shards, "pity": next_pity,
+		})
+	var crystals_before: int = summon_crystals
+	owned_pets = next_owned
+	summon_crystals -= cost
+	summon_pity = next_pity
+	last_summon_receipt = {
+		"results": results.duplicate(true), "cost": cost,
+		"crystals_before": crystals_before, "crystals_after": summon_crystals,
+		"pity": summon_pity,
+	}
+	# Observers see the committed batch, never a half-applied ten-pull.
+	for result: Dictionary in results:
+		if not bool(result["duplicate"]):
+			pet_unlocked.emit(String(result["pet_id"]))
+		pet_summoned.emit(result.duplicate(true))
 	pet_state_changed.emit()
+	_summon_in_progress = false
+	last_summon_error = ""
 	return results
 
 
@@ -427,6 +454,7 @@ func to_save_dict() -> Dictionary:
 		"essence": essence,
 		"summon_crystals": summon_crystals,
 		"summon_pity": summon_pity,
+		"last_summon_receipt": last_summon_receipt.duplicate(true),
 	}
 
 
@@ -436,6 +464,8 @@ func apply_save_dict(data: Dictionary) -> void:
 	essence = maxi(0, int(data.get("essence", 0)))
 	summon_crystals = maxi(0, int(data.get("summon_crystals", 3000)))
 	summon_pity = clampi(int(data.get("summon_pity", 0)), 0, LEGENDARY_PITY - 1)
+	last_summon_receipt = Dictionary(data.get("last_summon_receipt", {})).duplicate(true)
+	last_summon_error = ""
 	_ensure_starter_pet()
 	pet_state_changed.emit()
 	active_pet_changed.emit(active_pet_id)
