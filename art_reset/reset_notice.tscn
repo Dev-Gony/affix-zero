@@ -1,0 +1,20 @@
+[gd_scene format=3]
+
+[node name="ArtResetNotice" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Message" type="Label" parent="."]
+layout_mode = 0
+offset_left = 48.0
+offset_top = 64.0
+offset_right = 912.0
+offset_bottom = 480.0
+theme_override_colors/font_color = Color(0.14, 0.23, 0.33, 1)
+theme_override_font_sizes/font_size = 24
+text = "AFFIX: ZERO\nART-RESET-01\n\n기존 이미지와 이전 시각 방향을 제거했습니다.\n전투 · 아이템 · 스킬 규칙은 보존했습니다.\n\n새 외부 리소스의 라이선스와 애니메이션을 검수한 뒤 연결합니다.\n이 화면은 아트 교체 상태 안내이며 플레이 빌드가 아닙니다."
+autowrap_mode = 3

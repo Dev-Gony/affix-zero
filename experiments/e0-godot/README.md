@@ -1,43 +1,5 @@
-# E0 isolated combat slice
+# ART-RESET-01
 
-This is a separate Godot 4.7.2 project. It does not load the legacy root project, SaveManager, user://save.json, pets, rebirth, inventory, gacha, or production autoloads.
+사용자가 기존 이미지 전면 삭제를 요청해 이전 E0/V0 시각 자료를 제거했습니다. F5는 이미지 없는 교체 상태 안내입니다. 새 게임 화면 완성이 아닙니다.
 
-## E0-C01
-
-- Warrior + one melee enemy.
-- Real position-based approach.
-- IDLE / APPROACH / WINDUP / ACTIVE / RECOVERY / HIT / DEAD.
-- Damage occurs once in ACTIVE.
-- Separate pose frames for idle, walk, attack, hit, death.
-
-## E0-C02
-
-- Adds a ranged enemy with separate cast frames.
-- Ranged damage is not applied at cast time. A projectile node moves through world space and performs segment collision against the warrior.
-- Enemy death creates one world drop but grants no reward.
-- Only physical pickup calls RewardLedger.
-- Drop IDs are idempotent, so duplicate collection cannot add gold/xp twice.
-- After combat, the warrior physically walks to remaining drops.
-- All visuals here remain E0 prototype art, not final production art.
-
-## Windows run
-
-Use the standard Godot 4.7.2 executable, not the .NET build.
-
-Open only:
-
-`D:\github\affix-e0\experiments\e0-godot\project.godot`
-
-Do not open the legacy root `D:\github\affix\project.godot` with 4.7.2 yet.
-
-Headless contracts:
-
-```powershell
-Godot_v4.7.2-stable_win64.exe --headless --editor --path experiments/e0-godot --quit-after 3
-Godot_v4.7.2-stable_win64.exe --headless --path experiments/e0-godot res://tests/e0_c01_test.tscn
-Godot_v4.7.2-stable_win64.exe --headless --path experiments/e0-godot res://tests/e0_c02_test.tscn
-```
-
-Expected final lines:
-- `E0_C01_TEST PASSED`
-- `E0_C02_TEST PASSED`
+현재 기준은 ../../docs/project/HANDOFF.md, ART_RESET.md, ART_DIRECTION.md, ASSET_CANDIDATES.md, ASSET_INTAKE.md입니다. 기존 규칙 소스는 .gdignore 아래 보존되며 해당 파일의 과거 팔레트/아틀라스 복원 로직을 사용하지 않습니다. perf/tools의 옛 벤치마크 실행기를 다시 실행하지 마세요. 새 패키지 검수와 아트 연결이 다음 단계입니다.

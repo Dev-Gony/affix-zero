@@ -1,89 +1,33 @@
-# AFFIX: ZERO 현재 인수인계
+# 현재 인수인계: ART-RESET-01
 
-갱신: 2026-09-26 KST.
+2026-09-26 사용자 명시 요청으로 기존 게임 이미지 전부와 다크 판타지 시각 방향을 폐기했다. 다음 채팅도 이 결정부터 적용한다.
 
-## 가장 중요한 현재 방향
+## 현재 상태
 
-E0는 엔진/판정/성능 계약을 확인하기 위한 실험 장치일 뿐이며 **게임의 기본 실행 화면으로 사용하지 않는다**.
+- 작업 브랜치 chore/r0-preservation, PR #18. 정확한 최신 HEAD/CI는 매 세션 조회한다.
+- 삭제 전 기준 46ad2db3538734d3aed48a119856f32862f7c164.
+- assets/ 및 experiments/e0-godot/assets/를 삭제한다. design-system/도 삭제한다. 옛 이미지 사본을 현재 트리의 다른 폴더로 옮기지 않는다.
+- 게임 규칙/데이터 기존 파일은 보존하고 옛 렌더 코드는 비활성으로 둔다. 사용자 저장과 stash를 건드리지 않는다.
+- root와 experiments/e0-godot 기본 실행은 이미지 없는 아트 교체 상태 안내다. 신규 게임/MVP 완성 화면이 아니다. 예전 화면을 다시 보여주지 않는다.
+- 이 작업의 audit PASS는 기존 미디어 제거/게임 소스 바이트 보존만 뜻한다. E0/V0 옛 렌더 테스트는 docs/history/ci로 이동해 중단 사실을 남겼다.
+- 기존 C03 수치로 최종 GPU 성능/엔진 적합성을 확정하지 않는다.
 
-사용자가 Windows에서 E0-C03 40적 화면을 확인한 결과, 원형 군집/도형형 임시 캐릭터/진단 HUD가 실제 AFFIX 게임 방향과 현저히 다르다고 판단했다. 이 피드백은 정당하며 E0를 더 확장하는 작업을 중단했다.
+## 새 디자인 결정
 
-현재부터 개발 기준은 `V0 Vertical Slice`다.
+ART_DIRECTION.md: 밝고 선명한 야외 캐주얼 2D RPG. 기존 다크 배경/아틀라스/CC0 타일/E0 SVG의 복원·색변경 재활용 금지. Hero Siege/Survivor.io는 플레이/장비/성장 구조 참고이며 기존 분위기를 가져오지 않는다.
 
-## 엔진
+1차 시각 레퍼런스 Tiny Swords. 현행 팩은 원본 재배포 제한, 제작자 제공 TS_old version_CC0 Licensed는 별도로 실물/라이선스 검사해야 한다. CC0 대안은 Ninja Adventure, UI 보조 후보는 Kenney UI Pack - Adventure. 새 원본 ZIP은 아직 확보/반입하지 않았다. Game UI Database는 접근 제한으로 실제 화면 미검수, Pinterest/Dribbble도 채택 작품 미확정.
 
-- Godot 4.7.2 Standard
-- typed GDScript
-- Compatibility
-- 엔진 전환은 현재 보류. 이유: E0 40적 x1에서 성능 여유가 충분히 관찰됐고, 현재 문제는 엔진이 아니라 임시 아트/배치/연출/게임 화면 구성에 있음.
-- 이 판단은 Godot이 최종적으로 무조건 고정이라는 뜻이 아니다.
+## 다음 작업 ART-02
 
-## V0 Vertical Slice
+Tiny Swords의 정확한 CC0 구버전 ZIP 확보 → 원본 라이선스/해시/프레임/방향/pivot/impact 검수 → 밝은 작은 필드와 영웅1/적1 → 보존 규칙 연결. 실제 에셋 확보 전에 임의 SVG나 옛 아틀라스를 가져와 진행한 척하지 않는다.
 
-기본 실행 씬은 이제:
-`res://vslice/v0_main.tscn`
+## 로컬
 
-E0-C03가 아니다.
+사용자는 D:\github\affix-e0 / e0-c01-local을 사용한다. 현재 Godot 실행파일의 폴더/파일 구조는 이미 확인됐으므로 다시 묻지 않는다. 에디터를 닫고 clean 상태에서 fetch + ff-only 업데이트한다. 로컬 수정이 있으면 실패 메시지를 확인하고 자동 stash/pop/reset/clean은 하지 않는다. Git history/다른 worktree까지 삭제하지 않았다.
 
-구현:
-- 저장소의 본게임 제작 자산 `assets/sprites/dungeon_courtyard.png` 사용
-- `class_atlas_alpha.png` warrior 사용
-- `enemy_atlas_alpha.png` slime/bat/skeleton/goblin/dark_knight 사용
-- 화면 가장자리 스폰
-- 적 간 separation 적용
-- 최대 일반 적 18개
-- 자동 타깃/접근/근접 공격
-- 피격/넉백/데미지 숫자/타격 파편
-- 적 사망
-- XP/Gold world pickup + 자석 회수
-- 레벨업 시 ATK 증가/회복
-- 30킬 뒤 Dark Knight elite
-- stage clear / retry
-- compact HUD
-- arena clamp + y-sort
-- legacy save/manager는 계속 격리
-
-중요: 현재 class/enemy atlas는 본게임용 원본 아트이지만 직업/몬스터별 단일 포즈 atlas다. V0의 공격/이동은 아직 production frame animation 완성이 아니다. 이 사실을 숨기지 않는다. 다음 아트 단계에서 walk/attack/hit/death 실제 프레임 세트를 새로 제작/연결해야 한다.
-
-## 자동검증
-
-V0 smoke가 Godot 4.7.2에서 다음을 검증:
-- repository production texture 세 개를 실제 파일에서 로딩
-- player 생성
-- enemy spawn
-
-커밋 `a450668ac1723bf8df639bc72d4c14e910bbe352` 계열 workflow의 V0 smoke step에서 `V0_SMOKE_TEST PASSED` 확인. 이후 arena clamp/y-sort 수정은 최신 HEAD의 CI를 계속 확인한다.
-
-## 로컬 실행
-
-사용자의 E0 worktree는 그대로 사용한다.
-
-```bash
-cd /d/github/affix-e0
-git fetch origin chore/r0-preservation
-git merge --ff-only origin/chore/r0-preservation
-```
-
-Godot 4.7.2 Standard에서:
-`D:\github\affix-e0\experiments\e0-godot\project.godot`
-
-F5를 누르면 V0 vertical slice가 기본 실행되어야 한다.
-
-화면에 E0-C03/40 ENEMIES 진단화면이 다시 기본으로 뜨면 실패다.
-
-## 다음 개발
-
-1. 사용자 V0 실제 화면 확인
-2. gameplay/visual 오류 즉시 수정
-3. V0-02 production animation asset pipeline
-   - warrior walk/attack/hit/death
-   - 첫 melee monster walk/attack/hit/death
-   - 공격 프레임과 damage active frame 동기화
-4. V0-03 survivor-style spawn pacing + elite/boss telegraph
-5. 그 다음에만 40/150/300 성능 재측정
-
-## 새 채팅용
+## 새 채팅 재개
 
 ```text
-Dev-Gony/affix-zero 개발을 이어간다. chore/r0-preservation 최신 HEAD와 PR #18, docs/project/HANDOFF.md를 확인한다. E0는 테스트 전용이며 기본 실행 화면으로 쓰지 않는다. 사용자는 E0-C03 40적 원형 군집/임시 도형 화면을 명확히 거절했고 성능 실험 확장을 중단했다. 기본 실행은 experiments/e0-godot/vslice/v0_main.tscn의 V0 Vertical Slice다. dungeon_courtyard + class_atlas_alpha + enemy_atlas_alpha를 실제 repo asset에서 로딩하고 edge spawn, separation, auto melee combat, hit FX, death, XP/gold pickups, level-up, 30kill dark knight elite, compact HUD를 구현했다. V0_SMOKE_TEST PASSED 증거가 있다. 단 class/enemy atlas는 아직 실제 walk/attack/hit/death frame animation asset이 아니므로 최종 애니메이션 완성이라고 주장하면 안 된다. 다음은 사용자 V0 화면 확인 후 production animation pipeline이다. legacy save/stash는 건드리지 않는다. 승인 없는 merge/reset/clean/stash pop 금지. 모든 답변 마지막에 3항목 진행 상황 체크포인트를 유지한다.
+Dev-Gony/affix-zero의 chore/r0-preservation 최신 HEAD/PR #18과 docs/project/HANDOFF.md, ART_RESET.md, ART_DIRECTION.md, ASSET_CANDIDATES.md, ASSET_INTAKE.md를 읽고 이어가라. 사용자 요청은 기존 이미지 전부 삭제와 다크 아트 완전 폐기다. 기존 assets 및 E0 SVG는 재사용/복원/참고하지 마라. 게임 규칙과 아이템·스킬·성장/저장 데이터는 보존되어 있다. 현재 기본 씬은 이미지 없는 교체 안내이지 새 게임이 아니다. 새 시각은 밝은 Tiny Swords 계열 캐주얼 2D RPG. 현행 Tiny Swords는 재배포 제한이므로 제작자가 제공하는 TS_old version_CC0 Licensed ZIP을 실물 검수한 뒤 반입한다. 아직 신규 ZIP/프레임 검수 완료라고 쓰지 마라. 다음 ART-02는 원본 라이선스/해시/idle-walk-attack-hit-death/발 pivot/impact frame 검사 후 작은 실제 필드를 만드는 작업이다. 검수 전 block/SVG 대체 제작이나 옛 다크 아틀라스 복원 금지. 사용자 승인 없는 병합/force/reset/clean/stash pop/save migration 금지. 마지막은 기존 세 항목 진행 상황 체크포인트다.
 ```
