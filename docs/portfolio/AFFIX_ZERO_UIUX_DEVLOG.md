@@ -710,6 +710,7 @@ Pending. Validate card density, text wrapping, permanent-upgrade row width, Info
 - Skill rows no longer render large text-only placeholder icon tiles.
 - Skill actions widened from 104px to 118px and card spacing simplified.
 - Rebirth permanent upgrades now receive a dedicated header/hint and stronger gold affordance when points are available.
+- Management screens now hide both the top combat HUD and bottom dock, move to y=8 and expand to 384px height so they read as dedicated game surfaces rather than overlays stacked on active combat chrome.
 - UIUX regression contracts now verify restrained equipment accents, slim skill accents, four-column permanent upgrades and the two-column info dashboard.
 - Build identity advanced to **uiux-v2.1**.
 
@@ -736,6 +737,7 @@ Automated contracts cover:
 | Skill identity | Large text-only pseudo-icon block | Slim progression accent until real skill art exists |
 | Skill actions | Narrow utility controls | Wider desktop purchase controls |
 | Rebirth growth | Functional but visually secondary | Dedicated permanent-growth header + stronger affordance |
+| Management framing | Combat HUD still visible behind the management shell | Dedicated near-fullscreen management surface; combat chrome hidden |
 | Overall impression | Good structure, still slightly tool-like | Less debug chrome, stronger game-screen hierarchy |
 
 ### Windows play approval
