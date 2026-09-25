@@ -28,6 +28,11 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
           fetch-depth: 0
 
+      - name: Install test and capture prerequisites
+        run: |
+          apt-get update -qq
+          apt-get install -y --no-install-recommends python3 xvfb xauth libgl1-mesa-dri fonts-noto-cjk
+
       - name: Install export templates
         run: |
           mkdir -p "$XDG_DATA_HOME/godot/export_templates"
@@ -66,10 +71,6 @@ jobs:
       - name: Capture baseline fixture screens
         shell: bash
         run: |
-          if ! command -v xvfb-run >/dev/null; then
-            apt-get update -qq
-            apt-get install -y --no-install-recommends xvfb xauth libgl1-mesa-dri
-          fi
           set -o pipefail
           timeout 90 xvfb-run -a -s "-screen 0 1280x800x24" godot --path . --rendering-method gl_compatibility --audio-driver Dummy res://tests/pr_a_capture.tscn -- --affix-test-mode 2>&1 | tee build/pr-a/capture.log
           grep -q "PR_A_CAPTURE PASSED" build/pr-a/capture.log
