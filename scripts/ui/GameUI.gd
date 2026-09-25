@@ -81,6 +81,7 @@ var _pause_visible: bool = false
 var _volume_slider: HSlider
 var _fullscreen_check: CheckBox
 var _autosave_check: CheckBox
+var _minimap: GameMiniMap
 
 
 func _ready() -> void:
@@ -211,6 +212,14 @@ func _build_hud() -> void:
 	menu_button.tooltip_text = "설정 · 저장 · 종료  (ESC)"
 	menu_button.pressed.connect(_toggle_pause_menu)
 	quick_row.add_child(menu_button)
+
+	_minimap = GameMiniMap.new()
+	_minimap.position = Vector2(550, 42)
+	_minimap.size = Vector2(78, 58)
+	_minimap.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	_minimap.z_index = 24
+	_minimap.set_floor(GameManager.floor)
+	add_child(_minimap)
 
 
 func _add_bar(parent: VBoxContainer, title: String, fill_color: Color) -> ProgressBar:
@@ -469,6 +478,8 @@ func _toggle_management(tab_index: int) -> void:
 	_management_open = true
 	_switch_management_tab(tab_index, false)
 	_management_window.visible = true
+	if _minimap != null:
+		_minimap.visible = false
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -488,6 +499,8 @@ func _close_management(play_sound: bool = true) -> void:
 		AudioManager.play_sfx("ui_click")
 	_management_open = false
 	_management_window.visible = false
+	if _minimap != null:
+		_minimap.visible = GameManager.game_state == GameManager.GameState.RUNNING and not _pause_visible
 	_sync_dock_buttons()
 	_sync_modal_blocker()
 
@@ -779,7 +792,11 @@ func _connect_signals() -> void:
 	GameManager.inventory_changed.connect(_refresh_inventory)
 	GameManager.equipment_changed.connect(_on_equipment_changed)
 	GameManager.skills_changed.connect(_refresh_skills)
-	GameManager.floor_changed.connect(func(_floor: int) -> void: _refresh_hud())
+	GameManager.floor_changed.connect(func(next_floor: int) -> void:
+		_refresh_hud()
+		if _minimap != null:
+			_minimap.set_floor(next_floor)
+	)
 	GameManager.speed_changed.connect(_refresh_speed_buttons)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	GameManager.notification_requested.connect(_show_notification)
@@ -790,6 +807,8 @@ func _connect_signals() -> void:
 
 func _refresh_all() -> void:
 	_refresh_hud()
+	if _minimap != null:
+		_minimap.set_floor(GameManager.floor)
 	_refresh_speed_buttons(GameManager.speed_multiplier)
 	if _loot_filter_option != null:
 		_loot_filter_option.select(GameManager.loot_min_rarity_index)
@@ -1777,6 +1796,8 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 		_hud_panel.visible = show_game_ui and not _management_open
 	if _bottom_panel != null:
 		_bottom_panel.visible = show_game_ui and not _management_open
+	if _minimap != null:
+		_minimap.visible = show_game_ui and not _management_open and not _pause_visible
 	if not show_game_ui:
 		if _management_open:
 			_management_open = false
@@ -1808,6 +1829,8 @@ func _toggle_pause_menu() -> void:
 	else:
 		get_tree().paused = false
 		GameManager.set_game_state(GameManager.GameState.RUNNING)
+	if _minimap != null:
+		_minimap.visible = not _pause_visible and not _management_open and GameManager.game_state != GameManager.GameState.CLASS_SELECTION
 	_sync_modal_blocker()
 	AudioManager.play_sfx("ui_click")
 
