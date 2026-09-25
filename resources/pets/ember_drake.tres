@@ -6,11 +6,11 @@
 script = ExtResource("1")
 id = "ember_drake"
 display_name = "화염룡"
-rarity_index = 4
-rarity_name = "전설"
+rarity_index = 5
+rarity_name = "신화"
 rarity_color = Color("ef4444")
-summon_weight = 4.0
-duplicate_shards = 45
+summon_weight = 1.5
+duplicate_shards = 60
 role = "공격형"
 element = "화염"
 color = Color(1, 0.28, 0.18, 1)
