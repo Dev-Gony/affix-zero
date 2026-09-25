@@ -44,7 +44,7 @@ func refresh() -> void:
 			continue
 		var unlocked: bool = GameManager.unlocked_classes.has(class_data.id)
 		var card := Button.new()
-		card.custom_minimum_size = Vector2(178, 94)
+		card.custom_minimum_size = Vector2(184, 102)
 		card.disabled = not unlocked
 		card.text = _class_card_text(class_data, unlocked)
 		card.icon = _make_class_icon(class_data)
@@ -54,14 +54,14 @@ func refresh() -> void:
 			class_data.description, class_data.base_hp, class_data.base_mp, class_data.base_atk,
 			class_data.base_def, class_data.base_spd, class_data.base_crit
 		]
-		card.add_theme_color_override("font_color", class_data.color if unlocked else Color("65657c"))
-		card.add_theme_color_override("font_disabled_color", Color("65657c"))
-		card.add_theme_font_size_override("font_size", 8)
-		card.add_theme_stylebox_override("normal", _card_style(Color("1c131b"), class_data.color.darkened(0.22), 1))
-		card.add_theme_stylebox_override("hover", _card_style(Color("38202a"), class_data.color, 2))
-		card.add_theme_stylebox_override("pressed", _card_style(Color("4b1f28"), Color("f0b45f"), 2))
-		card.add_theme_stylebox_override("disabled", _card_style(Color("0d0a0f"), Color("34282a"), 1))
-		card.add_theme_stylebox_override("focus", _card_style(Color(0, 0, 0, 0), Color("f0b45f"), 2))
+		card.add_theme_color_override("font_color", Color("edf2f7") if unlocked else Color("667386"))
+		card.add_theme_color_override("font_disabled_color", Color("667386"))
+		card.add_theme_font_size_override("font_size", 9)
+		card.add_theme_stylebox_override("normal", _card_style(Color("111821"), class_data.color.darkened(0.10), 2))
+		card.add_theme_stylebox_override("hover", _card_style(Color("1d2733"), class_data.color.lightened(0.12), 2))
+		card.add_theme_stylebox_override("pressed", _card_style(Color("27313e"), Color("f0b84b"), 3))
+		card.add_theme_stylebox_override("disabled", _card_style(Color("0b1016"), Color("2b3542"), 1))
+		card.add_theme_stylebox_override("focus", _card_style(Color(0, 0, 0, 0), Color("f0b84b"), 2))
 		if unlocked:
 			card.pressed.connect(_select_class.bind(class_data))
 			if first_unlocked_card == null:
@@ -80,44 +80,44 @@ func _focus_card(card: Button) -> void:
 func _build_layout() -> void:
 	var outer := VBoxContainer.new()
 	outer.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
-	outer.position = Vector2(-285, -163)
-	outer.size = Vector2(570, 326)
-	outer.add_theme_constant_override("separation", 8)
+	outer.position = Vector2(-296, -168)
+	outer.size = Vector2(592, 336)
+	outer.add_theme_constant_override("separation", 10)
 	add_child(outer)
 
 	var title := Label.new()
-	title.text = "AFFIX: ZERO"
+	title.text = "AFFIX: ZERO  ·  영웅 선택"
 	title.custom_minimum_size.y = 30
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_font_size_override("font_size", 24)
-	title.add_theme_color_override("font_color", Color("e2544d"))
+	title.add_theme_color_override("font_color", Color("f0b84b"))
 	outer.add_child(title)
 
 	var subtitle := Label.new()
-	subtitle.text = "영웅을 선택하세요  ·  전투는 자동으로 시작됩니다"
+	subtitle.text = "자동사냥 성장형 ARPG  ·  직업마다 기본 능력과 성장 방향이 다릅니다"
 	subtitle.custom_minimum_size.y = 18
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	subtitle.add_theme_color_override("font_color", Color("a9abc4"))
+	subtitle.add_theme_color_override("font_color", Color("9aa8ba"))
 	outer.add_child(subtitle)
 
 	_grid = GridContainer.new()
 	_grid.columns = 3
 	_grid.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_grid.add_theme_constant_override("h_separation", 8)
-	_grid.add_theme_constant_override("v_separation", 8)
+	_grid.add_theme_constant_override("h_separation", 10)
+	_grid.add_theme_constant_override("v_separation", 10)
 	outer.add_child(_grid)
 
 	var hint := Label.new()
-	hint.text = "첫 플레이 추천: 전사 / 마법사   ·   환생으로 새로운 직업 해금"
+	hint.text = "첫 플레이 추천: 전사 / 마법사   ·   잠긴 직업은 환생 누적으로 해금"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_font_size_override("font_size", 9)
-	hint.add_theme_color_override("font_color", Color("8b8da8"))
+	hint.add_theme_color_override("font_color", Color("8492a6"))
 	outer.add_child(hint)
 
 
 func _class_card_text(class_data: ClassData, unlocked: bool) -> String:
 	var status: String = "선택 가능" if unlocked else "환생 %d회 해금" % class_data.unlock_rebirths
-	return "%s\n%s\nHP %d  ATK %d  DEF %d\nSPD %.1f  CRIT %.0f%%  ·  %s" % [
+	return "%s\n%s\nHP %d   ATK %d   DEF %d\nSPD %.1f   CRIT %.0f%%\n%s" % [
 		class_data.display_name, class_data.description, class_data.base_hp, class_data.base_atk,
 		class_data.base_def, class_data.base_spd, class_data.base_crit, status
 	]
@@ -128,10 +128,11 @@ func _card_style(background: Color, border: Color, width: int) -> StyleBoxFlat:
 	style.bg_color = background
 	style.border_color = border
 	style.set_border_width_all(width)
-	style.content_margin_left = 5
-	style.content_margin_right = 5
-	style.content_margin_top = 4
-	style.content_margin_bottom = 4
+	style.content_margin_left = 7
+	style.content_margin_right = 7
+	style.content_margin_top = 6
+	style.content_margin_bottom = 6
+	style.set_corner_radius_all(3)
 	style.anti_aliasing = false
 	return style
 

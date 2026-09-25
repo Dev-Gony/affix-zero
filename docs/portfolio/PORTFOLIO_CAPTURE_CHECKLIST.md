@@ -195,3 +195,113 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - x5 combat readability:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## UIUX V2.0 — Full Management Overhaul
+
+### Required capture set
+
+- [ ] **Management hub overview**
+  - Open any management tab.
+  - Capture the new almost-full-width hub.
+  - Confirm combat is visually dimmed behind it and the bottom combat dock is hidden.
+  - Confirm top navigation shows 장비 / 가방 / 스킬 / 환생 / 정보.
+
+- [ ] **Class selection V2**
+  - Trigger the class-selection screen from a fresh/rebirth flow.
+  - Confirm all six class cards fit in one screen.
+  - Confirm each card remains readable at desktop scale and class color is used as identity rather than full UI chrome.
+
+- [ ] **Equipment composition**
+  - Open 장비.
+  - Confirm the character portrait sits in the center of the 3x3 composition.
+  - Confirm equipment cards are materially larger than V1 and rarity colors remain readable.
+  - Check long item names, enhancement rate/cost and buttons for clipping.
+
+- [ ] **Inventory desktop layout**
+  - Open 가방.
+  - Confirm the item grid and detail pane are visible side-by-side.
+  - Confirm eight columns fit without horizontal scrolling.
+  - Select several items and verify comparison/details update without moving the grid.
+  - Confirm clean upgrades show the green ↑ hint.
+
+- [ ] **Skill progression**
+  - Open 스킬.
+  - Confirm each skill row includes a visible level progress bar.
+  - Confirm +1 / +10 / MAX remain readable and clickable.
+
+- [ ] **Rebirth progression**
+  - Open 환생.
+  - Confirm the level-to-rebirth progress bar is visible.
+  - Confirm permanent upgrade buttons remain readable.
+
+- [ ] **Navigation / ESC**
+  - Switch tabs using the in-window top navigation.
+  - Confirm the management hub stays open.
+  - Press ESC once: management should close.
+  - Confirm pause/settings does **not** open on that same keypress.
+  - Press ESC again: pause/settings should open.
+
+- [ ] **Combat dock restoration**
+  - Close management.
+  - Confirm the compact bottom dock returns and keyboard shortcuts 1-5 still work.
+
+- [ ] **Combat HUD cleanup**
+  - Confirm active combat no longer shows separate 저장 / 종료 buttons.
+  - Confirm the single 메뉴 button opens pause/settings.
+  - Verify save/load/quit remain available inside the dedicated menu/info surfaces.
+
+### UIUX V2.0 validation notes
+
+- Build commit:
+- Management scale: Too small / Good / Too large
+- Class selection readability:
+- Equipment scan speed:
+- Inventory grid readability:
+- Detail pane readability:
+- Upgrade arrow usefulness:
+- Skill progress readability:
+- Rebirth progress readability:
+- Top navigation:
+- ESC behavior:
+- Combat dock restore:
+- Combat HUD menu/readability:
+- Clipping / overlap:
+- Overall visual direction: Reject / Iterate / Accept
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected
+
+
+## UIUX V2.1 — Playtest Polish
+
+- [ ] **Management live state**
+  - Open any management tab during active combat.
+  - Confirm the header shows 자동사냥 계속 and combat is still visibly running behind the dim layer.
+
+- [ ] **Equipment hierarchy**
+  - Confirm occupied cards have subtle rarity tint + stronger rarity border without making the whole screen look neon.
+  - Confirm center portrait shows class, current level and rebirth count.
+
+- [ ] **Empty inventory context**
+  - With a strict filter such as 에픽만 and an empty bag, confirm both header and detail pane explain the active acquisition filter.
+
+- [ ] **Rebirth layout**
+  - Confirm the top progression card fills the width cleanly.
+  - Confirm all four permanent upgrades are presented in one balanced row.
+  - Confirm long remaining-level text does not clip.
+
+- [ ] **Info dashboard**
+  - Confirm 모험 기록 / 전투 능력 / 현재 층 위협도 / 보조 능력 appear as four balanced cards.
+  - Confirm save/load/quit are absent from Info and remain available only in 메뉴.
+
+### UIUX V2.1 validation notes
+
+- Build commit:
+- Management-live indicator:
+- Equipment rarity treatment:
+- Empty inventory explanation:
+- Rebirth card balance:
+- Info dashboard readability:
+- Text clipping:
+- Bugs found:
+- Merge approval: Pending / Approved / Rejected

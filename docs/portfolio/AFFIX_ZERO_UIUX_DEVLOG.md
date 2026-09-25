@@ -455,3 +455,221 @@ Automated contracts cover:
 ### Windows play approval
 
 Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are noticeable, Legendary/Epic feel exceptional, and x5 combat still remains readable.
+
+
+## 2026-09-25 — UIUX V2.0 Full Management Overhaul
+
+### Problem
+
+- The existing UI was functionally complete but visually read like a developer/admin overlay rather than a finished game interface.
+- Equipment, inventory, skills, rebirth and information all shared the same narrow side-modal treatment, so important systems lacked distinct hierarchy.
+- The equipment screen compressed seven slots, the character portrait, growth information and actions into tiny 3x3 cards.
+- The inventory stacked the item grid above the detail pane, forcing the player to scan vertically instead of comparing gear and details at the same time.
+- The brown/red border language competed with rarity colors and made nearly every panel look equally urgent.
+- The bottom dock, modal window, HUD and notifications all remained visually active at once, creating hierarchy noise.
+
+### Cause
+
+- The original UI was built incrementally around a 316px-wide management popup.
+- New features were added inside the existing shell instead of revisiting the shell itself.
+- The same compact card patterns were reused for desktop management even after inventory, enhancement and skill systems became denser.
+- Navigation treated the management window as a secondary popup, even though it had become the main place where players convert idle farming into progression.
+
+### Reference UX
+
+- **Survivor.io / 탕탕특공대**
+  - Character-centered equipment composition.
+  - Strong rarity-colored equipment cards.
+  - Dense inventory grid with clear upgrade affordances.
+  - Management screens feel like primary game surfaces, not debug popups.
+- **Hero Siege**
+  - Dark desktop-first management panels.
+  - Dense information without losing readability.
+  - Strong tab/system separation and detailed item inspection.
+- **AFFIX: ZERO direction**
+  - Keep the dark ARPG mood and information density of Hero Siege.
+  - Borrow the immediate equipment/inventory hierarchy and reward readability of Survivor.io.
+  - Do not copy either UI literally; preserve the game's own pixel-dungeon identity.
+
+### Decision
+
+- Replace the narrow right-side management popup with an almost full-width desktop management hub.
+- Keep combat running behind a stronger dim layer, preserving the idle-game identity while making management the visual focus.
+- Add dedicated in-window top navigation for 장비 / 가방 / 스킬 / 환생 / 정보.
+- Hide the compact bottom dock while the management hub is open and restore it after closing.
+- Keep the character portrait at the visual center of the equipment composition and enlarge all equipment cards.
+- Rebuild inventory as an **8-column grid + persistent right-side detail/comparison pane**.
+- Use slate/blue-black structural colors and reserve gold for selection/progression so rarity colors remain meaningful.
+- Make skills and rebirth visually communicate progression through bars, not text alone.
+- Show a green inventory upgrade arrow only when an item is a clean visible-stat improvement with no visible downgrade.
+- Fix ESC behavior so closing management does not immediately open the pause menu.
+
+### Implementation
+
+- Combat HUD:
+  - Removed always-visible 저장 / 종료 actions from active combat.
+  - Replaced them with one 메뉴 entry that opens pause/settings, where save/load/quit already belong.
+  - Reallocated HUD width to run-state and speed controls so active combat reads more like a game HUD and less like a debug toolbar.
+- Management hub expanded to roughly the full 640px desktop canvas:
+  - 612x346 primary panel.
+  - Dedicated header with section title, current gold and close affordance.
+  - Persistent five-section navigation row.
+  - 596px-wide content region.
+- Combat dock is now compact and visible only when management is closed.
+- Equipment:
+  - 3x3 centered composition preserved, but cards expanded from ~88px to ~176px.
+  - Character portrait stays in the center cell.
+  - Larger equipment icons, labels and enhancement actions.
+  - Strong rarity border color while structural chrome remains neutral.
+- Inventory:
+  - 8-column scrollable item grid.
+  - Persistent 188px detail/comparison pane on the right.
+  - Larger item cells and clearer filter/sell controls.
+  - Strict-upgrade green arrow derived from the existing comparison system.
+- Skills:
+  - Added visible level progress bars.
+  - Increased card/action widths for desktop readability.
+- Rebirth:
+  - Added explicit level-to-rebirth progress bar.
+- Theme:
+  - Replaced most brown/red structural chrome with slate/blue-black panels.
+  - Gold is used for selected/progression states rather than every border.
+- Class selection:
+  - Enlarged all six class cards.
+  - Unified card chrome with the V2 slate/gold language while preserving each class color as identity.
+  - Reframed the screen around "자동사냥 성장형 ARPG" rather than a generic selection modal.
+- Interaction:
+  - ESC closes management only; a second ESC can then open pause/settings.
+  - Top management navigation switches tabs without closing the hub.
+- Added a dedicated `uiux_v2_overhaul` regression contract.
+- Build identity advanced to **uiux-v2.0**.
+
+### Failure / Revision
+
+- The previous incremental UI approach kept solving local clipping problems while preserving the larger hierarchy problem.
+- During V2 implementation, the old ESC flow was identified as a UX bug: pressing ESC while management was open closed management **and immediately opened pause/settings** in the same keypress.
+- V2 changes ESC to perform one state transition per keypress.
+- The first V2 CI run failed because the older PR-B safety test still encoded the previous double-transition behavior as the expected contract.
+- The regression was deliberately updated, not bypassed: first ESC closes management while idle combat keeps running; a second ESC explicitly opens the modal pause menu.
+- The next CI pass exposed an older G3.3 layout contract requiring at least 350px management height. V2 had landed at 346px, so the hub was increased by 4px rather than weakening the existing full-detail readability guard.
+- The following full smoke run then failed because it still hard-coded the pre-V2 **six-column inventory grid**. V2 intentionally uses an eight-column desktop grid with a persistent detail pane, so the legacy smoke contract was updated from six to eight columns rather than shrinking the new layout back to fit an obsolete assumption.
+- The redesign intentionally does not replace the existing game art or create a new asset pack yet; layout/hierarchy must be validated first before spending time on decorative art.
+
+### Verification
+
+Automated contracts cover:
+
+- Management hub width >= 600px and height >= 340px.
+- Hub positioned as a primary screen rather than a side popup.
+- Five in-window navigation buttons exist.
+- Inventory uses eight columns.
+- Inventory maintains a persistent detail pane >= 170px wide.
+- Character portrait remains in the equipment layout center.
+- Opening management hides the compact combat dock.
+- Switching top tabs does not close management.
+- Closing management restores the compact dock.
+- Equipment cards remain >= 170px wide.
+- All six class choices remain visible in one screen with desktop-sized cards >= 180px wide.
+
+### Before / After
+
+| Area | Before | UIUX V2 |
+|---|---|---|
+| Combat HUD | Save/quit mixed into active combat controls | Run state + speed + one menu entry |
+| Management shell | 316px right-side popup | 612px primary desktop hub |
+| Navigation | Bottom dock only | In-window top navigation + compact closed-state dock |
+| Equipment | Tiny 3x3 admin-like cards | Large character-centered loadout composition |
+| Inventory | Grid stacked above details | 8-column grid + persistent right detail pane |
+| Skills | Text-heavy rows | Level bars + roomier actions |
+| Rebirth | Text summary + buttons | Explicit progression bar + permanent upgrades |
+| Color hierarchy | Brown/red chrome everywhere | Slate structure, gold progression, rarity colors reserved for loot |
+| ESC behavior | Close management then open pause immediately | One state transition per keypress |
+| Class selection | Separate older brown/red visual language | Same slate/gold hierarchy as management V2 |
+| Overall read | Functional debug overlay | Dedicated game management surface |
+
+### Windows play approval
+
+Pending. The critical review is now visual rather than mechanical: panel scale, information hierarchy, equipment/inventory scanning speed, management-vs-combat separation, and whether the larger desktop hub feels like a finished game screen rather than a developer overlay.
+
+
+## 2026-09-25 — UIUX V2.1 Playtest Polish
+
+### Problem
+
+- Windows playtest confirmed the new full-width management shell works, but several secondary screens still looked like stretched developer panels.
+- The Info tab was a large raw text wall with duplicated save/load/quit actions even though those actions had already moved to the pause menu.
+- The Rebirth tab used only the top-left portion of the available desktop canvas, leaving large dead space around a 2x2 button block.
+- An empty inventory could look broken or content-less because the UI did not explain that a strict acquisition filter such as Epic-only was active.
+- While management correctly leaves idle combat running, the dimmed background made that rule easy to miss.
+
+### Cause
+
+- V2.0 primarily solved shell/layout hierarchy first; several old tab internals were simply enlarged inside the new container.
+- Save/quit utilities remained duplicated in Info from the pre-overhaul information architecture.
+- Rebirth and statistics were still text-first layouts designed for the old narrow popup.
+- Empty-state copy described only what would happen after acquiring an item, not why the current inventory could remain empty.
+
+### Reference UX
+
+- **Survivor.io:** progression screens use distinct cards and large at-a-glance status blocks instead of raw system text.
+- **Hero Siege:** dense statistics are grouped by system so the player can scan categories without reading one long paragraph.
+- **AFFIX: ZERO:** management must clearly communicate that auto-hunt is still running in the background because this is an idle-first ARPG.
+
+### Decision
+
+- Keep the V2.0 combat HUD, primary management shell, equipment composition and 8-column inventory structure.
+- Convert Info into a four-card dashboard: adventure history, combat stats, current-floor threat and auxiliary bonuses.
+- Remove duplicate save/load/quit actions from Info; keep those utilities only in the pause/settings menu.
+- Rebuild Rebirth around a large progression card plus one full-width row of four permanent-upgrade cards.
+- Surface the active loot acquisition filter directly in the inventory header and empty-state copy.
+- Add a green 자동사냥 계속 indicator to the management header.
+- Give equipped item cards a subtle rarity-tinted background and stronger rarity border while keeping structural chrome neutral.
+- Enrich the center equipment portrait with current level and rebirth count.
+
+### Implementation
+
+- Management header now includes ● 자동사냥 계속.
+- Equipment cards use a subtle rarity tint and 2px rarity border when occupied.
+- Character portrait now shows class, current level and rebirth count.
+- Inventory header includes current acquisition threshold, e.g. 획득 에픽만.
+- Empty inventory detail now explicitly explains the active loot filter and that lower tiers are skipped.
+- Info tab now uses a 2x2 dashboard card layout and no longer duplicates save/load/quit.
+- Rebirth tab now uses:
+  - large rebirth/progression card,
+  - current permanent point count,
+  - explicit levels remaining until rebirth,
+  - full-width four-card permanent growth row.
+- Added V2.1 regression contracts for management-live state, info dashboard, rebirth grid and empty-inventory filter context.
+- Build identity advanced to **uiux-v2.1**.
+
+### Failure / Revision
+
+- The screenshots showed that V2.0 solved the major shell problem but exposed a second-order issue: enlarging old content does not automatically make it feel designed for the new canvas.
+- V2.1 therefore changes content hierarchy rather than merely adding more spacing or decoration.
+- The first V2.1 CI run then exposed one more legacy contract: Gameplay V3 still reached directly into the removed raw `_stats_label`. The product behavior was intact, but the test was coupled to the old widget implementation. The contract was migrated to the new current-floor threat dashboard label and still verifies the same player-facing information.
+
+### Verification
+
+Automated contracts cover:
+
+- Management header states that auto-hunt continues.
+- Info contains exactly four dashboard cards in a 2-column layout.
+- Rebirth contains four permanent-growth cards in one row.
+- Epic-only acquisition state is visible in the inventory header.
+- Empty inventory explains the active acquisition filter.
+- Existing full-width hub, 8-column inventory, center portrait and management-open/close behavior remain intact.
+
+### Before / After
+
+| Area | V2.0 playtest | V2.1 |
+|---|---|---|
+| Info | Large raw text wall + duplicate utilities | Four category cards, menu owns utilities |
+| Rebirth | Top-left content + large dead area | Progression hero card + four full-width upgrades |
+| Empty inventory | Looks merely empty | Explains active acquisition threshold |
+| Management state | Combat continues but subtly | Explicit green idle-combat indicator |
+| Equipment rarity | Border-only emphasis | Subtle rarity surface tint + stronger border |
+| Center portrait | Class only | Class + level + rebirth context |
+
+### Windows play approval
+
+Pending. Validate card density, text wrapping, permanent-upgrade row width, Info readability and whether the management-live indicator is helpful rather than distracting.
