@@ -344,6 +344,46 @@ func show_attack(from: Vector2, to: Vector2, critical: bool) -> void:
 	spawn_fragments(to, color, 3 if not critical else 6, 48.0)
 
 
+func show_player_basic_attack(class_id: String, from: Vector2, to: Vector2, critical: bool) -> void:
+	var direction: Vector2 = from.direction_to(to)
+	if direction.is_zero_approx():
+		direction = Vector2.RIGHT
+	var tangent := Vector2(-direction.y, direction.x)
+	var crit_color := Color("ffd84d")
+	match class_id:
+		"warrior":
+			var color := crit_color if critical else Color("ff8f6b")
+			var angle: float = direction.angle()
+			_rings.append({"center": from, "radius": 12.0, "speed": 100.0, "color": Color(color, 0.55), "life": 0.18, "duration": 0.18, "width": 2.6})
+			_lines.append({"points": PackedVector2Array([
+				from + Vector2.RIGHT.rotated(angle - 0.75) * 12.0,
+				to,
+				from + Vector2.RIGHT.rotated(angle + 0.55) * 14.0,
+			]), "color": color, "life": 0.16, "duration": 0.16, "width": 3.2})
+		"knight":
+			var color := crit_color if critical else Color("8be0f1")
+			_lines.append({"points": PackedVector2Array([from - tangent * 8.0, to, from + tangent * 8.0]), "color": color, "life": 0.18, "duration": 0.18, "width": 3.2})
+			_rings.append({"center": to, "radius": 5.0, "speed": 78.0, "color": Color(color, 0.52), "life": 0.20, "duration": 0.20, "width": 2.4})
+		"assassin":
+			var color := crit_color if critical else Color("ff72b6")
+			for offset: float in [-5.0, 0.0, 5.0]:
+				_lines.append({"points": PackedVector2Array([
+					from + tangent * offset,
+					to - direction * 4.0 - tangent * offset,
+					to + direction * 6.0 + tangent * offset,
+				]), "color": Color(color, 0.86 - absf(offset) * 0.04), "life": 0.12 + absf(offset) * 0.006, "duration": 0.16, "width": 1.8})
+		"mage":
+			_rings.append({"center": from, "radius": 7.0, "speed": 48.0, "color": Color("b56dff", 0.45), "life": 0.22, "duration": 0.22, "width": 1.5})
+		"sage":
+			_lines.append({"points": PackedVector2Array([from, from.lerp(to,0.45)+tangent*5.0, from.lerp(to,0.72)-tangent*4.0, to]), "color": Color("c9a7ff",0.72), "life":0.13,"duration":0.13,"width":1.4})
+		"saint":
+			_rings.append({"center": from, "radius": 6.0, "speed": 55.0, "color": Color("fff2a1",0.48), "life":0.22,"duration":0.22,"width":1.5})
+		_:
+			show_attack(from,to,critical)
+	if critical:
+		spawn_fragments(to, crit_color, 6, 56.0)
+
+
 func show_enemy_attack(from: Vector2, to: Vector2, ranged: bool = false) -> void:
 	var direction: Vector2 = from.direction_to(to)
 	var tangent := Vector2(-direction.y, direction.x)
