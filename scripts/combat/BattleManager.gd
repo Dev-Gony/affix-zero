@@ -121,7 +121,7 @@ func _draw() -> void:
 		var room := WorldLayout.room_rect(room_index)
 		var walk := WorldLayout.walk_rect(room_index)
 		var visual_theme: int = (room_index + floor_theme) % 3
-		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.24) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.22) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.24))
+		var backdrop_tint := Color(0.82, 0.62, 0.62, 0.46) if visual_theme == 0 else (Color(0.86, 0.72, 0.56, 0.42) if visual_theme == 1 else Color(0.58, 0.72, 0.90, 0.46))
 		match visual_theme:
 			0:
 				_draw_tiled_rect(room, FLOOR_TILE, Color("4d3438"))
