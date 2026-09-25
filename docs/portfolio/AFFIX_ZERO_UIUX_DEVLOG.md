@@ -549,6 +549,8 @@ Pending. Validate that Normal/Magic do not create clutter, Rare/Unique are notic
 - The previous incremental UI approach kept solving local clipping problems while preserving the larger hierarchy problem.
 - During V2 implementation, the old ESC flow was identified as a UX bug: pressing ESC while management was open closed management **and immediately opened pause/settings** in the same keypress.
 - V2 changes ESC to perform one state transition per keypress.
+- The first V2 CI run failed because the older PR-B safety test still encoded the previous double-transition behavior as the expected contract.
+- The regression was deliberately updated, not bypassed: first ESC closes management while idle combat keeps running; a second ESC explicitly opens the modal pause menu.
 - The redesign intentionally does not replace the existing game art or create a new asset pack yet; layout/hierarchy must be validated first before spending time on decorative art.
 
 ### Verification
