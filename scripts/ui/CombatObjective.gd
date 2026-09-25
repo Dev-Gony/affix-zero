@@ -12,7 +12,7 @@ var theme_name: String = "붉은 성채"
 func sync_from_game() -> void:
 	floor_number = GameManager.floor
 	kills = GameManager.kills_on_floor
-	kill_goal = 8 + GameManager.floor
+	kill_goal = WorldLayout.encounter_kill_goal(GameManager.floor)
 	var theme_index: int = floori(float(maxi(0, floor_number - 1)) / 15.0) % 3
 	theme_name = ["붉은 성채", "잿빛 납골당", "푸른 금고"][theme_index]
 	_resolve_next_pet()
