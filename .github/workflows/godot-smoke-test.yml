@@ -6,30 +6,74 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   smoke-test:
     runs-on: ubuntu-latest
     container:
       image: barichello/godot-ci:4.3
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       GODOT_VERSION: "4.3"
+      XDG_DATA_HOME: /tmp/affix-ci-user-data
+      XDG_CONFIG_HOME: /tmp/affix-ci-config
+      LIBGL_ALWAYS_SOFTWARE: "1"
 
     steps:
-      - name: Check out repository
+      - name: Check out exact source revision
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
 
       - name: Install export templates
         run: |
-          mkdir -p ~/.local/share/godot/export_templates
-          mv "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
-            ~/.local/share/godot/export_templates/${GODOT_VERSION}.stable
+          mkdir -p "$XDG_DATA_HOME/godot/export_templates"
+          cp -r "/root/.local/share/godot/export_templates/${GODOT_VERSION}.stable" \
+            "$XDG_DATA_HOME/godot/export_templates/${GODOT_VERSION}.stable"
+
+      - name: Stamp build identity
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          python3 tools/stamp_build.py
 
       - name: Import project
-        run: godot --headless --editor --path . --quit-after 3
+        shell: bash
+        run: |
+          mkdir -p build/pr-a
+          set -o pipefail
+          godot --headless --editor --path . --quit-after 3 -- --affix-test-mode 2>&1 | tee build/pr-a/import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" build/pr-a/import.log
 
-      - name: Run gameplay smoke test
-        run: godot --headless --path . res://tests/smoke_test.tscn
+      - name: Verify PR-A backup and identity safety
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 90 godot --headless --path . res://tests/pr_a_safety.tscn -- --affix-test-mode 2>&1 | tee build/pr-a/safety.log
+          grep -q "PR_A_SAFETY PASSED" build/pr-a/safety.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/pr-a/safety.log
+
+      - name: Run existing gameplay smoke test
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120 godot --headless --path . res://tests/smoke_test.tscn -- --affix-test-mode 2>&1 | tee build/pr-a/gameplay.log
+          grep -q "SMOKE TEST PASSED" build/pr-a/gameplay.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/pr-a/gameplay.log
+
+      - name: Capture baseline fixture screens
+        shell: bash
+        run: |
+          if ! command -v xvfb-run >/dev/null; then
+            apt-get update -qq
+            apt-get install -y --no-install-recommends xvfb xauth libgl1-mesa-dri
+          fi
+          set -o pipefail
+          timeout 90 xvfb-run -a -s "-screen 0 1280x800x24" godot --path . --rendering-method gl_compatibility --audio-driver Dummy res://tests/pr_a_capture.tscn -- --affix-test-mode 2>&1 | tee build/pr-a/capture.log
+          grep -q "PR_A_CAPTURE PASSED" build/pr-a/capture.log
+          ! grep -E "SCRIPT ERROR|Parse Error" build/pr-a/capture.log
 
       - name: Verify exported runtime resources
         shell: bash
@@ -37,8 +81,9 @@ jobs:
           mkdir -p build/runtime-smoke
           godot --headless --path . --export-pack "Windows Desktop" build/runtime-smoke/AFFIX_ZERO.pck
           set -o pipefail
-          godot --headless --main-pack build/runtime-smoke/AFFIX_ZERO.pck --quit-after 8 2>&1 | tee build/runtime-smoke/runtime.log
+          godot --headless --main-pack build/runtime-smoke/AFFIX_ZERO.pck --quit-after 8 -- --affix-test-mode 2>&1 | tee build/runtime-smoke/runtime.log
           ! grep -E "SCRIPT ERROR|Enemy resource catalog incomplete|Loot resource catalog incomplete" build/runtime-smoke/runtime.log
+          grep -q "AFFIX_BUILD_INFO" build/runtime-smoke/runtime.log
 
       - name: Export Windows build
         run: |
@@ -49,6 +94,14 @@ jobs:
         run: |
           mkdir -p build/web
           godot --headless --path . --export-release "Web" build/web/index.html
+
+      - name: Upload PR-A evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: AFFIX-ZERO-pr-a-evidence
+          path: build/pr-a/
+          if-no-files-found: warn
 
       - name: Upload Windows playable build
         uses: actions/upload-artifact@v4

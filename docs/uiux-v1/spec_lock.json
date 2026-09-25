@@ -1,0 +1,19 @@
+{
+  "spec_version": "1.0",
+  "approved_on": "2026-09-25",
+  "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
+  "baseline_tree": "701ba9df95cad44911c33d9f91cea1c14f58ca64",
+  "backup_branch": "backup/pre-uiux-v1-cdcf080",
+  "handoff_package": "AFFIX_ZERO_UIUX_REBUILD_v1.0.zip",
+  "package_sha256": "888c13c7c39dd5eefe0ea44fbce538ade6ded6ad6572afd741be91c9960a09ca",
+  "master_file": "AFFIX_ZERO_UIUX_MASTER_v1.0.md",
+  "master_sha256": "15e2b33c85ebe51cccb6e37642d02d53f60e5112f9fef769f26407dc4d1a5add",
+  "qa_file": "qa/acceptance_tests.json",
+  "qa_sha256": "50eacc91aa51b7f77c1a38c1c11a1e84fb8279532be56a9d2799fd7b2f86f6df",
+  "qa_count": 94,
+  "current_stage": "PR-A",
+  "handoff_storage": "user-approved detached ZIP; not automatically imported into the game",
+  "current_runtime": {"viewport": [640,400], "window": [1280,800]},
+  "target_PR_C": {"ui": [1280,720], "world_viewport": [640,360]},
+  "merge_requires_user_approval": true
+}
