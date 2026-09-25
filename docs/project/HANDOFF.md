@@ -9,7 +9,7 @@
 - legacy Godot 4.3 루트 프로젝트와 실제 save v2는 E0에서 읽지 않는다.
 - E0-C01: 전사 + 근접 적, 자동 접근, WINDUP/ACTIVE/RECOVERY, 피해 1회, 피격/사망, 실제 포즈 프레임 구현.
 - 사용자가 Windows에서 E0-C01을 직접 실행했고 2026-09-26 채팅에서 확인 완료를 보고하며 실행 화면을 제공했다. 이는 로컬 실행/렌더 확인이며 최종 아트 승인으로 확대하지 않는다.
-- E0-C02: 원거리 적 + 실제 이동 투사체 + 구간 충돌 판정 + 적별 드랍 + 전사의 물리적 드랍 접근/회수 + idempotent RewardLedger 구현.
+- E0-C02: 원거리 적 + 실제 이동 투사체 + 구간 충돌 판정 + 적별 드랍 + 전사의 물리적 드랍 접근/회수 + idempotent RewardLedger 구현. 사용자가 Windows에서 문제없이 실행 완료를 확인함.
 - 보상은 적 사망 순간 지급하지 않고 드랍 접촉 시에만 ledger에 반영한다. 같은 drop_id는 두 번 반영되지 않는다.
 - 원거리 적은 E0 arena bounds 안에서 이동한다.
 
@@ -72,9 +72,23 @@ D:\github\affix-e0\experiments\e0-godot\project.godot
 
 을 다시 실행한다. 화면 제목이 `E0-C02`로 바뀌고 전사/근접 적/보라색 원거리 적, 날아가는 보라색 투사체, 노란 드랍, RewardLedger GOLD/XP 표시가 보여야 한다.
 
+## E0-C03 구현/검증
+
+- 40적 x1 고정부하 하네스 구현: 근접 32 + 원거리 8 + 전사 1.
+- 적 HP를 높여 측정 중 40마리 수를 유지한다. 드랍은 C02에서 이미 검증했으므로 C03 부하 fixture에서는 0으로 고정.
+- 실제 E0 projectile node를 사용한다.
+- warm-up 10초, 측정 60초, 3회 반복이 Windows 기본값.
+- Time.get_ticks_usec 기반 wall-clock frame time을 수집하고 p50/p95/p99/max/avg FPS 계산.
+- JSON summary + CSV raw samples를 E0 user-data/perf 폴더에 기록.
+- Windows visible run에서는 vsync를 harness가 끄고 Engine.time_scale=1, max_fps=0.
+- CI는 0.2초 warm-up + 1.2초 측정 1회로 harness 계약만 검사하며 그 성능 수치를 GTX1050 결과로 사용하지 않는다.
+- 자동검증 기준 commit 60fe8f24f28944953dcc7533e4126109d3056932, run 36163443157, job 108165362935, success.
+- 로그에 E0_C01_TEST PASSED / E0_C02_TEST PASSED / E0_C03_TEST PASSED 확인.
+- CI headless의 p50/p95/p99 값은 harness 동작 증거일 뿐 성능 판정 자료가 아니다.
+
 ## 다음 개발
 
-사용자 C02 화면 확인 뒤 E0-C03을 진행한다.
+사용자가 Windows visible E0-C03을 실행해 생성된 JSON 결과를 전달하면 실제 GTX1050 기준선을 판정한다.
 
 E0-C03:
 - 40적 x1 부하 장면
