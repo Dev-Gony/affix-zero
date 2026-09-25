@@ -56,6 +56,49 @@ var _travel_index: int = 0
 var _player_velocity: Vector2 = Vector2.ZERO
 
 
+func _unhandled_key_input(event: InputEvent) -> void:
+	if not OS.has_feature("editor"):
+		return
+	if event is InputEventKey and event.pressed and not event.echo:
+		var loot_vfx_shortcut: bool = event.ctrl_pressed and event.shift_pressed and event.keycode == KEY_8
+		if loot_vfx_shortcut:
+			_debug_show_loot_vfx()
+			get_viewport().set_input_as_handled()
+
+
+func _debug_show_loot_vfx() -> void:
+	if not is_inside_tree():
+		return
+	var samples: Array[Dictionary] = [
+		{"id": "normal", "name": "일반", "color": "9d9d9d"},
+		{"id": "magic", "name": "매직", "color": "4466ff"},
+		{"id": "rare", "name": "레어", "color": "ffd700"},
+		{"id": "unique", "name": "유니크", "color": "ff8c00"},
+		{"id": "legend", "name": "전설", "color": "ff4444"},
+		{"id": "epic", "name": "에픽", "color": "d138ff"},
+	]
+	for index: int in samples.size():
+		var sample: Dictionary = samples[index]
+		var column: int = index % 3
+		var row: int = floori(float(index) / 3.0)
+		var raw_position: Vector2 = player.global_position + Vector2((column - 1) * 72.0, (row - 1) * 64.0)
+		var position := Vector2(
+			clampf(raw_position.x, _combat_rect.position.x + 24.0, _combat_rect.end.x - 24.0),
+			clampf(raw_position.y, _combat_rect.position.y + 24.0, _combat_rect.end.y - 24.0)
+		)
+		effects.show_drop(position, {
+			"id": "debug-loot-vfx-%d" % index,
+			"name": "%s 연출 테스트" % String(sample["name"]),
+			"rarity_name": String(sample["name"]),
+			"rarity_id": String(sample["id"]),
+			"rarity_index": index,
+			"rarity_color": String(sample["color"]),
+			"icon_index": index,
+			"boss_reward": index == 5,
+		})
+	GameManager.notification_requested.emit("드랍 VFX 비교 · 일반 → 에픽 · Ctrl+Shift+8", Color("d9a441"))
+
+
 func _ready() -> void:
 	randomize()
 	_load_enemy_resources()
