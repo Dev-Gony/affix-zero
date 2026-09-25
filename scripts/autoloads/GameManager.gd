@@ -658,6 +658,76 @@ func equipment_enhancement_risk_text(item: Dictionary) -> String:
 	return "+%d → +%d · 성공 %.2f%% · 실패 %s" % [current_level, target_level, rate, failure_text]
 
 
+func equipment_enhancement_preview(item: Dictionary) -> Dictionary:
+	if item.is_empty():
+		return {"status": "empty"}
+	var current_level: int = equipment_enhancement_level(item)
+	if current_level >= EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		return {
+			"status": "max",
+			"current_level": current_level,
+			"current_multiplier": equipment_enhancement_stat_multiplier(current_level),
+			"stat_gains": {},
+		}
+	var target_level: int = current_level + 1
+	var current_multiplier: float = equipment_enhancement_stat_multiplier(current_level)
+	var next_multiplier: float = equipment_enhancement_stat_multiplier(target_level)
+	var stat_gains: Dictionary = {}
+	var base_stats: Dictionary = Dictionary(item.get("base_stats", {}))
+	for stat_name: Variant in base_stats.keys():
+		var gain: float = float(base_stats[stat_name]) * (next_multiplier - current_multiplier)
+		if not is_zero_approx(gain):
+			stat_gains[String(stat_name)] = gain
+	return {
+		"status": "ready",
+		"current_level": current_level,
+		"target_level": target_level,
+		"cost": equipment_enhancement_cost(item),
+		"success_rate": equipment_enhancement_success_rate(target_level),
+		"downgrade": equipment_enhancement_downgrade(target_level),
+		"destroy_chance": equipment_enhancement_destroy_chance(target_level),
+		"current_multiplier": current_multiplier,
+		"next_multiplier": next_multiplier,
+		"stat_gains": stat_gains,
+	}
+
+
+func affordable_equipment_enhancement_slots() -> Array[String]:
+	var slots: Array[String] = []
+	for slot: String in EQUIPMENT_SLOTS:
+		var item: Dictionary = Dictionary(equipment.get(slot, {}))
+		if item.is_empty():
+			continue
+		if equipment_enhancement_level(item) >= EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+			continue
+		if gold >= equipment_enhancement_cost(item):
+			slots.append(slot)
+	return slots
+
+
+func affordable_skill_upgrade_option_count() -> int:
+	if selected_class.is_empty():
+		return 0
+	var count: int = 0
+	for definition_value: Variant in class_skill_definitions():
+		var definition: Dictionary = definition_value
+		var skill_id: String = String(definition.get("id", ""))
+		var base_cost: int = int(definition.get("base_cost", 100))
+		var cost_step: int = int(definition.get("cost_step", 80))
+		if max_affordable_skill_upgrades(skill_id, base_cost, cost_step, 1) > 0:
+			count += 1
+	return count
+
+
+func growth_opportunity_summary() -> Dictionary:
+	return {
+		"equipment_slots": affordable_equipment_enhancement_slots(),
+		"equipment_count": affordable_equipment_enhancement_slots().size(),
+		"skill_count": affordable_skill_upgrade_option_count(),
+		"gold": gold,
+	}
+
+
 func enhance_equipped_item(slot: String) -> Dictionary:
 	var item: Dictionary = Dictionary(equipment.get(slot, {})).duplicate(true)
 	if item.is_empty():
