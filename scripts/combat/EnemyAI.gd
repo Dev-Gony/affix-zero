@@ -11,6 +11,40 @@ const ENEMY_TEXTURES := {
 	"dragon": preload("res://assets/cc0/pixelboy/dragon.png"),
 	"demon_lord": preload("res://assets/cc0/pixelboy/demon_lord.png"),
 }
+
+const ELITE_AFFIXES: Dictionary = {
+	"brutal": {
+		"display_name": "폭군",
+		"hp": 1.65,
+		"attack": 1.45,
+		"defense": 1.10,
+		"speed": 0.92,
+		"cooldown": 1.00,
+		"reward": 2.60,
+		"color": "ff6b6b",
+	},
+	"swift": {
+		"display_name": "질풍",
+		"hp": 1.35,
+		"attack": 1.25,
+		"defense": 1.00,
+		"speed": 1.32,
+		"cooldown": 0.76,
+		"reward": 2.40,
+		"color": "67e8f9",
+	},
+	"bulwark": {
+		"display_name": "철벽",
+		"hp": 2.10,
+		"attack": 1.12,
+		"defense": 1.80,
+		"speed": 0.84,
+		"cooldown": 1.08,
+		"reward": 2.80,
+		"color": "f6c85f",
+	},
+}
+
 signal died(enemy: EnemyAI, world_position: Vector2, fragment_color: Color, xp_reward: int, gold_reward: int)
 signal attacked_player(enemy: EnemyAI, raw_damage: float)
 signal damage_received(world_position: Vector2, damage: int, critical: bool)
@@ -30,6 +64,10 @@ var xp_reward: int = 1
 var gold_reward: int = 1
 var body_color: Color = Color.WHITE
 var movement_bounds: Rect2 = Rect2()
+var is_elite: bool = false
+var elite_affix_id: String = ""
+var elite_display_name: String = ""
+var elite_color: Color = Color.WHITE
 var _attack_time_left: float = 0.0
 var _dead: bool = false
 var _hit_flash_left: float = 0.0
@@ -64,7 +102,7 @@ static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictiona
 	}
 
 
-func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bounds: Rect2 = Rect2()) -> void:
+func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bounds: Rect2 = Rect2(), elite_affix: String = "") -> void:
 	enemy_data = data
 	target = player_target
 	movement_bounds = arena_bounds
@@ -84,7 +122,36 @@ func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bou
 	xp_reward = maxi(1, roundi(data.xp_reward * (1.0 + (current_floor - 1) * 0.12)))
 	gold_reward = maxi(1, roundi(data.gold_reward * (1.0 + (current_floor - 1) * 0.08)))
 	body_color = data.color
+	if data.behavior != "boss" and ELITE_AFFIXES.has(elite_affix):
+		_apply_elite_affix(elite_affix)
 	queue_redraw()
+
+
+func _apply_elite_affix(affix_id: String) -> void:
+	var affix: Dictionary = Dictionary(ELITE_AFFIXES.get(affix_id, {}))
+	if affix.is_empty():
+		return
+	is_elite = true
+	elite_affix_id = affix_id
+	elite_display_name = String(affix.get("display_name", "엘리트"))
+	elite_color = Color.from_string(String(affix.get("color", "ffffff")), Color.WHITE)
+	max_hp *= float(affix.get("hp", 1.0))
+	hp = max_hp
+	attack *= float(affix.get("attack", 1.0))
+	defense *= float(affix.get("defense", 1.0))
+	move_speed *= float(affix.get("speed", 1.0))
+	attack_cooldown = maxf(0.32, attack_cooldown * float(affix.get("cooldown", 1.0)))
+	var reward_multiplier: float = float(affix.get("reward", 2.0))
+	xp_reward = maxi(1, roundi(xp_reward * reward_multiplier))
+	gold_reward = maxi(1, roundi(gold_reward * reward_multiplier))
+	radius *= 1.12
+	body_color = body_color.lerp(elite_color, 0.45)
+
+
+func elite_title() -> String:
+	if not is_elite:
+		return enemy_data.display_name if enemy_data != null else ""
+	return "%s %s" % [elite_display_name, enemy_data.display_name if enemy_data != null else "몬스터"]
 
 
 func _process(delta: float) -> void:
@@ -215,9 +282,13 @@ func _draw() -> void:
 		"slime": 22.0, "bat": 24.0, "skeleton": 26.0, "goblin": 25.0,
 		"dark_knight": 34.0, "lich": 32.0, "dragon": 44.0, "demon_lord": 48.0,
 	}
-	var sprite_size: float = float(size_map.get(enemy_id, 26.0))
+	var sprite_size: float = float(size_map.get(enemy_id, 26.0)) * (1.16 if is_elite else 1.0)
 	var sprite_modulate := Color(1.45, 1.45, 1.45, alpha) if _hit_flash_left > 0.0 else Color(1.0, 1.0, 1.0, alpha)
 	draw_circle(Vector2(0, sprite_size * 0.28), sprite_size * 0.25, Color(0, 0, 0, 0.34 * alpha))
+	if is_elite and not _dead:
+		var elite_pulse: float = 0.62 + sin(_motion_clock * 5.0) * 0.16
+		draw_arc(Vector2.ZERO, sprite_size * 0.58, 0.0, TAU, 28, Color(elite_color, elite_pulse * alpha), 2.4)
+		draw_arc(Vector2.ZERO, sprite_size * 0.67, 0.0, TAU, 28, Color(elite_color, elite_pulse * 0.42 * alpha), 1.2)
 	if _spawn_reveal_left > 0.0:
 		draw_arc(Vector2.ZERO, 9.0 + reveal * 8.0, 0.0, TAU, 20, Color(body_color, 0.75 * (1.0 - reveal)), 2.0)
 	if _is_targeted and not _dead:
