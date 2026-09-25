@@ -268,6 +268,10 @@ static func boss_pattern_damage_multiplier(kind: String) -> float:
 	return 1.12 if kind == "doom_mark" else 1.28
 
 
+static func boss_pattern_warning_for_speed(speed_multiplier: float) -> float:
+	return BOSS_PATTERN_WARNING * sqrt(maxf(1.0, speed_multiplier))
+
+
 static func boss_retry_progress_for_floor(floor_number: int) -> int:
 	return maxi(0, 8 + floor_number - BOSS_RETRY_KILLS)
 
@@ -331,15 +335,16 @@ func _begin_boss_pattern(boss: EnemyAI) -> void:
 	_boss_pattern_boss = boss
 	_boss_pattern_kind = "ground_slam" if _boss_pattern_cast_count % 2 == 0 else "doom_mark"
 	_boss_pattern_cast_count += 1
-	_boss_pattern_time_left = BOSS_PATTERN_WARNING
+	var warning_duration: float = boss_pattern_warning_for_speed(GameManager.speed_multiplier)
+	_boss_pattern_time_left = warning_duration
 	var radius: float = boss_pattern_radius(_boss_pattern_kind)
 	if _boss_pattern_kind == "ground_slam":
 		_boss_pattern_center = boss.global_position
-		effects.show_boss_telegraph(_boss_pattern_center, radius, BOSS_PATTERN_WARNING, Color("ff5b61"), "마왕 강타")
+		effects.show_boss_telegraph(_boss_pattern_center, radius, warning_duration, Color("ff5b61"), "마왕 강타")
 		GameManager.notification_requested.emit("보스 패턴 · 마왕 강타 · 이탈 중", Color("ff7b72"))
 	else:
 		_boss_pattern_center = player.global_position
-		effects.show_boss_telegraph(_boss_pattern_center, radius, BOSS_PATTERN_WARNING, Color("c084fc"), "파멸 표식")
+		effects.show_boss_telegraph(_boss_pattern_center, radius, warning_duration, Color("c084fc"), "파멸 표식")
 		GameManager.notification_requested.emit("보스 패턴 · 파멸 표식 · 이탈 중", Color("c9a7ff"))
 	_boss_pattern_evade_target = compute_boss_evade_target(player.global_position, _boss_pattern_center, radius, _combat_rect)
 	boss.set_special_casting(true)
