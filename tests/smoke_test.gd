@@ -141,7 +141,7 @@ func _run() -> void:
 	var filter_save: Dictionary = GameManager.to_save_dict()
 	_check(int(filter_save.get("loot_min_rarity_index", -1)) == 2, "Loot rarity filter persists in save data")
 	GameManager.set_loot_min_rarity(0)
-	_check(game_ui._inventory_grid.columns == 6, "Inventory uses a readable six-column scrollable grid")
+	_check(game_ui._inventory_grid.columns == 8, "Inventory uses the UIUX V2 eight-column desktop grid")
 	_check(game_ui._inventory_grid.get_child_count() == GameManager.INVENTORY_CAPACITY, "Inventory renders every available loot slot")
 	_check(game_ui._inventory_grid.get_child(0).get_child_count() >= 2, "Loot slots show text rarity and item-level badges")
 	GameManager.inventory.clear()
