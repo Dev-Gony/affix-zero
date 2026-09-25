@@ -152,8 +152,8 @@ func set_game_state(next_state: GameState) -> void:
 
 
 func set_loot_min_rarity(index: int) -> void:
-	loot_min_rarity_index = clampi(index, 0, 4)
-	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설"][loot_min_rarity_index], Color("d9a441"))
+	loot_min_rarity_index = clampi(index, 0, 5)
+	notification_requested.emit("자동 획득 등급: %s 이상" % ["일반", "마법", "희귀", "고유", "전설", "에픽"][loot_min_rarity_index], Color("d9a441"))
 
 
 func set_master_volume(value: float) -> void:
@@ -237,26 +237,35 @@ func _add_stat(stat_name: String, value: float) -> void:
 		"PEN": penetration += value
 
 
-func enemy_armor_penetration() -> float:
-	return clampf(maxf(0.0, float(floor - 10)) * 0.012, 0.0, 0.72)
+func enemy_armor_penetration(is_boss: bool = false) -> float:
+	var depth_penetration: float = maxf(0.0, float(floor - 10)) * (0.010 if not is_boss else 0.013)
+	return clampf(depth_penetration, 0.0, 0.45 if not is_boss else 0.68)
 
 
-func enemy_minimum_hit_ratio() -> float:
-	return clampf(maxf(0.0, float(floor - 20)) * 0.0009, 0.0, 0.06)
+func enemy_minimum_hit_ratio(is_boss: bool = false) -> float:
+	var depth: float = maxf(0.0, float(floor - 20))
+	if is_boss:
+		return clampf(0.04 + depth * 0.0008, 0.04, 0.10)
+	return clampf(depth * 0.00045, 0.0, 0.025)
 
 
-func take_damage(raw_damage: float) -> int:
-	var defense_reduction: float = clampf(class_skill_effect("reduction"), 0.0, 0.65)
-	var effective_defense: float = float(def) * (1.0 - enemy_armor_penetration())
+func enemy_maximum_hit_ratio(is_boss: bool = false) -> float:
+	return 0.60 if is_boss else 0.32
+
+
+func take_damage(raw_damage: float, is_boss: bool = false) -> int:
+	var defense_reduction: float = clampf(class_skill_effect("reduction"), 0.0, 0.60)
+	var effective_defense: float = float(def) * (1.0 - enemy_armor_penetration(is_boss))
 	var calculated: float = maxf(1.0, raw_damage - effective_defense) * (1.0 - defense_reduction)
-	var minimum_chip: float = float(max_hp) * enemy_minimum_hit_ratio()
-	var damage: int = maxi(1, int(round(maxf(calculated, minimum_chip))))
+	var minimum_chip: float = float(max_hp) * enemy_minimum_hit_ratio(is_boss)
+	var maximum_hit: float = float(max_hp) * enemy_maximum_hit_ratio(is_boss)
+	var resolved_damage: float = clampf(maxf(calculated, minimum_chip), 1.0, maxf(1.0, maximum_hit))
+	var damage: int = maxi(1, int(round(resolved_damage)))
 	hp = maxi(0, hp - damage)
 	stats_changed.emit()
 	if hp <= 0:
 		player_died.emit()
 	return damage
-
 
 func heal_after_kill() -> void:
 	var heal_percent: float = vamp + class_skill_effect("heal_on_kill")
@@ -333,6 +342,22 @@ func unequip_item(slot: String) -> void:
 	equipment_changed.emit()
 
 
+func calculate_item_sell_value(item_level: int, rarity_index: int, enhancement_level: int = 0) -> int:
+	var rarity_multipliers: Array[float] = [1.0, 1.6, 2.5, 4.0, 7.0, 16.0]
+	var safe_rarity: int = clampi(rarity_index, 0, rarity_multipliers.size() - 1)
+	var base_value: float = 25.0 + float(maxi(1, item_level)) * 5.0
+	var enhancement_multiplier: float = 1.0 + float(maxi(0, enhancement_level)) * 0.15
+	return maxi(1, roundi(base_value * rarity_multipliers[safe_rarity] * enhancement_multiplier))
+
+
+func item_sell_value(item: Dictionary) -> int:
+	return calculate_item_sell_value(
+		int(item.get("item_level", 1)),
+		int(item.get("rarity_index", 0)),
+		equipment_enhancement_level(item)
+	)
+
+
 func sell_item(item_id: String) -> void:
 	var inventory_index: int = _find_inventory_index(item_id)
 	if inventory_index < 0:
@@ -342,7 +367,7 @@ func sell_item(item_id: String) -> void:
 		notification_requested.emit("잠금 아이템은 판매할 수 없습니다.", Color("ffb86b"))
 		return
 	inventory.pop_at(inventory_index)
-	add_gold(int(item.get("sell_value", 0)))
+	add_gold(item_sell_value(item))
 	inventory_changed.emit()
 
 
@@ -371,23 +396,51 @@ func sell_inventory_below_rarity(_min_rarity_index: int) -> Dictionary:
 func sell_all_normal() -> void:
 	var kept_items: Array[Dictionary] = []
 	var sale_total: int = 0
+	var sold_count: int = 0
 	var protected_count: int = 0
 	for item: Dictionary in inventory:
-		if String(item.get("rarity_id", "")) == "normal" and not bool(item.get("locked", false)):
-			sale_total += int(item.get("sell_value", 0))
+		var is_normal: bool = String(item.get("rarity_id", "")) == "normal"
+		if is_normal and not bool(item.get("locked", false)):
+			sale_total += item_sell_value(item)
+			sold_count += 1
 		else:
-			if String(item.get("rarity_id", "")) == "normal" and bool(item.get("locked", false)):
+			if is_normal and bool(item.get("locked", false)):
 				protected_count += 1
 			kept_items.append(item)
 	inventory = kept_items
 	if sale_total > 0:
 		add_gold(sale_total)
 		var protected_text: String = " · 잠금 %d개 보호" % protected_count if protected_count > 0 else ""
-		notification_requested.emit("일반 장비 판매 +%dG%s" % [sale_total, protected_text], Color("f6c85f"))
+		notification_requested.emit("일반 장비 %d개 판매 +%dG%s" % [sold_count, sale_total, protected_text], Color("f6c85f"))
 	elif protected_count > 0:
 		notification_requested.emit("판매할 일반 장비 없음 · 잠금 %d개 보호" % protected_count, Color("ffd166"))
 	inventory_changed.emit()
 
+
+func sell_all_unlocked() -> Dictionary:
+	var kept_items: Array[Dictionary] = []
+	var sale_total: int = 0
+	var sold_count: int = 0
+	var protected_count: int = 0
+	for item: Dictionary in inventory:
+		if bool(item.get("locked", false)):
+			protected_count += 1
+			kept_items.append(item)
+			continue
+		sale_total += item_sell_value(item)
+		sold_count += 1
+	inventory = kept_items
+	if sale_total > 0:
+		add_gold(sale_total)
+		notification_requested.emit("잠금 제외 전체 %d개 판매 +%dG · 잠금 %d개 보호" % [sold_count, sale_total, protected_count], Color("f6c85f"))
+	else:
+		notification_requested.emit("판매할 장비 없음 · 잠금 %d개 보호" % protected_count, Color("ffd166"))
+	inventory_changed.emit()
+	return {
+		"sold_count": sold_count,
+		"sale_total": sale_total,
+		"protected_count": protected_count,
+	}
 
 func class_skill_definitions(class_id: String = selected_class) -> Array:
 	return Array(CLASS_SKILL_DEFINITIONS.get(class_id, []))
@@ -778,7 +831,7 @@ func apply_save_dict(data: Dictionary) -> void:
 	hp = clampi(int(data.get("hp", max_hp)), 0, max_hp)
 	mp = clampi(int(data.get("mp", max_mp)), 0, max_mp)
 	set_speed_multiplier(float(data.get("speed_multiplier", 1.0)))
-	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 4)
+	loot_min_rarity_index = clampi(int(data.get("loot_min_rarity_index", 0)), 0, 5)
 	set_master_volume(float(data.get("master_volume", 1.0)))
 	set_fullscreen(bool(data.get("fullscreen_enabled", false)))
 	set_autosave(bool(data.get("autosave_enabled", true)))
