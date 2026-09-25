@@ -1014,3 +1014,110 @@ Automated contracts now cover:
 ### Windows play approval
 
 Pending. This is now a visual/play-feel checkpoint: verify item art, hero/enemy atlas quality, boss/elite readability, pet essence/evolution, pet passives, floor themes, minimap/objective placement and x1/x5 skill-effect density before merge.
+
+
+## 2026-09-25 — G6.0 Dark ARPG Dungeon / Combat Rebuild
+
+### 문제
+
+- 캐릭터와 몬스터 원화 수준은 올라갔지만, 배경은 반복되는 직사각형 타일 방이라 전투 화면 전체의 완성도를 끌어내렸다.
+- 몬스터는 고해상도 정적 이미지가 위치만 이동해 ‘JPG가 다가오는’ 인상이 강했고, 공격의 준비/실행/피격 상태가 캐릭터 동작으로 전달되지 않았다.
+- 3x3 보드형 방 배치는 던전을 탐험한다기보다 같은 경기장을 반복하는 느낌을 만들었다.
+- XP/골드/장비가 작은 점과 비슷한 크기로 보이며 필드 파밍의 손맛이 약했다.
+- 펫은 단순 도형 실루엣과 층 자동 해금 구조라 수집형 성장 콘텐츠로 보기 어려웠다.
+
+### 원인
+
+- 초기 MVP에서 전투 로직 검증을 우선하며 월드 구조를 3x3 고정 그리드로 단순화했다.
+- 적 아트는 단일 atlas cell을 사용하면서 animation state 없이 bob 값만 적용했다.
+- 필드 보상은 기능 구분만 만족하면 된다는 전제로 작은 primitive VFX를 사용했다.
+- 펫 시스템도 전투 기여도 검증을 위해 해금을 층 진행에 묶었고, 수집 경제/중복 가치가 없었다.
+
+### 참고 UX
+
+- **Hero Siege / 고전 ARPG:** 방과 통로가 이어지는 던전 동선, 어두운 벽/횃불/잔해, 캐릭터가 공간을 ‘통과한다’는 감각.
+- **Survivor류:** x5에서도 읽히는 공격 텔레그래프, 짧고 분명한 피격/스킬 이펙트, 자동사냥 중에도 보상이 무엇인지 즉시 식별되는 필드 UX.
+- **수집형 변신/펫 시스템:** 등급 기반 확률, 1회/10회 소환, 보장 규칙, 중복 획득을 성장 재료로 환원하는 루프.
+
+### 결정
+
+- 비주얼 방향을 귀여운 모바일풍이 아닌 **Dark ARPG**로 고정한다.
+- Survivor 계열에서는 전투 가독성과 자동 성장 UX만 가져오고, 월드/장비/펫의 미술 방향은 다크 판타지로 통일한다.
+- 3x3 보드는 폐기하고 5x4 월드 안에 15개의 실제 연결 방/통로로 구성된 굴곡 던전 루트를 사용한다.
+- 완전한 sprite-sheet 제작 전에도 정적 atlas를 position/scale/rotation state animation으로 움직여 적의 이동·선딜·공격·피격·사망을 명확히 만든다.
+- 펫 정수는 진화 재화가 아니라 **가챠 소환 재화**로 전환하고, 중복 펫은 전용 조각으로 환원한다.
+
+### 구현
+
+- **던전 구조**
+  - WorldLayout을 3x3 → 5x4 월드로 확장.
+  - 15개 방이 직교 통로로 이어지는 굴곡 경로 구성.
+  - 빈 셀은 실제 void로 남겨 ‘보드’가 아니라 던전 경로로 보이게 변경.
+  - 방마다 walk margin을 달리해 완전히 같은 크기의 사각 경기장 반복을 줄임.
+  - 미니맵도 3x3 박스가 아니라 실제 방 노드/통로 그래프로 변경.
+- **맵 아트 방향**
+  - 바닥/벽/통로 팔레트를 어두운 회흑/적갈/청회 계열로 재조정.
+  - 기존 courtyard overlay와 횃불/기둥/균열/뼈/룬 레이어를 더 강하게 결합.
+- **몬스터 애니메이션**
+  - 이동 bob 외에 슬라임 squash/stretch, 박쥐 날개 박동, 대형 몬스터 hover 적용.
+  - 공격 선딜 시 pullback/crouch, 공격 시 lunge/rotation, 피격 시 squash/shake, 사망 시 fall/flatten 적용.
+  - 적 종류별 공격 타입: slam / dive / slash / shadow bolt / flame / hellfire.
+  - 공격 선딜을 시각적으로 표시하는 telegraph VFX 추가.
+- **캐릭터 공격**
+  - 기본 공격을 직업별 색/형태로 분리: 전사 slash, 기사 청색 타격, 마법사 arcane bolt, 현자 lightning, 암살자 cross-slash, 성자 holy beam.
+  - 기사 shield charge는 선만 그리는 효과에서 실제 캐릭터 돌진 이동 + 경로 피해로 변경.
+- **필드 드랍**
+  - XP는 녹색 점 → 결정 조각 묶음.
+  - 골드는 노란 점 → 코인 스택.
+  - 펫 정수는 보라색 별 결정으로 명확히 구분.
+  - 실제 장비 아이콘을 더 크게 표시하고 희귀도 pedestal ring 및 체류시간을 증가.
+- **펫**
+  - 전투용 펫 외형을 단순 도형에서 레이어드 실루엣으로 재작성.
+  - 여우 꼬리/드레이크 날개/슬라임 squash/골렘 팔/박쥐 flap/요정 wing animation 적용.
+  - 펫 공격 시 lunge, 지원 시 pulse animation 추가.
+  - 층 자동 해금 제거.
+  - 펫 정수 기반 1회/10회 소환 구현.
+  - 10회 소환은 영웅 등급 이상 최소 1마리 보장.
+  - 중복 소환은 등급에 따라 펫 전용 조각 지급.
+  - 진화 조건을 골드 + 중복 조각으로 변경.
+
+### 실패 / 수정
+
+- G5.1의 3x3 미니맵/반복방은 HUD 가독성은 좋아졌지만 ‘던전 탐험’이라는 핵심 판타지를 만들지 못했다. 이에 레이아웃 자체를 교체했다.
+- 고해상도 몬스터 atlas를 연결하는 것만으로는 애니메이션처럼 보이지 않았다. 신규 sprite sheet 확보를 기다리지 않고 공격 state 기반 transform animation과 종류별 VFX를 먼저 적용했다.
+- 펫 정수를 진화에 직접 쓰는 구조는 엘리트/보스 파밍과 펫 ‘수집’이 연결되지 않았다. 정수를 소환 재화로, 중복을 진화 조각으로 분리했다.
+- 필드 보상 색 점은 기능적으로는 맞았지만 장비와 재화를 구별하기 어려웠다. 자원별 실루엣을 분리하고 실제 장비 아이콘 체류를 늘렸다.
+
+### 검증
+
+- 자동 테스트에서 확인할 계약:
+  - WorldLayout 5x4 / 15-room dungeon route / 14 corridor edges
+  - 10연차 결과 수와 영웅 이상 보장
+  - 중복 조각 저장/불러오기 및 진화 소모
+  - 층 진행으로 펫이 자동 해금되지 않는지
+  - 기존 장비/보스 HUD/직업 atlas 회귀
+- 실제 Godot 검증이 필요한 항목:
+  - 적 animation이 ‘이미지 슬라이드’ 인상을 충분히 줄였는지
+  - 통로 이동 중 카메라/벽/방 경계가 자연스러운지
+  - x1/x5에서 적 telegraph와 직업별 공격 VFX가 읽히는지
+  - 펫 실루엣이 플레이 화면에서 캐릭터와 어울리는지
+  - 필드 XP/골드/정수/장비가 즉시 구분되는지
+
+### Before / After
+
+| 영역 | Before | After |
+|---|---|---|
+| 월드 | 3x3 반복 경기장 | 5x4 월드의 15방 굴곡 던전 + 실제 통로 |
+| 미니맵 | 3x3 고정 셀 | 실제 dungeon node/edge graph |
+| 몬스터 | 정적 atlas가 이동 | 이동/선딜/돌진/피격/사망 state animation |
+| 적 공격 | 피격 순간 선/링 | 타입별 telegraph + slam/dive/bolt/flame/hellfire |
+| 캐릭터 기본 공격 | 공통 slash | 6직업별 공격 VFX |
+| 기사 스킬 | 시각적 선만 표시 | 실제 캐릭터 돌진 + 경로 피해 |
+| 필드 보상 | 작은 색 점 중심 | XP 결정 / 코인 / 정수 결정 / 실제 장비 아이콘 |
+| 펫 획득 | 층 자동 해금 | 정수 가챠 1/10회 + 보장 |
+| 펫 중복 | 가치 없음 | 전용 진화 조각 |
+| 펫 외형 | 간단 도형 | 레이어드 dark-fantasy 실루엣 + action animation |
+
+### Windows play approval
+
+Pending. V6는 코드/CI 통과 후 Windows Godot 4.3에서 던전 이동, 적 공격 애니메이션, 직업 VFX, 필드 드랍, 펫 가챠/외형을 실제 플레이로 확인한 뒤에만 merge 한다.
