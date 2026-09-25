@@ -56,6 +56,7 @@ var class_base_stats: Dictionary = {
 
 var inventory: Array[Dictionary] = []
 var equipment: Dictionary = {}
+const CLASS_SKILL_MAX_LEVEL: int = 20
 const CLASS_SKILL_DEFINITIONS: Dictionary = {
 	"warrior": [
 		{"id": "warrior_fury", "name": "격노", "description": "모든 피해 +8% / Lv", "effect": "damage", "value": 0.08, "base_cost": 100, "cost_step": 80},
@@ -401,17 +402,20 @@ func skill_upgrade_total_cost(skill_id: String, base_cost: int, cost_step: int, 
 	if level_count <= 0 or class_id.is_empty():
 		return 0
 	var current_level: int = class_skill_level(skill_id, class_id)
-	var count: int = level_count
-	return count * base_cost + cost_step * (count * current_level + (count * (count - 1)) / 2)
+	var count: int = mini(level_count, maxi(0, CLASS_SKILL_MAX_LEVEL - current_level))
+	var triangular: int = floori(float(count * (count - 1)) / 2.0)
+	return count * base_cost + cost_step * (count * current_level + triangular)
 
 
-func max_affordable_skill_upgrades(skill_id: String, base_cost: int, cost_step: int, max_levels: int = 9999) -> int:
+func max_affordable_skill_upgrades(skill_id: String, base_cost: int, cost_step: int, max_levels: int = CLASS_SKILL_MAX_LEVEL) -> int:
 	if selected_class.is_empty() or gold <= 0:
 		return 0
 	var count: int = 0
 	var running_cost: int = 0
 	var current_level: int = class_skill_level(skill_id)
-	while count < max_levels:
+	var remaining_levels: int = maxi(0, CLASS_SKILL_MAX_LEVEL - current_level)
+	var limit: int = mini(max_levels, remaining_levels)
+	while count < limit:
 		var next_cost: int = base_cost + (current_level + count) * cost_step
 		if running_cost + next_cost > gold:
 			break
