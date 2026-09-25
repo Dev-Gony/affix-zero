@@ -15,5 +15,6 @@ base_attack = 14.0
 attack_interval = 0.82
 attack_range = 180.0
 follow_distance = 28.0
+player_crit_bonus_percent = 7.0
 unlock_floor = 40
 description = "빠른 연속 공격으로 적의 뒤를 물어뜯는 박쥐."
