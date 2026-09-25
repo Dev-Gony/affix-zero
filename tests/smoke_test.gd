@@ -81,7 +81,7 @@ func _run() -> void:
 	_check(main.get_node("UILayer/GameUI") != null, "Game UI is available")
 	_check(AudioManager.has_complete_audio_bank(), "Authored or procedural audio covers every BGM and SFX channel")
 	var game_ui: GameUI = main.get_node("UILayer/GameUI")
-	_check(game_ui._loot_filter_option != null and game_ui._loot_filter_option.item_count == 5, "Inventory exposes five loot rarity filter choices")
+	_check(game_ui._loot_filter_option != null and game_ui._loot_filter_option.item_count == 6, "Inventory exposes six loot rarity filter choices")
 	_check(game_ui._class_selection._grid.get_child_count() == 6, "Class selection renders all six cards")
 	_check(game_ui._equipment_row.get_child_count() == 9, "Equipment paper doll renders seven slots, a class portrait, and a combat summary")
 	var equipment_slot_count: int = 0
@@ -116,7 +116,7 @@ func _run() -> void:
 		item_icon_indices[item_base.icon_index] = true
 	_check(item_icon_indices.size() == 29 and not item_icon_indices.has(5), "All item bases map to distinct atlas cells while preserving the empty cell")
 	_check(LootManager._generator._affixes.size() == 10, "All ten affixes load")
-	_check(LootManager._generator._rarities.size() == 5, "All five rarities load")
+	_check(LootManager._generator._rarities.size() == 6, "All six rarities load")
 	_check(not generated_item.is_empty(), "Item generator creates an item")
 	_check(generated_item.has("affixes") and generated_item.has("base_stats") and generated_item.has("icon_index"), "Generated item is fully serializable")
 	var legacy_item: Dictionary = generated_item.duplicate(true)
