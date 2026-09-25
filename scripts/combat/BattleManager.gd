@@ -401,8 +401,9 @@ func _perform_auto_attack() -> void:
 		return
 	if player.global_position.distance_to(target.global_position) > _attack_range():
 		return
-	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier()
-	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, GameManager.crit, false)
+	var attack_power: float = GameManager.atk * GameManager.skill_damage_multiplier() * (1.0 + PetManager.active_player_damage_bonus_percent() * 0.01)
+	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
+	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, target.defense, 0, GameManager.penetration, crit_chance, false)
 	player.play_attack(target.global_position)
 	effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
 	target.take_hit(result)
@@ -601,8 +602,9 @@ func _deal_skill_damage(enemy: EnemyAI, power_scale: float = 1.0) -> void:
 	if not is_instance_valid(enemy):
 		return
 	var skill_level: int = 1 + floori(float(GameManager.level - 1) / 5.0)
-	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier()
-	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, GameManager.crit, true)
+	var attack_power: float = GameManager.atk * power_scale * GameManager.skill_damage_multiplier() * (1.0 + PetManager.active_player_damage_bonus_percent() * 0.01)
+	var crit_chance: float = GameManager.crit + PetManager.active_player_crit_bonus_percent()
+	var result: Dictionary = DamageCalculator.calculate_damage(attack_power, enemy.defense, skill_level, GameManager.penetration, crit_chance, true)
 	enemy.take_hit(result)
 	if bool(result.get("critical", false)):
 		_start_shake(3.0, 0.18)
@@ -619,13 +621,18 @@ func _on_enemy_died(enemy: EnemyAI, world_position: Vector2, fragment_color: Col
 	effects.spawn_fragments(world_position, fragment_color, randi_range(8, 12), 68.0)
 	AudioManager.play_sfx("monster_death")
 	GameManager.record_kill()
-	var adjusted_xp: int = maxi(1, xp_reward)
+	var adjusted_xp: int = maxi(1, roundi(float(xp_reward) * (1.0 + PetManager.active_player_xp_bonus_percent() * 0.01)))
 	var pet_levels: int = PetManager.add_xp(PetManager.active_pet_id, maxi(1, adjusted_xp / 4))
 	if pet_levels > 0:
 		var active_data: PetData = PetManager.active_pet_data()
 		if active_data != null:
 			GameManager.notification_requested.emit("%s Lv.%d · 펫 성장" % [active_data.display_name, PetManager.level_for(PetManager.active_pet_id)], pet.pet_color())
-	var adjusted_gold: int = maxi(1, roundi(gold_reward * RebirthManager.gold_multiplier() * (1.0 + GameManager.gold_bonus * 0.01)))
+	var adjusted_gold: int = maxi(1, roundi(
+		gold_reward
+		* RebirthManager.gold_multiplier()
+		* (1.0 + GameManager.gold_bonus * 0.01)
+		* (1.0 + PetManager.active_player_gold_bonus_percent() * 0.01)
+	))
 	effects.spawn_resource_pickup(world_position, "xp", adjusted_xp)
 	effects.spawn_resource_pickup(world_position, "gold", adjusted_gold)
 	if defeated_boss:
@@ -679,7 +686,9 @@ func _on_enemy_attack(attacker: EnemyAI, raw_damage: float) -> void:
 	var ranged: bool = is_instance_valid(attacker) and attacker.behavior in ["caster", "boss"]
 	effects.show_enemy_attack(attacker.global_position if is_instance_valid(attacker) else player.global_position + Vector2.LEFT * 12.0, player.global_position, ranged)
 	var is_boss: bool = is_instance_valid(attacker) and attacker.behavior == "boss"
-	var damage: int = GameManager.take_damage(raw_damage, is_boss)
+	var reduction: float = clampf(PetManager.active_player_damage_reduction_percent(), 0.0, 80.0)
+	var reduced_damage: float = raw_damage * (1.0 - reduction * 0.01)
+	var damage: int = GameManager.take_damage(reduced_damage, is_boss)
 	effects.show_damage(player.global_position + Vector2(0, -12), damage, false)
 	effects.spawn_fragments(player.global_position, Color("ff4d5a"), randi_range(3, 5), 45.0)
 	_start_shake(2.0, 0.12)
