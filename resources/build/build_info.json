@@ -1,7 +1,7 @@
 {
   "version": "g3.1",
   "stage": "GAMEPLAY-V3",
-  "baseline_commit": "904208be5c2d73f14b87ddb6e1da81226b4fc7fe",
+  "baseline_commit": "cdcf080d2916c053e72e5c3c4ecc57a30213d0f2",
   "source_commit": "unidentified",
   "branch": "dev/gameplay-v3-balance",
   "built_at_utc": "unstamped-local-checkout",
