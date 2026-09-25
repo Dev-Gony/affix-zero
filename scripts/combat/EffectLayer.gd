@@ -595,8 +595,9 @@ func _draw() -> void:
 			draw_rect(Rect2(position + Vector2(-beam_width * 1.8, -beam_height * 0.72), Vector2(beam_width * 3.6, beam_height * 0.72)), Color(rarity_color, alpha * 0.06), true)
 		if rarity_index >= 4:
 			draw_rect(Rect2(position + Vector2(-beam_width * 3.0, -beam_height * 0.48), Vector2(beam_width * 6.0, beam_height * 0.48)), Color(rarity_color, alpha * 0.04), true)
-		draw_circle(position, 9.0 + rarity_index * 1.4, Color(rarity_color, alpha * (0.10 + rarity_index * 0.025)))
-		var icon_size: float = 18.0 + minf(4.0, float(rarity_index))
+		draw_circle(position, 11.0 + rarity_index * 1.8, Color(rarity_color, alpha * (0.12 + rarity_index * 0.030)))
+		draw_arc(position, 12.0 + rarity_index * 1.7, 0.0, TAU, 24, Color(rarity_color, alpha * 0.28), 1.0 + rarity_index * 0.16)
+		var icon_size: float = 22.0 + float(rarity_index) * 1.6
 		var icon_index: int = int(loot_icon.get("icon_index", -1))
 		if icon_index >= 0 and icon_index < 30:
 			var cell_size := Vector2(float(ITEM_BASE_ATLAS.get_width()) / 6.0, float(ITEM_BASE_ATLAS.get_height()) / 5.0)
