@@ -4,6 +4,7 @@ class_name EnemyProjectile
 signal impacted(world_position: Vector2, raw_damage: float, is_boss: bool)
 
 var destination: Vector2
+var target_node: Node2D
 var raw_damage: float = 1.0
 var is_boss: bool = false
 var projectile_color: Color = Color("c084fc")
@@ -13,10 +14,11 @@ var _start_position: Vector2
 var _travel_distance: float = 1.0
 
 
-func setup(start: Vector2, target: Vector2, damage: float, boss: bool, color: Color = Color("c084fc")) -> void:
+func setup(start: Vector2, target: Node2D, damage: float, boss: bool, color: Color = Color("c084fc")) -> void:
 	global_position = start
 	_start_position = start
-	destination = target
+	target_node = target
+	destination = target.global_position if target != null and is_instance_valid(target) else start
 	raw_damage = damage
 	is_boss = boss
 	projectile_color = color
@@ -27,6 +29,8 @@ func setup(start: Vector2, target: Vector2, damage: float, boss: bool, color: Co
 
 func _process(delta: float) -> void:
 	_clock += delta
+	if target_node != null and is_instance_valid(target_node):
+		destination = target_node.global_position
 	var distance: float = global_position.distance_to(destination)
 	if distance <= 5.0:
 		global_position = destination
