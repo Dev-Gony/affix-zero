@@ -79,6 +79,7 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 var _death_time_left: float = 0.0
 var _death_duration: float = 0.28
 var _is_targeted: bool = false
+var _special_casting: bool = false
 
 
 static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictionary:
@@ -176,6 +177,9 @@ func _process(delta: float) -> void:
 		_spawn_reveal_left = maxf(0.0, _spawn_reveal_left - delta)
 		queue_redraw()
 		return
+	if _special_casting:
+		queue_redraw()
+		return
 	if _attack_windup_left > 0.0:
 		_attack_windup_left = maxf(0.0, _attack_windup_left - delta)
 		queue_redraw()
@@ -208,6 +212,20 @@ func set_targeted(value: bool) -> void:
 		return
 	_is_targeted = value
 	queue_redraw()
+
+
+func set_special_casting(value: bool) -> void:
+	if _special_casting == value:
+		return
+	_special_casting = value
+	if value:
+		_attack_windup_left = 0.0
+		_attack_time_left = maxf(_attack_time_left, 0.35)
+	queue_redraw()
+
+
+func is_special_casting() -> bool:
+	return _special_casting
 
 
 func _clamp_to_movement_bounds() -> void:
