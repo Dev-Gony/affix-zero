@@ -291,3 +291,82 @@ The supplied play captures show the elite aura clearly around enemies during nor
 | Failure response | Shortened retry + evade logic | Preserve progression pressure |
 | Development priority | More combat mechanics | Better farming / upgrade / equipment UX |
 | Idle identity | Weakened | Preserved |
+
+
+## 2026-09-25 — G4.1 Idle Growth Loop UX
+
+### Problem
+
+- Live G4.0 play confirmed that a boss wall is better treated as a progression check than as a manual-action challenge.
+- The existing growth systems already work, but the UI hides too much useful information behind tooltips and separate panels.
+- Epic was added to the data model, but the inventory rarity badge map still lacked an Epic entry and could visually fall back to the wrong label.
+
+### Cause
+
+- Equipment cards only showed a generic 강화 button; success rate, cost and real stat gain were not visible at a glance.
+- The equipment summary showed combat stats but not whether the player currently had affordable growth actions.
+- The skill panel showed per-row costs but did not summarize how many skills could be upgraded with the current gold.
+- Boss defeat copy described only the setback, not the intended idle loop of farming and automatic retry.
+
+### Reference UX
+
+- **Idle RPGs:** a progression wall should immediately answer 'what can I improve now?' without demanding continuous manual control.
+- **Survivor.io:** growth choices are legible and reward loops are communicated quickly.
+- **AFFIX: ZERO:** farming remains automatic; the management UI should make converting accumulated gold/items into power low-friction and obvious.
+
+### Decision
+
+- Keep the existing boss stat-check model and defeat setback unchanged.
+- Make equipment enhancement affordability, next success rate and next enhancement level visible directly on each equipped-item card.
+- Show real next-step base-stat gains in the enhancement tooltip rather than only a generic risk string.
+- Add equipment/skill affordable-growth counts to the equipment summary.
+- Add current gold + affordable skill option count to the skill-panel header.
+- Change boss defeat messaging to explicitly frame the loop as 'retreat, farm, automatically retry'.
+- Fix the Epic inventory badge mapping.
+
+### Implementation
+
+- Added GameManager.equipment_enhancement_preview() with target level, cost, odds, destruction/downgrade risk, multiplier change and real base-stat gains.
+- Added affordable equipment-slot and affordable skill-option helpers plus a growth summary contract.
+- Equipment cards now surface success probability and gold cost before clicking.
+- Enhancement buttons display the next target level and disable when the current gold cannot afford the attempt.
+- Equipment summary now includes affordable equipment/skill growth counts.
+- Skill header now includes current gold and number of skills currently affordable to upgrade.
+- Epic inventory slots now display 에픽 instead of falling back to 일반.
+- Boss defeat notification now communicates 파밍 후 자동 재도전 while preserving the existing mechanics.
+- Added dedicated gameplay_v4_growth_ux regression tests and CI coverage.
+- Build identity advanced to **g4.1**.
+
+### Failure / Revision
+
+- The immediately preceding G4.1 boss-pattern prototype was rejected before merge because it weakened the idle identity.
+- This revision redirects the same boss-wall problem toward progression readability instead of adding combat execution complexity.
+
+### Verification
+
+Automated contracts cover:
+
+- Enhancement preview points to the actual next level.
+- +1 preview exposes the true base-stat multiplier change and resulting ATK delta.
+- Enhancement cost and success rate are included in the preview contract.
+- Max-level gear returns a terminal preview state.
+- Growth summary detects affordable equipped-item enhancement and class-skill growth.
+- Epic has an explicit player-facing inventory badge.
+- Very low probabilities such as 0.3% remain visible instead of rounding to 0%.
+- Enhancement tooltip text exposes the actual stat gain.
+
+### Before / After
+
+| Area | Before | After |
+|---|---|---|
+| Boss wall response | Considered adding action patterns | Preserve idle stat gate and improve growth conversion UX |
+| Equipment card | Generic 강화 button | Next +level, success odds and cost visible |
+| Enhancement value | Multiplier/risk mostly hidden | Real next base-stat gain exposed |
+| Growth awareness | Player manually checks every panel | Equipment summary shows affordable growth counts |
+| Skills | Individual costs only | Current gold + affordable skill count at top |
+| Epic badge | Missing mapping / fallback risk | Explicit 에픽 badge |
+| Boss failure copy | Generic retreat notice | 파밍 후 자동 재도전 loop communicated |
+
+### Windows play approval
+
+Pending. Validate that equipment cards remain readable, low success rates are not visually clipped, skill/equipment growth counts update immediately after spending gold, and the boss defeat message appears without changing the existing automatic retreat/retry behavior.
