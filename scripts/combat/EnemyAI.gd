@@ -80,6 +80,8 @@ var _knockback_velocity: Vector2 = Vector2.ZERO
 var _death_time_left: float = 0.0
 var _death_duration: float = 0.28
 var _is_targeted: bool = false
+var _attack_recovery_left: float = 0.0
+var _last_move_direction: Vector2 = Vector2.LEFT
 
 
 static func floor_scaling(current_floor: int, is_boss: bool = false) -> Dictionary:
@@ -169,6 +171,7 @@ func _process(delta: float) -> void:
 		_hit_flash_left = maxf(0.0, _hit_flash_left - delta)
 		queue_redraw()
 	_attack_time_left = maxf(0.0, _attack_time_left - delta)
+	_attack_recovery_left = maxf(0.0, _attack_recovery_left - delta)
 	if not _knockback_velocity.is_zero_approx():
 		global_position += _knockback_velocity * delta
 		_clamp_to_movement_bounds()
@@ -198,6 +201,7 @@ func _process(delta: float) -> void:
 	elif behavior == "skirmisher" and distance < effective_attack_range * 0.68:
 		move_direction = -toward_target
 	if not move_direction.is_zero_approx():
+		_last_move_direction = move_direction.normalized()
 		_move_with_behavior(move_direction, delta)
 	if distance <= effective_attack_range and _attack_time_left <= 0.0:
 		_attack_windup_left = _attack_windup_duration
@@ -301,7 +305,23 @@ func _draw() -> void:
 		var warning_progress: float = 1.0 - _attack_windup_left / _attack_windup_duration
 		draw_arc(Vector2.ZERO, sprite_size * 0.52, -PI * 0.5, -PI * 0.5 + TAU * warning_progress, 24, Color("ff4d5a", 0.90), 2.5)
 	var death_scale_y: float = maxf(0.15, death_alpha) if _dead else 1.0
-	draw_set_transform(Vector2(0, bob), 0.0, Vector2(1.0, death_scale_y))
+	var facing_scale: float = -1.0 if _last_move_direction.x < -0.08 else 1.0
+	var walk_squash: float = 1.0 + absf(step_wave) * 0.035 if moving else 1.0
+	var attack_progress: float = 0.0
+	if _attack_windup_left > 0.0:
+		attack_progress = 1.0 - (_attack_windup_left / maxf(0.001, _attack_windup_duration))
+	elif _attack_recovery_left > 0.0:
+		attack_progress = _attack_recovery_left / 0.18
+	var target_dir: Vector2 = global_position.direction_to(target.global_position) if target != null and is_instance_valid(target) else _last_move_direction
+	var lunge: Vector2 = target_dir * sin(attack_progress * PI) * (8.0 if behavior != "boss" else 13.0)
+	var attack_rotation: float = 0.0
+	if _attack_windup_left > 0.0:
+		attack_rotation = sin(attack_progress * PI) * 0.10 * (-1.0 if facing_scale < 0.0 else 1.0)
+	elif _attack_recovery_left > 0.0:
+		attack_rotation = -sin(attack_progress * PI) * 0.07 * (-1.0 if facing_scale < 0.0 else 1.0)
+	var scale_y: float = death_scale_y * walk_squash
+	var scale_x: float = facing_scale * (2.0 - walk_squash)
+	draw_set_transform(Vector2(0, bob) + lunge, attack_rotation, Vector2(scale_x, scale_y))
 	draw_texture_rect_region(
 		ENEMY_ATLAS,
 		Rect2(-sprite_size * 0.58, -sprite_size * 0.72, sprite_size * 1.16, sprite_size * 1.16),
@@ -309,6 +329,8 @@ func _draw() -> void:
 		sprite_modulate
 	)
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
+	if (_attack_windup_left > 0.0 or _attack_recovery_left > 0.0) and not _dead:
+		_draw_attack_motion(sprite_size, target_dir, alpha)
 	var bar_width: float = maxf(20.0, sprite_size * 0.72)
 	var bar_y: float = -sprite_size * 0.58 - 5.0
 	if hp < max_hp or _is_targeted or is_elite or behavior == "boss":
@@ -339,3 +361,27 @@ func _draw() -> void:
 			8,
 			Color("ff9aa4", alpha)
 		)
+
+
+
+func _draw_attack_motion(sprite_size: float, target_dir: Vector2, alpha: float) -> void:
+	if target_dir.is_zero_approx():
+		target_dir = Vector2.RIGHT
+	var tangent := Vector2(-target_dir.y, target_dir.x)
+	var progress: float = 1.0 - (_attack_windup_left / maxf(0.001, _attack_windup_duration)) if _attack_windup_left > 0.0 else (1.0 - _attack_recovery_left / 0.18)
+	match behavior:
+		"caster":
+			var orb_pos: Vector2 = target_dir * (sprite_size * 0.52)
+			var orb_radius: float = 2.0 + progress * 4.5
+			draw_circle(orb_pos, orb_radius + 4.0, Color("9f7aea", 0.12 * alpha))
+			draw_circle(orb_pos, orb_radius, Color("c4a7ff", 0.85 * alpha))
+			draw_line(orb_pos - tangent * 4.0, orb_pos + tangent * 4.0, Color("f1e8ff", 0.55 * alpha), 1.2)
+		"boss":
+			var arc_center: float = target_dir.angle()
+			draw_arc(Vector2.ZERO, sprite_size * 0.72, arc_center - 0.65, arc_center + 0.65, 14, Color("ff645e", 0.78 * alpha), 3.2)
+			draw_arc(Vector2.ZERO, sprite_size * 0.90, arc_center - 0.46, arc_center + 0.46, 12, Color("ffb078", 0.32 * alpha), 1.4)
+		_:
+			var start: Vector2 = target_dir * (sprite_size * 0.18) - tangent * 5.0
+			var finish: Vector2 = target_dir * (sprite_size * 0.68) + tangent * 7.0
+			draw_line(start, finish, Color("ffcf9e", 0.80 * alpha), 2.0)
+			draw_circle(finish, 2.2, Color("fff1db", 0.78 * alpha))
