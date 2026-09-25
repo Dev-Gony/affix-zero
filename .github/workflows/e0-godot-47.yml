@@ -41,19 +41,19 @@ jobs:
         shell: bash
         run: |
           set -o pipefail
-          godot --headless --editor --path experiments/e0-godot --quit-after 3 2>&1 | tee /tmp/e0-import.log
-          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script" /tmp/e0-import.log
+          godot --headless --editor --path experiments/e0-godot --import 2>&1 | tee /tmp/e0-import.log
+          ! grep -E "SCRIPT ERROR|Parse Error|Failed to load script|No loader found for resource" /tmp/e0-import.log
       - name: Run E0-C01 contract
         shell: bash
         run: |
           set -o pipefail
           timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c01_test.tscn 2>&1 | tee /tmp/e0-c01.log
           grep -q "E0_C01_TEST PASSED" /tmp/e0-c01.log
-          ! grep -E "SCRIPT ERROR|Parse Error" /tmp/e0-c01.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c01.log
       - name: Run E0-C02 contract
         shell: bash
         run: |
           set -o pipefail
           timeout 30 godot --headless --path experiments/e0-godot res://tests/e0_c02_test.tscn 2>&1 | tee /tmp/e0-c02.log
           grep -q "E0_C02_TEST PASSED" /tmp/e0-c02.log
-          ! grep -E "SCRIPT ERROR|Parse Error" /tmp/e0-c02.log
+          ! grep -E "SCRIPT ERROR|Parse Error|No loader found for resource" /tmp/e0-c02.log
