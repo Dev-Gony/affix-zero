@@ -1168,7 +1168,8 @@ func _apply_game_state_visibility(state: GameManager.GameState) -> void:
 		if _pause_visible:
 			_pause_visible = false
 			_pause_panel.visible = false
-			PauseCoordinator.release_all("pause_menu")
+			get_tree().paused = false
+			GameManager.set_game_state(GameManager.GameState.RUNNING)
 	if _management_window != null:
 		_management_window.visible = show_game_ui and _management_open
 	_sync_dock_buttons()
@@ -1187,9 +1188,11 @@ func _toggle_pause_menu() -> void:
 	_pause_visible = not _pause_visible
 	_pause_panel.visible = _pause_visible
 	if _pause_visible:
-		PauseCoordinator.acquire("pause_menu")
+		GameManager.set_game_state(GameManager.GameState.PAUSED)
+		get_tree().paused = true
 	else:
-		PauseCoordinator.release_all("pause_menu")
+		get_tree().paused = false
+		GameManager.set_game_state(GameManager.GameState.RUNNING)
 	_sync_modal_blocker()
 	AudioManager.play_sfx("ui_click")
 
@@ -1221,7 +1224,6 @@ func _manual_load() -> void:
 	if data.is_empty():
 		_show_notification("불러올 저장 데이터가 없습니다.", Color("ffb86b"))
 	else:
-		PauseCoordinator.enforce()
 		_refresh_all()
 		_show_notification("저장 데이터 불러오기 완료", COLOR_GREEN)
 
@@ -1231,7 +1233,7 @@ func _save_and_quit() -> void:
 	if error != OK:
 		_show_notification("저장 실패 · 종료하지 않았습니다.", Color("ff6b6b"))
 		return
-	PauseCoordinator.clear_all()
+	get_tree().paused = false
 	get_tree().quit()
 
 
