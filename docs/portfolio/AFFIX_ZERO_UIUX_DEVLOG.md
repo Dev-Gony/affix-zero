@@ -426,6 +426,7 @@ G4.1 growth-loop UX is considered player-validated. PR remains unmerged by polic
 - Legendary and Epic both use the chase-drop audio path through rarity index >= 4.
 - Existing acquisition filter is checked before field-drop VFX is rendered.
 - Added dedicated gameplay_v4_loot_vfx regression tests and CI coverage.
+- Added editor-only **Ctrl+Shift+8** comparison showcase that spawns Normal → Epic sample VFX without adding items or changing progression.
 - Build identity advanced to **g4.2**.
 
 ### Failure / Revision
