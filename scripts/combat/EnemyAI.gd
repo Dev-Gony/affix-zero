@@ -77,7 +77,8 @@ func setup(data: EnemyData, current_floor: int, player_target: Node2D, arena_bou
 	move_speed = data.move_speed * minf(1.65, 1.0 + depth * 0.010)
 	attack_cooldown = maxf(0.45, data.attack_cooldown * maxf(0.55, 1.0 - depth * 0.008))
 	behavior = data.behavior
-	attack_range = data.attack_range + minf(24.0, depth * 0.35)
+	var base_attack_range: float = data.attack_range if data.attack_range > 0.0 else data.radius + 11.0
+	attack_range = base_attack_range + minf(24.0, depth * 0.35)
 	_attack_windup_duration = data.attack_windup * maxf(0.50, 1.0 - depth * 0.006)
 	radius = data.radius
 	xp_reward = maxi(1, roundi(data.xp_reward * (1.0 + (current_floor - 1) * 0.12)))
