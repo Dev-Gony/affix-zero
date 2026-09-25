@@ -545,3 +545,18 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 - Visual direction consistency:
 - Bugs found:
 - Merge approval: Pending / Approved / Rejected
+
+
+## G6.1 — Animated Combat Playtest
+- [ ] slime visibly squashes/hops instead of sliding rigidly
+- [ ] bat wings flap while moving
+- [ ] skeleton/goblin/dark knight show visible weapon attack motion
+- [ ] lich launches a curved purple shadow projectile
+- [ ] dragon launches a visible fire projectile/attack
+- [ ] demon lord launches a larger boss meteor and boss hit feedback remains readable
+- [ ] enemy windup -> strike -> recovery is visually readable at x1
+- [ ] at x5, projectile/VFX density is readable rather than a solid blob
+- [ ] active pet is visually larger than G5.1 and no longer reads as a tiny icon
+- [ ] drake/bat pet wings animate
+- [ ] pet rarity aura does not overpower the player
+- [ ] dungeon traversal remains corridor-based and does not look like a 3x3 board
