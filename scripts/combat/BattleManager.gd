@@ -441,9 +441,9 @@ func _perform_auto_attack() -> void:
 		projectiles_root.add_child(projectile)
 		projectile.setup(player.global_position + player._visual_facing * 8.0, target, result, _basic_projectile_color(), _basic_projectile_style())
 		projectile.impacted.connect(_on_player_basic_projectile_impacted)
-		effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+		effects.show_player_basic_attack(GameManager.selected_class, player.global_position, target.global_position, bool(result.get("critical", false)))
 	else:
-		effects.show_attack(player.global_position, target.global_position, bool(result.get("critical", false)))
+		effects.show_player_basic_attack(GameManager.selected_class, player.global_position, target.global_position, bool(result.get("critical", false)))
 		target.take_hit(result)
 		_finish_player_attack_feedback(result)
 
