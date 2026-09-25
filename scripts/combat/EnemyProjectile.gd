@@ -37,7 +37,7 @@ func setup(start: Vector2, target: Node2D, damage: float, boss: bool, color: Col
 			travel_speed = 105.0
 		_:
 			travel_speed = 125.0 if boss else 165.0
-	_travel_distance = maxf(1.0, start.distance_to(target))
+	_travel_distance = maxf(1.0, start.distance_to(destination))
 	queue_redraw()
 
 
