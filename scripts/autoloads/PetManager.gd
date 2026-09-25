@@ -161,6 +161,58 @@ func active_support_interval() -> float:
 	return data.support_interval if data != null else 999.0
 
 
+func _active_passive_scale() -> float:
+	return 1.0 + float(stars_for(active_pet_id) - 1) * 0.15
+
+
+func active_player_damage_bonus_percent() -> float:
+	var data: PetData = active_pet_data()
+	return data.player_damage_bonus_percent * _active_passive_scale() if data != null else 0.0
+
+
+func active_player_damage_reduction_percent() -> float:
+	var data: PetData = active_pet_data()
+	return data.player_damage_reduction_percent * _active_passive_scale() if data != null else 0.0
+
+
+func active_player_crit_bonus_percent() -> float:
+	var data: PetData = active_pet_data()
+	return data.player_crit_bonus_percent * _active_passive_scale() if data != null else 0.0
+
+
+func active_player_xp_bonus_percent() -> float:
+	var data: PetData = active_pet_data()
+	return data.player_xp_bonus_percent * _active_passive_scale() if data != null else 0.0
+
+
+func active_player_gold_bonus_percent() -> float:
+	var data: PetData = active_pet_data()
+	return data.player_gold_bonus_percent * _active_passive_scale() if data != null else 0.0
+
+
+func active_passive_text() -> String:
+	var data: PetData = active_pet_data()
+	if data == null:
+		return ""
+	var parts: Array[String] = []
+	var damage_bonus: float = active_player_damage_bonus_percent()
+	var reduction: float = active_player_damage_reduction_percent()
+	var crit_bonus: float = active_player_crit_bonus_percent()
+	var xp_bonus: float = active_player_xp_bonus_percent()
+	var gold_bonus: float = active_player_gold_bonus_percent()
+	if damage_bonus > 0.0:
+		parts.append("주인 피해 +%.1f%%" % damage_bonus)
+	if reduction > 0.0:
+		parts.append("받는 피해 -%.1f%%" % reduction)
+	if crit_bonus > 0.0:
+		parts.append("치명 +%.1f%%" % crit_bonus)
+	if xp_bonus > 0.0:
+		parts.append("경험치 +%.1f%%" % xp_bonus)
+	if gold_bonus > 0.0:
+		parts.append("골드 +%.1f%%" % gold_bonus)
+	return " · ".join(parts)
+
+
 func add_essence(amount: int) -> int:
 	if amount <= 0:
 		return 0
