@@ -1259,20 +1259,41 @@ func _refresh_pets() -> void:
 	if _pet_content == null:
 		return
 	_clear_container(_pet_content)
-	var currency_row := HBoxContainer.new()
-	currency_row.add_theme_constant_override("separation", 6)
-	_pet_content.add_child(currency_row)
+	var summon_panel := PanelContainer.new()
+	summon_panel.add_theme_stylebox_override("panel", _style_box(Color("14101d"), Color("6d3fa3"), 1, 2))
+	_pet_content.add_child(summon_panel)
+	var summon_row := HBoxContainer.new()
+	summon_row.add_theme_constant_override("separation", 6)
+	summon_panel.add_child(summon_row)
+	var summon_info := VBoxContainer.new()
+	summon_info.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	summon_row.add_child(summon_info)
 	var essence_label := Label.new()
-	essence_label.text = "◆ 펫 정수 %d" % PetManager.essence
-	essence_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	essence_label.text = "◆ 펫 정수 %d  ·  소환 %d회" % [PetManager.essence, PetManager.summon_count]
 	essence_label.add_theme_font_size_override("font_size", 9)
 	essence_label.add_theme_color_override("font_color", Color("c084fc"))
-	currency_row.add_child(essence_label)
+	summon_info.add_child(essence_label)
 	var essence_hint := Label.new()
-	essence_hint.text = "엘리트 · 보스 처치로 획득"
-	essence_hint.add_theme_font_size_override("font_size", 7)
+	essence_hint.text = "엘리트·보스 → 정수 획득 → 펫 소환 · 10회 소환은 영웅 이상 1마리 보장"
+	essence_hint.add_theme_font_size_override("font_size", 6)
 	essence_hint.add_theme_color_override("font_color", COLOR_MUTED)
-	currency_row.add_child(essence_hint)
+	summon_info.add_child(essence_hint)
+	var single_summon := Button.new()
+	single_summon.text = "1회 소환\n◆%d" % PetManager.SINGLE_SUMMON_COST
+	single_summon.custom_minimum_size = Vector2(68, 36)
+	single_summon.add_theme_font_size_override("font_size", 7)
+	single_summon.disabled = not PetManager.can_summon(1)
+	single_summon.pressed.connect(_summon_pets.bind(1))
+	summon_row.add_child(single_summon)
+	var ten_summon := Button.new()
+	ten_summon.text = "10회 소환\n◆%d" % PetManager.TEN_SUMMON_COST
+	ten_summon.custom_minimum_size = Vector2(76, 36)
+	ten_summon.add_theme_font_size_override("font_size", 7)
+	ten_summon.disabled = not PetManager.can_summon(10)
+	if not ten_summon.disabled:
+		ten_summon.add_theme_stylebox_override("normal", _style_box(Color("21152f"), Color("c084fc"), 2, 2))
+	ten_summon.pressed.connect(_summon_pets.bind(10))
+	summon_row.add_child(ten_summon)
 
 	var active_data: PetData = PetManager.active_pet_data()
 	var active_panel := PanelContainer.new()
@@ -1361,15 +1382,20 @@ func _refresh_pets() -> void:
 		pet_actions.add_child(train_button)
 		var evolve_button := Button.new()
 		var evolve_cost: int = PetManager.evolution_cost(active_data.id)
-		var evolve_essence: int = PetManager.evolution_essence_cost(active_data.id)
+		var evolve_fragments: int = PetManager.evolution_fragment_cost(active_data.id)
 		var required_level: int = PetManager.evolution_required_level(active_data.id)
 		if PetManager.stars_for(active_data.id) >= PetManager.MAX_STARS:
 			evolve_button.text = "진화 MAX"
 			evolve_button.disabled = true
 		else:
-			evolve_button.text = "진화 ★%d · %dG · ◆%d" % [PetManager.stars_for(active_data.id) + 1, evolve_cost, evolve_essence]
+			evolve_button.text = "진화 ★%d · %dG · 조각 %d/%d" % [
+				PetManager.stars_for(active_data.id) + 1,
+				evolve_cost,
+				PetManager.fragments_for(active_data.id),
+				evolve_fragments,
+			]
 			evolve_button.disabled = not PetManager.can_evolve(active_data.id)
-			evolve_button.tooltip_text = "필요 Lv.%d · 펫 정수 %d · 공격/지원 효과 강화" % [required_level, evolve_essence]
+			evolve_button.tooltip_text = "필요 Lv.%d · 중복 소환 조각 %d개 · 공격/지원 효과 강화" % [required_level, evolve_fragments]
 		evolve_button.custom_minimum_size.y = 24
 		evolve_button.add_theme_font_size_override("font_size", 6)
 		if not evolve_button.disabled:
@@ -1381,7 +1407,7 @@ func _refresh_pets() -> void:
 	var roster_header := HBoxContainer.new()
 	_pet_content.add_child(roster_header)
 	var roster_title := Label.new()
-	roster_title.text = "보유 / 해금 예정 펫"
+	roster_title.text = "보유 / 소환 가능 펫"
 	roster_title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	roster_title.add_theme_font_size_override("font_size", 10)
 	roster_title.add_theme_color_override("font_color", COLOR_GOLD)
@@ -1413,8 +1439,9 @@ func _add_pet_card(parent: GridContainer, pet_id: String) -> void:
 	button.custom_minimum_size = Vector2(184, 66)
 	button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	button.disabled = not owned
-	var border: Color = COLOR_GOLD if active else (data.color if owned else Color("343d49"))
-	var background: Color = Color("151c25").lerp(data.color, 0.06) if owned else Color("0d1117")
+	var rarity_color: Color = PetManager.rarity_color(data.rarity_index)
+	var border: Color = COLOR_GOLD if active else (rarity_color if owned else Color(rarity_color, 0.38))
+	var background: Color = Color("151c25").lerp(rarity_color, 0.10) if owned else Color("0d1117").lerp(rarity_color, 0.04)
 	button.add_theme_stylebox_override("normal", _style_box(background, border.darkened(0.18), 1 if not active else 2, 2))
 	button.add_theme_stylebox_override("hover", _style_box(Color("202936"), border, 2, 2))
 	button.tooltip_text = data.description
@@ -1445,9 +1472,9 @@ func _add_pet_card(parent: GridContainer, pet_id: String) -> void:
 	var state_text := Label.new()
 	state_text.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	if owned:
-		state_text.text = "Lv.%d · %s · %s" % [PetManager.level_for(pet_id), data.role, data.rarity_name]
+		state_text.text = "Lv.%d · %s · %s · 조각 %d" % [PetManager.level_for(pet_id), data.role, data.rarity_name, PetManager.fragments_for(pet_id)]
 	else:
-		state_text.text = "%d층 해금 · %s" % [data.unlock_floor, data.rarity_name]
+		state_text.text = "미보유 · 소환 획득 · %s" % data.rarity_name
 	state_text.add_theme_font_size_override("font_size", 6)
 	state_text.add_theme_color_override("font_color", COLOR_TEXT if owned else COLOR_MUTED)
 	text_col.add_child(state_text)
@@ -1469,6 +1496,28 @@ func _set_active_pet(pet_id: String) -> void:
 		if data != null:
 			_show_notification("%s 출전" % data.display_name, data.color)
 		SaveManager.save_game()
+
+
+func _summon_pets(count: int) -> void:
+	AudioManager.play_sfx("ui_click")
+	var results: Array[Dictionary] = PetManager.summon_pets(count)
+	if results.is_empty():
+		_show_notification("펫 정수가 부족합니다", Color("c084fc"))
+		return
+	var best_result: Dictionary = {}
+	var new_count: int = 0
+	for result: Dictionary in results:
+		if bool(result.get("new", false)):
+			new_count += 1
+		if best_result.is_empty() or int(result.get("rarity_index", 0)) > int(best_result.get("rarity_index", 0)):
+			best_result = result
+	var best_id: String = String(best_result.get("pet_id", ""))
+	var best_data: PetData = PetManager.get_pet_data(best_id)
+	if best_data != null:
+		var suffix: String = " · 신규 %d종" % new_count if new_count > 0 else " · 중복 조각 획득"
+		_show_notification("%d회 소환 · [%s] %s%s" % [results.size(), best_data.rarity_name, best_data.display_name, suffix], PetManager.rarity_color(best_data.rarity_index))
+	SaveManager.save_game()
+	_refresh_pets()
 
 
 func _train_active_pet() -> void:
