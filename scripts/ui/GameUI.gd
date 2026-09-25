@@ -1267,6 +1267,45 @@ func _refresh_pets() -> void:
 		progress.add_theme_stylebox_override("fill", _style_box(active_data.color.darkened(0.22), active_data.color, 1, 1))
 		active_info.add_child(progress)
 
+		var pet_actions := VBoxContainer.new()
+		pet_actions.custom_minimum_size = Vector2(124, 84)
+		pet_actions.add_theme_constant_override("separation", 4)
+		active_row.add_child(pet_actions)
+		var stars := Label.new()
+		stars.text = "★".repeat(PetManager.stars_for(active_data.id)) + "☆".repeat(PetManager.MAX_STARS - PetManager.stars_for(active_data.id))
+		stars.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		stars.add_theme_font_size_override("font_size", 9)
+		stars.add_theme_color_override("font_color", COLOR_GOLD)
+		pet_actions.add_child(stars)
+		var train_button := Button.new()
+		var train_cost: int = PetManager.training_cost(active_data.id)
+		train_button.text = "훈련 +1Lv · %dG" % train_cost if level < PetManager.MAX_LEVEL else "훈련 MAX"
+		train_button.disabled = level >= PetManager.MAX_LEVEL or GameManager.gold < train_cost
+		train_button.custom_minimum_size.y = 24
+		train_button.add_theme_font_size_override("font_size", 6)
+		if not train_button.disabled:
+			train_button.add_theme_stylebox_override("normal", _style_box(Color("171c24"), COLOR_GOLD.darkened(0.18), 1, 2))
+			train_button.add_theme_stylebox_override("hover", _style_box(Color("242b36"), COLOR_GOLD, 2, 2))
+		train_button.pressed.connect(_train_active_pet)
+		pet_actions.add_child(train_button)
+		var evolve_button := Button.new()
+		var evolve_cost: int = PetManager.evolution_cost(active_data.id)
+		var required_level: int = PetManager.evolution_required_level(active_data.id)
+		if PetManager.stars_for(active_data.id) >= PetManager.MAX_STARS:
+			evolve_button.text = "진화 MAX"
+			evolve_button.disabled = true
+		else:
+			evolve_button.text = "진화 ★%d · %dG" % [PetManager.stars_for(active_data.id) + 1, evolve_cost]
+			evolve_button.disabled = not PetManager.can_evolve(active_data.id)
+			evolve_button.tooltip_text = "필요 Lv.%d · 공격/지원 효과 강화" % required_level
+		evolve_button.custom_minimum_size.y = 24
+		evolve_button.add_theme_font_size_override("font_size", 6)
+		if not evolve_button.disabled:
+			evolve_button.add_theme_stylebox_override("normal", _style_box(Color("14211a"), COLOR_GREEN.darkened(0.10), 1, 2))
+			evolve_button.add_theme_stylebox_override("hover", _style_box(Color("1b2b22"), COLOR_GREEN, 2, 2))
+		evolve_button.pressed.connect(_evolve_active_pet)
+		pet_actions.add_child(evolve_button)
+
 	var roster_header := HBoxContainer.new()
 	_pet_content.add_child(roster_header)
 	var roster_title := Label.new()
@@ -1357,6 +1396,26 @@ func _set_active_pet(pet_id: String) -> void:
 		var data: PetData = PetManager.get_pet_data(pet_id)
 		if data != null:
 			_show_notification("%s 출전" % data.display_name, data.color)
+		SaveManager.save_game()
+
+
+func _train_active_pet() -> void:
+	AudioManager.play_sfx("ui_click")
+	var pet_id: String = PetManager.active_pet_id
+	if PetManager.train_pet(pet_id):
+		var data: PetData = PetManager.active_pet_data()
+		if data != null:
+			_show_notification("%s 훈련 완료 · Lv.%d" % [data.display_name, PetManager.level_for(pet_id)], data.color)
+		SaveManager.save_game()
+
+
+func _evolve_active_pet() -> void:
+	AudioManager.play_sfx("ui_click")
+	var pet_id: String = PetManager.active_pet_id
+	if PetManager.evolve_pet(pet_id):
+		var data: PetData = PetManager.active_pet_data()
+		if data != null:
+			_show_notification("%s 진화 · ★%d" % [data.display_name, PetManager.stars_for(pet_id)], COLOR_GOLD)
 		SaveManager.save_game()
 
 
