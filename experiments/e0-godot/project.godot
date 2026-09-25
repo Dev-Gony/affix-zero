@@ -1,11 +1,10 @@
 ; Engine configuration file.
-; E0 is intentionally isolated from the legacy AFFIX project and user:// data.
 config_version=5
 
 [application]
 
-config/name="AFFIX ZERO E0 C01"
-run/main_scene="res://main.tscn"
+config/name="AFFIX ZERO"
+run/main_scene="res://vslice/v0_main.tscn"
 config/features=PackedStringArray("4.7")
 config/use_custom_user_dir=true
 config/custom_user_dir_name="AFFIX_ZERO_E0"
