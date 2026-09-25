@@ -161,6 +161,8 @@ For G3.3, the important story is not merely “added Epic.” The portfolio evid
 
 ### Required capture set
 
+Editor-only comparison shortcut: **Ctrl+Shift+8** spawns Normal → Epic sample drop VFX around the player for deterministic visual validation. It does not add items or change progression.
+
 - [ ] **Normal / Magic restraint**
   - Capture ordinary field equipment if naturally encountered.
   - Normal should not create a tall light pillar.
