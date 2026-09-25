@@ -727,12 +727,31 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 		item_label.text = "비어 있음"
 		item_label.add_theme_color_override("font_color", Color("70708a"))
 	else:
-		item_label.text = "%s · %d" % [String(item.get("base_name", item.get("name", ""))), int(item.get("item_level", 1))]
+		var enhancement_level: int = GameManager.equipment_enhancement_level(item)
+		var enhancement_text: String = " +%d" % enhancement_level if enhancement_level > 0 else ""
+		item_label.text = "%s%s · %d" % [String(item.get("base_name", item.get("name", ""))), enhancement_text, int(item.get("item_level", 1))]
 		item_label.tooltip_text = _format_item_details(item)
 		item_label.add_theme_color_override("font_color", border_color)
 	content.add_child(item_label)
+
+	var action_row := HBoxContainer.new()
+	action_row.add_theme_constant_override("separation", 2)
+	content.add_child(action_row)
+
+	var enhance_button := Button.new()
+	enhance_button.text = "강화"
+	enhance_button.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	enhance_button.custom_minimum_size.y = 17
+	enhance_button.add_theme_font_size_override("font_size", 5)
+	enhance_button.disabled = item.is_empty() or GameManager.equipment_enhancement_level(item) >= GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL
+	if not item.is_empty():
+		enhance_button.tooltip_text = "%s\n비용 %dG" % [GameManager.equipment_enhancement_risk_text(item), GameManager.equipment_enhancement_cost(item)]
+	enhance_button.pressed.connect(_enhance_equipped.bind(slot))
+	action_row.add_child(enhance_button)
+
 	var action := Button.new()
 	action.text = "해제"
+	action.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	action.custom_minimum_size.y = 17
 	action.add_theme_font_size_override("font_size", 5)
 	action.add_theme_stylebox_override("normal", _compact_style_box(Color("211720"), Color("69432f")))
@@ -742,7 +761,7 @@ func _build_equipment_card(slot: String) -> PanelContainer:
 	action.add_theme_stylebox_override("focus", _compact_style_box(Color(0, 0, 0, 0), COLOR_GOLD, 2))
 	action.disabled = item.is_empty()
 	action.pressed.connect(_unequip.bind(slot))
-	content.add_child(action)
+	action_row.add_child(action)
 	return card
 
 
@@ -977,8 +996,9 @@ func _add_skill_row(definition: Dictionary) -> void:
 	var base_cost: int = int(definition.get("base_cost", 100))
 	var cost_step: int = int(definition.get("cost_step", 80))
 	var level: int = GameManager.class_skill_level(skill_id)
-	var at_cap: bool = level >= GameManager.CLASS_SKILL_MAX_LEVEL
-	var cost: int = base_cost + level * cost_step
+	var max_level: int = GameManager.class_skill_max_level()
+	var at_cap: bool = level >= max_level
+	var cost: int = GameManager.skill_upgrade_cost_for_level(base_cost, cost_step, level)
 	var panel := PanelContainer.new()
 	panel.custom_minimum_size.y = 67
 	panel.add_theme_stylebox_override("panel", _style_box(Color("171119"), Color("59443a"), 1, 0))
@@ -1001,7 +1021,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	text_column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	row.add_child(text_column)
 	var title_label := Label.new()
-	title_label.text = "%s  Lv.%d%s" % [title, level, "  MAX" if at_cap else ""]
+	title_label.text = "%s  Lv.%d/%d%s" % [title, level, max_level, "  MAX" if at_cap else ""]
 	title_label.add_theme_font_size_override("font_size", 9)
 	text_column.add_child(title_label)
 	var description_label := Label.new()
@@ -1020,7 +1040,7 @@ func _add_skill_row(definition: Dictionary) -> void:
 	one_button.custom_minimum_size = Vector2(78, 16)
 	one_button.add_theme_font_size_override("font_size", 6)
 	one_button.disabled = at_cap or GameManager.gold < cost
-	one_button.tooltip_text = "1레벨 강화 · 현재 골드 %dG" % GameManager.gold
+	one_button.tooltip_text = "1레벨 강화 · 환생할 때마다 최대 레벨 +%d · 현재 골드 %dG" % [GameManager.CLASS_SKILL_LEVELS_PER_REBIRTH, GameManager.gold]
 	one_button.pressed.connect(_buy_skill_amount.bind(skill_id, base_cost, cost_step, 1))
 	actions.add_child(one_button)
 
@@ -1114,9 +1134,12 @@ func _compact_stats(item: Dictionary, include_affixes: bool = false) -> String:
 
 
 func _format_item_details(item: Dictionary) -> String:
+	var enhancement_level: int = GameManager.equipment_enhancement_level(item)
+	var enhancement_multiplier: float = GameManager.equipment_enhancement_stat_multiplier(enhancement_level)
 	var lines := PackedStringArray([
-		"[%s] %s" % [String(item.get("rarity_name", "")), String(item.get("name", ""))],
+		"[%s] %s%s" % [String(item.get("rarity_name", "")), String(item.get("name", "")), " +%d" % enhancement_level if enhancement_level > 0 else ""],
 		"%s · 아이템 레벨 %d" % [String(SLOT_NAMES.get(String(item.get("slot", "")), "")), int(item.get("item_level", 1))],
+		"강화 보정: 기본 능력치 x%.2f" % enhancement_multiplier,
 		"기본: %s" % _compact_stats(item),
 	])
 	for affix_data: Variant in Array(item.get("affixes", [])):
@@ -1125,6 +1148,11 @@ func _format_item_details(item: Dictionary) -> String:
 				String(affix_data.get("name", "")), String(STAT_NAMES.get(String(affix_data.get("stat", "")), affix_data.get("stat", ""))),
 				_format_value(String(affix_data.get("stat", "")), float(affix_data.get("value", 0.0)))
 			])
+	if enhancement_level < GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL:
+		lines.append("다음 강화: %s" % GameManager.equipment_enhancement_risk_text(item))
+		lines.append("강화 비용: %dG" % GameManager.equipment_enhancement_cost(item))
+	else:
+		lines.append("다음 강화: 최대 강화 +%d" % GameManager.EQUIPMENT_ENHANCEMENT_MAX_LEVEL)
 	lines.append("판매가: %dG%s" % [int(item.get("sell_value", 0)), " · 잠금" if bool(item.get("locked", false)) else ""])
 	lines.append("장착 비교: %s" % _comparison_text(item))
 	return "\n".join(lines)
@@ -1152,9 +1180,10 @@ func _comparison_text(item: Dictionary) -> String:
 
 func _item_stat_totals(item: Dictionary) -> Dictionary:
 	var totals: Dictionary = {}
+	var enhancement_multiplier: float = GameManager.equipment_enhancement_stat_multiplier(GameManager.equipment_enhancement_level(item))
 	var base_stats: Dictionary = item.get("base_stats", {})
 	for stat_name: Variant in base_stats.keys():
-		totals[String(stat_name)] = float(totals.get(String(stat_name), 0.0)) + float(base_stats[stat_name])
+		totals[String(stat_name)] = float(totals.get(String(stat_name), 0.0)) + float(base_stats[stat_name]) * enhancement_multiplier
 	for affix_data: Variant in Array(item.get("affixes", [])):
 		if affix_data is Dictionary:
 			var stat_name: String = String(affix_data.get("stat", ""))
@@ -1292,6 +1321,11 @@ func _equip(item_id: String) -> void:
 func _unequip(slot: String) -> void:
 	AudioManager.play_sfx("ui_click")
 	GameManager.unequip_item(slot)
+
+
+func _enhance_equipped(slot: String) -> void:
+	AudioManager.play_sfx("ui_click")
+	GameManager.enhance_equipped_item(slot)
 
 
 func _sell(item_id: String) -> void:
