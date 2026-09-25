@@ -119,3 +119,17 @@ E0-02 첫 작업은 작은 실제 에셋 세트의 출처/동작 검수와 독�
 - CI에서 관측된 p50/p95/p99는 headless/Linux 환경이므로 사용자 GTX1050의 성능 근거로 사용하지 않는다.
 - 실제 Windows 측정은 NOT_RUN이며 제안 기준 p95 <= 16.7ms, p99 <= 33.3ms의 통과 여부도 아직 결정하지 않는다.
 - 사용자는 E0-C02를 Windows에서 문제없이 진행 완료했다고 채팅에서 확인했다.
+
+
+## 11. E0-C03 사용자 시각 판정과 개발 방향 수정
+
+사용자는 Windows에서 E0-C03을 실제 실행했고 40적 화면 스크린샷을 제공했다. 프레임 수치와 별개로 중앙 원형 군집, 임시 SVG 캐릭터, 진단 중심 HUD가 실제 AFFIX 게임 품질/방향으로 받아들일 수 없다고 명확히 거절했다.
+
+판정:
+- E0-C03 harness engineering contract: PASS_AUTO.
+- E0-C03 product presentation: FAIL_USER.
+- 150/300적 성능 확장: PAUSED.
+- 엔진 자체 FAIL 근거로는 사용하지 않음.
+- 다음 게이트: V0 Vertical Slice Windows visual playtest.
+
+기본 실행 scene은 V0로 교체했다. E0는 직접 테스트 scene을 지정했을 때만 사용하는 engineering fixture로 남긴다.
