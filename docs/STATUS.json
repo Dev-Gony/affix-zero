@@ -5,7 +5,7 @@
   "branch": "restart/unity-6",
   "pr": 19,
   "stage": "STITCH_TALENT_FORGE_LOOP",
-  "implementation_commit": "See docs/validation/management/source-fingerprint.json",
+  "implementation_commit": "11d6aa67ad8b525dff93fc2ed757f72cb1a83b02",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
