@@ -187,5 +187,46 @@
       "Handheld weapon in actor sprite is baked and does not change appearance with equipment",
       "No hero-selection/town/mana/active abilities"
     ]
+  },
+  "management_screens": {
+    "build_guid": "863e316feb2d4b01b0667c7d636282c0",
+    "windows_build": {
+      "recordedUtc": "2026-09-26T05:42:27.8768512Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "core_checks": 105,
+    "player_720": "docs/validation/management/player-720.json",
+    "player_1080": "docs/validation/management/player-1080.json",
+    "result": "PASS",
+    "ui_callback_count_each": 17,
+    "framebuffer_captures_each": 12,
+    "actual_enhanced_impact": 43,
+    "checks": [
+      "prior combat/loot/equip/talent/restart regression",
+      "management tabs preserve frozen combat and manual pause",
+      "locked node selection does not spend points; invest disabled",
+      "explicit invest/refund/reinvest",
+      "forge preview equals actual attack 43 to45 and gold8 to0",
+      "insufficient gold disables UI and rejects controller command without mutation",
+      "scene reload retains enhancement rank1 and remaining gold0"
+    ],
+    "static_compile": "Editor and player DLL reference compile pass; initial Color32 conditional conversion CS0029 fixed using explicit Color cast",
+    "physical_input": "NOT_RUN",
+    "visual_review": "Agent viewed 720 talent/forge preview and 1080 forge enhanced; layouts fit and Korean visible. Not user visual approval.",
+    "source_fingerprint": "docs/validation/management/source-fingerprint.json",
+    "limitations": [
+      "Single three-node offensive branch, no active skill loadout",
+      "Equipped weapon deterministic +1..+3 only; no sockets/reforge/salvage/random success",
+      "Pets reference-only; hero selection/town remain unimplemented",
+      "Session memory only; no disk save",
+      "Actor-held weapon image unchanged"
+    ]
   }
 }

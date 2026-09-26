@@ -23,7 +23,7 @@ namespace AffixZero.Presentation
         private bool finishing, restarted;
         private FrozenState frozen;
         private readonly HashSet<string> completedCaptures = new HashSet<string>();
-        private static readonly string[] RequiredCaptures = { "walk", "impact", "cleared", "paused", "equipment", "loot", "comparison", "equipped", "talent" };
+        private static readonly string[] RequiredCaptures = { "walk", "impact", "cleared", "paused", "equipment", "loot", "comparison", "equipped", "talent", "talent-locked", "forge-preview", "forge-enhanced" };
         private readonly HashSet<string> requestedCaptures = new HashSet<string>();
         private readonly List<string> screenshots = new List<string>();
 
@@ -92,11 +92,12 @@ namespace AffixZero.Presentation
                 report.actorsInitialized = true;
                 if (restarted)
                 {
-                    Require(found.Progression.TotalDamage == 43 && hero.Damage == 43 && found.Progression.FuryRank == 1 &&
-                        found.Progression.Inventory.Count == 1 && found.Progression.EquippedWeapon.DamageBonus == 16,
-                        "Equipment or talents did not survive the next encounter.");
-                    Require(found.Progression.TotalExperience == 25 && found.Progression.TotalGold == 8,
-                        "Accumulated rewards were lost on scene reload.");
+                    Require(found.Progression.TotalDamage == 45 && hero.Damage == 45 && found.Progression.FuryRank == 1 &&
+                        found.Progression.Inventory.Count == 1 && found.Progression.EquippedWeapon.DamageBonus == 18 &&
+                        found.Progression.EquippedWeapon.EnhancementRank == 1,
+                        "Equipment, enhancement or talents did not survive the next encounter.");
+                    Require(found.Progression.TotalExperience == 25 && found.Progression.TotalGold == 0,
+                        "XP or gold after enhancement changed on scene reload.");
                     report.buildPreservedAcrossEncounters = true;
                 }
                 if (restarted) report.restartPauseAndOverlayReset = true;
@@ -183,6 +184,7 @@ namespace AffixZero.Presentation
                     report.restartCombatObserved && report.restartPauseAndOverlayReset &&
                     report.lootPickupVerified && report.equipmentSwapVerified && report.talentResetVerified &&
                     report.buildPreservedAcrossEncounters && report.improvedRealHitVerified &&
+                    report.talentSelectionVerified && report.forgeVerified && report.managementPauseStable &&
                     report.movementPauseStable && report.attackPauseStable && report.equipmentPauseStable &&
                     report.equipmentCloseResumed && report.manualPauseSurvivesOverlay && report.combatResumedAfterPause,
                     "Required combat or pause observations are missing.");
@@ -232,11 +234,30 @@ namespace AffixZero.Presentation
                     build.Inventory[0].DamageBonus == 6, "Equip callback did not swap the old weapon and update attack.");
                 report.equipmentSwapVerified = true;
                 CaptureOnce("equipped");
+                DispatchUiClick("talents-tab");
+                Require(encounter.Screen == ManagementScreen.Talents && encounter.IsPaused, "Talent tab did not pause/open.");
+                ProgressionPhase("progressionSelectLocked");
+            }
+            else if (phase == "progressionSelectLocked")
+            {
+                DispatchUiClick("talent-node-precision");
+                var root=encounter.GetComponent<UIDocument>().rootVisualElement;
+                Require(build.UnspentPoints==1 && build.SpentPoints==0 && hero.Damage==40 &&
+                    root.Q<Label>("talent-detail-name").text=="정밀" && !root.Q("talent-invest").enabledSelf,
+                    "Selecting a locked node changed points or allowed investment.");
+                report.talentSelectionVerified=true;
+                CaptureOnce("talent-locked");
+                ProgressionPhase("progressionSelectFury");
+            }
+            else if (phase == "progressionSelectFury")
+            {
+                DispatchUiClick("talent-node-fury");
+                Require(build.UnspentPoints==1 && hero.Damage==40,"Node selection spent a point.");
                 ProgressionPhase("progressionInvest");
             }
             else if (phase == "progressionInvest")
             {
-                DispatchUiClick("talent-fury");
+                DispatchUiClick("talent-invest");
                 Require(hero.Damage == 43 && build.FuryRank == 1 && build.UnspentPoints == 0,
                     "Talent callback did not spend one point and apply attack.");
                 CaptureOnce("talent");
@@ -244,7 +265,7 @@ namespace AffixZero.Presentation
             }
             else if (phase == "progressionReset")
             {
-                DispatchUiClick("talent-reset");
+                DispatchUiClick("talent-screen-reset");
                 Require(hero.Damage == 40 && build.FuryRank == 0 && build.UnspentPoints == 1,
                     "Talent reset did not refund and recalculate.");
                 report.talentResetVerified = true;
@@ -252,9 +273,38 @@ namespace AffixZero.Presentation
             }
             else if (phase == "progressionReinvest")
             {
-                DispatchUiClick("talent-fury");
+                DispatchUiClick("talent-invest");
                 Require(hero.Damage == 43 && build.UnspentPoints == 0, "Refunded point could not be invested again.");
-                DispatchUiClick("close-character");
+                DispatchUiClick("forge-tab");
+                ProgressionPhase("progressionForgePreview");
+            }
+            else if (phase == "progressionForgePreview")
+            {
+                var root=encounter.GetComponent<UIDocument>().rootVisualElement;
+                Require(encounter.Screen==ManagementScreen.Forge && encounter.IsPaused &&
+                    root.Q<Label>("forge-attack-damage").text=="43 → 45" &&
+                    root.Q<Label>("forge-cost").text=="소모 골드  8 G" && build.TotalGold==8,
+                    "Forge preview differs from live cost or damage.");
+                CaptureOnce("forge-preview");
+                ProgressionPhase("progressionForgeEnhance");
+            }
+            else if (phase == "progressionForgeEnhance")
+            {
+                DispatchUiClick("forge-enhance");
+                Require(build.TotalGold==0 && build.EquippedWeapon.EnhancementRank==1 && hero.Damage==45 &&
+                    build.TotalExperience==25 && build.Inventory.Count==1 && build.UnspentPoints==0,
+                    "Forge failed to deduct gold once or changed unrelated state.");
+                report.forgeVerified=true;
+                CaptureOnce("forge-enhanced");
+                ProgressionPhase("progressionForgeClose");
+            }
+            else if (phase == "progressionForgeClose")
+            {
+                Require(!encounter.GetComponent<UIDocument>().rootVisualElement.Q("forge-enhance").enabledSelf &&
+                    !encounter.EnhanceWeapon() && build.TotalGold==0 && hero.Damage==45,
+                    "Insufficient gold allowed another enhancement.");
+                DispatchUiClick("forge-close");
+                Require(!encounter.ManagementVisible&&!encounter.IsPaused,"Closing forge did not resume previous state.");
                 ProgressionPhase("progressionNext");
             }
             else if (phase == "progressionNext")
@@ -282,7 +332,8 @@ namespace AffixZero.Presentation
         }
 
         private bool IsPausePhase() => phase == "movementPaused" || phase == "equipmentPaused" ||
-            phase == "manualWithEquipment" || phase == "manualAfterEquipment" || phase == "attackPaused";
+            phase == "manualWithEquipment" || phase == "manualAfterEquipment" || phase == "attackPaused" ||
+            phase == "talentsPaused" || phase == "forgePaused";
 
         private void BeginPauseCheck(string next)
         {
@@ -326,9 +377,27 @@ namespace AffixZero.Presentation
                     "Closing equipment unexpectedly removed manual pause.");
                 BeginPauseCheck("manualAfterEquipment");
             }
+            else if (phase == "manualAfterEquipment")
+            {
+                report.manualPauseSurvivesOverlay=true;
+                DispatchUiClick("talents-tab");
+                Require(encounter.Screen==ManagementScreen.Talents&&!encounter.EquipmentVisible,"Talent overlay not exclusive.");
+                BeginPauseCheck("talentsPaused");
+            }
+            else if (phase == "talentsPaused")
+            {
+                DispatchUiClick("forge-tab");
+                Require(encounter.Screen==ManagementScreen.Forge&&!encounter.EquipmentVisible,"Forge overlay not exclusive.");
+                BeginPauseCheck("forgePaused");
+            }
             else
             {
-                if (phase == "manualAfterEquipment") report.manualPauseSurvivesOverlay = true;
+                if (phase == "forgePaused")
+                {
+                    DispatchUiClick("forge-close");
+                    Require(!encounter.ManagementVisible && encounter.IsPaused,"Closing forge removed manual pause.");
+                    report.managementPauseStable=true;
+                }
                 if (phase == "attackPaused") report.attackPauseStable = true;
                 encounter.SetPaused(false);
                 Require(!encounter.IsPaused && Time.timeScale > 0, "Combat did not resume after pause.");
@@ -378,7 +447,7 @@ namespace AffixZero.Presentation
                 if (actor == enemy) report.enemyDamageObserved = true;
                 if (actor == enemy && restarted && !report.improvedRealHitVerified)
                 {
-                    Require(receipt.Damage == 41, "Upgraded attack did not apply 43 minus enemy defense 2 at impact.");
+                    Require(receipt.Damage == 43, "Enhanced attack did not apply 45 minus enemy defense 2 at impact.");
                     report.improvedRealHitVerified = true;
                     report.upgradedHitDamage = receipt.Damage;
                 }
@@ -438,6 +507,9 @@ namespace AffixZero.Presentation
             var panel = root.Q("character-panel");
             Require(panel != null && (panel.resolvedStyle.display != DisplayStyle.None) == encounter.EquipmentVisible,
                 "Character panel visibility differs from encounter state.");
+            Require((root.Q("talent-screen").resolvedStyle.display != DisplayStyle.None)==(encounter.Screen==ManagementScreen.Talents) &&
+                (root.Q("forge-screen").resolvedStyle.display != DisplayStyle.None)==(encounter.Screen==ManagementScreen.Forge),
+                "Management screen visibility differs from controller state.");
             Require(root.Q("attack-slot") != null, "Native attack slot missing.");
             report.nativeHudStateVerified = true;
             report.nativeHudCaptureChecks++;
@@ -530,8 +602,8 @@ namespace AffixZero.Presentation
             public string buildGuid = Application.buildGUID;
             public string result = "RUNNING";
             public string problem = "";
-            public string scope = "Actual Windows combat, pause, loot/equip/talent callbacks, build persistence and upgraded impact.";
-            public string interactionMethod = "Pause checks use shared APIs; loot/equip/talent/next controls receive UI Toolkit ClickEvent dispatch. No physical mouse or keyboard input generated.";
+            public string scope = "Actual Windows combat, management pause, loot/equip, dedicated talent selection/invest/reset, forge cost/upgrade, scene persistence and enhanced impact.";
+            public string interactionMethod = "Combat pause uses shared APIs; management tabs, loot/equip/talent/forge/next controls receive UI Toolkit ClickEvent dispatch. No physical mouse or keyboard input generated.";
             public string actualUiClickVerification = "NOT_RUN";
             public string screenshotScope = "Uncompressed 24-bit BMP from end-of-frame ReadPixels framebuffer, including the actual runtime UI Toolkit HUD.";
             public string userVisualApproval = "NOT_APPROVED";
@@ -544,6 +616,7 @@ namespace AffixZero.Presentation
             public int nativeHudCaptureChecks;
             public bool lootPickupVerified, equipmentSwapVerified, talentResetVerified;
             public bool buildPreservedAcrossEncounters, improvedRealHitVerified;
+            public bool talentSelectionVerified, forgeVerified, managementPauseStable;
             public int uiCallbacksDispatched, upgradedHitDamage;
             public int firstClearHeroHp;
             public string[] screenshots = Array.Empty<string>();

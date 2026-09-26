@@ -24,7 +24,7 @@
 
 실제 화면 캡처를 위해 검수 게임 창은 표시해야 한다. Unity batch 에디터만 숨긴 창으로 실행한다. probe는 공유 API로 pause/정보창/재시작을 검증하고, 매 캡처에서 UIDocument·HP·XP·골드·창 상태를 검사한다. 실제 버튼 클릭/키보드 자동화는 아니다. Editor Camera.Render 캡처는 HUD를 포함하지 않는다.
 
-최신 결과는 docs/validation/stitch와 docs/media/stitch. 새 빌드 GUID54d35624853d494cbee6127fe860214e, 720/1080 player모두PASS. BMP→PNG는 동일 RGB 픽셀임을 검사했다. 시안 전체 구현이나 사용자 승인으로 읽지 않는다.
+첫 HUD 단계의 결과는 docs/validation/stitch와 docs/media/stitch. 새 빌드 GUID54d35624853d494cbee6127fe860214e, 720/1080 player모두PASS. BMP→PNG는 동일 RGB 픽셀임을 검사했다. 시안 전체 구현이나 사용자 승인으로 읽지 않는다.
 
 ## 빠른 소스 검사
 
@@ -38,6 +38,12 @@
 정적 DLL 컴파일/.NET CI는 Unity import·Play·실행·시각 검수를 대체하지 않는다. 소스 예시 art-preview.html도 게임이 아니다. 사용자 폴더·세이브·stash·Git history는 삭제하지 않는다.
 
 
-## 최신 장비·특성 실행
+## 이전 장비·특성 실행 (강화 추가 전)
 
-같은 실행 진입점에서 현재빌드GUID e86a4c30328a47ec9bf8cf3ba918d0f8을 사용한다. 최신 보고서는 docs/validation/progression, 캡처는 docs/media/progression이다. probe는회수→가방선택→장착→특성투자→초기화→재투자→닫기→다음전투를 네이티브 ClickEvent로검사한다. 창을클릭하는OS입력은아니다. 첫검보장드랍후공격력30→40→43,다음전투실제41피해를확인했다. Tab/I는관리창toggle,K는특성창열기,Esc닫기/일시정지. 게임종료시세션은소멸하며저장기능은아직없다.
+같은 실행 진입점에서 당시 빌드 GUID e86a4c30328a47ec9bf8cf3ba918d0f8을 사용한다. 최신 보고서는 docs/validation/progression, 캡처는 docs/media/progression이다. probe는회수→가방선택→장착→특성투자→초기화→재투자→닫기→다음전투를 네이티브 ClickEvent로검사한다. 창을클릭하는OS입력은아니다. 첫검보장드랍후공격력30→40→43,다음전투실제41피해를확인했다. Tab/I는관리창toggle,K는특성창열기,Esc닫기/일시정지. 게임종료시세션은소멸하며저장기능은아직없다.
+
+## 최신 특성·대장간 실행
+
+실행 진입점과 빌드 명령은 그대로다. 최신 GUID는 `863e316feb2d4b01b0667c7d636282c0`, 보고서 `docs/validation/management/`, 캡처 `docs/media/management/`다. I/Tab은 장비, K는 특성, F는 대장간을 전환하고 Esc는 열린 창을 닫거나 일시정지한다. 모든 관리 화면은 전투를 멈추며 닫을 때 이전 수동 일시정지를 보존한다.
+
+검사 실행은 두 해상도 각각 ClickEvent 17회와 화면 상태 12개로 새 노드 선택·투자·환불 및 강화 비용 차감/부족 차단을 확인했다. 실제 공격력 45, 방어 후 피해 43, 다음 장면 강화 +1과 잔여 골드 0 유지를 검사했다. 물리 입력 자동화는 아니며 프로세스 종료 후 저장은 없다.

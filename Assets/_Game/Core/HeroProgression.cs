@@ -8,6 +8,7 @@ namespace AffixZero.Core
 
     public sealed class WeaponItem
     {
+        public const int MaxEnhancementRank = 3;
         public string Id { get; }
         public string Name { get; }
         public int FlatDamage { get; }
@@ -15,16 +16,20 @@ namespace AffixZero.Core
         public string AffixName { get; }
         public string IconResource { get; }
         public string Rarity { get; }
-        public int DamageBonus => FlatDamage + AffixDamage;
+        public int EnhancementRank { get; }
+        public int EnhancementDamage => EnhancementRank * 2;
+        public int DamageBonus => FlatDamage + AffixDamage + EnhancementDamage;
 
         public WeaponItem(string id, string name, int flatDamage, int affixDamage,
-            string affixName, string iconResource, string rarity)
+            string affixName, string iconResource, string rarity, int enhancementRank = 0)
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name) ||
                 string.IsNullOrWhiteSpace(iconResource) || string.IsNullOrWhiteSpace(rarity))
                 throw new ArgumentException("Item identity, name, icon and rarity are required.");
-            // Reserve room for base attack and all ranks before an item enters the profile.
-            if (flatDamage < 0 || affixDamage < 0 || (long)flatDamage + affixDamage > int.MaxValue - 40)
+            if (enhancementRank < 0 || enhancementRank > MaxEnhancementRank)
+                throw new ArgumentOutOfRangeException(nameof(enhancementRank));
+            // Reserve base attack, all talents and all enhancement ranks before intake.
+            if (flatDamage < 0 || affixDamage < 0 || (long)flatDamage + affixDamage > int.MaxValue - 46)
                 throw new ArgumentOutOfRangeException(nameof(flatDamage));
             if (affixDamage > 0 && string.IsNullOrWhiteSpace(affixName))
                 throw new ArgumentException("A damage affix requires a name.", nameof(affixName));
@@ -35,6 +40,7 @@ namespace AffixZero.Core
             AffixName = affixName ?? string.Empty;
             IconResource = iconResource;
             Rarity = rarity;
+            EnhancementRank = enhancementRank;
         }
     }
 
@@ -55,6 +61,7 @@ namespace AffixZero.Core
         public WeaponItem PendingLoot { get; private set; }
         public int UnspentPoints { get; private set; }
         public int TotalExperience { get; private set; }
+        // Available run gold after purchases, not lifetime gross earnings.
         public int TotalGold { get; private set; }
         public int FuryRank { get; private set; }
         public int PrecisionRank { get; private set; }
@@ -62,6 +69,9 @@ namespace AffixZero.Core
         public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank;
         public int TalentDamage => FuryRank * 3 + PrecisionRank * 4 + KeystoneRank * 6;
         public int TotalDamage => BaseDamage + EquippedWeapon.DamageBonus + TalentDamage;
+        public int EquippedEnhancementCost => EquippedWeapon.EnhancementRank >= WeaponItem.MaxEnhancementRank
+            ? 0 : (EquippedWeapon.EnhancementRank + 1) * 8;
+        public bool CanEnhanceEquipped => EquippedEnhancementCost > 0 && TotalGold >= EquippedEnhancementCost;
 
         public HeroProgression()
         {
@@ -123,6 +133,18 @@ namespace AffixZero.Core
             WeaponItem previous = EquippedWeapon;
             EquippedWeapon = inventory[index];
             inventory[index] = previous;
+            return true;
+        }
+
+        public bool TryEnhanceEquipped()
+        {
+            if (!CanEnhanceEquipped) return false;
+            WeaponItem current = EquippedWeapon;
+            var enhanced = new WeaponItem(current.Id, current.Name, current.FlatDamage, current.AffixDamage,
+                current.AffixName, current.IconResource, current.Rarity, current.EnhancementRank + 1);
+            int cost = EquippedEnhancementCost;
+            TotalGold -= cost;
+            EquippedWeapon = enhanced;
             return true;
         }
 

@@ -101,10 +101,75 @@ internal static class ProgressionChecks
         try { Item(" "); } catch (ArgumentException) { badIdRejected = true; }
         check(badIdRejected, "empty item identity rejected at construction");
         var maximum = new HeroProgression();
-        maximum.TryCreatePendingLoot(Item("maximum", int.MaxValue - 40));
+        maximum.TryCreatePendingLoot(Item("maximum", int.MaxValue - 46));
         maximum.PickUp();
         maximum.Equip(0);
-        check(maximum.TotalDamage == int.MaxValue - 16 && maximum.CompareDamage(0) < 0,
+        check(maximum.TotalDamage == int.MaxValue - 22 && maximum.CompareDamage(0) < 0,
             "largest accepted weapon remains arithmetically safe");
+
+        var forge = new HeroProgression();
+        WeaponItem starter = forge.EquippedWeapon;
+        check(starter.EnhancementRank == 0 && starter.EnhancementDamage == 0 &&
+            forge.EquippedEnhancementCost == 8 && !forge.CanEnhanceEquipped &&
+            !forge.TryEnhanceEquipped() && ReferenceEquals(starter, forge.EquippedWeapon) && forge.TotalGold == 0,
+            "unaffordable first enhancement leaves weapon and balance unchanged");
+        forge.TryRegisterKill("forge:1");
+        forge.PickUp();
+        forge.Equip(0);
+        WeaponItem ember = forge.EquippedWeapon;
+        check(forge.CanEnhanceEquipped && forge.TryEnhanceEquipped() && forge.TotalDamage == 42 &&
+            forge.TotalGold == 0 && forge.TotalExperience == 25 && forge.UnspentPoints == 1 &&
+            forge.EquippedWeapon.EnhancementRank == 1 && forge.EquippedWeapon.EnhancementDamage == 2,
+            "eight earned gold buys first ember enhancement for attack 42 without consuming XP or talent points");
+        WeaponItem enhanced = forge.EquippedWeapon;
+        check(!ReferenceEquals(ember, enhanced) && ember.EnhancementRank == 0 &&
+            enhanced.Id == ember.Id && enhanced.Name == ember.Name && enhanced.IconResource == ember.IconResource &&
+            enhanced.FlatDamage == ember.FlatDamage && enhanced.AffixDamage == ember.AffixDamage &&
+            enhanced.AffixName == ember.AffixName && enhanced.Rarity == ember.Rarity,
+            "enhancement creates immutable replacement preserving item identity and authored properties");
+        check(!forge.TryRegisterKill("forge:1") && forge.TotalGold == 0 &&
+            !forge.TryEnhanceEquipped() && ReferenceEquals(enhanced, forge.EquippedWeapon),
+            "duplicate kill cannot replenish spent gold or fund another enhancement");
+        check(forge.TrySpendPoint(TalentId.Fury) && forge.TotalDamage == 45,
+            "first enhancement and first Fury rank combine additively for attack 45");
+        check(forge.CompareDamage(0) == -12 && forge.Equip(0) && forge.TotalDamage == 33 &&
+            forge.Inventory[0].EnhancementRank == 1 && forge.Equip(0) && forge.TotalDamage == 45 &&
+            ReferenceEquals(enhanced, forge.EquippedWeapon), "bag swaps retain rank and comparison includes enhancement");
+        forge.TryRegisterKill("forge:2");
+        check(forge.EquippedEnhancementCost == 16 && !forge.CanEnhanceEquipped &&
+            !forge.TryEnhanceEquipped() && forge.TotalGold == 8 && ReferenceEquals(enhanced, forge.EquippedWeapon),
+            "rank two requires full sixteen gold and does not partially charge");
+        forge.TryRegisterKill("forge:3");
+        check(forge.TryEnhanceEquipped() && forge.TotalGold == 0 && forge.EquippedWeapon.EnhancementRank == 2 &&
+            forge.TotalDamage == 47 && forge.EquippedEnhancementCost == 24,
+            "second enhancement consumes sixteen gold and exposes final rank cost");
+        forge.TryRegisterKill("forge:4");
+        forge.TryRegisterKill("forge:5");
+        forge.TryRegisterKill("forge:6");
+        check(forge.TryEnhanceEquipped() && forge.TotalGold == 0 && forge.TotalDamage == 49 &&
+            forge.EquippedWeapon.EnhancementRank == 3 && forge.EquippedWeapon.EnhancementDamage == 6,
+            "third enhancement consumes twenty-four gold and reaches six bonus damage");
+        forge.TryRegisterKill("forge:7");
+        WeaponItem capped = forge.EquippedWeapon;
+        check(forge.EquippedEnhancementCost == 0 && !forge.CanEnhanceEquipped && !forge.TryEnhanceEquipped() &&
+            forge.TotalGold == 8 && ReferenceEquals(capped, forge.EquippedWeapon),
+            "maximum enhancement rejects even with gold and preserves all state");
+        forge.ResetTalents();
+        check(forge.TotalDamage == 46 && forge.TotalGold == 8 && forge.TotalExperience == 175 &&
+            forge.EquippedWeapon.EnhancementRank == 3, "talent refund does not refund forge costs or remove enhancement");
+        throws(() => new WeaponItem("bad-rank", "Sword", 1, 0, "", "Icon", "Common", -1),
+            "negative enhancement rank rejected");
+        throws(() => new WeaponItem("bad-rank", "Sword", 1, 0, "", "Icon", "Common", 4),
+            "enhancement above maximum rejected");
+        throws(() => Item("unsafe-upgrade", int.MaxValue - 45),
+            "weapon without room for all future enhancements rejected at intake");
+        for (int i = 0; i < 6; i++) maximum.TryRegisterKill("boundary:" + i);
+        maximum.TrySpendPoint(TalentId.Fury);
+        maximum.TrySpendPoint(TalentId.Fury);
+        maximum.TrySpendPoint(TalentId.Precision);
+        maximum.TrySpendPoint(TalentId.Keystone);
+        check(maximum.TryEnhanceEquipped() && maximum.TryEnhanceEquipped() && maximum.TryEnhanceEquipped() &&
+            maximum.TotalDamage == int.MaxValue && maximum.TotalGold == 0,
+            "largest accepted weapon reaches exact int maximum with full talents and enhancements safely");
     }
 }

@@ -5,6 +5,8 @@ using UnityEngine.SceneManagement;
 
 namespace AffixZero.Presentation
 {
+    public enum ManagementScreen { None, Equipment, Talents, Forge }
+
     public sealed class FirstEncounter : MonoBehaviour
     {
         [SerializeField] private MeleeActor hero;
@@ -23,8 +25,10 @@ namespace AffixZero.Presentation
         public int RewardCollectionCount => rewards == null ? 0 : rewards.CollectionCount;
         public MeleeActor Hero => hero;
         public MeleeActor Enemy => enemy;
-        public bool IsPaused => manuallyPaused || EquipmentVisible;
-        public bool EquipmentVisible { get; private set; }
+        public bool IsPaused => manuallyPaused || ManagementVisible;
+        public ManagementScreen Screen { get; private set; }
+        public bool EquipmentVisible => Screen == ManagementScreen.Equipment;
+        public bool ManagementVisible => Screen != ManagementScreen.None;
         public float ElapsedSeconds { get; private set; }
         public bool HasEnded => (hero != null && hero.IsDead) || (enemy != null && enemy.IsDead);
         public float SecondsSinceEnd => endedAt < 0 ? 0 : Time.unscaledTime - endedAt;
@@ -99,6 +103,19 @@ namespace AffixZero.Presentation
             ProgressionNotice = "특성을 초기화하고 사용한 포인트를 돌려받았습니다.";
         }
 
+        public bool EnhanceWeapon()
+        {
+            if (!Progression.TryEnhanceEquipped())
+            {
+                ProgressionNotice = Progression.EquippedWeapon.EnhancementRank >= WeaponItem.MaxEnhancementRank
+                    ? "최대 강화 단계입니다." : "강화에 필요한 골드가 부족합니다.";
+                return false;
+            }
+            ApplyBuild();
+            ProgressionNotice = "+" + Progression.EquippedWeapon.EnhancementRank + " 강화 완료 · 다음 공격부터 피해 +2";
+            return true;
+        }
+
         public bool NextEncounter()
         {
             if (!HasEnded) { ProgressionNotice = "전투가 끝난 뒤 이동할 수 있습니다."; return false; }
@@ -122,7 +139,13 @@ namespace AffixZero.Presentation
 
         public void SetEquipmentVisible(bool visible)
         {
-            EquipmentVisible = visible;
+            ShowManagement(visible ? ManagementScreen.Equipment : ManagementScreen.None);
+        }
+
+        public void ShowManagement(ManagementScreen screen)
+        {
+            if (screen < ManagementScreen.None || screen > ManagementScreen.Forge) return;
+            Screen = screen;
             ApplyPause();
         }
 
@@ -175,7 +198,7 @@ namespace AffixZero.Presentation
                 return;
             }
             manuallyPaused = false;
-            EquipmentVisible = false;
+            Screen = ManagementScreen.None;
             Time.timeScale = previousTimeScale;
             SceneManager.LoadScene(scene.buildIndex);
         }

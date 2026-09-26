@@ -1,0 +1,86 @@
+{
+  "build_guid": "863e316feb2d4b01b0667c7d636282c0",
+  "scope": "Runtime/Core/Editor C# source, runtime UI theme and unchanged package manifests at management-screen Windows verification; art provenance remains in existing manifests. Hashes are local file bytes.",
+  "files": [
+    {
+      "path": "Assets/_Game/Core/AttackTimeline.cs",
+      "sha256": "2ebb4a6ff975f8547f2b97bd217837139d3718cb71032d95153d21b6c0eae878"
+    },
+    {
+      "path": "Assets/_Game/Core/CombatHealth.cs",
+      "sha256": "39c067ba38609f48b8ddb15655dfbaf8a57747b10eb28e9f61b3815c17192fdb"
+    },
+    {
+      "path": "Assets/_Game/Core/EncounterRewards.cs",
+      "sha256": "b3436803fd49c8ba3647437298d29089461b3e8de465aec30f9c5e7284452b16"
+    },
+    {
+      "path": "Assets/_Game/Core/HeroProgression.cs",
+      "sha256": "c23a96ebb24c5ebee485614a0d548bc511047b580c0a1f4e5b53696c510ebdd6"
+    },
+    {
+      "path": "Assets/_Game/Editor/EncounterVerification.cs",
+      "sha256": "9fea49ccef7ca594dbed116ca1208bdb0c53d383304dd91cb0f63b2290839047"
+    },
+    {
+      "path": "Assets/_Game/Editor/FoundationSetup.cs",
+      "sha256": "29e7e5a9b68f98d015c4bad43b201a945903b14b3ef99d89a4640ef71df5c4a3"
+    },
+    {
+      "path": "Assets/_Game/Editor/HeroSiegeArtSetup.cs",
+      "sha256": "e191fd5f9f59db94ef5f48b0bcdea69e995443862324ff22fd4427e76bbbdb74"
+    },
+    {
+      "path": "Assets/_Game/Editor/ProjectDashboard.cs",
+      "sha256": "da9ff6aff045fc04c4861d9b596c362033a59ff88bc2fbae2a5fa14ed6ec20ce"
+    },
+    {
+      "path": "Assets/_Game/Editor/ReviewedArtSetup.cs",
+      "sha256": "855c925b708d3eb8a132a165ac776058ea10d291eb6b85bbf8bfc013f6f8a708"
+    },
+    {
+      "path": "Assets/_Game/Presentation/ActorAnimationSet.cs",
+      "sha256": "ac5c0098c39d4ca61a04c44e522e8b3ed131fd998f8144deae634f5856e2da5e"
+    },
+    {
+      "path": "Assets/_Game/Presentation/EncounterHud.cs",
+      "sha256": "83ca43bf45694e5a34bb0cd8e33f5e8a8d086b54e3aadf197c5d780891a69feb"
+    },
+    {
+      "path": "Assets/_Game/Presentation/EquipmentPanel.cs",
+      "sha256": "40552950bec8e76b2780b22a1b959a254bae9f1e5ed0d04a75a25fa1c8478ee7"
+    },
+    {
+      "path": "Assets/_Game/Presentation/FirstEncounter.cs",
+      "sha256": "c89196e1cf7388d56bd902d18e5fb2ffa5735b39cb716bfd3c826737aee8d1da"
+    },
+    {
+      "path": "Assets/_Game/Presentation/ForgePanel.cs",
+      "sha256": "97ebaf70ca8338716d78d9ba3baabfad9b73e112b18c3ad95a234c23359d8f1a"
+    },
+    {
+      "path": "Assets/_Game/Presentation/MeleeActor.cs",
+      "sha256": "b10578fd8c53f3a715b46b6a2d263d05b14f06962b62a121fb646ae5a083fc9c"
+    },
+    {
+      "path": "Assets/_Game/Presentation/PlayerSmokeProbe.cs",
+      "sha256": "ab0d82ca0c073f4243b3803c4826d033065d54b383a8ffe4c8a908892227acd8"
+    },
+    {
+      "path": "Assets/_Game/Presentation/TalentPanel.cs",
+      "sha256": "a5239c4219af0a0f2db5d4e6d14b2618d012bce08a257bba628d4cc08644869a"
+    },
+    {
+      "path": "Assets/_Game/Resources/AffixUI/RuntimeTheme.tss",
+      "sha256": "682e2b1c6cc1d6e332c15f56c840f7d8282cb1e5bc627eb6664580352a752fda"
+    },
+    {
+      "path": "Packages/manifest.json",
+      "sha256": "78b9072dcc6fa529087a495056f52028f48162434cd7fff8ffff0b6258405f3b"
+    },
+    {
+      "path": "Packages/packages-lock.json",
+      "sha256": "16b25471a4769a00dd0cf95fcabc7790c1ee6c6c94f3b527dc0183f669934e5f"
+    }
+  ]
+}

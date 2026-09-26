@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "STITCH_EQUIPMENT_TALENT_LOOP",
-  "implementation_commit": "80b5eb494b8624aef1c7458b52aa518efa64e526",
+  "stage": "STITCH_TALENT_FORGE_LOOP",
+  "implementation_commit": "See docs/validation/management/source-fingerprint.json",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -20,8 +20,8 @@
   "unity_editor_import": "PASS",
   "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
   "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
-  "ui_direction": "USER_STITCH_FOUR_SCREENS_NATIVE_UNITY",
-  "windows_build": "SUCCEEDED_2026-09-26T05:22:48Z_ZERO_ERRORS_WARNINGS",
+  "ui_direction": "USER_STITCH_SEVEN_REFERENCE_SCREENS_NATIVE_UNITY",
+  "windows_build": "SUCCEEDED_2026-09-26T05:42:27Z_ZERO_ERRORS_WARNINGS",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -32,24 +32,24 @@
   },
   "next": "Implement hero selection and town-to-dungeon navigation using the user Stitch screens",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
-  "core_checks": 90,
+  "core_checks": 105,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_LOOT_EQUIPMENT_TALENT_NEXT_ENCOUNTER_720_1080",
+  "windows_player": "PASS_TALENT_FORGE_LOOP_720_1080",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/progression/",
+  "actual_game_capture": "docs/media/management/",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
-  "new_direction_validation": "LOOT_EQUIP_TALENT_CALLBACKS_AND_REAL_HIT_PASS; FULL_PRODUCT_INCOMPLETE",
-  "previous_technical_checks_scope": "Historical Ninja and first HUD reports remain historical; current scope is progression below.",
+  "new_direction_validation": "TALENT_SELECTION_FORGE_GOLD_AND_REAL_IMPACT_PASS; FULL_PRODUCT_INCOMPLETE",
+  "previous_technical_checks_scope": "Ninja, first HUD and progression reports are historical; latest scope is management below.",
   "stitch": {
     "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
     "engine_or_package_changes": false,
-    "current_scope": "Combat HUD plus one weapon inventory/equip/compare and one three-node talent branch; scene-to-scene session progression",
-    "build_guid": "e86a4c30328a47ec9bf8cf3ba918d0f8",
-    "reports": "docs/validation/progression/",
-    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; NINE_NATIVE_UI_CLICKEVENT_CALLBACKS_VERIFIED",
-    "other_screens": "Hero selection and town not implemented; no save, mana or active skill loadout"
+    "current_scope": "Native combat, equipment, dedicated talent detail/investment, equipped weapon enhancement; seven reference screens inspected",
+    "build_guid": "863e316feb2d4b01b0667c7d636282c0",
+    "reports": "docs/validation/management/",
+    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; SEVENTEEN_UI_CLICKEVENT_CALLBACKS_VERIFIED",
+    "other_screens": "Hero selection/town/pets not implemented; no disk save, mana, active skill loadout or socket/reforge systems"
   },
   "progression": {
     "weapon_slots": 1,
@@ -63,6 +63,31 @@
     "verified_upgraded_impact_after_defense": 41,
     "talent_branch": "Fury2 -> Precision1 -> Keystone1; one point per unique kill",
     "session_persistence": "Gear, bag, talents, total XP/gold preserved across scene reload; not disk save",
-    "input_test": "UI Toolkit ClickEvent callbacks, not OS mouse/keyboard input"
+    "input_test": "UI Toolkit ClickEvent callbacks, not OS mouse/keyboard input",
+    "historical_verification": "Prior equipment slice; latest enhanced attack results in management."
+  },
+  "management": {
+    "reference_zips": [
+      "(4) talents",
+      "(5) pets reference-only",
+      "(6) forge"
+    ],
+    "talents": "Select node without spending, inspect effect/prerequisite, invest explicitly, refund actual spent points",
+    "forge": {
+      "target": "Equipped weapon",
+      "max_rank": 3,
+      "damage_per_rank": 2,
+      "costs": [
+        8,
+        16,
+        24
+      ],
+      "success": "deterministic; no destruction",
+      "gold": "TotalGold now means available balance after purchases"
+    },
+    "screen_state": "Exclusive Equipment/Talents/Forge; all pause combat and preserve prior manual pause on close",
+    "verified_example": "Attack 43 -> 45, gold 8 -> 0, actual next-encounter impact 43 after defense2",
+    "session_only": true,
+    "pet_scope": "Reference intake only, no pet runtime"
   }
 }

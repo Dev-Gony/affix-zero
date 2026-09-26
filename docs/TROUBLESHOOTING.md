@@ -50,3 +50,11 @@
 | 새 HUD PanelSettings에 기본 테마 경고 | 동적 PanelSettings에 ThemeStyleSheet 미지정 | RuntimeTheme.tss에서 unity-theme://default를 import하고 Resources로 명시 연결 | 요소에 직접 스타일을 지정해도 기본 런타임 패널 설정은 갖춘다 |
 | 장착 중 진행하던 공격의 피해까지 바뀔 가능성 | impact 시점에 현재 damage 필드를 읽음 | 스윙 시작에 damage를 저장하고 해당 공격이 끝날 때까지 사용 | 빌드 변경과 진행 중 공격의 판정 시점을 분리한다 |
 | 다음 전투에서 누적 보상이 사라져 보임 | HUD가 해당전투의 일회성 rewards만 표시 | 중복 처치 방지 모델에 세션 TotalExperience/TotalGold를 추가하고 HUD에 연결 | 전투별 검증 값과 플레이어 누적 진행 값은 분리해야 한다 |
+
+## 특성·대장간 추가 — 2026-09-26
+
+| 문제 발생 지점 | 원인 분석 | 해결 방법 및 적용된 코드 개념 | 배운 점 |
+|---|---|---|---|
+| TalentPanel 정적 컴파일 CS0029 | Color32/Color 조건식이 Color32로 해석되어 StyleColor까지 암시적 변환되지 않음 | 조건식의 Color32를 Color로 명시 변환한 뒤 Editor/Player 정적 컴파일과 실제 빌드 통과 | UI 스타일에 할당할 조건식 타입을 명확히 한다 |
+| 관리 화면 추가 시 닫기로 수동 pause가 풀릴 위험 | 단일 장비 bool만으로 여러 화면을 표현하기 어려움 | 배타적 ManagementScreen과 독립 manuallyPaused를 분리, 세 화면 전환·닫기 중 HP/위치/공격 시간이 유지되는지 실제 player 검사 | 화면 상태와 사용자가 설정한 pause를 분리한다 |
+| 시안의 성공 문구를 실제 강화로 오인할 위험 | 원본 HTML은 일정 시간 뒤 문구만 바꾸며 골드 차감이나 확률 계산이 없음 | Core에서 비용/최대 단계 확인 후 불변 무기를 교체하고 잔액 차감, UI 미리보기·실제 피해·다음 장면 보존 검사 | 레퍼런스의 연출과 게임 트랜잭션을 구분한다 |

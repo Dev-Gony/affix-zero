@@ -28,6 +28,9 @@ namespace AffixZero.Presentation
         private Label pauseCaption;
         private Texture2D room, attackIcon;
         private EquipmentPanel equipmentPanel;
+        private TalentPanel talentPanel;
+        private ForgePanel forgePanel;
+        private VisualElement dungeonTab, equipmentTab, talentTab, forgeTab;
         private int selectedItemIndex = -1;
         private Image actionIcon;
         private string actionIconResource;
@@ -74,8 +77,10 @@ namespace AffixZero.Presentation
             top.style.right = 0; top.style.width = StyleKeyword.Auto;
             Text(top, "AFFIX : ZERO", 20, 13, 162, 26, 19, Cream);
             Text(top, "TEMPLE", 188, 17, 74, 19, 10, Gold);
-            Click(top, "dungeon-tab", "던전 사냥", 290, 8, 110, 33, () => encounter.SetEquipmentVisible(false), Crimson);
-            Click(top, "character-tab", "캐릭터 / 장비", 414, 8, 134, 33, () => encounter.SetEquipmentVisible(!encounter.EquipmentVisible), Surface);
+            dungeonTab = Click(top, "dungeon-tab", "던전 사냥", 276, 8, 100, 33, () => encounter.ShowManagement(ManagementScreen.None), Crimson);
+            equipmentTab = Click(top, "character-tab", "장비 [I]", 384, 8, 100, 33, () => ToggleManagement(ManagementScreen.Equipment), Surface);
+            talentTab = Click(top, "talents-tab", "특성 [K]", 492, 8, 100, 33, () => ToggleManagement(ManagementScreen.Talents), Surface);
+            forgeTab = Click(top, "forge-tab", "대장간 [F]", 600, 8, 112, 33, () => ToggleManagement(ManagementScreen.Forge), Surface);
             currency = Text(top, "", 0, 16, 210, 21, 12, Gold);
             currency.name = "gold-value";
             currency.style.left = StyleKeyword.Auto; currency.style.right = 136;
@@ -136,7 +141,7 @@ namespace AffixZero.Presentation
             attackState=Text(actions,"",88,36,245,17,11,Muted);
             var attackTrack=Box(actions,"attack-elapsed",88,61,242,4,Surface);
             attackFill=Box(attackTrack,"attack-elapsed-fill",0,0,0,4,Gold);
-            Text(bottom,"TAB / I 장비   K 특성   ESC 일시정지",0,102,350,20,11,Muted).style.left=Length.Percent(50);
+            Text(bottom,"I 장비   K 특성   F 대장간   ESC 닫기 / 정지",0,102,350,20,11,Muted).style.left=Length.Percent(50);
             var hints=bottom[bottom.childCount-1];hints.style.marginLeft=-175;hints.style.unityTextAlign=TextAnchor.MiddleCenter;
             var xpTrack=Box(bottom,"experience-line",18,135,0,3,Edge);
             xpTrack.style.right=18;xpTrack.style.width=StyleKeyword.Auto;
@@ -165,6 +170,18 @@ namespace AffixZero.Presentation
                 ()=>encounter.EquipItem(selectedItemIndex),()=>encounter.DiscardItem(selectedItemIndex),
                 ()=>encounter.SpendTalent(TalentId.Fury),()=>encounter.SpendTalent(TalentId.Precision),()=>encounter.SpendTalent(TalentId.Keystone),
                 ()=>encounter.ResetTalents(),()=>encounter.SetEquipmentVisible(false),portrait);
+            talentPanel=new TalentPanel(root,()=> {
+                var p=encounter.Progression;
+                return new TalentPanel.View {Points=p.UnspentPoints,Spent=p.SpentPoints,Fury=p.FuryRank,
+                    Precision=p.PrecisionRank,Keystone=p.KeystoneRank,TotalDamage=p.TotalDamage};
+            },id=>encounter.SpendTalent(id),()=>encounter.ResetTalents(),()=>encounter.ShowManagement(ManagementScreen.None));
+            forgePanel=new ForgePanel(root,()=> {
+                var p=encounter.Progression;var item=p.EquippedWeapon;
+                return new ForgePanel.View {Name=item.Name,Icon=item.IconResource,Rank=item.EnhancementRank,
+                    WeaponDamage=item.DamageBonus,TotalDamage=p.TotalDamage,Gold=p.TotalGold,Cost=p.EquippedEnhancementCost,
+                    CanEnhance=p.CanEnhanceEquipped,Affix="기본 피해 +"+item.FlatDamage+"\n"+item.AffixName+"  어픽스 피해 +"+item.AffixDamage,
+                    Notice=encounter.ProgressionNotice};
+            },()=>encounter.EnhanceWeapon(),()=>encounter.ShowManagement(ManagementScreen.Equipment),()=>encounter.ShowManagement(ManagementScreen.None));
         }
         private void SelectItem(int index) { selectedItemIndex=index; }
         private EquipmentPanel.View ReadEquipment()
@@ -183,7 +200,7 @@ namespace AffixZero.Presentation
                 Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+" s",
                 Comparison=item==null?"가방에서 무기를 선택하세요.":"공격력  "+p.TotalDamage+" → "+(p.TotalDamage+delta),
                 Delta=item==null?"":delta==0?"공격력 변화 없음":"공격력 "+(delta>0?"+":"")+delta,
-                Affix=item==null?"":item.Rarity+"  ·  무기 피해 +"+item.FlatDamage+(item.AffixDamage>0?"\n"+item.AffixName+"  ·  추가 피해 +"+item.AffixDamage:""),
+                Affix=item==null?"":item.Rarity+"  ·  기본 피해 +"+item.FlatDamage+(item.AffixDamage>0?"\n"+item.AffixName+" +"+item.AffixDamage:"")+(item.EnhancementRank>0?"  ·  강화 +"+item.EnhancementRank+" (피해 +"+item.EnhancementDamage+")":""),
                 Status=encounter.ProgressionNotice,Points=p.UnspentPoints,Fury=p.FuryRank,Precision=p.PrecisionRank,Keystone=p.KeystoneRank,
                 CanEquip=item!=null,CanSalvage=item!=null,CanReset=p.SpentPoints>0,
                 CanFury=p.UnspentPoints>0&&p.FuryRank<2,
@@ -194,7 +211,7 @@ namespace AffixZero.Presentation
         private static EquipmentPanel.ItemView ItemView(WeaponItem item)
         {
             return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=item.Name,Icon=item.IconResource,
-                Affix="무기 피해 +"+item.FlatDamage+(item.AffixDamage>0?"\n"+item.AffixName+" +"+item.AffixDamage:""),Damage=item.DamageBonus};
+                Affix="무기 피해 +"+item.DamageBonus+(item.AffixDamage>0?"\n"+item.AffixName+" +"+item.AffixDamage:"")+(item.EnhancementRank>0?" · 강화 +"+item.EnhancementRank:""),Damage=item.DamageBonus};
         }
         private void BuildResult()
         {
@@ -210,15 +227,20 @@ namespace AffixZero.Presentation
         }
         private void TogglePause()
         {
-            if(encounter.EquipmentVisible) encounter.SetEquipmentVisible(false);
+            if(encounter.ManagementVisible) encounter.ShowManagement(ManagementScreen.None);
             else encounter.SetPaused(!encounter.IsPaused);
+        }
+        private void ToggleManagement(ManagementScreen target)
+        {
+            encounter.ShowManagement(encounter.Screen==target?ManagementScreen.None:target);
         }
         private void Update()
         {
             if(root==null || encounter==null) return;
             // Project activeInputHandler=0: preserve the existing legacy key bindings without package changes.
             if(Input.GetKeyDown(KeyCode.Tab) || Input.GetKeyDown(KeyCode.I)) encounter.SetEquipmentVisible(!encounter.EquipmentVisible);
-            if(Input.GetKeyDown(KeyCode.K)) encounter.SetEquipmentVisible(true);
+            if(Input.GetKeyDown(KeyCode.K)) ToggleManagement(ManagementScreen.Talents);
+            if(Input.GetKeyDown(KeyCode.F)) ToggleManagement(ManagementScreen.Forge);
             if(Input.GetKeyDown(KeyCode.Escape)) TogglePause();
             if(Input.GetKeyDown(KeyCode.R) && encounter.HasEnded) encounter.RestartEncounter();
         }
@@ -240,20 +262,26 @@ namespace AffixZero.Presentation
             int seconds=Mathf.FloorToInt(encounter.ElapsedSeconds);
             clock.text="TEMPLE  "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
             pauseCaption.text=encounter.IsPaused?"계속하기":"일시정지";
-            paused.style.display=encounter.IsPaused&&!encounter.EquipmentVisible&&!encounter.HasEnded?DisplayStyle.Flex:DisplayStyle.None;
+            paused.style.display=encounter.IsPaused&&!encounter.ManagementVisible&&!encounter.HasEnded?DisplayStyle.Flex:DisplayStyle.None;
             attackState.text=encounter.HasEnded?"전투 종료":encounter.IsPaused?"일시정지":hero.IsAttacking?"공격 중":hero.CurrentClip==ActorClip.Hit?"피격":hero.CurrentClip==ActorClip.Walk?"접근 중":"대기";
             float progress=hero.IsAttacking && hero.AnimationSet!=null?(float)(hero.AttackElapsed/hero.AnimationSet.AttackDuration):0;
             attackFill.style.width=Length.Percent(100*Mathf.Clamp01(progress));
             PositionMarker(mapHero,hero.transform.position);
             PositionMarker(mapEnemy,enemy.transform.position);mapEnemy.style.display=enemy.IsDead?DisplayStyle.None:DisplayStyle.Flex;
             equipmentPanel.Refresh(encounter.EquipmentVisible);
+            talentPanel.Refresh(encounter.Screen==ManagementScreen.Talents);
+            forgePanel.Refresh(encounter.Screen==ManagementScreen.Forge);
+            dungeonTab.style.backgroundColor=encounter.Screen==ManagementScreen.None?Crimson:Surface;
+            equipmentTab.style.backgroundColor=encounter.Screen==ManagementScreen.Equipment?Crimson:Surface;
+            talentTab.style.backgroundColor=encounter.Screen==ManagementScreen.Talents?Crimson:Surface;
+            forgeTab.style.backgroundColor=encounter.Screen==ManagementScreen.Forge?Crimson:Surface;
             if(encounter.Progression!=null && actionIcon!=null && actionIconResource!=encounter.Progression.EquippedWeapon.IconResource)
             {
                 actionIconResource=encounter.Progression.EquippedWeapon.IconResource;
                 actionIcon.image=Resources.Load<Texture2D>(actionIconResource);
             }
             bool ended=encounter.HasEnded&&encounter.SecondsSinceEnd>=0.8f;
-            result.style.display=ended&&!encounter.EquipmentVisible?DisplayStyle.Flex:DisplayStyle.None;
+            result.style.display=ended&&!encounter.ManagementVisible?DisplayStyle.Flex:DisplayStyle.None;
             var loot=encounter.Progression==null?null:encounter.Progression.PendingLoot;
             lootText.text=loot==null?encounter.ProgressionNotice:"전리품  ·  "+loot.Name;
             pickupLoot.SetEnabled(loot!=null && !hero.IsDead);pickupLoot.style.opacity=loot==null?0.4f:1;
