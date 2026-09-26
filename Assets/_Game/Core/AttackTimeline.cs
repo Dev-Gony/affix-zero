@@ -39,7 +39,9 @@ namespace AffixZero.Core
         {
             if (!Finite(seconds) || seconds < 0) throw new ArgumentOutOfRangeException(nameof(seconds));
             if (!IsRunning || seconds == 0) return default;
-            if (!lockedTargetAlive) { Cancel(); return default; }
+            // Once impact has resolved, finish the visible recovery even if that hit
+            // killed the target. A dead target before impact still cancels the swing.
+            if (!lockedTargetAlive && !impactConsumed) { Cancel(); return default; }
             Elapsed = Math.Min(Duration, Elapsed + seconds);
             Impact result = default;
             if (!impactConsumed && Elapsed >= ImpactTime)

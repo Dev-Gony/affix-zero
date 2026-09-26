@@ -16,8 +16,10 @@ namespace AffixZero.Presentation
         [SerializeField, Min(0.01f)] private float moveSpeed = 1.6f;
         [SerializeField, Min(0.01f)] private float reach = 1.0f;
         private SpriteRenderer view;
+        private SpriteRenderer weaponView;
         private AttackTimeline timeline;
         private CombatHealth health;
+        private MeleeActor attackTarget;
         private double clipTime;
         private double hurtRemaining;
         private ActorClip clip = ActorClip.Idle;
@@ -25,11 +27,25 @@ namespace AffixZero.Presentation
         public int Hp => health == null ? maximumHp : health.Current;
         public int MaxHp => maximumHp;
         public bool IsDead => health != null && health.IsDead;
+        public bool IsReady => health != null;
+        public int ActorId => actorId;
+        public int DeathCount => health == null ? 0 : health.DeathCount;
+        public ActorClip CurrentClip => clip;
+        public ActorAnimationSet AnimationSet => animationSet;
+        public MeleeActor CurrentTarget => target;
+        public bool IsAttacking => timeline != null && timeline.IsRunning;
+        public double AttackElapsed => timeline == null ? 0 : timeline.Elapsed;
         public event Action<MeleeActor, HitReceipt> Damaged;
 
         public void Configure(ActorAnimationSet set, int id, int hp, int attackDamage)
         { animationSet = set; actorId = id; maximumHp = hp; damage = attackDamage; }
         public void SetTarget(MeleeActor other) { target = other; }
+
+        private void OnDisable()
+        {
+            timeline?.Cancel();
+            attackTarget = null;
+        }
 
         private void Start()
         {
@@ -41,6 +57,13 @@ namespace AffixZero.Presentation
             timeline = animationSet.CreateTimeline();
             health = new CombatHealth(maximumHp, defense);
             view.sprite = animationSet.Frame(ActorClip.Idle, 0);
+            if (animationSet.HasAttackWeapon)
+            {
+                var weapon = new GameObject("Attack Weapon", typeof(SpriteRenderer));
+                weapon.transform.SetParent(transform, false);
+                weaponView = weapon.GetComponent<SpriteRenderer>();
+                weaponView.enabled = false;
+            }
         }
 
         private void Update()
@@ -52,23 +75,29 @@ namespace AffixZero.Presentation
             if (IsDead) { SetClip(ActorClip.Death); RenderClip(); return; }
             if (hurtRemaining > 0)
             { hurtRemaining = Math.Max(0, hurtRemaining - delta); SetClip(ActorClip.Hit); RenderClip(); return; }
-            if (target == null || target.health == null || target.IsDead)
-            { timeline.Cancel(); SetClip(ActorClip.Idle); RenderClip(); return; }
-
-            Vector2 toTarget = target.transform.position - transform.position;
-            // Preserve attack direction until recovery finishes.
-            if (!timeline.IsRunning && Math.Abs(toTarget.x) > 0.01f)
-                view.flipX = animationSet.SourceFacesRight ? toTarget.x < 0 : toTarget.x > 0;
             if (timeline.IsRunning)
             {
-                bool sameTarget = target.actorId == timeline.TargetId;
-                Impact impact = timeline.Advance(delta, sameTarget && !target.IsDead, toTarget.magnitude <= reach + 0.05f);
+                // Keep the actual object as well as its ID locked throughout the swing.
+                // Selecting a new target cannot redirect damage already in preparation.
+                bool alive = attackTarget != null && attackTarget.isActiveAndEnabled
+                    && attackTarget.health != null && !attackTarget.IsDead;
+                bool inRange = alive && Vector2.Distance(transform.position, attackTarget.transform.position) <= reach + 0.05f;
+                Impact impact = timeline.Advance(delta, alive, inRange);
                 SetClip(ActorClip.Attack);
                 // A skipped render frame still displays the impact pose when applying its hit.
                 view.sprite = impact.Occurred ? animationSet.ImpactSprite : animationSet.AttackFrame(timeline);
-                if (impact.Occurred) target.Receive(actorId, impact.AttackId, damage);
+                RenderWeapon(impact.Occurred);
+                if (impact.Occurred) attackTarget.Receive(actorId, impact.AttackId, damage);
+                if (!timeline.IsRunning) attackTarget = null;
                 return;
             }
+            if (target == null || !target.isActiveAndEnabled || target.health == null || target.IsDead)
+            { SetClip(ActorClip.Idle); RenderClip(); return; }
+
+            Vector2 toTarget = target.transform.position - transform.position;
+            // Preserve attack direction until recovery finishes.
+            if (Math.Abs(toTarget.x) > 0.01f)
+                view.flipX = animationSet.SourceFacesRight ? toTarget.x < 0 : toTarget.x > 0;
             if (toTarget.magnitude > reach)
             {
                 Vector2 destination = (Vector2)target.transform.position - toTarget.normalized * reach;
@@ -78,8 +107,10 @@ namespace AffixZero.Presentation
             else
             {
                 timeline.Begin(target.actorId);
+                attackTarget = target;
                 SetClip(ActorClip.Attack);
                 view.sprite = animationSet.AttackFrame(timeline);
+                RenderWeapon(false);
             }
         }
 
@@ -89,6 +120,7 @@ namespace AffixZero.Presentation
             HitReceipt receipt = health.Receive(attacker, attack, power);
             if (!receipt.Accepted) return;
             timeline.Cancel();
+            attackTarget = null;
             hurtRemaining = receipt.Killed ? 0 : animationSet.HitDuration;
             clipTime = 0;
             SetClip(receipt.Killed ? ActorClip.Death : ActorClip.Hit);
@@ -96,7 +128,20 @@ namespace AffixZero.Presentation
             Damaged?.Invoke(this, receipt);
         }
         private void SetClip(ActorClip next) { if (clip != next) { clip = next; clipTime = 0; } }
-        private void RenderClip() { view.sprite = animationSet.Frame(clip, clipTime); }
+        private void RenderClip()
+        {
+            view.sprite = animationSet.Frame(clip, clipTime);
+            if (weaponView != null) weaponView.enabled = false;
+        }
+        private void RenderWeapon(bool showImpact)
+        {
+            if (weaponView == null) return;
+            weaponView.enabled = true;
+            weaponView.sprite = animationSet.WeaponFrame(timeline, showImpact);
+            weaponView.flipX = view.flipX;
+            weaponView.sortingLayerID = view.sortingLayerID;
+            weaponView.sortingOrder = view.sortingOrder + 1;
+        }
         private static bool FinitePositive(float x) => x > 0 && !float.IsNaN(x) && !float.IsInfinity(x);
     }
 }

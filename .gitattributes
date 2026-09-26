@@ -8,3 +8,5 @@
 *.md text eol=lf
 *.png binary
 *.wav binary
+Assets/Art/NinjaAdventure/LICENSE.txt -text
+Assets/Art/NinjaAdventure/SOURCE_README.md -text

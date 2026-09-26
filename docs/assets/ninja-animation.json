@@ -1,0 +1,346 @@
+{
+  "pixelsPerUnit": 16,
+  "sourceDirectionColumns": [
+    "down",
+    "up",
+    "left",
+    "right"
+  ],
+  "attackImpactFrameIndex": 1,
+  "weaponGrid": [
+    64,
+    64
+  ],
+  "weaponPivot": [
+    0.5,
+    0.375
+  ],
+  "clips": [
+    {
+      "name": "Idle",
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Idle.png",
+      "direction": "right",
+      "framesPerSecondProposed": 5,
+      "fpsIsProjectTuning": true,
+      "pivot": [
+        0.5,
+        0.25
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "rectTopLeft": [
+            96,
+            0,
+            32,
+            32
+          ],
+          "pixelSha256": "eddebee4c3032ac96807a6b2683a8b9f08438886e8ea83ec34bd6d42f3a570b0",
+          "alphaBounds": [
+            8,
+            9,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 1,
+          "rectTopLeft": [
+            96,
+            32,
+            32,
+            32
+          ],
+          "pixelSha256": "b5f5d78e19a028f11070b47ae021e28966a7cfa02cfdfca8b0878e71a7a83cad",
+          "alphaBounds": [
+            8,
+            9,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 2,
+          "rectTopLeft": [
+            96,
+            64,
+            32,
+            32
+          ],
+          "pixelSha256": "3b182c4eed2b64b8d4ef7b45da868b4de0a2f24463907bfad2353eea57e08543",
+          "alphaBounds": [
+            8,
+            10,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 3,
+          "rectTopLeft": [
+            96,
+            96,
+            32,
+            32
+          ],
+          "pixelSha256": "651019d68b888c00a595fa613ecd29f0a3f1025d9fd65f3b4f7b99a7128b8587",
+          "alphaBounds": [
+            8,
+            10,
+            23,
+            24
+          ]
+        }
+      ],
+      "uniquePixelFrames": 4
+    },
+    {
+      "name": "Walk",
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Walk.png",
+      "direction": "right",
+      "framesPerSecondProposed": 8,
+      "fpsIsProjectTuning": true,
+      "pivot": [
+        0.5,
+        0.25
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "rectTopLeft": [
+            96,
+            0,
+            32,
+            32
+          ],
+          "pixelSha256": "8f68b5bde859dc634204d6e8239bce94c9bd7359f27b223893efc5e2c3f0fbe4",
+          "alphaBounds": [
+            8,
+            9,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 1,
+          "rectTopLeft": [
+            96,
+            32,
+            32,
+            32
+          ],
+          "pixelSha256": "25cf95cbcd0de4346e5240a79f77b3ee57190730b2299ace80013afb84783c4a",
+          "alphaBounds": [
+            8,
+            8,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 2,
+          "rectTopLeft": [
+            96,
+            64,
+            32,
+            32
+          ],
+          "pixelSha256": "b256df92a56b649e871800903bb140c3a5b00ad73f2edabf106835552bf99262",
+          "alphaBounds": [
+            8,
+            9,
+            23,
+            24
+          ]
+        },
+        {
+          "index": 3,
+          "rectTopLeft": [
+            96,
+            96,
+            32,
+            32
+          ],
+          "pixelSha256": "26b1c1fdd2fc4d40c89b28a587189cc60e857fac232b254c7128b6c6874b11be",
+          "alphaBounds": [
+            8,
+            9,
+            23,
+            24
+          ]
+        }
+      ],
+      "uniquePixelFrames": 4
+    },
+    {
+      "name": "Attack",
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Attack.png",
+      "direction": "right",
+      "framesPerSecondProposed": 10,
+      "fpsIsProjectTuning": true,
+      "pivot": [
+        0.5,
+        0.25
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "rectTopLeft": [
+            96,
+            0,
+            32,
+            32
+          ],
+          "pixelSha256": "53e298f6d854277833a1e087e4e619f14c01c4f3b3a370de3b97585c929fd4c4",
+          "alphaBounds": [
+            5,
+            7,
+            22,
+            24
+          ]
+        },
+        {
+          "index": 1,
+          "rectTopLeft": [
+            96,
+            32,
+            32,
+            32
+          ],
+          "pixelSha256": "edede9ce59b1715ffbc985637ab86a3d85b37700cbed019b4d6b8a80e18eaef3",
+          "alphaBounds": [
+            8,
+            8,
+            25,
+            24
+          ]
+        },
+        {
+          "index": 2,
+          "rectTopLeft": [
+            96,
+            64,
+            32,
+            32
+          ],
+          "pixelSha256": "477fb047e53e5875f9a418d21efa95e0b7fb989c99275971d6577fa47a60ba27",
+          "alphaBounds": [
+            9,
+            9,
+            25,
+            24
+          ]
+        },
+        {
+          "index": 3,
+          "rectTopLeft": [
+            96,
+            96,
+            32,
+            32
+          ],
+          "pixelSha256": "a10d8d16872a46b8f8279ac99f66b41a6d53c97812c8f4f1f5425dd5766624f1",
+          "alphaBounds": [
+            9,
+            9,
+            25,
+            24
+          ]
+        }
+      ],
+      "uniquePixelFrames": 4
+    },
+    {
+      "name": "Hit",
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Hit.png",
+      "direction": "right",
+      "framesPerSecondProposed": 10,
+      "fpsIsProjectTuning": true,
+      "pivot": [
+        0.5,
+        0.25
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "rectTopLeft": [
+            96,
+            0,
+            32,
+            32
+          ],
+          "pixelSha256": "0ebfce96e2a115d2e727d5ce4d5595f6e7e68d9b5f06f529a7e827f5299815ba",
+          "alphaBounds": [
+            8,
+            8,
+            22,
+            24
+          ]
+        },
+        {
+          "index": 1,
+          "rectTopLeft": [
+            96,
+            32,
+            32,
+            32
+          ],
+          "pixelSha256": "0584c826258c80ac1d8749b0fe2f91f2f119620baa794c40f4d2549d1a0192dd",
+          "alphaBounds": [
+            8,
+            8,
+            23,
+            24
+          ]
+        }
+      ],
+      "uniquePixelFrames": 2
+    },
+    {
+      "name": "Dead",
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Dead.png",
+      "direction": "shared",
+      "framesPerSecondProposed": 6,
+      "fpsIsProjectTuning": true,
+      "pivot": [
+        0.5,
+        0.25
+      ],
+      "frames": [
+        {
+          "index": 0,
+          "rectTopLeft": [
+            0,
+            0,
+            32,
+            32
+          ],
+          "pixelSha256": "4bb1e8b62427e35e9d95a62c3dc2fbc6a7d7fd2cc7dce200dae0139a5dfe2d74",
+          "alphaBounds": [
+            7,
+            12,
+            25,
+            26
+          ]
+        },
+        {
+          "index": 1,
+          "rectTopLeft": [
+            0,
+            32,
+            32,
+            32
+          ],
+          "pixelSha256": "aa99f6e523aa7ebc5666eece659c0549632b08a45e64c2640347a2b17257f7a1",
+          "alphaBounds": [
+            8,
+            11,
+            24,
+            26
+          ]
+        }
+      ],
+      "uniquePixelFrames": 2
+    }
+  ]
+}

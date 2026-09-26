@@ -18,6 +18,13 @@ namespace AffixZero.Editor
         private bool licenseReviewed;
         private Vector2 scroll;
 
+        private void OnEnable()
+        {
+            hero = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(ReviewedArtSetup.DataRoot + "Hero.asset");
+            enemy = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(ReviewedArtSetup.DataRoot + "Enemy.asset");
+            ground = ReviewedArtSetup.EnvironmentSpriteNamed("Grass");
+        }
+
         [MenuItem("AFFIX/Project Dashboard")]
         public static void Open() => GetWindow<ProjectDashboard>("AFFIX Project");
 
@@ -33,6 +40,7 @@ namespace AffixZero.Editor
                 EditorGUILayout.HelpBox("Editor version differs. Do not silently upgrade project settings; record the version first.", MessageType.Warning);
             if (GUILayout.Button("Export setup report")) ExportReport();
             if (GUILayout.Button("Open current documentation")) EditorUtility.RevealInFinder(Path.GetFullPath("docs/README.md"));
+            if (GUILayout.Button("Import reviewed Ninja Adventure art and create encounter")) ReviewedArtSetup.Build();
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("First encounter assets", EditorStyles.boldLabel);
             hero = (ActorAnimationSet)EditorGUILayout.ObjectField("Hero animation set", hero, typeof(ActorAnimationSet), false);
@@ -64,6 +72,15 @@ namespace AffixZero.Editor
         {
             string issue = ReadinessIssue();
             if (issue != null) { Debug.LogError(issue); return; }
+            CreateReviewedEncounter(hero, enemy, ground);
+        }
+
+        public static void CreateReviewedEncounter(ActorAnimationSet hero, ActorAnimationSet enemy, Sprite ground)
+        {
+            if (Application.unityVersion != Version) throw new InvalidOperationException("Unexpected editor version.");
+            if (hero == null || enemy == null || ground == null) throw new InvalidOperationException("Reviewed assets are required.");
+            string problem = hero.ValidateSet() ?? enemy.ValidateSet();
+            if (problem != null) throw new InvalidOperationException(problem);
             const string path = "Assets/_Game/Scenes/FirstEncounter.unity";
             if (!EditorSceneManager.SaveCurrentModifiedScenesIfUserWantsTo()) return;
             if (File.Exists(path)) { EditorSceneManager.OpenScene(path); return; }
@@ -76,21 +93,35 @@ namespace AffixZero.Editor
             camera.transform.position = new Vector3(0, 0, -10);
             camera.orthographic = true;
             camera.orthographicSize = 4.2f;
+            camera.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
+            camera.transparencySortAxis = Vector3.up;
             camera.clearFlags = CameraClearFlags.SolidColor;
             camera.backgroundColor = new Color(0.84f, 0.93f, 0.79f);
             Transform world = new GameObject("Field").transform;
-            for (int y = -4; y < 4; y++)
-            for (int x = -7; x < 7; x++)
+            for (int y = -6; y < 6; y++)
+            for (int x = -12; x < 12; x++)
             {
-                SpriteRenderer tile = new GameObject("Ground", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
-                tile.transform.SetParent(world);
-                tile.transform.position = new Vector3(x + 0.5f, y + 0.5f, 0);
-                tile.transform.localScale = new Vector3(1 / ground.bounds.size.x, 1 / ground.bounds.size.y, 1);
-                tile.sprite = ground;
-                tile.sortingOrder = -10000;
+                string name = y == 1 ? "PathTop" : y == 0 ? "Dirt" : y == -1 ? "PathBottom"
+                    : (x * x + y * y) % 11 == 0 ? "GrassDetail" : (x - y + 30) % 5 == 0 ? "GrassTufts" : "Grass";
+                Sprite sprite = ReviewedArtSetup.EnvironmentSpriteNamed(name) ?? ground;
+                Place(sprite, name, new Vector2(x + .5f, y + .5f), world, -10000);
             }
+            PlaceDecoration("Pond", new Vector2(4.4f, -2.7f), world, -9500);
+            PlaceDecoration("Tree", new Vector2(-5.8f, 1.7f), world);
+            PlaceDecoration("Tree", new Vector2(-3.8f, 2.25f), world);
+            PlaceDecoration("Tree", new Vector2(5.7f, 1.55f), world);
+            PlaceDecoration("Tree", new Vector2(6.7f, -1.6f), world);
+            PlaceDecoration("Shrub", new Vector2(-5.0f, -2.2f), world);
+            PlaceDecoration("Shrub", new Vector2(3.7f, 2.0f), world);
+            PlaceDecoration("Flowers", new Vector2(-3.8f, -2.5f), world);
+            PlaceDecoration("Flowers", new Vector2(5.0f, 2.0f), world);
+            PlaceDecoration("Daisies", new Vector2(1.3f, 2.4f), world);
+            PlaceDecoration("Daisies", new Vector2(-1.8f, -2.2f), world);
+            PlaceDecoration("Rock", new Vector2(2.65f, -2.3f), world);
             MeleeActor player = MakeActor("Hero", hero, 1, 120, 30, new Vector3(-2.5f, 0, 0));
             MeleeActor opponent = MakeActor("Melee Enemy", enemy, 2, 80, 10, new Vector3(2.5f, 0, 0));
+            opponent.GetComponent<SpriteRenderer>().color = new Color(1, .7f, .72f);
+            opponent.GetComponent<SpriteRenderer>().flipX = true;
             player.SetTarget(opponent);
             opponent.SetTarget(player);
             new GameObject("Encounter", typeof(FirstEncounter)).GetComponent<FirstEncounter>().Configure(player, opponent);
@@ -99,6 +130,22 @@ namespace AffixZero.Editor
                 EditorBuildSettings.scenes = EditorBuildSettings.scenes.Concat(new[] { new EditorBuildSettingsScene(path, true) }).ToArray();
             AssetDatabase.SaveAssets();
             Debug.Log("FirstEncounter created using selected assets. Unity Play and visual acceptance are still required.");
+        }
+
+        private static void PlaceDecoration(string name, Vector2 position, Transform parent, int? order = null)
+        {
+            Sprite sprite = ReviewedArtSetup.EnvironmentSpriteNamed(name);
+            if (sprite != null) Place(sprite, name, position, parent, order ?? -(int)(position.y * 100));
+        }
+
+        private static SpriteRenderer Place(Sprite sprite, string name, Vector2 position, Transform parent, int order)
+        {
+            var view = new GameObject(name, typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
+            view.transform.SetParent(parent);
+            view.transform.position = position;
+            view.sprite = sprite;
+            view.sortingOrder = order;
+            return view;
         }
 
         private static MeleeActor MakeActor(string name, ActorAnimationSet set, int id, int hp, int power, Vector3 position)

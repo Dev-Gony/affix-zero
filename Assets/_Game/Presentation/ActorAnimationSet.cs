@@ -14,6 +14,7 @@ namespace AffixZero.Presentation
         [SerializeField] private Sprite[] attack = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] hit = Array.Empty<Sprite>();
         [SerializeField] private Sprite[] death = Array.Empty<Sprite>();
+        [SerializeField] private Sprite[] attackWeapon = Array.Empty<Sprite>();
         [SerializeField, Min(1)] private float attackFps = 12;
         [SerializeField, Min(1)] private float movementFps = 10;
         [SerializeField, Min(1)] private float reactionFps = 10;
@@ -25,12 +26,19 @@ namespace AffixZero.Presentation
         public string SourceLicenseRecord => sourceLicenseRecord;
         public Sprite ImpactSprite => attack[impactFrame];
         public double HitDuration => hit.Length / (double)reactionFps;
+        public bool HasAttackWeapon => attackWeapon != null && attackWeapon.Length > 0;
 
         public string ValidateSet()
         {
             string problem = Check(idle, 1, "idle") ?? Check(walk, 2, "walk")
                 ?? Check(attack, 3, "attack") ?? Check(hit, 1, "hit") ?? Check(death, 2, "death");
             if (problem != null) return problem;
+            if (HasAttackWeapon)
+            {
+                if (attackWeapon.Length != attack.Length) return "Weapon frames must match the body attack timeline.";
+                problem = Check(attackWeapon, 3, "attack weapon");
+                if (problem != null) return problem;
+            }
             if (!PositiveFinite(attackFps) || !PositiveFinite(movementFps) || !PositiveFinite(reactionFps))
                 return "Animation FPS must be positive and finite.";
             if (impactFrame <= 0 || impactFrame >= attack.Length - 1)
@@ -50,6 +58,12 @@ namespace AffixZero.Presentation
         {
             if (timeline == null) throw new ArgumentNullException(nameof(timeline));
             return attack[timeline.FrameAt(attack.Length, attackFps)];
+        }
+
+        public Sprite WeaponFrame(AttackTimeline timeline, bool showImpact)
+        {
+            if (!HasAttackWeapon) return null;
+            return attackWeapon[showImpact ? impactFrame : timeline.FrameAt(attackWeapon.Length, attackFps)];
         }
 
         public Sprite Frame(ActorClip clip, double elapsed)

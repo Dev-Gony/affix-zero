@@ -1,0 +1,70 @@
+{
+  "packSha256": "95a06f4fdcfd1882f061a45ff313b7c905dbe2de1e8512b281d7937df62a7b15",
+  "files": [
+    {
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Attack.png",
+      "bytes": 2411,
+      "sha256": "f4a1d75b7bfdb8a1f038d65d1a0b07ee7d38e1f97c9edf827341c0a94b6898b9"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Dead.png",
+      "bytes": 566,
+      "sha256": "3d14bec49e3c1ef58df5681a6f495d56c121fe9be7824607c543aa2e76040b4e"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Hit.png",
+      "bytes": 1406,
+      "sha256": "e296cec728ad53665a10a805e2e52324a542ee57675e6a9e68881e64af333f65"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Idle.png",
+      "bytes": 1560,
+      "sha256": "58375e9f65d40403aded184328456204c8008df05bafab7a74b846e68b6a657b"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Characters/NinjaGreen/Walk.png",
+      "bytes": 1847,
+      "sha256": "d03702e8b5bd7e98c177c27f80acb00e09f339596269209df1b6594a39bb6c36"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "bytes": 29615,
+      "sha256": "e111065065edf806e7e893330086e68efc8755175d92f14d087b42d40a331e16"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloorDetail.png",
+      "bytes": 5446,
+      "sha256": "eab91fc2a1d10191e3c26a6e936175a2492b6ef481c4ba7d984b717954bf1c01"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "bytes": 43359,
+      "sha256": "51eedd957ad4ac88988d170aa83a42404ef8fdebff9e6753b6fe80841ab3d5bb"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetWater.png",
+      "bytes": 23565,
+      "sha256": "927e1fa1e793bb0398fdaad40cea22792c20f66703cdba80fb9462df7cbc275c"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/LICENSE.txt",
+      "bytes": 6722,
+      "sha256": "9bc2cd77030dd73fd2497c5729556a11524fa04099d8351bc527fd4d4c31b916"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/SOURCE_README.md",
+      "bytes": 599,
+      "sha256": "6865198a6d7b052636269e9db0de966304737d5f8bacf683f2ac06ad60a68bd7"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Weapons/Axe.png",
+      "bytes": 2486,
+      "sha256": "6e0e7416956e92f4775fb9a1a5734d67cec14c5da4b8b38211d7f82162a9b639"
+    },
+    {
+      "path": "Assets/Art/NinjaAdventure/Weapons/Katana.png",
+      "bytes": 2120,
+      "sha256": "2364fdcef781ae4422c44c79af6d4661f86d9e835c834ded9ea1ace3b7ee0d4b"
+    }
+  ]
+}

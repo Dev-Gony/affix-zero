@@ -50,7 +50,19 @@ internal static class Program
             Throws(() => attack.Begin(0), "invalid target rejected");
             Throws(() => attack.FrameAt(0, 8), "empty frame set rejected");
             Check(attack.FrameAt(6, 8) == 5, "last frame clamped");
+            var lethal = new AttackTimeline(0.25, 0.75);
+            lethal.Begin(7);
+            Check(lethal.Advance(0.25, true, true).Occurred, "lethal swing reaches impact");
+            Check(!lethal.Advance(0.125, false, false).Occurred && lethal.IsRunning,
+                "target death after impact preserves recovery without ghost damage");
+            lethal.Advance(0.5, false, false);
+            Check(!lethal.IsRunning && lethal.Elapsed == lethal.Duration,
+                "lethal swing finishes full recovery");
+            var restarted = new AttackTimeline(0.25, 0.75);
+            Check(!restarted.IsRunning && restarted.AttackId == 0 && restarted.TargetId == 0,
+                "new encounter starts without prior attack state");
             CombatHealthChecks.Run(Check, Throws);
+            EncounterRewardsChecks.Run(Check, Throws);
             Console.WriteLine("CORE_SMOKE_PASSED checks=" + passed + " scope=pure-CSharp-not-Unity-editor");
             return 0;
         }

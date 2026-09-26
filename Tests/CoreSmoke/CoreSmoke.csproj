@@ -9,5 +9,6 @@
   <ItemGroup>
     <Compile Include="../../Assets/_Game/Core/AttackTimeline.cs" Link="AttackTimeline.cs" />
     <Compile Include="../../Assets/_Game/Core/CombatHealth.cs" Link="CombatHealth.cs" />
+    <Compile Include="../../Assets/_Game/Core/EncounterRewards.cs" Link="EncounterRewards.cs" />
   </ItemGroup>
 </Project>
