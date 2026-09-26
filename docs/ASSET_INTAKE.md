@@ -1,14 +1,14 @@
 # 새 외부 에셋 반입 절차 v0.2
 
-확인일: 2026-09-26. 원본 ZIP은 아직 확보되지 않았다. 사용자에게 현재 후보의 원본을 요청하는 것과 실제 반입 완료를 구분한다.
+확인일: 2026-09-26. 새 Ninja Adventure 제작자 원본과 CC0 동봉 전문을 확보했고, 최소 11 PNG/라이선스/README를 반입했다. 상세 권리·SHA·프레임 검수는 [반입 기록](assets/ninja-adventure.md)에 있다. Unity slicing/Play/사용자 시각 승인은 별도 미완료 단계다.
 
-## 1. 현재 후보의 권리 구분
+## 1. 미채택 후보의 권리 구분
 
 제작자 페이지: https://pixelfrog-assets.itch.io/tiny-swords
 
 페이지는 현행 Free Pack/Enemy Pack의 수정·개인/상업 사용을 허용하면서 재배포/재판매/재포장을 제한한다. 별도로 `TS_old version_CC0 Licensed` 파일을 제공한다. **공개 GitHub 반입 대상으로 검토하는 것은 정확히 CC0 구버전이며, 현행 무료 팩에 그 권리를 임의 적용하지 않는다.**
 
-페이지상의 현행 격자/애니메이션 FPS 안내를 구버전 파일에 자동 적용하지 않는다. 구버전 ZIP에 들어 있는 문서와 실제 PNG를 검수해야 한다. Ninja Adventure/Kenney는 대안 검토 가능하지만 이번에 원본을 반입하거나 승인한 적은 없다.
+Tiny Swords CC0 구버전 ZIP을 실제 검수한 결과 Warrior의 Hit 클립이 없어서 U1 계약에 미달했다. 현재 팩과 CC0 구버전의 권리를 혼합하지 않았으며 이 팩은 Assets에 반입하지 않았다. 자세한 내용은 [미채택 기록](assets/tiny-swords-rejected.md)에 있다. 대신 제작자 CC0 전문을 동봉한 신규 Ninja Adventure를 채택했다.
 
 ## 2. 반입 기록
 
@@ -26,4 +26,4 @@ SpriteRenderer에 사용할 import 설정, pixels-per-unit, point filter, sprite
 
 ## 현재 상태
 
-원본 확보 NOT_DONE / 라이선스 파일 검수 NOT_DONE / 프레임 확인 NOT_DONE / Unity import NOT_RUN / 사용자 시각 승인 NOT_RUN.
+원본 확보 DONE / 라이선스 파일·공개 재배포 근거 검수 DONE / 실제 프레임·pivot·impact 정적 확인 DONE / 원본 파일 무결성 PASS / Unity import BLOCKED_BEFORE_IMPORT_EXIT198 / 사용자 시각 승인 NOT_RUN. 캐릭터 방향열과 환경 rect는 JSON으로 기록하고 Tools/validate_reviewed_art.py로 원본 SHA·픽셀 내용·범위를 확인한다.

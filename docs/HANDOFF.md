@@ -1,27 +1,39 @@
-# 현재 인수인계 | Unity U1 연결 준비
+# 현재 인수인계 | 신규 CC0 아트와 U1 실행 준비
 
-갱신: 2026-09-26. 현재 저장소 Dev-Gony/affix-zero, 브랜치 restart/unity-6, PR #19 Draft. 현재 Unity 소스 기준은 009740a1cee5b1e7846c5531f9a6269439b192eb이며 이후 문서와 검증 결과 커밋은 원격에서 재조회한다.
+갱신: 2026-09-26. 저장소 Dev-Gony/affix-zero, 브랜치 restart/unity-6, PR #19 Draft. 구현 기준 커밋 dbe8d76e286cdecfcf302dd42a9672a40fb87b9a. 이후 도구/문서 커밋은 최신 HEAD를 확인한다.
 
-## 확정된 사용자 정보
+## 사용자와 환경
 
-Unity를 D드라이브에 설치 완료했다. 버전/정확한 exe 경로/프로젝트 import는 아직 보고서로 확인하지 않았다. 기존 Godot 코드와 이미지 전부 폐기, Unity/C#로 새 시작, 밝은 외부 라이선스 리소스 우선, 채팅+GitHub 개발이다. 과거 작업은 용량이 크면 지우고 문서로만 남기길 선호한다.
+사용자는 현재 Unity Hub에서 에디터 설치 중이며 완료 후 알려주겠다고 했다. 그때까지 추가 Unity 실행을 보류한다. 이미 존재하는 D:\Program Files\Unity 6000.3.24f1\Editor\Unity.exe의 ProductVersion은 6000.3.24f1_4e7b9b5b6244로 프로젝트와 일치했다. 1회 batch 실행은 import 전에 라이선스 부재로 종료 코드 198을 반환했다. 설치·라이선스 문제를 해결됐다고 추정하지 않는다. 재설치나 옛 Godot 폴더 동기화를 요구하지 않는다.
 
-## 작성된 것
+## 실제 반영한 것
 
-새 AttackTimeline에 더해 CombatHealth의 HP/방어/공격자+공격ID 중복 차단/사망1회와 코어 테스트를 추가했다. MeleeActor는 실제 이동·프레임 표시·impact 피해·피격·사망 연결 코드다. ActorAnimationSet은 클립 재생과 방향을 제공한다. Project Dashboard는 실제 에디터 경로/버전 보고와 검수된 영웅/적/바닥을 연결하는 씬 제작 도구다. 빈 씬 생성 메뉴는 Dashboard로 연결한다.
+- 새 Ninja Adventure 제작자 원본과 CC0 전문 확인, 최소 11 PNG와 라이선스/README 반입. SHA·프레임·방향·pivot·impact는 docs/assets에 기록. Tiny Swords CC0 구버전은 Hit 결손으로 미채택.
+- NinjaGreen의 실제 idle/walk/attack/hit/death와 Katana/Axe 공격 프레임을 연결하는 ReviewedArtSetup. 영웅과 첫 적은 같은 신규 캐릭터를 공유하며 적은 진영 tint와 Axe로 구분한다. 별도 몬스터 아트를 완성한 것이 아니다.
+- 몸·무기의 공통 공격 시간표, 공격 대상 object 잠금, 치명타 뒤 회복 동작, 취소/중복 피해 차단.
+- 밝은 초원·흙길·연못·나무 씬 생성기, 아이보리/초록 HUD, 자동 접근·공격, 처치 후 XP25/Gold8 자동수령 1회, 재시작 초기화. 접촉 드랍·영구 저장은 없다.
+- 실제 Play/피해/사망/보상/씬 재시작을 검사하는 EncounterVerification과 Windows 빌드 진입점. 도구 작성과 실행 성공은 별개.
+- Tools/validate_reviewed_art.py와 preview_reviewed_art.py: 원본 SHA/실프레임 검사, 원본 재생 HTML 생성. HTML은 Unity 게임 실행화면이 아니다.
 
-로컬 Tools/Local/Inspect-Storage.cmd는 옛 두 폴더 용량과 Git 연결 관계를 읽고 Build/Reports에 JSON만 저장한다. 삭제 기능은 없다. 초기 clone은 depth1/no-tags를 허용하며 audit는 shallow 상태와 CI의 역사 비교를 구분한다.
+## 실행한 검사와 한계
 
-## 아직 완료되지 않은 것
+코어 56 checks PASS. 설치된 Unity DLL을 참조한 전체 C# 정적 컴파일 오류0/경고0. 현재 트리 감사 PASS, 이전 엔진 잔존 파일0. 정적 컴파일은 Unity asmdef/패키지/import/Play 검증을 대신하지 않는다.
 
-신규 원본 ZIP/동봉 라이선스/실제 프레임은 미확보·미검수다. Unity import/Editor 메뉴 실행/실제 플레이/프레임 품질/Windows 빌드는 미검증이다. 신규 XP/Gold 회수·장비·스킬·펫·시즌은 미구현이다. 코어 CI와 도구 CI 결과는 VERIFICATION의 source SHA를 보고 사용한다. U1 전체 완료라고 쓰지 않는다.
+수치 시뮬에서 2프레임 피격을 6fps로 재생하면 영웅이 계속 경직됨을 확인해 reactionFps10으로 조정했다. hero attack8fps/enemy10fps, impact index1, 이동8fps. 시뮬은 실제 Unity Play 결과가 아니다.
 
-## 다음 실제 행동
+**Unity import/씬 생성/Play/Windows build/사용자 시각 승인은 미완료.** 현재 PNG .meta는 GUID를 보존하는 초기 설정이며 실제 slice와 .asset/.unity는 승인 버전 에디터에서 생성한다. 빈 씬을 완성 게임으로 보고하지 않는다.
 
-사용자는 새 Unity repo를 최신화하고 Hub에서 루트 폴더를 연 뒤 AFFIX/Project Dashboard → Export setup report를 실행한다. 정확한 Unity exe 경로를 다시 묻지 않는다. 삭제를 검토하려면 별도 Inspect-Storage.cmd 보고서를 만든다. 개인 경로는 공유 전 확인한다.
+## 설치 완료 후 순서
 
-개발은 Tiny Swords 제작자 제공 CC0 구버전 ZIP 확보와 license/frame 검수 → 새 Sprite import/ActorAnimationSet → 밝은 첫 전투 씬 생성/실행 순서다. 에셋이 없다고 거절된 이미지·막대 도형을 복원하지 않는다. 그 뒤 U1-D 회수와 U2로 간다.
+1. 완료 안내 후 프로젝트를 사용하는 다른 Unity 프로세스가 없는지 확인하고 현행 버전으로 실행. 라이선스 오류가 지속될 때만 Hub 로그인/라이선스 활성화를 요청한다.
+2. AffixZero.Editor.ReviewedArtSetup.Build를 -batchmode -quit -projectPath와 함께 실행하거나 에디터 AFFIX → Setup → Import Reviewed Art and Create Encounter를 사용. 기존 씬은 덮어쓰지 않는다.
+3. AffixZero.Editor.EncounterVerification.Run은 -batchmode와 **-quit 없이** 실행. 실제 Play와 domain reload를 기다려 Build/Reports/encounter-verification.json을 생성. PNG는 Camera.Render 월드만 포함하며 HUD는 별도 확인.
+4. Play 통과 후 AffixZero.Editor.EncounterVerification.BuildWindows 실행. 생성된 scene/data/.meta/ProjectSettings를 검토·추적. Windows 실행과 사용자 시각 승인은 따로 확인.
 
-## 새 채팅 재개 프롬프트
+U2 웨이브·펫·가챠·시즌은 U1 승인 전 확장하지 않는다. PR 병합, 옛 사용자 폴더/세이브/stash/Git history 삭제는 수행하지 않았다.
 
-Dev-Gony/affix-zero의 restart/unity-6 최신 HEAD, PR #19, docs/HANDOFF.md, STATUS.json, VERIFICATION.json을 읽고 이어가라. 사용자는 Unity를 D드라이브에 설치했고 기존 코드/아트는 완전히 폐기했다. 현재 U1 연결 소스 009740a에는 AttackTimeline, CombatHealth, MeleeActor, ActorAnimationSet, FirstEncounter, ProjectDashboard와 읽기 전용 저장공간 보고 도구가 있다. Unity 에디터 자체 검증과 새 원본 아트는 아직 없다. 단순 C# 테스트를 게임 완성으로 보고하지 마라. 새 리소스 후보는 Tiny Swords CC0 구버전이고 원본/라이선스/동작을 실제 검수해야 한다. 과거는 docs/history의 텍스트 회고만 보존하고 코드/이미지를 복원하지 마라. 원격 Git history와 사용자 옛 폴더는 삭제하지 않았으며 용량/worktree 관계 확인 후 구체적 승인으로만 정리한다. 필요한 로컬 행동은 최소화하고 끝에는 세 항목 진행 상황 체크포인트를 남겨라.
+## 진행 상황 체크포인트
+
+1. 완료: 신규 원본 검수, U1 연결 소스, 코어/정적 검사, GitHub 구현 업데이트.
+2. 준비: 실제 씬 생성·Play·빌드 도구와 원본 애니메이션 미리보기.
+3. 대기: 설치 완료 안내 후 실제 Unity 검증과 시각 승인.

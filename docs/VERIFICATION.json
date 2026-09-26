@@ -28,13 +28,57 @@
     "reason": "Expected non-repository Git reads left nonzero LASTEXITCODE despite report assertions passing.",
     "resolution": "Keep informational read failure in JSON; reset process status only after successful report creation; add exit-code assertion. Retest passed at 64dc3f2."
   },
-  "unity_editor_import": "NOT_RUN",
+  "unity_editor_import": "BLOCKED_BEFORE_IMPORT_EXIT_198",
   "unity_animation_render": "NOT_RUN",
   "windows_build": "NOT_RUN",
   "user_playtest": "NOT_RUN",
-  "new_licensed_art_import": "NOT_DONE",
+  "new_licensed_art_import": "RAW_SOURCES_REVIEWED_UNITY_SLICING_PENDING",
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
   "remote_history_rewritten": false,
-  "scope": "Core C# and synthetic storage inspection only; no Unity gameplay acceptance."
+  "scope": "Current source art verification, 56 core checks and installed-API static C# compile. Unity import/Play/build/user approval not completed.",
+  "current_u1": {
+    "implementation_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
+    "recorded_date": "2026-09-26",
+    "core_checks_passed": 56,
+    "core_scope": "AttackTimeline, CombatHealth, EncounterRewards; pure C#",
+    "static_csharp_compile": {
+      "result": "PASS",
+      "errors": 0,
+      "warnings": 0,
+      "reference_editor": "6000.3.24f1_4e7b9b5b6244",
+      "scope": "Installed Unity API DLL references; not Unity asmdef/package compilation, asset import, rendering, Play or player build",
+      "reproduce": "Tools/Local/Test-UnitySources.ps1"
+    },
+    "asset_integrity": {
+      "result": "PASS",
+      "source_files": 13,
+      "source_pngs": 11,
+      "right_facing_body_frames": 16,
+      "environment_rectangles": 15,
+      "reproduce": "python Tools/validate_reviewed_art.py"
+    },
+    "art_preview": {
+      "result": "BROWSER_SOURCE_RENDER_PAUSE_AND_IMPACT_STEP_VERIFIED",
+      "scope": "HTML canvas original body+weapon frames, not Unity or user visual approval"
+    },
+    "restart_audit": "PASS",
+    "balance_simulation": {
+      "result": "6 scenarios at 30/60/120fps and both actor update orders: hero96HP, enemy0HP after reactionFps10 adjustment",
+      "scope": "Translated numerical runtime logic, NOT Unity Play"
+    },
+    "editor_attempt": {
+      "result": "BLOCKED_BEFORE_IMPORT",
+      "exit_code": 198,
+      "reason": "No valid Unity Editor license found",
+      "local_log": "Build/Reports/unity-initial-import.log",
+      "latest_user_report": "Unity Hub editor installation in progress; wait for completion notification"
+    },
+    "github_ci": {
+      "source_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
+      "run_id": 36215204628,
+      "result": "success",
+      "scope": "Core tests, tracked-tree audit and synthetic Windows storage report; not Unity"
+    }
+  }
 }

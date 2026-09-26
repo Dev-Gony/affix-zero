@@ -14,7 +14,7 @@
 
 ## 구현·검증
 
-코어 C#과 Unity 표시·편집 도구를 분리한다. 현재 U1 연결 코드는 원본 리소스와 로컬 에디터 검증을 기다리는 상태다. `.NET` CI는 `UnityEngine` 코드를 컴파일하지 않는다. 소스 작성, 코어 테스트, Unity import, Play, Windows build, 사용자 시각 승인 상태를 구분한다. `Assets/**/*.meta`를 추적한다. 버전·패키지·렌더러를 승인 없이 바꾸지 않는다.
+코어 C#과 Unity 표시·편집 도구를 분리한다. 현재 U1은 신규 CC0 원본과 연결 코드를 확보했고 로컬 에디터 검증을 기다린다. `.NET` CI는 `UnityEngine` 코드를 컴파일하지 않는다. 로컬 설치 DLL 참조 정적 컴파일도 Unity import/Play 검증을 대체하지 않는다. 소스 작성, 코어 테스트, Unity import, Play, Windows build, 사용자 시각 승인 상태를 구분한다. `Assets/**/*.meta`를 추적한다. 버전·패키지·렌더러를 승인 없이 바꾸지 않는다.
 
 ## 과거 자료와 용량
 

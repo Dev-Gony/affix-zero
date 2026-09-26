@@ -1,32 +1,26 @@
-# AFFIX: ZERO | Unity 재시작
+# AFFIX: ZERO
 
-**현재 개발선:** `restart/unity-6` · PR #19 · Unity 6.3 LTS `6000.3.24f1` · C# · Built-in 2D.
+자동사냥을 중심으로 캐주얼 슈팅·로그라이크·핵앤슬래시·액션 RPG를 결합하는 새 Unity 프로젝트입니다.
 
-사용자는 Unity를 D드라이브에 설치했다고 확인했다. 정확한 실행 파일 경로, 설치 버전, 이 프로젝트의 에디터 import/Play 완료 여부는 아직 보고받지 않았다. 설치 질문을 반복하지 말고 Unity에서 실제 경로를 보고하게 한다.
+**개발선:** restart/unity-6 · [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19) · Unity 6000.3.24f1 · C# · Built-in 2D.
 
-## 현재 상태
+## 현재 구현
 
-기존 Godot 코드와 이미지는 현재 파일 트리에 없다. 새로 작성한 C# 공격 시간표와 체력/중복 타격 규칙, Unity 액터 연결 코드, 실제 프레임 데이터 검사, 첫 전투 씬 제작 도구를 제공한다. **새 아트 미반입, Unity 실행 미검증이므로 플레이 가능한 첫 빌드 완료 상태가 아니다.**
+새 CC0 Ninja Adventure 원본의 실제 걷기·공격·피격·사망 프레임과 Katana/Axe를 반입했습니다. 첫 영웅과 적은 같은 신규 캐릭터를 공유하고 무기·진영 색으로 구분합니다. 밝은 초원 씬 생성, 자동 접근·공격, 몸/무기 타격 동기화, HP HUD, 처치 보상 1회, 재시작을 연결했습니다. 폐기한 Godot 코드와 이미지는 사용하지 않습니다.
 
-Unity 상단 `AFFIX → Project Dashboard`에서 실행 중인 에디터 정보와 에셋 준비 상태를 확인한다. `Export setup report`는 `Build/Reports`에 JSON을 저장하고 위치를 연다. 설치 경로를 Git Bash에 추측해 입력할 필요가 없다.
+코어 **56 checks PASS**, 설치 Unity API 참조 C# 정적 컴파일 **오류0/경고0**입니다. **실제 Unity import·Play·Windows 빌드는 미검증**입니다. 사용자는 Hub에서 에디터 설치 중이며, 발견한 설치본의 실행 시도는 라이선스 오류198로 import 이전 중단됐습니다. 첫 빌드 완료 상태가 아닙니다.
+
+## 설치 완료 후
+
+프로젝트 루트를 승인 버전 Unity에서 연 뒤 AFFIX → Setup → Import Reviewed Art and Create Encounter로 검수 원본을 slice하고 첫 씬을 생성합니다. 기존 씬은 덮어쓰지 않습니다. 실행 검사와 현재 인수인계는 [HANDOFF](docs/HANDOFF.md), 자세한 절차는 [LOCAL_WORKFLOW](docs/LOCAL_WORKFLOW.md)에 있습니다.
+
+원본 프레임 미리보기는 python Tools/preview_reviewed_art.py로 Build/Reports/art-preview.html에 만듭니다. 이는 Unity 실행화면이 아닙니다.
 
 ## 문서
 
-문서 목차는 [docs/README.md](docs/README.md), 재개 지점은 [docs/HANDOFF.md](docs/HANDOFF.md).
+- [제품 기획](docs/PRODUCT_BRIEF.md) · [로드맵](docs/ROADMAP.md) · [구조](docs/ARCHITECTURE.md)
+- [신규 아트 검수](docs/assets/ninja-adventure.md) · [아트 방향](docs/ART_DIRECTION.md) · [반입 원칙](docs/ASSET_INTAKE.md)
+- [현재 상태](docs/STATUS.json) · [검증 기록](docs/VERIFICATION.json) · [트러블슈팅](docs/TROUBLESHOOTING.md)
+- [문서 목차](docs/README.md) · [텍스트 전용 과거 회고](docs/history/LEGACY_RETROSPECTIVE.md)
 
-- [PRODUCT_BRIEF.md](docs/PRODUCT_BRIEF.md): 핵심 기획·MVP·수락 조건
-- [ARCHITECTURE.md](docs/ARCHITECTURE.md): Unity 구현 책임과 검증 범위
-- [ROADMAP.md](docs/ROADMAP.md): 실제 순서와 장기 콘텐츠
-- [ART_DIRECTION.md](docs/ART_DIRECTION.md), [ASSET_INTAKE.md](docs/ASSET_INTAKE.md): 새 리소스 원칙
-- [LOCAL_WORKFLOW.md](docs/LOCAL_WORKFLOW.md): 로컬 업데이트·메뉴·보고서
-- [CLEANUP_PLAN.md](docs/CLEANUP_PLAN.md): 과거 폴더 용량·삭제 계획
-- [history/LEGACY_RETROSPECTIVE.md](docs/history/LEGACY_RETROSPECTIVE.md): 코드·이미지를 포함하지 않은 회고
-- [VERIFICATION.json](docs/VERIFICATION.json): 실행한 검사 증거
-
-## 과거 정리
-
-현재 프로젝트에는 과거 구현 사본을 보관하지 않는다. 회고는 텍스트만 보관한다. 로컬 예전 폴더 삭제와 원격 Git 이력 삭제는 별도 작업이며 이번 갱신에서 수행하지 않았다. `Tools/Local/Inspect-Storage.cmd`는 용량·worktree 연결 관계를 읽고 보고서만 만든다.
-
-## 실행 전제
-
-아직 영웅·적·바닥 원본 리소스가 확보되지 않았다. 검수 전 임시 막대 그림이나 거절된 아틀라스로 빈자리를 채우지 않는다. 라이선스와 실제 프레임을 확인한 뒤 첫 전투 씬을 생성한다. `.meta`는 소스와 함께 추적하며 `Library`, `Temp`, `Build` 같은 캐시는 제외한다.
+Assets/**/*.meta는 추적하고 Library, Build, 원본 ZIP/검사 임시 출력은 제외합니다. 옛 폴더·세이브·stash·Git history 삭제와 PR 병합은 수행하지 않았습니다.

@@ -12,5 +12,11 @@
 | shallow clone에서 과거 삭제 검사 실패 위험 | baseline commit을 얕은 clone이 포함하지 않음 | 일반 감사는 현재 트리 검사, CI --require-history는 과거 비교를 필수로 유지 | 용량 절약과 검증 범위를 명시적으로 나눠야 한다 |
 | 새 에셋 없이 가짜 화면을 만드는 위험 | 리소스 공급과 구현 준비를 혼합 | 실프레임/ground/라이선스 검수 전 씬 생성 차단 | 결손 상태를 숨기지 말고 정확히 노출한다 |
 | 저장공간 도구 Windows CI에서 PASS 출력 후 exit 1 | 합성 폴더가 Git repo가 아닌 것은 정상인데 Git 조회 실패가 LASTEXITCODE에 남아 runner가 실패로 종료. 최초 run 36174165918/job108200697247에서 재현 | Git 실패는 JSON의 GIT_READ_FAILED로 남기고 보고서 저장 성공 시 도구 종료 상태를 명시적으로 정상화. 종료 코드와 비저장소 상태를 검사에 추가. Dictionary 표시는 PSCustomObject로 변환 | 예상된 데이터 부재와 도구 실행 실패를 분리하되 보고서에 부재를 숨기지 않아야 한다 |
+| 첫 Unity batch 실행 | 기존 설치본 버전은 일치하나 유효 license/entitlement 없음, exit198 | import 이전 중단을 기록. 사용자가 Hub 설치 중이므로 완료 안내 전 추가 실행 보류 | 설치 exe 존재와 실제 사용 가능한 에디터는 구분한다 |
+| Tiny Swords 후보 반입 | CC0 구버전 Warrior에 Hit 태그/클립 부재 | 동봉 CC0 전문과 모든 필수 클립이 있는 신규 Ninja Adventure로 전환 | 보기 좋은 공격 예시만으로 U1 계약을 충족하지 않는다 |
+| 치명타 직후 공격 자세 끊김 | 사망 대상 분기가 recovery까지 즉시 취소 | impact 소비 후에는 피해 없이 recovery 유지, object 대상 잠금 | 피해 판정과 표시 동작 수명을 구분한다 |
+| 첫 전투 무한 경직 수치 조합 | 피격2프레임/6fps가 영웅 다음 impact보다 길어 적이 반복 취소 | reactionFps10 적용. 30/60/120fps·양측 실행 순서 수치 시뮬6조건 검토. Unity Play는 대기 | 실제 속도와 취소 규칙의 조합을 확인한다 |
+| 몸32px와 무기64px 정렬 | 동일 normalized pivot은 서로 다른 발 위치를 가리킴 | body(.5,.25), weapon(.5,.375), PPU16 및 동일 시간표 | 절대 픽셀 기준점으로 정렬한다 |
+| 자동 Play 검사 재시작 상태 오독 | LoadScene 요청 직후 이전 액터를 검사할 가능성 | sceneLoaded 완료 후 신규 액터 바인딩·이벤트 해제 | 요청과 완료 이벤트를 분리한다 |
 
-Unity Presentation/Editor의 컴파일·로컬 화면 검증은 사용자 에디터 실행 전까지 미완료다. 읽기 전용 도구 테스트는 임시 합성 데이터만 사용하며 실제 사용자 파일은 삭제하지 않는다.
+현재 전체 C# 설치 API 참조 정적 컴파일은 PASS이며 Unity asmdef/import/로컬 화면 검증은 미완료다. 읽기 전용 도구 테스트는 임시 합성 데이터만 사용하며 실제 사용자 파일은 삭제하지 않는다.

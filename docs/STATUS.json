@@ -4,17 +4,34 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "U1_INTEGRATION_SOURCE_WRITTEN_AWAITING_ASSETS_AND_UNITY_IMPORT",
-  "implementation_commit": "009740a1cee5b1e7846c5531f9a6269439b192eb",
+  "stage": "U1_REVIEWED_ART_AND_INTEGRATION_AWAITING_UNITY_SETUP",
+  "implementation_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
-  "installation": {"user_confirmed": true, "drive": "D:", "actual_editor_version": "NOT_VERIFIED", "exact_editor_path": "REPORT_FROM_UNITY_DASHBOARD"},
-  "new_art": "NOT_IMPORTED",
-  "unity_editor_import": "NOT_RUN",
+  "installation": {
+    "user_confirmed": true,
+    "drive": "D:",
+    "actual_editor_version": "6000.3.24f1_4e7b9b5b6244",
+    "exact_editor_path": "D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe",
+    "latest_user_report": "HUB_EDITOR_INSTALL_IN_PROGRESS_WILL_NOTIFY_WHEN_READY",
+    "further_editor_launches": "WAIT_FOR_USER_INSTALL_COMPLETION"
+  },
+  "new_art": "SOURCE_IMPORTED_AND_REVIEWED_UNITY_SLICING_PENDING",
+  "unity_editor_import": "BLOCKED_BEFORE_IMPORT_EXIT_198_NO_VALID_LICENSE",
   "unity_play": "NOT_RUN",
   "visual_approval": "NOT_RUN",
   "windows_build": "NOT_RUN",
-  "first_encounter_scene": "BUILDER_AVAILABLE_REQUIRES_APPROVED_ASSETS",
-  "cleanup": {"policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE", "local_sizes": "NOT_MEASURED", "local_deleted": false, "remote_history_rewritten": false, "read_only_inspector_available": true},
-  "next": "Unity dashboard report and licensed source pack inspection; no old assets or code reuse"
+  "first_encounter_scene": "REVIEWED_ART_BUILDER_READY_NOT_GENERATED",
+  "cleanup": {
+    "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
+    "local_sizes": "NOT_MEASURED",
+    "local_deleted": false,
+    "remote_history_rewritten": false,
+    "read_only_inspector_available": true
+  },
+  "next": "User will report Hub installation completion; then reviewed asset setup, actual Play, Windows build and visual acceptance",
+  "rewards": "SOURCE_WRITTEN_AUTO_COLLECT_25_XP_8_GOLD_ONCE_PER_DEATH_TRANSIENT_ONLY",
+  "core_checks": 56,
+  "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
+  "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay"
 }

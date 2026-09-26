@@ -24,7 +24,11 @@ jobs:
           dotnet-version: '8.0.x'
       - name: Verify fresh source tree and tracked metadata
         run: python3 Tools/audit_restart.py --require-history
-      - name: Compile and exercise pure C# timeline and health
+      - name: Validate new CC0 source files and real animation frames
+        run: |
+          python3 -m pip install Pillow==11.3.0
+          python3 Tools/validate_reviewed_art.py
+      - name: Compile and exercise pure C# timeline, health and rewards
         run: dotnet run --project Tests/CoreSmoke/CoreSmoke.csproj --configuration Release
       - name: State validation boundary
         run: echo 'Unity Editor import, rendering, scene builder, build and Windows playtest NOT_RUN. Core tests are not gameplay approval.'

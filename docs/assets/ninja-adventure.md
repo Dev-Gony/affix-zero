@@ -17,15 +17,15 @@
 
 원본 `Actor/CharacterAnimated/NinjaGreen/Separate`의 신규 NinjaGreen 동작을 사용한다. 영웅은 원본 초록 정찰병과 Katana, 첫 적은 같은 캐릭터의 다른 진영 근접 정찰병과 Axe로 구분한다. 적의 색은 Unity에서 새 리소스에 적용하는 진영 tint이며 별도 제작자 캐릭터나 새 적 애니메이션이라고 표현하지 않는다. 현재 패키지의 구형 Monster sheet를 완전한 attack/hit/death 동작으로 간주하지 않는다.
 
-| 클립 | PNG | 셀 | 실제 시간 프레임 | 픽셀 내용 고유 프레임 | 제안 속도 |
-|---|---|---|---|---|---|
-| Idle | 128×128 | 32×32 | 4 | 4 | 5 fps |
-| Walk | 128×128 | 32×32 | 4 | 4 | 8 fps |
-| Attack | 128×128 | 32×32 | 4 | 4 | 10 fps |
-| Hit | 128×64 | 32×32 | 2 | 2 | 10 fps |
-| Dead | 32×64 | 32×32 | 2 | 2 | 6 fps |
+| 클립 | PNG | 셀 | 실제 시간 프레임 | 픽셀 내용 고유 프레임 | 초기 제안 | 현재 연결 선택 |
+|---|---|---|---|---|---|---|
+| Idle | 128×128 | 32×32 | 4 | 4 | 5 fps | 양쪽 8 fps |
+| Walk | 128×128 | 32×32 | 4 | 4 | 8 fps | 양쪽 8 fps |
+| Attack | 128×128 | 32×32 | 4 | 4 | 10 fps | 영웅 8 / 적 10 fps |
+| Hit | 128×64 | 32×32 | 2 | 2 | 10 fps | 양쪽 10 fps |
+| Dead | 32×64 | 32×32 | 2 | 2 | 6 fps | 양쪽 10 fps |
 
-PNG는 열이 방향, 행이 시간이다. 방향열은 0=down, 1=up, 2=left, 3=right. U1 연결은 오른쪽 열과 수평 반전을 먼저 사용하며 상하 방향별 재생 구현 완료라고 주장하지 않는다. Dead는 방향 공용이다. 위 fps는 프로젝트 튜닝 제안이며 제작자 고정 FPS 사양이 아니다. 제작자 Attack 미리보기 GIF는 200/60/60/100ms 등을 섞고 IdleWalk 미리보기는 200ms 간격이다.
+PNG는 열이 방향, 행이 시간이다. 방향열은 0=down, 1=up, 2=left, 3=right. U1 연결은 오른쪽 열과 수평 반전을 먼저 사용하며 상하 방향별 재생 구현 완료라고 주장하지 않는다. Dead는 방향 공용이다. 위 fps는 프로젝트 튜닝 값이며 제작자 고정 FPS 사양이 아니다. 제작자 Attack 미리보기 GIF는 200/60/60/100ms 등을 섞고 IdleWalk 미리보기는 200ms 간격이다. `ninja-animation.json`의 `framesPerSecondProposed`는 최초 정적 검수 제안값으로 보존하며 픽셀/해시 기록도 변경하지 않는다. 현재 `ReviewedArtSetup`의 movementFps=8, reactionFps=10, 공격은 영웅8/적10이며 HTML 검사 도구도 현재 선택값을 사용한다. 짧은 피격 동작이 연속 공격 사이를 과도하게 점유하지 않도록 공용 reaction 속도를 10 fps로 선택했다. Unity 실제 실행 검증과는 별개다.
 
 오른쪽 클립의 top-left rect는 `(96,row*32,32,32)`, Dead는 `(0,row*32,32,32)`. Unity y좌표는 `sheetHeight-(row+1)*32`. PPU=16, point filtering, mipmap 없음, 무손실 RGBA sprite import, body pivot=(0.5,0.25). 발 기준점은 원본 셀의 top-left (16,24)이며 사망 자세는 그 자리에 주저앉아 발 영역이 2px 더 낮다. 전체 좌표·픽셀 해시는 `ninja-animation.json`에 있다.
 

@@ -10,6 +10,7 @@
 | ROADMAP.md | 단계별 개발과 도감·환생·펫·시즌 확장 |
 | ART_DIRECTION.md | 밝은 새 시각 방향과 금지 사항 |
 | ASSET_INTAKE.md | 라이선스·원본·프레임 검수 |
+| assets/ninja-adventure.md / ninja-*.json | 신규 CC0 원본·재배포 근거·SHA·실프레임·환경 좌표 |
 | LOCAL_WORKFLOW.md | D드라이브 Unity 사용, 보고서, 업데이트 |
 | CLEANUP_PLAN.md | 오래된 로컬 폴더·캐시·Git 이력의 구분 |
 | RESTART_DECISION.md | 재시작 결정과 기술적 사실의 구분 |

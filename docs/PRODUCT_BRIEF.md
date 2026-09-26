@@ -12,7 +12,7 @@ Hero Siege에서 참고할 것은 장비 파밍·어픽스·빌드의 깊이, Su
 
 ### U1: 첫 전투 경험
 
-밝은 작은 야외 필드, 영웅1종, 근접 적1종, 실제 idle/walk/attack/hit/death 프레임, 접근·타격·피격·사망·재시작. 이어 XP/Gold 회수까지 연결한다. 현재 코드에는 이동/타격/체력/사망 연결과 씬 제작 도구가 있고, 새 아트·Unity 실행·보상 회수는 아직 완료되지 않았다.
+밝은 작은 야외 필드, 영웅1종, 근접 적1종, 실제 idle/walk/attack/hit/death 프레임, 접근·타격·피격·사망·재시작. 새 CC0 Ninja Adventure 원본과 몸/무기 동기화, 씬 생성기, 처치 후 XP/Gold 자동수령 코드를 연결했다. 영웅과 적은 동일 새 NinjaGreen 원본을 무기/진영 색으로 구분하며 별도 몬스터 원본은 아니다. 실제 Unity import/Play/시각 승인은 미완료다.
 
 공격은 대상과 방향을 고정한 준비 → impact 1회 → 회복으로 구성한다. 타격 시 생존/거리를 재검사하고 취소·범위 이탈·사망 후 유령 피해를 허용하지 않는다. 애니메이션과 실제 타격은 같은 공격 시간표를 사용한다. 여러 프레임을 건너뛰는 경우를 포함해 한 공격의 피해는 한 번만 인정한다.
 
@@ -42,4 +42,4 @@ U1 승인 후 원거리 적과 비유도 투사체, 소규모 웨이브, 명확�
 
 ## 6. 완료 상태 표기
 
-SOURCE_WRITTEN → CORE_TESTED → UNITY_IMPORTED → PLAY_TESTED → VISUAL_ACCEPTED → BUILD_TESTED를 구분한다. 현재 U1은 SOURCE_WRITTEN이며 코어 테스트 결과는 VERIFICATION에 기록한다. 실제 리소스 확보와 Windows 에디터/플레이 검증 전에는 U1을 완료로 표시하지 않는다.
+SOURCE_WRITTEN → CORE_TESTED → UNITY_IMPORTED → PLAY_TESTED → VISUAL_ACCEPTED → BUILD_TESTED를 구분한다. 현재 U1 소스와 새 원본 검수, 코어56 검사 및 설치 API 참조 정적 C# 컴파일을 통과했다. Unity import는 license198로 이전 단계에서 중단됐다. 설치 API 정적 컴파일과 HTML 원본 재생은 실제 Unity 검증을 대신하지 않으며 U1 전체 완료로 표시하지 않는다.
