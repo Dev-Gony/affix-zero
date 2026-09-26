@@ -5,7 +5,7 @@
   "branch": "restart/unity-6",
   "pr": 19,
   "stage": "STITCH_NATIVE_COMBAT_HUD_FIRST_SLICE",
-  "implementation_commit": "See docs/validation/stitch/source-fingerprint.json; pending current source commit",
+  "implementation_commit": "0685bbb03a47b94bd31dcbfa6c1472a6d8dc3fa8",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
