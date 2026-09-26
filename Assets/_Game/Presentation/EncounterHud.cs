@@ -11,9 +11,9 @@ namespace AffixZero.Presentation
     public sealed class EncounterHud : MonoBehaviour
     {
         private const float RoomWidth = 32f, RoomHeight = 21.333333f;
-        private static readonly Color Surface = new Color32(25, 28, 30, 250);
-        private static readonly Color Ink = new Color32(10, 12, 15, 245);
-        private static readonly Color Edge = new Color32(65, 66, 70, 255);
+        private static readonly Color Surface = new Color32(26, 28, 31, 250);
+        private static readonly Color Ink = new Color32(12, 14, 17, 250);
+        private static readonly Color Edge = new Color32(51, 53, 56, 255);
         private static readonly Color Crimson = new Color32(196, 30, 58, 255);
         private static readonly Color Gold = new Color32(233, 195, 73, 255);
         private static readonly Color Sky = new Color32(151, 203, 255, 255);
@@ -34,6 +34,8 @@ namespace AffixZero.Presentation
         private VisualElement huntButton;
         private Label huntCaption, huntStatus;
         private Label enemyTitle;
+        private Label sectionCaption, killCount, huntRewards, combatStats, mapCaption;
+        private readonly VisualElement[] sectionTicks=new VisualElement[3];
         private Label saveStatus;
         private VisualElement saveRetry;
         private readonly HashSet<MeleeActor> observedActors=new HashSet<MeleeActor>();
@@ -78,101 +80,126 @@ namespace AffixZero.Presentation
 
         private void BuildTop()
         {
-            var top = Box(root, "top-navigation", 0, 0, 0, 48, Surface);
+            var top = Box(root, "top-navigation", 0, 0, 0, 56, Surface);
             top.style.right = 0; top.style.width = StyleKeyword.Auto;
-            Text(top, "AFFIX : ZERO", 20, 13, 162, 26, 19, Cream);
-            Text(top, "TEMPLE", 188, 17, 74, 19, 10, Gold);
-            dungeonTab = Click(top, "dungeon-tab", "던전 사냥", 276, 8, 100, 33, () => encounter.ShowManagement(ManagementScreen.None), Crimson);
-            equipmentTab = Click(top, "character-tab", "장비 [I]", 384, 8, 100, 33, () => ToggleManagement(ManagementScreen.Equipment), Surface);
-            talentTab = Click(top, "talents-tab", "특성 [K]", 492, 8, 100, 33, () => ToggleManagement(ManagementScreen.Talents), Surface);
-            forgeTab = Click(top, "forge-tab", "대장간 [F]", 600, 8, 112, 33, () => ToggleManagement(ManagementScreen.Forge), Surface);
-            huntButton=Click(top,"autohunt-toggle","자동사냥 시작",728,8,134,33,()=> {
+            Box(top,"location-mark",18,19,10,17,Crimson);
+            Text(top, "AFFIX : ZERO", 38, 8, 194, 25, 19, Cream);
+            Text(top, "사원 마당  /  TEMPLE", 39, 33, 198, 17, 10, Gold);
+            dungeonTab = Click(top, "dungeon-tab", "던전 사냥", 254, 11, 102, 34, () => encounter.ShowManagement(ManagementScreen.None), Crimson);
+            equipmentTab = Click(top, "character-tab", "인벤토리 [I]", 364, 11, 116, 34, () => ToggleManagement(ManagementScreen.Equipment), Surface);
+            talentTab = Click(top, "talents-tab", "특성 [K]", 488, 11, 92, 34, () => ToggleManagement(ManagementScreen.Talents), Surface);
+            forgeTab = Click(top, "forge-tab", "대장간 [F]", 588, 11, 110, 34, () => ToggleManagement(ManagementScreen.Forge), Surface);
+            huntButton=Click(top,"autohunt-toggle","자동사냥 시작",728,11,134,34,()=> {
                 if(encounter.Hunt.Running)encounter.Hunt.StopHunt();else encounter.Hunt.StartHunt();
             },Crimson);
             huntCaption=huntButton.Q<Label>();
-            currency = Text(top, "", 0, 16, 210, 21, 12, Gold);
+            var wallet=Box(top,"currency-inset",0,12,240,31,Ink);
+            wallet.style.left=StyleKeyword.Auto;wallet.style.right=142;
+            currency = Text(wallet, "", 10, 5, 220, 21, 12, Gold);
             currency.name = "gold-value";
-            currency.style.left = StyleKeyword.Auto; currency.style.right = 136;
-            pauseButton = Click(top, "pause-button", "일시정지", 0, 9, 106, 30, TogglePause, Ink);
+            currency.style.unityTextAlign=TextAnchor.MiddleCenter;
+            pauseButton = Click(top, "pause-button", "일시정지", 0, 12, 106, 31, TogglePause, Ink);
             pauseButton.style.left = StyleKeyword.Auto; pauseButton.style.right = 18;
             pauseCaption = pauseButton.Q<Label>();
         }
         private void BuildEnemy()
         {
-            var enemy = Box(root, "enemy-health", 0, 62, 570, 60, Surface);
-            enemy.style.left = Length.Percent(50); enemy.style.marginLeft = -285;
-            enemyTitle=Text(enemy, "사원 경비병", 12, 7, 275, 19, 13, Cream);
-            enemyValue = Text(enemy, "", 296, 9, 262, 17, 11, new Color32(255,179,180,255));
+            var ribbon=Box(root,"dungeon-progress",0,64,650,28,Edge);
+            ribbon.style.left=Length.Percent(50);ribbon.style.marginLeft=-325;
+            sectionCaption=Text(ribbon,"",12,3,580,23,13,Gold);
+            for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i]=Box(ribbon,"section-tick-"+i,580+i*20,9,14,10,Ink);
+            var enemy = Box(root, "enemy-health", 0, 98, 650,67, Surface);
+            enemy.style.left = Length.Percent(50); enemy.style.marginLeft = -325;
+            Box(enemy,"target-accent",0,0,3,67,Crimson);
+            enemyTitle=Text(enemy, "사원 경비병", 12, 6, 375, 23, 15, Cream);
+            enemyValue = Text(enemy, "", 402, 9, 236, 19, 11, new Color32(255,179,180,255));
             enemyValue.name = "enemy-hp-value";
             enemyValue.style.unityTextAlign = TextAnchor.MiddleRight;
-            var track = Box(enemy, "enemy-track", 12, 33, 546, 12, Ink);
-            enemyFill = Box(track, "enemy-fill", 0, 0, 546, 12, Crimson);
-            clock = Text(root, "", 20, 65, 170, 20, 11, Muted);
-            huntStatus=Text(root,"",20,91,245,48,12,Gold);huntStatus.name="autohunt-status";huntStatus.style.whiteSpace=WhiteSpace.Normal;
-            paused = Text(root, "일시정지  /  PAUSED", 0, 132, 210, 24, 12, Gold);
+            var track = Box(enemy, "enemy-track", 12, 33, 626, 12, Ink);
+            enemyFill = Box(track, "enemy-fill", 0, 0, 626, 12, Crimson);
+            Text(enemy,"근접 전투",12,48,180,16,10,Muted);
+            Text(enemy,"자동 탐색 · 자동 수거",432,48,206,16,10,Sky).style.unityTextAlign=TextAnchor.MiddleRight;
+            var stats=Box(root,"hunt-summary",16,186,236,102,Surface);
+            killCount=Text(stats,"",14,5,208,35,25,Gold);killCount.name="hunt-kills";
+            huntRewards=Text(stats,"",14,43,208,20,11,Cream);
+            clock = Text(stats, "", 14,71,208,18,10,Muted);
+            Box(stats,"hunt-summary-rule",0,99,236,3,Gold);
+            huntStatus=Text(root,"",18,298,236,55,12,Gold);huntStatus.name="autohunt-status";huntStatus.style.whiteSpace=WhiteSpace.Normal;
+            paused = Text(root, "일시정지  /  PAUSED", 0, 172, 210, 24, 12, Gold);
             paused.style.left = Length.Percent(50); paused.style.marginLeft = -105;
             paused.style.unityTextAlign = TextAnchor.MiddleCenter;
         }
         private void BuildMap()
         {
-            var frame = Box(root, "minimap", 0, 145, 172, 150, Surface);
-            frame.style.left = StyleKeyword.Auto; frame.style.right = 18;
-            Text(frame, "MAP: TEMPLE COURTYARD", 8, 7, 157, 18, 10, Cream);
+            var frame = Box(root, "minimap", 0, 186, 172, 168, Surface);
+            frame.style.left = StyleKeyword.Auto; frame.style.right = 16;
+            Text(frame, "MAP  /  사원 마당", 8, 7, 157, 18, 10, Cream);
             var map = Box(frame, "minimap-image", 8, 31, 156, 104, Ink);
             if (room != null) map.style.backgroundImage = new StyleBackground(room);
             else Text(map,"ROOM ART MISSING",4,40,150,20,10,Crimson);
             mapHero = Box(map,"hero-map-marker",0,0,5,5,Sky);
             mapEnemy = Box(map,"enemy-map-marker",0,0,5,5,Crimson);
             Border(mapHero,Color.white,1); Border(mapEnemy,Gold,1);
+            mapCaption=Text(frame,"",8,142,156,18,10,Sky);
         }
         private void BuildBottom()
         {
-            var bottom = Box(root,"bottom-hud",0,0,0,150,Surface);
+            var bottom = Box(root,"bottom-hud",0,0,0,130,Surface);
             bottom.style.top = StyleKeyword.Auto; bottom.style.bottom = 0; bottom.style.right = 0; bottom.style.width = StyleKeyword.Auto;
-            healthFill = Orb(bottom,"health-orb",34,12,96,Crimson,out healthValue);
+            healthFill = Orb(bottom,"health-orb",38,6,84,Crimson,out healthValue);
             healthValue.name = "hero-hp-value";
-            saveStatus=Text(bottom,"",156,76,295,28,11,Muted);saveStatus.name="save-status";
+            combatStats=Text(bottom,"",148,18,255,45,12,Cream);combatStats.style.whiteSpace=WhiteSpace.Normal;
+            saveStatus=Text(bottom,"",148,68,255,32,10,Muted);saveStatus.name="save-status";
             saveStatus.style.whiteSpace=WhiteSpace.Normal;
-            saveRetry=Click(bottom,"save-retry","저장 다시 시도",156,40,170,28,()=>encounter.RetrySave(),Crimson);
-            Text(bottom,"생명력 / HP",32,111,102,19,11,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
-            var mana = Orb(bottom,"mana-orb",0,12,96,new Color32(23,67,94,255),out Label manaValue);
+            saveRetry=Click(bottom,"save-retry","저장 다시 시도",915,20,170,30,()=>encounter.RetrySave(),Crimson);
+            Text(bottom,"생명력 / HP",27,91,106,16,10,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
+            var mana = Orb(bottom,"mana-orb",0,6,84,new Color32(0,81,129,255),out Label manaValue);
             var manaShell=mana.parent;
-            manaShell.style.left=StyleKeyword.Auto;manaShell.style.right=34;
+            manaShell.style.left=StyleKeyword.Auto;manaShell.style.right=38;
             mana.style.height=Length.Percent(0);manaValue.text="—";
-            var manaLabel=Text(bottom,"마나 / MP",0,111,116,19,11,Muted);
-            manaLabel.style.left=StyleKeyword.Auto;manaLabel.style.right=24;manaLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var actions=Box(bottom,"action-dock",0,13,350,87,Ink);
-            actions.style.left=Length.Percent(50);actions.style.marginLeft=-175;
-            var slot=Box(actions,"attack-slot",16,12,56,56,Surface);
+            manaShell.tooltip="현재 영웅은 마나와 능동 스킬을 사용하지 않습니다.";
+            var manaLabel=Text(bottom,"마나 / MP",0,91,106,16,10,Muted);
+            manaLabel.style.left=StyleKeyword.Auto;manaLabel.style.right=27;manaLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var actions=Box(bottom,"action-dock",0,11,440,84,Ink);
+            actions.style.left=Length.Percent(50);actions.style.marginLeft=-220;
+            var slot=Box(actions,"attack-slot",8,5,56,56,Surface);
             Border(slot,Crimson,2);
             if(attackIcon!=null) {
                 var icon=new Image {image=attackIcon,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};
-                Place(icon,12,10,32,32);slot.Add(icon);actionIcon=icon;
+                Place(icon,11,8,32,32);slot.Add(icon);actionIcon=icon;
             }
             Text(slot,"AUTO",8,39,42,14,9,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(actions,"기본 공격",88,11,245,21,14,Cream);
-            attackState=Text(actions,"",88,36,245,17,11,Muted);
-            var attackTrack=Box(actions,"attack-elapsed",88,61,242,4,Surface);
+            for(int i=0;i<6;i++)
+            {
+                var empty=Box(actions,"unassigned-skill-"+i,70+i*60,5,54,56,Surface);
+                Border(empty,Edge,1);Text(empty,"—",0,13,54,29,17,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+                empty.tooltip="빈 스킬 슬롯 · 능동 스킬은 아직 지원되지 않습니다.";
+            }
+            Text(actions,"기본 공격",10,66,92,17,10,Cream);
+            attackState=Text(actions,"",108,66,122,17,10,Gold);
+            Text(actions,"AUTO ATTACK",280,66,150,17,10,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
+            var attackTrack=Box(slot,"attack-elapsed",0,51,52,3,Edge);
             attackFill=Box(attackTrack,"attack-elapsed-fill",0,0,0,4,Gold);
-            Text(bottom,"I 장비   K 특성   F 대장간   ESC 닫기 / 정지",0,102,350,20,11,Muted).style.left=Length.Percent(50);
-            var hints=bottom[bottom.childCount-1];hints.style.marginLeft=-175;hints.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var xpTrack=Box(bottom,"experience-line",18,135,0,3,Edge);
+            Text(bottom,"I 인벤토리    K 특성    F 대장간    ESC 닫기 / 정지",0,110,465,17,10,Muted).style.left=Length.Percent(50);
+            var hints=bottom[bottom.childCount-1];hints.style.marginLeft=-232;hints.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var xpTrack=Box(bottom,"experience-line",18,107,0,2,Edge);
             xpTrack.style.right=18;xpTrack.style.width=StyleKeyword.Auto;
             // No level threshold exists yet: show the earned total, not an invented progress percentage.
-            xpValue=Text(bottom,"",155,114,350,17,10,Gold);
+            xpValue=Text(bottom,"",18,111,350,17,10,Gold);
             xpValue.name="xp-value";
         }
         private VisualElement Orb(VisualElement parent,string name,float x,float y,float size,Color color,out Label value)
         {
             var shell=Box(parent,name,x,y,size,size,Ink);
             shell.style.borderTopLeftRadius=shell.style.borderTopRightRadius=shell.style.borderBottomLeftRadius=shell.style.borderBottomRightRadius=size/2;
-            shell.style.overflow=Overflow.Hidden;Border(shell,Edge,3);
+            shell.style.overflow=Overflow.Hidden;Border(shell,new Color32(91,64,64,255),2);
             var fill=Box(shell,name+"-fill",0,0,0,0,color);
             fill.style.width=Length.Percent(100);fill.style.height=Length.Percent(100);
             fill.style.top=StyleKeyword.Auto;fill.style.bottom=0;
-            var shine=Box(shell,name+"-shine",12,9,48,14,new Color(1,1,1,0.10f));
+            var rim=Box(shell,name+"-rim",3,0,size-10,2,new Color(1,1,1,.16f));
+            var shine=Box(shell,name+"-shine",8,8,37,12,new Color(1,1,1,0.13f));
             shine.style.borderBottomLeftRadius=shine.style.borderBottomRightRadius=shine.style.borderTopLeftRadius=shine.style.borderTopRightRadius=14;
-            value=Text(shell,"",4,32,size-8,39,15,Cream);
+            value=Text(shell,"",4,25,size-12,39,14,Cream);
             value.style.whiteSpace=WhiteSpace.Normal;value.style.unityTextAlign=TextAnchor.MiddleCenter;
             return fill;
         }
@@ -276,6 +303,12 @@ namespace AffixZero.Presentation
                 huntButton.SetEnabled(hunt.Initialized);
                 huntCaption.text=hunt.Running?"자동사냥 중지":"자동사냥 시작";
                 huntStatus.text=hunt.StateCaption+"\n구역 "+(hunt.SectionIndex+1)+" / 3  ·  클리어 "+hunt.CompletedRuns;
+                sectionCaption.text="구역 "+(hunt.SectionIndex+1)+" / 3     사원 순찰  ·  "+hunt.CompletedRuns+"회 클리어";
+                for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i].style.backgroundColor=i<=hunt.SectionIndex?Gold:Ink;
+                killCount.text=hunt.TotalKills+"  KILLS";
+                huntRewards.text="수거 "+hunt.CollectedItems+"개  ·  재도전 "+hunt.DeathRetries+"회";
+                int alive=0;foreach(var actor in hunt.Enemies)if(actor.isActiveAndEnabled&&!actor.IsDead)alive++;
+                mapCaption.text="현재 구역  "+(hunt.SectionIndex+1)+"  ·  적 "+alive;
             }
             enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
             enemyValue.text=enemy.Hp+" / "+enemy.MaxHp+" HP";
@@ -285,6 +318,7 @@ namespace AffixZero.Presentation
             healthFill.style.height=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+"\n/ "+hero.MaxHp;
             currency.text="GOLD  "+encounter.Progression.TotalGold+"     XP  "+encounter.Progression.TotalExperience;
+            combatStats.text="공격력  "+encounter.Progression.TotalDamage+"   방어력  "+hero.Defense+"\n가방  "+encounter.Progression.Inventory.Count+" / 24   특성  "+encounter.Progression.UnspentPoints;
             xpValue.text="획득 경험치  "+encounter.Progression.TotalExperience+" XP";
             int seconds=Mathf.FloorToInt(encounter.ElapsedSeconds);
             clock.text="TEMPLE  "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");

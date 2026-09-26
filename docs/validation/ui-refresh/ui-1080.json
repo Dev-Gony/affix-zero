@@ -1,0 +1,957 @@
+{
+    "schema": "affix-ui-reference-v1",
+    "runId": "1b6f4688b9b541f8b27b21250083e6d4",
+    "startedUtc": "2026-09-26T07:41:23.7677004Z",
+    "finishedUtc": "2026-09-26T07:41:27.0976036Z",
+    "buildGuid": "e8115fc90b424d58a3fc868b8e140204",
+    "unityVersion": "6000.3.24f1",
+    "result": "PASS",
+    "status": "PASS",
+    "problem": "",
+    "phase": "forge-capture",
+    "scope": "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.",
+    "fixture": "After a real first attack and native Stop callback: six unique Core kill tokens grant 150 XP, 48 gold and six points; guaranteed first drop plus eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.",
+    "actualPhysicalInput": "NOT_RUN; external key/mouse-button/scroll input rejects the run",
+    "userVisualApproval": "NOT_APPROVED",
+    "ephemeralVerified": true,
+    "fixtureApplied": true,
+    "equipVerified": true,
+    "lockedSelectionVerified": true,
+    "talentVerified": true,
+    "forgeVerified": true,
+    "actualHeroHits": 1,
+    "realKillsBeforeFixture": 0,
+    "experienceBeforeFixture": 0,
+    "goldBeforeFixture": 0,
+    "elapsedSeconds": 3.3244359493255617,
+    "fixtureItemIds": [
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:0",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:1",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:2",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:3",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:4",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:5",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:6",
+        "reference-ui:1b6f4688b9b541f8b27b21250083e6d4:weapon:7"
+    ],
+    "nativeCallbacks": [
+        "autohunt-toggle",
+        "autohunt-toggle",
+        "character-tab",
+        "inventory-slot-0",
+        "equip-button",
+        "inventory-slot-1",
+        "talents-tab",
+        "talent-node-precision",
+        "talent-node-fury",
+        "talent-invest",
+        "talent-invest",
+        "talent-node-precision",
+        "talent-invest",
+        "talent-node-keystone",
+        "forge-tab",
+        "forge-enhance"
+    ],
+    "frames": [
+        {
+            "screen": "battle",
+            "imagePath": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-battle.bmp",
+            "equippedId": "equipped:starting-sword",
+            "selectedItem": "",
+            "comparison": "",
+            "selectedTalent": "",
+            "forgePreview": "",
+            "forgeCost": "",
+            "pixelWidth": 1920,
+            "pixelHeight": 1080,
+            "hp": 116,
+            "experience": 0,
+            "gold": 0,
+            "damage": 30,
+            "actorDamage": 30,
+            "points": 0,
+            "fury": 0,
+            "precision": 0,
+            "keystone": 0,
+            "enhancement": 0,
+            "inventoryCount": 0,
+            "comparisonDamage": 0,
+            "panelWidth": 1280.0,
+            "panelHeight": 720.0,
+            "running": true,
+            "paused": false,
+            "layoutVerified": true,
+            "bounds": [
+                {
+                    "name": "top-navigation",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "width": 1280.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "bottom-hud",
+                    "x": 0.0,
+                    "y": 590.0,
+                    "width": 1280.0,
+                    "height": 130.0,
+                    "enabled": true
+                },
+                {
+                    "name": "dungeon-tab",
+                    "x": 254.0,
+                    "y": 11.333333015441895,
+                    "width": 102.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "character-tab",
+                    "x": 364.0,
+                    "y": 11.333333015441895,
+                    "width": 116.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talents-tab",
+                    "x": 488.0,
+                    "y": 11.333333015441895,
+                    "width": 92.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-tab",
+                    "x": 588.0,
+                    "y": 11.333333015441895,
+                    "width": 110.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "autohunt-toggle",
+                    "x": 728.0,
+                    "y": 11.333333015441895,
+                    "width": 134.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "pause-button",
+                    "x": 1156.0,
+                    "y": 12.0,
+                    "width": 106.0,
+                    "height": 31.333332061767579,
+                    "enabled": true
+                },
+                {
+                    "name": "gold-value",
+                    "x": 908.0,
+                    "y": 17.33333396911621,
+                    "width": 220.0,
+                    "height": 20.66666603088379,
+                    "enabled": true
+                },
+                {
+                    "name": "hero-hp-value",
+                    "x": 44.0,
+                    "y": 623.3333129882813,
+                    "width": 72.0,
+                    "height": 38.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "attack-slot",
+                    "x": 428.0,
+                    "y": 606.0,
+                    "width": 56.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "xp-value",
+                    "x": 18.0,
+                    "y": 701.3333129882813,
+                    "width": 350.0,
+                    "height": 16.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "enemy-health",
+                    "x": 315.3333435058594,
+                    "y": 98.0,
+                    "width": 650.0,
+                    "height": 67.33332824707031,
+                    "enabled": true
+                },
+                {
+                    "name": "minimap",
+                    "x": 1092.0,
+                    "y": 186.0,
+                    "width": 172.0,
+                    "height": 168.0,
+                    "enabled": true
+                }
+            ]
+        },
+        {
+            "screen": "equipment",
+            "imagePath": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-equipment.bmp",
+            "equippedId": "loot:ember-steel:first",
+            "selectedItem": "날카로운 강철검",
+            "comparison": "공격력 -4",
+            "selectedTalent": "",
+            "forgePreview": "",
+            "forgeCost": "",
+            "pixelWidth": 1920,
+            "pixelHeight": 1080,
+            "hp": 116,
+            "experience": 150,
+            "gold": 48,
+            "damage": 40,
+            "actorDamage": 40,
+            "points": 6,
+            "fury": 0,
+            "precision": 0,
+            "keystone": 0,
+            "enhancement": 0,
+            "inventoryCount": 9,
+            "comparisonDamage": -4,
+            "panelWidth": 1280.0,
+            "panelHeight": 720.0,
+            "running": false,
+            "paused": true,
+            "layoutVerified": true,
+            "bounds": [
+                {
+                    "name": "top-navigation",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "width": 1280.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "bottom-hud",
+                    "x": 0.0,
+                    "y": 590.0,
+                    "width": 1280.0,
+                    "height": 130.0,
+                    "enabled": true
+                },
+                {
+                    "name": "dungeon-tab",
+                    "x": 254.0,
+                    "y": 11.333333015441895,
+                    "width": 102.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "character-tab",
+                    "x": 364.0,
+                    "y": 11.333333015441895,
+                    "width": 116.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talents-tab",
+                    "x": 488.0,
+                    "y": 11.333333015441895,
+                    "width": 92.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-tab",
+                    "x": 588.0,
+                    "y": 11.333333015441895,
+                    "width": 110.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "autohunt-toggle",
+                    "x": 728.0,
+                    "y": 11.333333015441895,
+                    "width": 134.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "pause-button",
+                    "x": 1156.0,
+                    "y": 12.0,
+                    "width": 106.0,
+                    "height": 31.333332061767579,
+                    "enabled": true
+                },
+                {
+                    "name": "gold-value",
+                    "x": 908.0,
+                    "y": 17.33333396911621,
+                    "width": 220.0,
+                    "height": 20.66666603088379,
+                    "enabled": true
+                },
+                {
+                    "name": "hero-hp-value",
+                    "x": 44.0,
+                    "y": 623.3333129882813,
+                    "width": 72.0,
+                    "height": 38.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "attack-slot",
+                    "x": 428.0,
+                    "y": 606.0,
+                    "width": 56.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "xp-value",
+                    "x": 18.0,
+                    "y": 701.3333129882813,
+                    "width": 350.0,
+                    "height": 16.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "character-panel",
+                    "x": 16.0,
+                    "y": 64.0,
+                    "width": 1248.0,
+                    "height": 516.0,
+                    "enabled": true
+                },
+                {
+                    "name": "equip-button",
+                    "x": 761.3333129882813,
+                    "y": 532.6666870117188,
+                    "width": 288.00006103515627,
+                    "height": 26.0,
+                    "enabled": true
+                },
+                {
+                    "name": "close-character",
+                    "x": 1115.3333740234375,
+                    "y": 71.33333587646485,
+                    "width": 136.0,
+                    "height": 30.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-0",
+                    "x": 43.33333206176758,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-1",
+                    "x": 128.6666717529297,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-2",
+                    "x": 213.3333282470703,
+                    "y": 392.6666564941406,
+                    "width": 80.00001525878906,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-3",
+                    "x": 298.6666564941406,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-4",
+                    "x": 383.3333435058594,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-5",
+                    "x": 468.6666564941406,
+                    "y": 392.6666564941406,
+                    "width": 80.00003051757813,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-6",
+                    "x": 553.3333129882813,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-7",
+                    "x": 638.6666870117188,
+                    "y": 392.6666564941406,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-8",
+                    "x": 43.33333206176758,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": true
+                },
+                {
+                    "name": "inventory-slot-9",
+                    "x": 128.6666717529297,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-10",
+                    "x": 213.3333282470703,
+                    "y": 447.3333435058594,
+                    "width": 80.00001525878906,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-11",
+                    "x": 298.6666564941406,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-12",
+                    "x": 383.3333435058594,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-13",
+                    "x": 468.6666564941406,
+                    "y": 447.3333435058594,
+                    "width": 80.00003051757813,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-14",
+                    "x": 553.3333129882813,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-15",
+                    "x": 638.6666870117188,
+                    "y": 447.3333435058594,
+                    "width": 80.0,
+                    "height": 50.0,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-16",
+                    "x": 43.33333206176758,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-17",
+                    "x": 128.6666717529297,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-18",
+                    "x": 213.3333282470703,
+                    "y": 502.6666564941406,
+                    "width": 80.00001525878906,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-19",
+                    "x": 298.6666564941406,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-20",
+                    "x": 383.3333435058594,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-21",
+                    "x": 468.6666564941406,
+                    "y": 502.6666564941406,
+                    "width": 80.00003051757813,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-22",
+                    "x": 553.3333129882813,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "inventory-slot-23",
+                    "x": 638.6666870117188,
+                    "y": 502.6666564941406,
+                    "width": 80.0,
+                    "height": 50.000030517578128,
+                    "enabled": false
+                },
+                {
+                    "name": "selected-item-name",
+                    "x": 823.3333129882813,
+                    "y": 356.6666564941406,
+                    "width": 410.00006103515627,
+                    "height": 26.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "comparison-delta",
+                    "x": 823.3333129882813,
+                    "y": 386.6666564941406,
+                    "width": 410.00006103515627,
+                    "height": 22.0,
+                    "enabled": true
+                }
+            ]
+        },
+        {
+            "screen": "talents",
+            "imagePath": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-talents.bmp",
+            "equippedId": "loot:ember-steel:first",
+            "selectedItem": "",
+            "comparison": "",
+            "selectedTalent": "숙련자의 일격",
+            "forgePreview": "",
+            "forgeCost": "",
+            "pixelWidth": 1920,
+            "pixelHeight": 1080,
+            "hp": 116,
+            "experience": 150,
+            "gold": 48,
+            "damage": 50,
+            "actorDamage": 50,
+            "points": 3,
+            "fury": 2,
+            "precision": 1,
+            "keystone": 0,
+            "enhancement": 0,
+            "inventoryCount": 9,
+            "comparisonDamage": 0,
+            "panelWidth": 1280.0,
+            "panelHeight": 720.0,
+            "running": false,
+            "paused": true,
+            "layoutVerified": true,
+            "bounds": [
+                {
+                    "name": "top-navigation",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "width": 1280.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "bottom-hud",
+                    "x": 0.0,
+                    "y": 590.0,
+                    "width": 1280.0,
+                    "height": 130.0,
+                    "enabled": true
+                },
+                {
+                    "name": "dungeon-tab",
+                    "x": 254.0,
+                    "y": 11.333333015441895,
+                    "width": 102.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "character-tab",
+                    "x": 364.0,
+                    "y": 11.333333015441895,
+                    "width": 116.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talents-tab",
+                    "x": 488.0,
+                    "y": 11.333333015441895,
+                    "width": 92.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-tab",
+                    "x": 588.0,
+                    "y": 11.333333015441895,
+                    "width": 110.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "autohunt-toggle",
+                    "x": 728.0,
+                    "y": 11.333333015441895,
+                    "width": 134.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "pause-button",
+                    "x": 1156.0,
+                    "y": 12.0,
+                    "width": 106.0,
+                    "height": 31.333332061767579,
+                    "enabled": true
+                },
+                {
+                    "name": "gold-value",
+                    "x": 908.0,
+                    "y": 17.33333396911621,
+                    "width": 220.0,
+                    "height": 20.66666603088379,
+                    "enabled": true
+                },
+                {
+                    "name": "hero-hp-value",
+                    "x": 44.0,
+                    "y": 623.3333129882813,
+                    "width": 72.0,
+                    "height": 38.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "attack-slot",
+                    "x": 428.0,
+                    "y": 606.0,
+                    "width": 56.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "xp-value",
+                    "x": 18.0,
+                    "y": 701.3333129882813,
+                    "width": 350.0,
+                    "height": 16.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-screen",
+                    "x": 16.0,
+                    "y": 64.0,
+                    "width": 1248.0,
+                    "height": 516.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-node-fury",
+                    "x": 84.0,
+                    "y": 230.0,
+                    "width": 188.0,
+                    "height": 142.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-node-precision",
+                    "x": 322.0,
+                    "y": 230.0,
+                    "width": 188.0,
+                    "height": 142.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-node-keystone",
+                    "x": 560.0,
+                    "y": 230.0,
+                    "width": 188.0,
+                    "height": 142.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-invest",
+                    "x": 836.0,
+                    "y": 500.0,
+                    "width": 400.0,
+                    "height": 52.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-screen-reset",
+                    "x": 902.0,
+                    "y": 80.0,
+                    "width": 194.0,
+                    "height": 40.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-screen-close",
+                    "x": 1108.0,
+                    "y": 80.0,
+                    "width": 136.0,
+                    "height": 40.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-detail-name",
+                    "x": 928.0,
+                    "y": 181.3333282470703,
+                    "width": 307.3333740234375,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-detail-effect",
+                    "x": 852.0,
+                    "y": 303.3333435058594,
+                    "width": 368.0,
+                    "height": 56.666656494140628,
+                    "enabled": true
+                },
+                {
+                    "name": "talent-screen-points",
+                    "x": 529.3333129882813,
+                    "y": 88.0,
+                    "width": 156.0,
+                    "height": 26.0,
+                    "enabled": true
+                }
+            ]
+        },
+        {
+            "screen": "forge",
+            "imagePath": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-forge.bmp",
+            "equippedId": "loot:ember-steel:first",
+            "selectedItem": "",
+            "comparison": "",
+            "selectedTalent": "",
+            "forgePreview": "52 → 54",
+            "forgeCost": "소모 골드  16 G",
+            "pixelWidth": 1920,
+            "pixelHeight": 1080,
+            "hp": 116,
+            "experience": 150,
+            "gold": 40,
+            "damage": 52,
+            "actorDamage": 52,
+            "points": 3,
+            "fury": 2,
+            "precision": 1,
+            "keystone": 0,
+            "enhancement": 1,
+            "inventoryCount": 9,
+            "comparisonDamage": 0,
+            "panelWidth": 1280.0,
+            "panelHeight": 720.0,
+            "running": false,
+            "paused": true,
+            "layoutVerified": true,
+            "bounds": [
+                {
+                    "name": "top-navigation",
+                    "x": 0.0,
+                    "y": 0.0,
+                    "width": 1280.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "bottom-hud",
+                    "x": 0.0,
+                    "y": 590.0,
+                    "width": 1280.0,
+                    "height": 130.0,
+                    "enabled": true
+                },
+                {
+                    "name": "dungeon-tab",
+                    "x": 254.0,
+                    "y": 11.333333015441895,
+                    "width": 102.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "character-tab",
+                    "x": 364.0,
+                    "y": 11.333333015441895,
+                    "width": 116.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "talents-tab",
+                    "x": 488.0,
+                    "y": 11.333333015441895,
+                    "width": 92.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-tab",
+                    "x": 588.0,
+                    "y": 11.333333015441895,
+                    "width": 110.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "autohunt-toggle",
+                    "x": 728.0,
+                    "y": 11.333333015441895,
+                    "width": 134.0,
+                    "height": 34.0,
+                    "enabled": true
+                },
+                {
+                    "name": "pause-button",
+                    "x": 1156.0,
+                    "y": 12.0,
+                    "width": 106.0,
+                    "height": 31.333332061767579,
+                    "enabled": true
+                },
+                {
+                    "name": "gold-value",
+                    "x": 908.0,
+                    "y": 17.33333396911621,
+                    "width": 220.0,
+                    "height": 20.66666603088379,
+                    "enabled": true
+                },
+                {
+                    "name": "hero-hp-value",
+                    "x": 44.0,
+                    "y": 623.3333129882813,
+                    "width": 72.0,
+                    "height": 38.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "attack-slot",
+                    "x": 428.0,
+                    "y": 606.0,
+                    "width": 56.0,
+                    "height": 56.0,
+                    "enabled": true
+                },
+                {
+                    "name": "xp-value",
+                    "x": 18.0,
+                    "y": 701.3333129882813,
+                    "width": 350.0,
+                    "height": 16.66668701171875,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-screen",
+                    "x": 16.0,
+                    "y": 64.0,
+                    "width": 1248.0,
+                    "height": 516.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-enhance",
+                    "x": 300.0,
+                    "y": 512.0,
+                    "width": 580.0,
+                    "height": 44.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-close",
+                    "x": 1108.0,
+                    "y": 80.0,
+                    "width": 136.0,
+                    "height": 40.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-equipment",
+                    "x": 40.0,
+                    "y": 434.0,
+                    "width": 212.0,
+                    "height": 40.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-item-name",
+                    "x": 298.0,
+                    "y": 333.3333435058594,
+                    "width": 584.0,
+                    "height": 34.666656494140628,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-attack-damage",
+                    "x": 606.0,
+                    "y": 433.3333435058594,
+                    "width": 262.0,
+                    "height": 28.666656494140626,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-cost",
+                    "x": 300.0,
+                    "y": 477.3333435058594,
+                    "width": 580.0,
+                    "height": 24.0,
+                    "enabled": true
+                },
+                {
+                    "name": "forge-wallet",
+                    "x": 940.0,
+                    "y": 481.3333435058594,
+                    "width": 288.0,
+                    "height": 24.0,
+                    "enabled": true
+                }
+            ]
+        }
+    ]
+}

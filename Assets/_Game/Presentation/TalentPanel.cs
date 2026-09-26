@@ -21,8 +21,8 @@ namespace AffixZero.Presentation
         private readonly Label points, spent, furyRank, precisionRank, keystoneRank, detailName, detailRank, detailEffect, prerequisite, investCaption, summaryDamage, summaryBonus, summaryPoints;
         private readonly Image detailIcon;
         private readonly Texture2D furyIcon, precisionIcon, keystoneIcon;
-        private static readonly Color Ink = new Color32(10,12,15,255), Surface = new Color32(25,28,30,255), Edge = new Color32(65,66,70,255);
-        private static readonly Color Crimson = new Color32(196,30,58,255), Gold = new Color32(233,195,73,255), Cream = new Color32(229,225,223,255), Muted = new Color32(159,163,170,255), Sky = new Color32(151,203,255,255);
+        private static readonly Color Ink = new Color32(17,19,22,255), Surface = new Color32(26,28,31,255), Highest = new Color32(51,53,56,255), Edge = new Color32(91,64,64,255);
+        private static readonly Color Crimson = new Color32(196,30,58,255), Gold = new Color32(233,195,73,255), Cream = new Color32(226,226,230,255), Muted = new Color32(227,190,189,255), Sky = new Color32(151,203,255,255);
 
         public TalentPanel(VisualElement parent,Func<View> read,Action<TalentId> invest,Action reset,Action close)
         {
@@ -34,48 +34,57 @@ namespace AffixZero.Presentation
             furyIcon=Resources.Load<Texture2D>("AffixGenerated/PowerRune");
             precisionIcon=Resources.Load<Texture2D>("AffixGenerated/PrecisionRune");
             keystoneIcon=Resources.Load<Texture2D>("AffixGenerated/VeteranRune");
-            Root=Box(parent,"talent-screen",18,60,1244,500,Ink);Root.pickingMode=PickingMode.Position;Border(Root,Edge,1);
-            Text(Root,"특성 스킬트리  /  TALENT RUNES",18,11,538,30,20,Cream);
-            points=Text(Root,"",573,9,170,24,14,Gold);points.name="talent-screen-points";
-            spent=Text(Root,"",755,9,160,24,12,Cream);
-            Text(Root,"승리로 얻은 포인트를 투자하세요.",575,34,330,17,10,Muted);
-            resetButton=Button(Root,"talent-screen-reset","특성 초기화",937,12,154,34,Reset,Surface);
-            Button(Root,"talent-screen-close","닫기 [K / ESC]",1104,12,124,34,close,Surface);
-            var tree=Box(Root,"talent-tree",12,65,742,364,Surface);
-            Text(tree,"무기 숙련",18,10,282,26,17,Gold);
-            Text(tree,"분노 → 정밀 → 숙련자의 일격",395,15,326,20,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
-            Box(tree,"tree-accent",18,41,704,1,Crimson);
-            firstLink=Box(tree,"fury-precision-link",368,126,2,40,Edge);
-            secondLink=Box(tree,"precision-keystone-link",368,222,2,40,Edge);
-            Text(tree,"↓",358,132,24,22,16,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(tree,"↓",358,228,24,22,16,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            furyNode=Node(tree,"talent-node-fury",TalentId.Fury,"분노",furyIcon,237,56,out furyRank);
-            precisionNode=Node(tree,"talent-node-precision",TalentId.Precision,"정밀",precisionIcon,237,152,out precisionRank);
-            keystoneNode=Node(tree,"talent-node-keystone",TalentId.Keystone,"숙련자의 일격",keystoneIcon,237,248,out keystoneRank);
-            Text(tree,"I",197,76,28,26,15,Gold);Text(tree,"II",197,172,28,26,15,Gold);Text(tree,"III",191,268,34,26,15,Gold);
-            Text(tree,"공격력 +3 / 단계",521,65,199,22,12,Muted);
-            Text(tree,"최대 2단계",521,91,199,18,10,Muted);
-            Text(tree,"공격력 +4",521,161,199,22,12,Muted);
-            Text(tree,"분노 2단계 필요",521,187,199,18,10,Muted);
-            Text(tree,"공격력 +6",521,257,199,22,12,Muted);
-            Text(tree,"정밀 1단계 필요",521,283,199,18,10,Muted);
-            Text(tree,"노드를 선택하면 오른쪽에서 효과와 선행 조건을 확인할 수 있습니다.",22,334,700,18,11,Muted);
-            var detail=Box(Root,"talent-detail",766,65,466,364,Surface);Border(detail,new Color32(110,58,65,255),1);
-            var iconFrame=Box(detail,"talent-detail-icon",18,19,70,70,Crimson);
-            detailIcon=Icon(iconFrame,null,15,15,40,40);
-            Text(detail,"선택한 특성",105,18,339,20,11,Gold);
-            detailName=Text(detail,"",105,44,339,29,20,Cream);detailName.name="talent-detail-name";
-            detailRank=Text(detail,"",105,76,339,20,11,Muted);
-            var effect=Box(detail,"talent-effect-panel",18,115,428,102,Ink);
-            Text(effect,"특성 효과",14,10,397,20,12,Gold);
-            detailEffect=Text(effect,"",14,39,397,51,14,Cream);detailEffect.name="talent-detail-effect";detailEffect.style.whiteSpace=WhiteSpace.Normal;
-            prerequisite=Text(detail,"",20,237,423,50,12,Sky);prerequisite.style.whiteSpace=WhiteSpace.Normal;
-            investButton=Button(detail,"talent-invest","특성 포인트 투자",18,306,428,40,Invest,Gold);
-            investCaption=investButton.Q<Label>();investCaption.style.color=Ink;
-            var summary=Box(Root,"talent-summary",12,441,1220,47,Surface);
-            summaryDamage=Text(summary,"",18,12,350,25,15,Cream);
-            summaryBonus=Text(summary,"",397,12,388,25,14,Gold);
-            summaryPoints=Text(summary,"",853,12,345,25,12,Muted);
+            Root=Box(parent,"talent-screen",16,64,1248,516,Ink);Root.pickingMode=PickingMode.Position;
+            var header=Box(Root,"talent-header",8,8,1232,56,Surface);
+            Box(header,"talent-header-accent",0,0,4,56,Crimson);
+            Text(header,"특성 스킬트리",18,5,355,29,23,Cream);
+            Text(header,"TALENT RUNES  /  무기 숙련",19,35,355,15,10,Muted);
+            var available=Box(header,"talent-available-card",493,8,180,40,Ink);
+            points=Text(available,"",12,8,156,26,16,Gold);points.name="talent-screen-points";
+            var invested=Box(header,"talent-invested-card",681,8,183,40,Ink);
+            spent=Text(invested,"",12,10,159,22,13,Cream);
+            resetButton=Button(header,"talent-screen-reset","특성 초기화",878,8,194,40,Reset,Highest);
+            Button(header,"talent-screen-close","닫기 [K / ESC]",1084,8,136,40,close,Highest);
+
+            var tree=Box(Root,"talent-tree",8,76,780,376,Surface);
+            var branch=Box(tree,"talent-branch-header",12,12,756,42,new Color32(60,26,35,255));
+            Box(branch,"talent-branch-accent",0,0,3,42,Crimson);
+            Text(branch,"무기 숙련",14,7,295,29,18,Cream);
+            Text(branch,"선택 → 효과 확인 → 포인트 투자",379,11,361,24,12,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
+            firstLink=Box(tree,"fury-precision-link",248,158,50,2,Edge);
+            secondLink=Box(tree,"precision-keystone-link",486,158,50,2,Edge);
+            Text(tree,"→",260,140,28,32,22,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"→",498,140,28,32,22,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            furyNode=Node(tree,"talent-node-fury",TalentId.Fury,"분노",furyIcon,60,90,out furyRank);
+            precisionNode=Node(tree,"talent-node-precision",TalentId.Precision,"정밀",precisionIcon,298,90,out precisionRank);
+            keystoneNode=Node(tree,"talent-node-keystone",TalentId.Keystone,"숙련자의 일격",keystoneIcon,536,90,out keystoneRank);
+            Text(tree,"공격력 +3 / 단계",42,248,224,25,15,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"최대 2단계",42,278,224,22,12,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"공격력 +4",280,248,224,25,15,Sky).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"분노 2단계 필요",280,278,224,22,12,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"공격력 +6",518,248,224,25,15,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(tree,"정밀 1단계 필요",518,278,224,22,12,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Box(tree,"talent-tree-divider",20,322,740,1,Edge);
+            Text(tree,"잠긴 특성도 선택해서 선행 조건을 확인할 수 있습니다.",22,339,736,21,12,Muted);
+
+            var detail=Box(Root,"talent-detail",800,76,440,432,Surface);
+            Box(detail,"talent-detail-accent",0,0,3,432,new Color32(255,179,180,255));
+            var iconFrame=Box(detail,"talent-detail-icon",20,20,76,76,Crimson);
+            detailIcon=Icon(iconFrame,null,14,14,48,48);
+            Text(detail,"선택한 특성  /  PASSIVE",112,17,307,19,11,Gold);
+            detailName=Text(detail,"",112,41,307,34,23,Cream);detailName.name="talent-detail-name";
+            detailRank=Text(detail,"",112,78,307,21,13,Muted);
+            var effect=Box(detail,"talent-effect-panel",20,120,400,112,Ink);
+            Text(effect,"특성 효과",16,12,368,22,12,Gold);
+            detailEffect=Text(effect,"",16,43,368,57,16,Cream);detailEffect.name="talent-detail-effect";detailEffect.style.whiteSpace=WhiteSpace.Normal;
+            Text(detail,"투자 조건",22,252,394,22,12,Gold);
+            prerequisite=Text(detail,"",22,283,394,57,14,Sky);prerequisite.style.whiteSpace=WhiteSpace.Normal;
+            investButton=Button(detail,"talent-invest","특성 포인트 투자",20,360,400,52,Invest,Gold);
+            investCaption=investButton.Q<Label>();investCaption.style.color=Ink;investCaption.style.fontSize=16;investCaption.style.unityFontStyleAndWeight=FontStyle.Bold;
+            var summary=Box(Root,"talent-summary",8,464,780,44,Surface);
+            summaryDamage=Text(summary,"",16,9,208,26,17,Cream);
+            summaryBonus=Text(summary,"",238,11,283,24,13,Gold);
+            summaryPoints=Text(summary,"",535,12,229,22,11,Muted);
             Root.style.display=DisplayStyle.None;
         }
         public void Refresh(bool visible)
@@ -118,14 +127,16 @@ namespace AffixZero.Presentation
             Border(node,SelectedTalent==id?Gold:acquired?Crimson:Edge,SelectedTalent==id?2:1);
             node.style.backgroundColor=acquired?(Color)new Color32(60,26,35,255):Ink;
             // Locked nodes remain selectable so their prerequisites can be read.
-            node.style.opacity=unlocked?1:0.6f;
+            node.style.opacity=unlocked?1:0.78f;
         }
         private VisualElement Node(VisualElement parent,string name,TalentId id,string caption,Texture2D texture,float x,float y,out Label rank)
         {
-            var node=Button(parent,name,"",x,y,264,72,()=>Select(id),Ink);
-            Icon(node,texture,12,12,48,48);
-            Text(node,caption,75,13,179,26,15,Cream);
-            rank=Text(node,"",75,43,176,19,11,Gold);return node;
+            var node=Button(parent,name,"",x,y,188,142,()=>Select(id),Ink);
+            var iconWell=Box(node,name+"-icon-well",61,16,66,66,Highest);
+            Icon(iconWell,texture,9,9,48,48);
+            Text(node,caption,6,91,176,29,17,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
+            rank=Text(node,"",135,7,44,19,11,Gold);rank.style.unityTextAlign=TextAnchor.MiddleCenter;
+            return node;
         }
         private static void SetEnabled(VisualElement element,bool value){element.SetEnabled(value);element.style.opacity=value?1:0.45f;}
         private static Image Icon(VisualElement parent,Texture2D texture,float x,float y,float width,float height)
@@ -133,7 +144,7 @@ namespace AffixZero.Presentation
         private static VisualElement Button(VisualElement parent,string name,string caption,float x,float y,float width,float height,Action action,Color color)
         {
             var element=Box(parent,name,x,y,width,height,color);Border(element,Edge,1);element.pickingMode=PickingMode.Position;element.focusable=true;
-            Text(element,caption,0,0,width,height,12,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(element,caption,0,0,width,height,13,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
             element.RegisterCallback<ClickEvent>(_=>action());
             element.RegisterCallback<NavigationSubmitEvent>(evt=>{action();evt.StopPropagation();});return element;
         }
@@ -143,7 +154,7 @@ namespace AffixZero.Presentation
         {var element=new VisualElement{name=name,pickingMode=PickingMode.Ignore};Place(element,x,y,width,height);element.style.backgroundColor=color;parent.Add(element);return element;}
         private static Label Text(VisualElement parent,string text,float x,float y,float width,float height,int size,Color color)
         {
-            var label=new Label(text){pickingMode=PickingMode.Ignore};Place(label,x,y,width,height);label.style.fontSize=size;label.style.color=color;
+            var label=new Label(text){pickingMode=PickingMode.Ignore};Place(label,x,y,width,height);label.style.fontSize=size;label.style.color=color;if(size>=17)label.style.unityFontStyleAndWeight=FontStyle.Bold;
             label.style.marginLeft=label.style.marginRight=label.style.marginTop=label.style.marginBottom=0;
             label.style.paddingLeft=label.style.paddingRight=label.style.paddingTop=label.style.paddingBottom=0;parent.Add(label);return label;
         }

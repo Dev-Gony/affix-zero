@@ -4,7 +4,7 @@ using UnityEngine.UIElements;
 
 namespace AffixZero.Presentation
 {
-    // Stitch 06: equipment list, central upgrade preview, right-hand item details.
+    // Stitch 11: equipment list, central upgrade preview, right-hand item details.
     // Only the implemented deterministic weapon upgrade is presented as an action.
     public sealed class ForgePanel
     {
@@ -21,52 +21,67 @@ namespace AffixZero.Presentation
         private readonly Image preview, selectedIcon;
         private readonly VisualElement enhance;
         private string resource;
-        private static readonly Color Ink = new Color32(10,12,15,255), Surface = new Color32(25,28,30,255), Edge = new Color32(65,66,70,255);
-        private static readonly Color Crimson = new Color32(196,30,58,255), Gold = new Color32(233,195,73,255), Cream = new Color32(229,225,223,255), Muted = new Color32(159,163,170,255), Sky = new Color32(151,203,255,255);
+        private static readonly Color Ink = new Color32(17,19,22,255), Surface = new Color32(26,28,31,255), Highest = new Color32(51,53,56,255), Edge = new Color32(91,64,64,255);
+        private static readonly Color Crimson = new Color32(196,30,58,255), Gold = new Color32(233,195,73,255), Cream = new Color32(226,226,230,255), Muted = new Color32(227,190,189,255), Sky = new Color32(151,203,255,255);
 
         public ForgePanel(VisualElement parent, Func<View> read, Action upgrade, Action equipment, Action close)
         {
             this.read = read;
-            Root = Box(parent,"forge-screen",18,60,1244,500,Ink);
-            Root.pickingMode = PickingMode.Position; Border(Root,Edge);
-            Text(Root,"대장간  /  FORGE",18,10,360,30,19,Cream);
-            Text(Root,"장비 강화",428,17,170,22,13,Gold);
-            Button(Root,"forge-close","닫기  [ESC]",1106,9,121,31,close,Surface);
+            Root = Box(parent,"forge-screen",16,64,1248,516,Ink);
+            Root.pickingMode = PickingMode.Position;
+            var header=Box(Root,"forge-header",8,8,1232,56,Surface);
+            Box(header,"forge-header-accent",0,0,4,56,Crimson);
+            Text(header,"대장간 강화",18,5,355,29,23,Cream);
+            Text(header,"FORGE  /  장착 무기 확정 강화",19,35,355,15,10,Muted);
+            var activeTab=Box(header,"forge-active-tab",427,9,226,38,Crimson);
+            Text(activeTab,"장비 강화  + ENHANCE",10,8,206,22,13,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(header,"실패 · 장비 파괴 없음",750,18,306,24,12,Gold).style.unityTextAlign=TextAnchor.MiddleRight;
+            Button(header,"forge-close","닫기  [ESC]",1084,8,136,40,close,Highest);
 
-            var list = Box(Root,"forge-equipment-list",12,49,238,439,Surface);
-            Text(list,"강화 대상 장비",14,13,208,25,15,Cream);
-            var item = Box(list,"forge-equipped-item",12,53,214,93,Ink); Border(item,Gold);
-            selectedIcon = Icon(item,12,16,42,42);
-            selected = Text(item,"",65,15,140,61,12,Cream); selected.style.whiteSpace = WhiteSpace.Normal;
-            Text(list,"현재 장착한 무기를 강화합니다.\n다른 무기는 장비 화면에서\n장착한 뒤 강화하세요.",14,166,208,80,12,Muted).style.whiteSpace = WhiteSpace.Normal;
-            Button(list,"forge-equipment","장비 선택으로 이동",14,260,208,35,equipment,Ink);
-            Text(list,"강화 단계는 무기에 남습니다.\n교체해도 강화가 유지됩니다.",14,364,208,58,11,Gold).style.whiteSpace = WhiteSpace.Normal;
+            var list = Box(Root,"forge-equipment-list",8,76,244,432,Surface);
+            Text(list,"강화 대상 장비",16,13,212,28,18,Cream);
+            Box(list,"forge-list-divider",16,49,212,1,Edge);
+            var item = Box(list,"forge-equipped-item",12,66,220,111,Highest);
+            Box(item,"forge-selected-accent",0,0,3,111,Crimson);
+            var iconWell=Box(item,"forge-selected-icon-well",12,20,52,52,Ink);
+            selectedIcon = Icon(iconWell,6,6,40,40);
+            selected = Text(item,"",75,21,134,76,14,Cream); selected.style.whiteSpace = WhiteSpace.Normal;
+            Text(list,"현재 장착한 무기를 강화합니다.\n다른 무기는 장비 화면에서\n장착한 뒤 강화하세요.",16,201,212,76,12,Muted).style.whiteSpace = WhiteSpace.Normal;
+            Button(list,"forge-equipment","장비 선택으로 이동",16,294,212,40,equipment,Highest);
+            var hint=Box(list,"forge-preservation-note",12,360,220,60,Ink);
+            Text(hint,"강화 단계는 무기에 남습니다.\n교체해도 유지됩니다.",12,12,196,40,12,Gold).style.whiteSpace = WhiteSpace.Normal;
 
-            var altar = Box(Root,"forge-preview",262,49,620,439,Surface);
-            Text(altar,"ENHANCEMENT ALTAR",16,13,350,24,14,Cream);
-            outcome = Text(altar,"",404,16,200,20,11,Gold); outcome.style.unityTextAlign=TextAnchor.MiddleRight;
-            var frame = Box(altar,"forge-item-frame",249,51,122,108,Ink); Border(frame,Gold);
-            preview = Icon(frame,29,15,64,64);
-            rank = Text(frame,"",4,82,114,21,12,Gold); rank.style.unityTextAlign=TextAnchor.MiddleCenter;
-            name = Text(altar,"",18,170,584,30,20,Cream); name.name="forge-item-name"; name.style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(altar,"강화 후 능력치  /  PREVIEW",20,215,580,21,12,Muted);
-            var weaponBox=Box(altar,"forge-weapon-preview",20,244,281,65,Ink);
-            Text(weaponBox,"무기 피해",12,7,257,18,11,Muted);
-            weapon=Text(weaponBox,"",12,30,257,27,20,Gold); weapon.name="forge-weapon-damage";
-            var attackBox=Box(altar,"forge-attack-preview",313,244,287,65,Ink);
-            Text(attackBox,"영웅 공격력",12,7,263,18,11,Muted);
-            attack=Text(attackBox,"",12,30,263,27,20,Sky); attack.name="forge-attack-damage";
-            cost=Text(altar,"",20,321,580,24,13,Gold); cost.name="forge-cost";
-            enhance=Button(altar,"forge-enhance","강화 실행",20,359,580,54,upgrade,Crimson);
+            var altar = Box(Root,"forge-preview",264,76,620,432,Surface);
+            Box(altar,"forge-altar-accent",16,18,4,18,Crimson);
+            Text(altar,"강화의 모루",29,11,300,29,18,Cream);
+            outcome = Text(altar,"",399,17,201,22,12,Gold); outcome.style.unityTextAlign=TextAnchor.MiddleRight;
+            var frame = Box(altar,"forge-item-frame",234,54,152,130,Ink); Border(frame,Edge);
+            Box(frame,"forge-frame-top",10,9,132,2,Gold);
+            preview = Icon(frame,40,22,72,72);
+            var rankPlate=Box(frame,"forge-rank-plate",19,101,114,22,Crimson);
+            rank = Text(rankPlate,"",0,1,114,21,13,Cream); rank.style.unityTextAlign=TextAnchor.MiddleCenter;
+            name = Text(altar,"",18,193,584,35,23,Cream); name.name="forge-item-name"; name.style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(altar,"강화 전 → 강화 후",20,235,580,21,11,Muted);
+            var weaponBox=Box(altar,"forge-weapon-preview",20,264,282,63,Ink);
+            Text(weaponBox,"무기 피해",12,7,258,18,11,Muted);
+            weapon=Text(weaponBox,"",12,29,258,29,23,Gold); weapon.name="forge-weapon-damage";
+            var attackBox=Box(altar,"forge-attack-preview",314,264,286,63,Ink);
+            Text(attackBox,"영웅 공격력",12,7,262,18,11,Muted);
+            attack=Text(attackBox,"",12,29,262,29,23,Sky); attack.name="forge-attack-damage";
+            cost=Text(altar,"",20,337,580,24,14,Gold); cost.name="forge-cost";
+            enhance=Button(altar,"forge-enhance","강화 실행",20,372,580,44,upgrade,Crimson);
+            enhance.Q<Label>().style.fontSize=17;enhance.Q<Label>().style.unityFontStyleAndWeight=FontStyle.Bold;
 
-            var info=Box(Root,"forge-details",894,49,338,439,Surface);
-            Text(info,"무기 속성",16,13,306,25,15,Cream);
-            details=Text(info,"",16,54,306,98,13,Cream); details.style.whiteSpace=WhiteSpace.Normal;
-            Box(info,"forge-divider",16,164,306,1,Edge);
-            Text(info,"강화 규칙",16,180,306,25,14,Gold);
-            Text(info,"단계마다 무기 피해 +2\n최대 강화 +3\n소모 골드  8 → 16 → 24\n실패와 장비 파괴 없음",16,219,306,96,12,Muted).style.whiteSpace=WhiteSpace.Normal;
-            wallet=Text(info,"",16,329,306,24,14,Gold); wallet.name="forge-wallet";
-            notice=Text(info,"",16,371,306,53,11,Sky); notice.name="forge-notice"; notice.style.whiteSpace=WhiteSpace.Normal;
+            var info=Box(Root,"forge-details",896,76,344,432,Surface);
+            Text(info,"무기 속성",16,13,312,28,18,Cream);
+            var propertyCard=Box(info,"forge-property-card",16,57,312,105,Ink);
+            details=Text(propertyCard,"",14,12,284,83,14,Cream); details.style.whiteSpace=WhiteSpace.Normal;
+            Box(info,"forge-divider",16,179,312,1,Edge);
+            Text(info,"강화 규칙",16,195,312,25,16,Gold);
+            Text(info,"단계마다 무기 피해 +2\n최대 강화 +3\n소모 골드  8 → 16 → 24\n실패와 장비 파괴 없음",16,234,312,91,13,Muted).style.whiteSpace=WhiteSpace.Normal;
+            var walletCard=Box(info,"forge-wallet-card",16,333,312,39,Highest);
+            wallet=Text(walletCard,"",12,8,288,24,16,Gold); wallet.name="forge-wallet";
+            notice=Text(info,"",16,384,312,36,11,Sky); notice.name="forge-notice"; notice.style.whiteSpace=WhiteSpace.Normal;
             Root.style.display=DisplayStyle.None;
         }
 
@@ -103,7 +118,7 @@ namespace AffixZero.Presentation
         private static VisualElement Box(VisualElement parent,string id,float x,float y,float w,float h,Color color)
         {var e=new VisualElement{name=id,pickingMode=PickingMode.Ignore};Place(e,x,y,w,h);e.style.backgroundColor=color;parent.Add(e);return e;}
         private static Label Text(VisualElement parent,string value,float x,float y,float w,float h,int size,Color color)
-        {var e=new Label(value){pickingMode=PickingMode.Ignore};Place(e,x,y,w,h);e.style.fontSize=size;e.style.color=color;e.style.marginLeft=e.style.marginRight=e.style.marginTop=e.style.marginBottom=0;e.style.paddingLeft=e.style.paddingRight=e.style.paddingTop=e.style.paddingBottom=0;parent.Add(e);return e;}
+        {var e=new Label(value){pickingMode=PickingMode.Ignore};Place(e,x,y,w,h);e.style.fontSize=size;e.style.color=color;if(size>=17)e.style.unityFontStyleAndWeight=FontStyle.Bold;e.style.marginLeft=e.style.marginRight=e.style.marginTop=e.style.marginBottom=0;e.style.paddingLeft=e.style.paddingRight=e.style.paddingTop=e.style.paddingBottom=0;parent.Add(e);return e;}
         private static void Border(VisualElement e,Color color){e.style.borderTopColor=e.style.borderRightColor=e.style.borderBottomColor=e.style.borderLeftColor=color;e.style.borderTopWidth=e.style.borderRightWidth=e.style.borderBottomWidth=e.style.borderLeftWidth=1;}
     }
 }

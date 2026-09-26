@@ -1,0 +1,349 @@
+{
+  "schema": "affix-stitch-reference-expansion-v1",
+  "reviewed_date": "2026-09-26",
+  "source": "User-provided Stitch exports 07-12",
+  "intake_metadata_source": "Build/Reference/Stitch/intake-07-12.json",
+  "archive_hash_provenance": "Copied from intake metadata; equality conclusions use recomputed extracted file SHA-256, not archive bytes.",
+  "comparison_scope": "Each of 18 extracted files was hashed, checked against intake bytes/hash, and compared by same filename against references 00-06.",
+  "summary": "07=00, 09=02, 10=03, 11=06, 12=04 for all three extracted files. 08 HTML=01; 08 PNG differs from every 00-06 PNG. All DESIGN.md files match. PNG byte difference does not prove a visual or layout revision.",
+  "unity_verification": "PASS_WINDOWS_720_1080_UI_CALLBACKS_AND_FRAMEBUFFERS",
+  "user_visual_approval": "NOT_APPROVED",
+  "references": [
+    {
+      "id": "07",
+      "screen": "hero-selection",
+      "archive": "stitch_hero_siege_homage_game (7).zip",
+      "bytes": 711724,
+      "sha256": "6ed7654c818b94818997566cd4ae878d524dc55fd12eb8f04ae6c2d4041e7f76",
+      "screen_dimensions": [
+        1600,
+        1280
+      ],
+      "local_extraction": "Build/Reference/Stitch/07",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 698470,
+          "sha256": "44a1deaa26fa5a21d1f1923b5e9836a36c68bd8768bb42a63dd5fc854ed79866"
+        },
+        {
+          "name": "code.html",
+          "bytes": 43219,
+          "sha256": "b9c28e2f9fcb23161563b2ffa58ea0d995b9f1b8f8ba0c3b3ba69d24264fa84a"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": [
+            "00"
+          ]
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "00"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "08",
+      "screen": "dungeon-combat",
+      "archive": "stitch_hero_siege_homage_game (8).zip",
+      "bytes": 476856,
+      "sha256": "f0f79f17f90042615f15f6aa48d4dc6f3e45bb4dcbb951b21369957a67908c06",
+      "screen_dimensions": [
+        1600,
+        1335
+      ],
+      "local_extraction": "Build/Reference/Stitch/08",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 467786,
+          "sha256": "a5c5e447c22c92256215d59d25c61c395b943dc7963c121ead4632c0cc5e26bd"
+        },
+        {
+          "name": "code.html",
+          "bytes": 35128,
+          "sha256": "1b967c21f0804460b3b5cfa608aa6020b885fd793edead3706725ee67e7876ab"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": []
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "01"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "09",
+      "screen": "town-sanctuary",
+      "archive": "stitch_hero_siege_homage_game (9).zip",
+      "bytes": 1307923,
+      "sha256": "5f6f3db0e867b46480b1c773fdb06986a4bdb6192ede355c54a9be06d2cfd77a",
+      "screen_dimensions": [
+        1600,
+        1315
+      ],
+      "local_extraction": "Build/Reference/Stitch/09",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 1295670,
+          "sha256": "be7b3b756ebdc45d76724988b4aeb649b90a41166802ba945d2c0ab46b15641a"
+        },
+        {
+          "name": "code.html",
+          "bytes": 33852,
+          "sha256": "a0e9e626a5e2db29ec1eebb25c1e493fbad9cc82f43d94cff98409964e5cbd6b"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": [
+            "02"
+          ]
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "02"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "10",
+      "screen": "equipment-talents",
+      "archive": "stitch_hero_siege_homage_game (10).zip",
+      "bytes": 588331,
+      "sha256": "df8a464450eac2050d853529a2e5219283023cc5f8a9b02d6ca118f0bc1c2468",
+      "screen_dimensions": [
+        1362,
+        1600
+      ],
+      "local_extraction": "Build/Reference/Stitch/10",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 577193,
+          "sha256": "f10f14c3b3a4235d295460d16822f4cdf29e1df4094e3b417ada8860bb2b1402"
+        },
+        {
+          "name": "code.html",
+          "bytes": 55802,
+          "sha256": "3a928524facf1c51c6a139cb0e8b155660bd1070ad13cce2940f85333fe59d70"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": [
+            "03"
+          ]
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "03"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "11",
+      "screen": "forge-enhancement",
+      "archive": "stitch_hero_siege_homage_game (11).zip",
+      "bytes": 678058,
+      "sha256": "f5661f3087ccbf615f9e1914ce161d79d2117e1b87c92d45d149558978404cf6",
+      "screen_dimensions": [
+        1600,
+        1400
+      ],
+      "local_extraction": "Build/Reference/Stitch/11",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 664486,
+          "sha256": "883e30bd160c58bfa3b82578177d7432c93e65cd3af8b1442852ab0fbdf58883"
+        },
+        {
+          "name": "code.html",
+          "bytes": 47492,
+          "sha256": "2a5cd54d20d2a116fb7bcd193c7c00691d8ba1174dba6c3cfe71420c928f4904"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": [
+            "06"
+          ]
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "06"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "12",
+      "screen": "talent-tree",
+      "archive": "stitch_hero_siege_homage_game (12).zip",
+      "bytes": 648262,
+      "sha256": "bed72694b708f174b250b72c0ec3e0253643c0d518ca8cef63b526627afd34e9",
+      "screen_dimensions": [
+        1600,
+        1326
+      ],
+      "local_extraction": "Build/Reference/Stitch/12",
+      "reference_only": true,
+      "files": [
+        {
+          "name": "screen.png",
+          "bytes": 635018,
+          "sha256": "12de43ad263274e9ddc1f73edd1463b7daf715dcc72443a9d2e6c848e906e172"
+        },
+        {
+          "name": "code.html",
+          "bytes": 56600,
+          "sha256": "e8c9a5b4789c7df5fc9e8e6b8725feff6fa61f60249a286e7b935b0325c01a9b"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        }
+      ],
+      "extracted_file_comparison": [
+        {
+          "file": "screen.png",
+          "exact_sha256_matches_prior_references": [
+            "04"
+          ]
+        },
+        {
+          "file": "code.html",
+          "exact_sha256_matches_prior_references": [
+            "04"
+          ]
+        },
+        {
+          "file": "DESIGN.md",
+          "exact_sha256_matches_prior_references": [
+            "00",
+            "01",
+            "02",
+            "03",
+            "04",
+            "05",
+            "06"
+          ]
+        }
+      ]
+    }
+  ],
+  "build_guid": "e8115fc90b424d58a3fc868b8e140204",
+  "evidence": "docs/validation/ui-refresh/"
+}
