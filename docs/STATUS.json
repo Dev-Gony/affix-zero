@@ -5,7 +5,7 @@
   "branch": "restart/unity-6",
   "pr": 19,
   "stage": "LOCAL_SAVED_AUTONOMOUS_HUNT",
-  "implementation_commit": null,
+  "implementation_commit": "59d4d067693ac3f0f627ccb5b4a6b988539199f5",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
