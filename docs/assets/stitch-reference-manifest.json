@@ -1,0 +1,126 @@
+{
+  "schema": "affix-stitch-reference-review-v1",
+  "reviewed_date": "2026-09-26",
+  "source": "User-provided Stitch exports",
+  "review_scope": "All four screen.png files viewed; HTML and shared design read as reference data. No external scripts executed.",
+  "unity_implementation": "NOT_IMPLEMENTED",
+  "engine_change_required_for_ui": false,
+  "engine": "6000.3.24f1",
+  "renderer": "Built-in 2D",
+  "proposed_ui": "Existing UI Toolkit module; UXML/USS and C#",
+  "source_assets": "ZIPs include HTML, flattened screenshot, design document only; remote image and font originals are not bundled.",
+  "references": [
+    {
+      "screen": "hero-selection",
+      "source_filename": "stitch_hero_siege_homage_game.zip",
+      "zip_sha256": "e34d666945d9e9361f1a7709cd57cf24685971ea5858d6a32a80273ff96b0c12",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/00",
+      "screenshot_size": [
+        1600,
+        1280
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 43219,
+          "sha256": "b9c28e2f9fcb23161563b2ffa58ea0d995b9f1b8f8ba0c3b3ba69d24264fa84a"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 698470,
+          "sha256": "44a1deaa26fa5a21d1f1923b5e9836a36c68bd8768bb42a63dd5fc854ed79866"
+        }
+      ]
+    },
+    {
+      "screen": "dungeon-combat",
+      "source_filename": "stitch_hero_siege_homage_game (1).zip",
+      "zip_sha256": "45587cffb9e9e1965b82e61efe3ce478d30cf47207326672a98a7cb07ac17275",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/01",
+      "screenshot_size": [
+        1600,
+        1335
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 35128,
+          "sha256": "1b967c21f0804460b3b5cfa608aa6020b885fd793edead3706725ee67e7876ab"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 467774,
+          "sha256": "bcb9e0b58bfd3f65671f0741dc896702e827c93472cb3abd2b6861c265d72a7b"
+        }
+      ]
+    },
+    {
+      "screen": "town-sanctuary",
+      "source_filename": "stitch_hero_siege_homage_game (2).zip",
+      "zip_sha256": "df3baf60e557442c00f430fd6f1040502560e04d818edbfb58e4248e5e1b3ce5",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/02",
+      "screenshot_size": [
+        1600,
+        1315
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 33852,
+          "sha256": "a0e9e626a5e2db29ec1eebb25c1e493fbad9cc82f43d94cff98409964e5cbd6b"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 1295670,
+          "sha256": "be7b3b756ebdc45d76724988b4aeb649b90a41166802ba945d2c0ab46b15641a"
+        }
+      ]
+    },
+    {
+      "screen": "equipment-talents",
+      "source_filename": "stitch_hero_siege_homage_game (3).zip",
+      "zip_sha256": "d310969eb0da4aa0b538589f03c77796a56e370d1d313e5951e911c26ca7d62e",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/03",
+      "screenshot_size": [
+        1362,
+        1600
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 55802,
+          "sha256": "3a928524facf1c51c6a139cb0e8b155660bd1070ad13cce2940f85333fe59d70"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 577193,
+          "sha256": "f10f14c3b3a4235d295460d16822f4cdf29e1df4094e3b417ada8860bb2b1402"
+        }
+      ]
+    }
+  ]
+}
