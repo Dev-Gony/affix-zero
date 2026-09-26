@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "STITCH_TALENT_FORGE_LOOP",
-  "implementation_commit": "11d6aa67ad8b525dff93fc2ed757f72cb1a83b02",
+  "stage": "AUTONOMOUS_DUNGEON_LOOP",
+  "implementation_commit": null,
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -16,12 +16,12 @@
     "latest_user_report": "INSTALLATION_COMPLETE",
     "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "FREE_ZERIE_PRIVATE_RAW_GENERATED_ROOM_CC0_ICON_OFL_FONT_IMPORTED",
+  "new_art": "FREE_ZERIE_PRIVATE_RAW_GENERATED_ROOM_AND_OBSTACLES_CC0_ICON_OFL_FONT_IMPORTED",
   "unity_editor_import": "PASS",
   "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
   "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
   "ui_direction": "USER_STITCH_SEVEN_REFERENCE_SCREENS_NATIVE_UNITY",
-  "windows_build": "SUCCEEDED_2026-09-26T05:42:27Z_ZERO_ERRORS_WARNINGS",
+  "windows_build": "SUCCEEDED_2026-09-26T06:36:34Z_ZERO_ERRORS_WARNINGS",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,25 +30,25 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "AUTO_HUNT_MVP: traversable dungeon routes, autonomous target selection/combat/loot, next section and automatic rerun before more management screens",
+  "next": "MVP step2: persistent local save and repeat-growth verification, then 20-minute unattended validation",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
-  "core_checks": 105,
+  "core_checks": 126,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_TALENT_FORGE_LOOP_720_1080",
+  "windows_player": "PASS_AUTO_HUNT_720_1080_AND_SEPARATE_SAFETY_SCENARIOS",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/management/",
+  "actual_game_capture": "docs/media/autohunt/",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
-  "new_direction_validation": "TALENT_SELECTION_FORGE_GOLD_AND_REAL_IMPACT_PASS; FULL_PRODUCT_INCOMPLETE",
-  "previous_technical_checks_scope": "Ninja, first HUD and progression reports are historical; latest scope is management below.",
+  "new_direction_validation": "THREE_AUTONOMOUS_CYCLES_ZERO_DEATHS_PER_RESOLUTION; FULL_MVP_INCOMPLETE",
+  "previous_technical_checks_scope": "management/progression/stitch are historical. Current runtime evidence: autohunt.",
   "stitch": {
     "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
     "engine_or_package_changes": false,
     "current_scope": "Native combat, equipment, dedicated talent detail/investment, equipped weapon enhancement; seven reference screens inspected",
-    "build_guid": "863e316feb2d4b01b0667c7d636282c0",
-    "reports": "docs/validation/management/",
-    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; SEVENTEEN_UI_CLICKEVENT_CALLBACKS_VERIFIED",
+    "build_guid": "6c03e8d2bc6e457abc31582911701d3d",
+    "reports": "docs/validation/autohunt/",
+    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; SEVEN_UI_CLICKEVENT_CALLBACKS_PER_BASELINE",
     "other_screens": "Hero selection/town/pets not implemented; no disk save, mana, active skill loadout or socket/reforge systems"
   },
   "progression": {
@@ -85,7 +85,7 @@
       "success": "deterministic; no destruction",
       "gold": "TotalGold now means available balance after purchases"
     },
-    "screen_state": "Exclusive Equipment/Talents/Forge; all pause combat and preserve prior manual pause on close",
+    "screen_state": "Exclusive Equipment/Talents/Forge; hunting continues while open. Explicit manual pause still freezes simulation.",
     "verified_example": "Attack 43 -> 45, gold 8 -> 0, actual next-encounter impact 43 after defense2",
     "session_only": true,
     "pet_scope": "Reference intake only, no pet runtime"
@@ -93,16 +93,53 @@
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "mvp": {
     "status": "NOT_READY",
-    "current": "One-on-one combat and management prototype",
+    "current": "Automatic three-area courtyard loop, two concurrent enemies, recurring clear weapons, safety stops; step1 runtime checks passed",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
-      "autonomous dungeon navigation and target switching",
-      "automatic item pickup and section/rerun loop",
-      "repeat loot growth and persistent save",
-      "hunt continues while management menus open",
-      "unattended endurance and physical controls validation"
+      "persistent local save and restart recovery",
+      "repeat-growth effectiveness validation in autonomous runs",
+      "20-minute unattended endurance",
+      "physical controls and user visual approval"
     ],
     "release_date": "NOT_COMMITTED; estimate after first autonomous dungeon integration",
     "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
+  },
+  "autohunt": {
+    "build_guid": "6c03e8d2bc6e457abc31582911701d3d",
+    "reports": "docs/validation/autohunt/",
+    "world": "One authored courtyard, three patrol areas, two pooled enemies, shared visual/grid obstacles",
+    "baseline_stats": {
+      "hero_hp": 120,
+      "hero_attack": 30,
+      "enemy_hp": 54,
+      "enemy_attack": 6
+    },
+    "normal_hits": "Damage/flash only; no attack/movement cancellation. Death cancels attacks.",
+    "baseline": {
+      "720": {
+        "run_id": "26b0296dea004e06a40c4a3cfab8caa8",
+        "seconds": 70.92882537841797,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      },
+      "1080": {
+        "run_id": "23dbebd8a24b4397bca82dce83b771bd",
+        "seconds": 70.64736938476562,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      }
+    },
+    "safety": "PASS: separate explicit attack=1 death injection and 24-item full-bag fixture. Each stop held 4 seconds.",
+    "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified."
   }
 }

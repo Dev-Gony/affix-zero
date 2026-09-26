@@ -1,0 +1,114 @@
+{
+  "buildGuid": "6c03e8d2bc6e457abc31582911701d3d",
+  "scope": "Lossless actual Windows framebuffer BMP to PNG conversion; not mockups. User visual approval pending.",
+  "captures": [
+    {
+      "path": "docs/media/autohunt/720-exploration.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "exploration",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "7eaa29e2580011cbea9161add5d5a7acaf198b38c715b5005a8c08d1a3a21ac9"
+    },
+    {
+      "path": "docs/media/autohunt/720-combat.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "combat",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "6141fcd198961c7bbcf05803469e5e41b8990328156960c7c68219d6704d25e0"
+    },
+    {
+      "path": "docs/media/autohunt/720-management.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "management",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "aba957860b3eded1916f8909b0c349c2933cbff2038447f87f02d7711529ae7d"
+    },
+    {
+      "path": "docs/media/autohunt/720-paused.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "paused",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "ff85dce64b15e5e40921346ce1f7604b7fcc6eae56874c3160280e0d31bff545"
+    },
+    {
+      "path": "docs/media/autohunt/720-loot.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "loot",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "c499d8ac8a79dc3a57a7fed02dd55b36de02aa1ec262023fd4a1838f9dcbb822"
+    },
+    {
+      "path": "docs/media/autohunt/720-run-complete.png",
+      "runId": "26b0296dea004e06a40c4a3cfab8caa8",
+      "state": "run-complete",
+      "width": 1280,
+      "height": 720,
+      "rgbPreserved": true,
+      "sha256": "86bddad34adb6e1691bb5601bfbd5096908beff703914ae5d1658fcc9e122b30"
+    },
+    {
+      "path": "docs/media/autohunt/1080-exploration.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "exploration",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "087c379959901c538a495312e494bceeb820fae3e2aa91cbb5fffb63bb0df1d3"
+    },
+    {
+      "path": "docs/media/autohunt/1080-combat.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "combat",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "6ef23447f90ea03ffab2e996161a0183773187f0b7d518a4b4eb69fe6076cfba"
+    },
+    {
+      "path": "docs/media/autohunt/1080-management.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "management",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "256443d7836d0112bdfe0491d18f3313eeb3bd7cca38622947b2a9894a732ba7"
+    },
+    {
+      "path": "docs/media/autohunt/1080-paused.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "paused",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "3c9839e1e6bcf589302f5c1da35dcb36ad29df4ff97292f8fd79d58d0f23d116"
+    },
+    {
+      "path": "docs/media/autohunt/1080-loot.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "loot",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "0d765c834d09e993946ba268f4bed65e26f040bc1571c7352a347614bd567894"
+    },
+    {
+      "path": "docs/media/autohunt/1080-run-complete.png",
+      "runId": "23dbebd8a24b4397bca82dce83b771bd",
+      "state": "run-complete",
+      "width": 1920,
+      "height": 1080,
+      "rgbPreserved": true,
+      "sha256": "ad49df1992c218d4fb3ca69c633ff09f916b23ff03c315958e84e582cbc65305"
+    }
+  ]
+}

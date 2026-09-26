@@ -1,10 +1,14 @@
 # Unity 구현 구조 — Hero Siege 오마주 검토 씬
 
-갱신: 2026-09-26. Unity 6000.3.24f1 / C# / Built-in 2D 유지. 사용자 제공 Stitch 7개 시안을 최우선 기준으로 삼으며, 현재는 전투·장비와 전용 특성·대장간 화면의 제한된 성장 루프를 네이티브 UI Toolkit으로 구현했다. 펫 시안은 참조만 보관한다. 무료 Soldier·Orc, 생성 사원 방, CC0 아이콘5개와 Noto Sans KR을 사용한다. 영웅 선택·타운·모든 장비 부위까지 구현한 것은 아니다. Godot 소스는 복원하지 않았다. 이전 Ninja·초원·두 HUD 시안은 deprecated이며 사용자에게 거절됐다.
+갱신: 2026-09-26. Unity 6000.3.24f1 / C# / Built-in 2D 유지. 사용자 제공 Stitch 7개 시안을 최우선 기준으로 삼으며, 현재는 자동 던전 순환과 장비·특성·대장간을 연결했다. 관리 UI는 네이티브 UI Toolkit이다. 펫 시안은 참조만 보관한다. 무료 Soldier·Orc, 생성 사원 방, CC0 아이콘5개와 Noto Sans KR을 사용한다. 영웅 선택·타운·모든 장비 부위까지 구현한 것은 아니다. Godot 소스는 복원하지 않았다. 이전 Ninja·초원·두 HUD 시안은 deprecated이며 사용자에게 거절됐다.
 
 | 계층/파일 | 책임과 현재 범위 |
 |---|---|
 | `Core/AttackTimeline.cs` | 대상 잠금, 준비·타격1회·회복, 취소. Unity/파일 접근 없음 |
+| `Core/DungeonNavigation.cs` | 통행 가능 셀, BFS 경로와 도달 가능한 대상 탐색 |
+| `Presentation/DungeonWorld.cs` | 단일 마당의 28×16 그리드·장애물 표시·이동 여유와 시야 판정 |
+| `Presentation/AutoHuntDirector.cs` | 세 구간·적 두 개체 재사용, 탐색/전투/수거/귀환/반복, 실패·포화 중단 |
+| `Presentation/AutoHuntSmokeProbe.cs` | 실제 1배속 자동 순환·통행·시야/impact·메뉴 중 사냥·수동 pause 검사 |
 | `Core/CombatHealth.cs` | HP/방어, 공격자+공격ID 중복 차단, 사망1회 |
 | `Core/EncounterRewards.cs` | 원정/적/사망ID별 보상1회, overflow 검사. 저장·인벤토리 없음 |
 | `Core/HeroProgression.cs` | 24칸 가방, 단일 장착 무기, 첫 확정 드랍, 누적 XP·가용 Gold, 3노드 특성과 최대 +3 확정 강화의 규칙·피해 계산 |
@@ -31,11 +35,11 @@ slice는 PPU32, Soldier pivot `(0.5,0.4)`, Orc `(0.55,0.43)`다. 프레임 수6/
 
 ## 전투와 UI 상태
 
-공격 시작 시 대상 object·ID와 `swingDamage`를 고정하고 공격 FPS와 impact index에서 판정 시점을 계산한다. 수신 키는 `(attackerId, attackId)`이며 동일/과거 공격을 다시 적용하지 않는다. 피격은 진행 공격을 취소한다. 치명타 후 회복 동작과 표시 프레임을 건너뛴 impact 표시는 코어/표시 계층에서 구분한다. 장비·특성이 공격 도중 바뀌어도 진행 중인 스윙 피해는 변하지 않고 다음 스윙부터 적용한다.
+공격 시작 시 대상 object·ID와 `swingDamage`를 고정하고 공격 FPS와 impact index에서 판정 시점을 계산한다. 수신 키는 `(attackerId, attackId)`이며 동일/과거 공격을 다시 적용하지 않는다. 일반 피격은 약 0.12초 flash와 피해만 반영하고 진행 공격·이동을 취소하지 않는다. 사망 때만 피격 경로에서 공격을 취소한다. 치명타 후 회복 동작과 표시 프레임을 건너뛴 impact 표시는 코어/표시 계층에서 구분한다. 장비·특성이 공격 도중 바뀌어도 진행 중인 스윙 피해는 변하지 않고 다음 스윙부터 적용한다.
 
-`FirstEncounter`는 `ManagementScreen`의 None/Equipment/Talents/Forge 단일 상태로 관리 화면을 상호 배타 표시한다. `IsPaused = manuallyPaused || ManagementVisible`이므로 어느 관리 화면을 열어도 전투가 멈추고, 닫아도 수동 pause는 유지된다. 화면이 모두 닫히고 수동 pause도 해제됐을 때 기존 속도로 복원한다. `EquipmentPanel`은 실제 24칸 가방과 단일 무기 슬롯을 표시한다. 가방 아이템을 선택하면 장착 무기와 피해 차이를 비교하고, 장착하면 이전 무기가 선택 가방 칸으로 교체된다. 버리기는 같은 아이템에 두 번 눌러 확인하며 보상 없이 제거한다. 다중 부위 장비·능동 스킬 hotbar는 아직 없다.
+`FirstEncounter`는 `ManagementScreen`의 None/Equipment/Talents/Forge 단일 상태로 관리 화면을 상호 배타 표시한다. `IsPaused = manuallyPaused`이므로 관리 화면을 열어도 사냥한다. 메뉴 전환·닫기는 수동 pause를 바꾸지 않는다. `EquipmentPanel`은 실제 24칸 가방과 단일 무기 슬롯을 표시한다. 가방 아이템을 선택하면 장착 무기와 피해 차이를 비교하고, 장착하면 이전 무기가 선택 가방 칸으로 교체된다. 버리기는 같은 아이템에 두 번 눌러 확인하며 보상 없이 제거한다. 다중 부위 장비·능동 스킬 hotbar는 아직 없다.
 
-`FirstEncounter.Progression`은 static `HeroProgression`을 통해 같은 실행 세션에서 유지된다. 첫 적 처치 시 잿불 강철검1개가 확정 드랍되며 회수 후 가방에 들어간다. 기본 공격력24에 시작 검6이 더해지고, 새 검은 기본 보너스12+잿불4를 준다. 모든 유효 처치는 XP25·Gold8·특성 포인트1을 지급하지만 이후 처치에서 새 무기를 반복 생성하지 않는다. 총 XP는 누적된다. `TotalGold`는 이름과 달리 총 획득액이 아니라 강화 비용을 차감한 세션 내 가용 잔액이다. 전투별 보상·HP·pause는 새 전투에서 초기화된다. `NextEncounter`는 전투 종료와 전리품 회수를 확인한 뒤 같은 씬을 다시 열어 장비·가방·특성·무기별 강화 단계·골드 잔액을 유지한다. 프로세스 종료 후 저장·복원은 없다.
+`FirstEncounter.Progression`은 static `HeroProgression`을 통해 같은 실행 세션에서 유지된다. 첫 적 처치 시 잿불 강철검1개가 확정 드랍되며 회수 후 가방에 들어간다. 기본 공격력24에 시작 검6이 더해지고, 새 검은 기본 보너스12+잿불4를 준다. 모든 유효 처치는 XP25·Gold8·특성 포인트1을 지급한다. 첫 드랍 외에 순환 완료마다 사원의 강철검을 자동 수거한다. `completedRuns % 3`으로 기본 보너스11/12/13·어픽스 보너스2/3/4와 이름을 순서대로 고른다. 무작위 대규모 어픽스 시스템은 아니다. 총 XP는 누적된다. `TotalGold`는 이름과 달리 총 획득액이 아니라 강화 비용을 차감한 세션 내 가용 잔액이다. 주력 루프의 `BeginAutoRun`은 전투별 보상을 새로 만들고 영웅 HP를 초기화한다. 장비·가방·특성·무기별 강화 단계·골드 잔액은 같은 세션에 유지한다. 자동사냥은 씬을 다시 로드하지 않고 순환한다. `NextEncounter`/씬 재시작은 이전 검증 경로로 남아 있으며 매 순환에 버튼을 요구하지 않는다. 프로세스 종료 후 저장·복원은 없다.
 
 특성은 분노(Fury)2단계까지 단계당 피해+3 → 정밀(Precision)1단계 피해+4 → 숙련(Keystone)1단계 피해+6의 한 분기다. 각 단계는 포인트1과 선행 조건을 요구하며 초기화는 사용 포인트를 돌려준다. 전용 `TalentPanel`에서 노드 선택 → 오른쪽 효과/선행 조건 확인 → 투자로 진행한다. 잠긴 정밀도 선택해 상세를 볼 수 있지만 투자할 수 없고, 선택만으로 포인트가 소모되지 않는다. 정밀은 현재 고정 피해 보너스다. 영웅 선택·타운·마나·능동 스킬·영구 저장은 미구현이다.
 
@@ -43,22 +47,29 @@ slice는 PPU32, Soldier pivot `(0.5,0.4)`, Orc `(0.55,0.43)`다. 프레임 수6/
 
 `EncounterHud`는 런타임 UIDocument와 PanelSettings를 생성한다. 기준 해상도1280×720, ScaleWithScreenSize와 MatchWidthOrHeight(0.5)를 사용한다. 배치는 Stitch 전투 시안의 하단 좌우 구체·중앙 공격 영역·상단 적 HP·우측 미니맵 구성을 따른다. HP·공격 경과·보상·적 위치는 현재 전투 상태에서 읽는다. 마나는 미구현으로 표시하며 임의 수치로 채우지 않고, 레벨 기준이 없는 경험치는 획득 합계만 표시한다.
 
-현재 읽는 리소스는 `AffixGenerated/TempleRoom-v1`, `AffixGenerated/{AttackIcon,EmberSword,PowerRune,PrecisionRune,VeteranRune}`, `AffixUI/Korean`이다. Noto Sans KR을 `FontDefinition.FromFont`로 적용한다. 한글 글꼴은 공식 정적 OTF/OFL 원본이며 자세한 기록은 `Assets/Art/Fonts/PROVENANCE.txt`에 있다. 생성 `HudFrames-v1.png`는 원본 이력으로 보존하지만 **현행 EncounterHud가 로드·slice하지 않는다**. 예전의 비정규 atlas rect를 현행 UI 계약으로 사용하지 않는다.
+현재 읽는 리소스는 `AffixGenerated/TempleRoom-v1`, `AffixGenerated/TempleObstacle-v1`, `AffixGenerated/{AttackIcon,EmberSword,PowerRune,PrecisionRune,VeteranRune}`, `AffixUI/Korean`이다. Noto Sans KR을 `FontDefinition.FromFont`로 적용한다. 한글 글꼴은 공식 정적 OTF/OFL 원본이며 자세한 기록은 `Assets/Art/Fonts/PROVENANCE.txt`에 있다. 생성 `HudFrames-v1.png`는 원본 이력으로 보존하지만 **현행 EncounterHud가 로드·slice하지 않는다**. 예전의 비정규 atlas rect를 현행 UI 계약으로 사용하지 않는다.
 
 미니맵은 방 thumbnail 위에 실제 영웅·적 위치 marker를 표시한다. 탐색 안개·방 연결·길찾기 지도는 아니다. 장비 변경은 능력치와 UI 아이콘에 반영된다. 월드 캐릭터의 무기는 원본 몸 sprite에 구워져 있어 장착에 따라 외형이 바뀌지 않는다.
 
 ## 단일 배경과 렌더링 한계
 
-TempleRoom은1536×1024 단일 래스터다. SpriteRenderer1개, PPU48, 월드 너비32, 카메라 orthographic size 약10.667로 배치한다. baked 횃불·그림자는 실시간 조명이 아니다. Room Visual Bounds는 표시 범위이며 충돌체·navmesh·벽 가림 처리가 아니다. 생성 배경을 완성된 타일맵·모듈형 던전으로 설명하지 않는다.
+TempleRoom은1536×1024 단일 래스터다. SpriteRenderer1개, PPU48, 월드 너비32, 카메라 orthographic size 약10.667로 배치한다. baked 횃불·그림자는 실시간 조명이 아니다. Room Visual Bounds는 표시 범위다. 별도 `DungeonWorld`가 28×16 그리드에서 네 모서리 플랫폼과 두 석재 장애물의 통행·시야를 막고 BFS로 우회한다. 석재 두 개는 (−4,0), (4,0)에 있으며 runtime sprite 폭2.4·높이1.8, BoxCollider2D 2×2다. 이동의 기준은 물리 엔진 경로가 아닌 그리드/여유 검사다. navmesh·벽 가림 처리는 없다. 생성 배경을 완성된 타일맵·모듈형 던전으로 설명하지 않는다.
 
 카메라는 `allowMSAA=false`, sprite는 Point/mipmap off/uncompressed/Clamp다. 엔진·렌더러·모듈은 변경하지 않았다. 예전 Ninja atlas의 MSAA 문제 해결은 과거 근거이며 새 PNG의 시각 품질 보증이 아니다.
 
+## 자동 순환과 안전 중단
+
+현재는 단일 사원 마당 안의 세 구간을 자동으로 순회한다. 적 두 개체를 구간마다 재사용하고, BFS 경로 탐색으로 통행 불가 모서리와 석재 장애물을 피한다. 탐색 → 대상 선택/접근 → 자동 공격 → 자동 수거 → 다음 구간 → 입구 귀환/반복을 연결했다. 세 개의 별도 방이나 절차 생성 던전은 아니다.
+
+일반 피격은 체력과 짧은 flash만 반영하며 공격·이동을 취소하지 않는다. 사망할 때 공격을 취소한다. 연속 두 번 사망하면 자동 중단하고, 가방 포화 시 보류 전리품을 보존한 채 멈춘다. 장비·특성·대장간을 열어도 사냥하며 수동 정지만 전투를 멈춘다. 연속 사망·포화 안전 검사는 PASS다. 별도 경로 막힘과 중단 후 재개 검증은 남아 있다.
+
 ## 실제 검증 범위
 
-새 `HeroSiegeArtSetup.Build`와 씬 생성은 `Build/Reports/unity-generated-art-setup.log` 종료코드0을 확인했다.
+최종 Windows 자동사냥 실행은 [720p 보고](validation/autohunt/player-720.json)와 [1080p 보고](validation/autohunt/player-1080.json) 모두 PASS다. 실행 ID는 각각 `26b0296dea004e06a40c4a3cfab8caa8`(70.9288초), `23dbebd8a24b4397bca82dce83b771bd`(70.6474초), Build GUID는 `6c03e8d2bc6e457abc31582911701d3d`다. 두 실행 모두 실제 1배속으로 3구간·3순환·18처치·4개 수거, 사망 0회·재시도 0회, XP 450·골드 144를 확인했다. 영웅 HP 120/공격력 30·적 HP 54/공격력 6을 바꾸지 않았다. 메뉴 중 사냥과 수동 정지/재개, UI 콜백 7회·실제 framebuffer 6개도 검사했다. [720p 전투](media/autohunt/720-combat.png) · [1080p 관리 중 사냥](media/autohunt/1080-management.png). 로컬 원본은 `Build/Reports/autohunt-diagnostic-{720,1080}/auto-hunt-smoke.json`이다.
 
-Windows build는 `Build/Reports/windows-build.json`의 2026-09-26T05:42:27.8768512Z Succeeded, 오류0/경고0이다. buildGuid=`863e316feb2d4b01b0667c7d636282c0`, 1280×720 run=`47da26d84f4745a69b72b26b27dc6503`과 1920×1080 run=`95ac18aaf2834c01a8bfd9bc2221326a` 모두 PASS다. 보존 보고는 [player-720.json](validation/management/player-720.json), [player-1080.json](validation/management/player-1080.json), [windows-build.json](validation/management/windows-build.json), 소스 식별은 [SHA manifest](validation/management/source-fingerprint.json)를 참조한다. 로컬 원본은 `Build/Reports/management-{720,1080}/player-smoke.json`, 화면 기록은 `docs/media/management/`다.
+최종 빌드는 `Build/Reports/windows-build.json`의 2026-09-26T06:36:34.0607289Z Succeeded, 오류 0/경고 0이다. 정상 두 해상도는 위 최종 빌드의 근거다. 안전 중단은 아래 명시한 직전 빌드에서 검사했으며 safety-build/source-fingerprint 보고서로 구분한다. 앞선 `autohunt-fixed-720` 후보 실행은 이력으로 구분한다. 이전 `docs/validation/management/`는 관리 기능 시제품의 역사적 근거다. 디스크 저장, 20분 연속 실행, OS 물리 입력 검사, 사용자 시각 승인은 완료되지 않았다.
 
-각 실행에서 UI Toolkit `ClickEvent` 콜백17회와 HUD framebuffer12개를 검사했다. 전투·전리품·장착 외에 관리 화면의 상호 배타 표시와 pause, 잠긴 정밀 노드 선택 시 포인트 미소모, 특성 투자/환불, 강화 비용 차감·피해 증가·다음 전투 유지와 실타격43(공격력45−적 방어2)을 확인했다. 코어 검사는105개 통과했다. 전투 pause는 공유 API, 관리 탭·전리품·장비·특성·대장간·다음 전투는 UI 이벤트 전달로 검사했다. **OS 물리 마우스/키보드 입력 NOT_RUN, 사용자 시각 승인 NOT_APPROVED**다. 기존 `validation/progression`의05:22:48Z 실행(콜백9/캡처9/실타격41)과 그 이전 Stitch·생성 아트 Play 보고는 당시 범위의 이력이다.
+.NET CI는 Core 검사이며 Unity import·실행과 다르다. 정상 실행과 안전 조건 주입 검사, OS 물리 입력, 사용자 시각 승인을 서로 대체하지 않는다. 이전 management 보고의 메뉴 pause는 당시 동작이며 현재의 메뉴 중 사냥 정책으로 바뀌었다.
 
-.NET CI는 Core만 검사한다. 설치 API 정적 컴파일, Unity import, Play, build, 실제 실행, 사용자 시각 승인을 구분한다. Editor Camera.Render의 월드 전용 캡처와 standalone의 실제 UI Toolkit HUD 포함 framebuffer 캡처는 서로 다르다. UI 이벤트 콜백 검증을 OS 물리 입력이나 사용자 체감 승인으로 표시하지 않는다.
+
+안전 검사의 빌드 GUID는 `0a94c21a725b4d3a9a01e269067fa423`다. 이후 변경은 관리 창 위 피해 숫자 숨김과 검사 보고의 최종 성장 수치 추가이며 전투·안전 중단 코드는 동일하다. [연속 사망 안전 검사](validation/autohunt/safety-deaths.json)는 run `f508cbfae00844128c310426a8abbbc3`, 약 29.4초에 실제 적 공격으로 두 번 사망·한 번 재시도 후 자동 중단, 4.01초 중단 유지 PASS다. 이 격리 검사만 영웅 공격력을 1로 주입했으며 정상 밸런스 증거가 아니다. [가방 포화 안전 검사](validation/autohunt/safety-bag-full.json)는 run `a8fd4677ac5741bb90de2caeccef30fa`, 시험용 무기 24개로 가방을 채운 뒤 실제 첫 처치의 전리품을 보류 상태로 보존하고 중단했다. 약 7.65초, 골드 8·XP 25·기존 아이템 24개 유지, 중단 4.01초 PASS다. 두 검사는 중단 후 재개나 20분 안정성을 증명하지 않는다.

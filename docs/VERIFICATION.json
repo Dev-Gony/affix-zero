@@ -36,7 +36,7 @@
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
   "remote_history_rewritten": false,
-  "scope": "Current progression checks are in progression_loop; previous records retained as historical evidence.",
+  "scope": "Latest autonomous runtime evidence in auto_hunt; all earlier snapshots historical.",
   "current_u1": {
     "implementation_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
     "recorded_date": "2026-09-26",
@@ -228,5 +228,45 @@
       "Session memory only; no disk save",
       "Actor-held weapon image unchanged"
     ]
+  },
+  "auto_hunt": {
+    "build_guid": "6c03e8d2bc6e457abc31582911701d3d",
+    "reports": "docs/validation/autohunt/",
+    "world": "One authored courtyard, three patrol areas, two pooled enemies, shared visual/grid obstacles",
+    "baseline_stats": {
+      "hero_hp": 120,
+      "hero_attack": 30,
+      "enemy_hp": 54,
+      "enemy_attack": 6
+    },
+    "normal_hits": "Damage/flash only; no attack/movement cancellation. Death cancels attacks.",
+    "baseline": {
+      "720": {
+        "run_id": "26b0296dea004e06a40c4a3cfab8caa8",
+        "seconds": 70.92882537841797,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      },
+      "1080": {
+        "run_id": "23dbebd8a24b4397bca82dce83b771bd",
+        "seconds": 70.64736938476562,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      }
+    },
+    "safety": "PASS: separate explicit attack=1 death injection and 24-item full-bag fixture. Each stop held 4 seconds.",
+    "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified.",
+    "core_checks": 126,
+    "static_compile": "Editor/Player DLL reference compilation PASS, 0 errors/warnings; separate from actual Windows build."
   }
 }

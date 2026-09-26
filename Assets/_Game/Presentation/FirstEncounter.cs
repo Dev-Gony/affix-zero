@@ -18,6 +18,8 @@ namespace AffixZero.Presentation
         private static HeroProgression sessionProgression;
         private GameObject lootView;
         private Sprite lootSprite;
+        public Vector2 LootPosition { get; private set; }
+        public AutoHuntDirector Hunt { get; private set; }
         public HeroProgression Progression => sessionProgression ?? (sessionProgression = new HeroProgression());
         public string ProgressionNotice { get; private set; } = "";
         public int Experience => rewards == null ? 0 : rewards.Experience;
@@ -25,12 +27,12 @@ namespace AffixZero.Presentation
         public int RewardCollectionCount => rewards == null ? 0 : rewards.CollectionCount;
         public MeleeActor Hero => hero;
         public MeleeActor Enemy => enemy;
-        public bool IsPaused => manuallyPaused || ManagementVisible;
+        public bool IsPaused => manuallyPaused;
         public ManagementScreen Screen { get; private set; }
         public bool EquipmentVisible => Screen == ManagementScreen.Equipment;
         public bool ManagementVisible => Screen != ManagementScreen.None;
         public float ElapsedSeconds { get; private set; }
-        public bool HasEnded => (hero != null && hero.IsDead) || (enemy != null && enemy.IsDead);
+        public bool HasEnded => hero != null && hero.IsDead;
         public float SecondsSinceEnd => endedAt < 0 ? 0 : Time.unscaledTime - endedAt;
 
         public void Configure(MeleeActor player, MeleeActor opponent) { hero = player; enemy = opponent; }
@@ -39,6 +41,9 @@ namespace AffixZero.Presentation
         {
             previousTimeScale = Time.timeScale;
             ApplyBuild();
+            hero.SetTarget(null);enemy.SetTarget(null);
+            Hunt=gameObject.AddComponent<AutoHuntDirector>();
+            SetPaused(true);
             var hud = GetComponent<EncounterHud>();
             if (hud == null) hud = gameObject.AddComponent<EncounterHud>();
             hud.Configure(this);
@@ -47,7 +52,6 @@ namespace AffixZero.Presentation
         private void Start()
         {
             rewards = new EncounterRewards(Guid.NewGuid().ToString("N"));
-            if (enemy != null) enemy.Damaged += OnEnemyDamaged;
             if (Progression.PendingLoot != null) ShowLoot();
         }
 
@@ -126,7 +130,7 @@ namespace AffixZero.Presentation
 
         private void Update()
         {
-            if (!HasEnded && hero != null && enemy != null && hero.IsReady && enemy.IsReady)
+            if (Hunt!=null && Hunt.Running && !HasEnded && hero != null && hero.IsReady)
                 ElapsedSeconds += Time.deltaTime;
             if (HasEnded && endedAt < 0) endedAt = Time.unscaledTime;
         }
@@ -153,20 +157,41 @@ namespace AffixZero.Presentation
 
         private void OnDestroy()
         {
-            if (enemy != null) enemy.Damaged -= OnEnemyDamaged;
             ClearLootView();
             Time.timeScale = previousTimeScale;
         }
 
-        private void OnEnemyDamaged(MeleeActor actor, HitReceipt receipt)
+        public void FocusEnemy(MeleeActor actor) { if(actor!=null)enemy=actor; }
+
+        public void BeginAutoRun()
         {
-            if (receipt.Killed && hero != null && !hero.IsDead &&
+            rewards=new EncounterRewards(Guid.NewGuid().ToString("N"));
+            endedAt=-1;
+            // A failed run never deletes an uncollected weapon. Recover it at the entrance.
+            if(Progression.PendingLoot!=null){LootPosition=new Vector2(-10,-4);ClearLootView();ShowLoot();}
+        }
+
+        public bool RegisterDefeat(MeleeActor actor)
+        {
+            if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
             {
                 Progression.TryRegisterKill(rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount);
-                ProgressionNotice = Progression.PendingLoot != null ? "전리품 발견 · 회수 후 장비를 비교하세요." : "특성 포인트 +1";
+                ProgressionNotice = Progression.PendingLoot != null ? "전리품 발견 · 자동 회수 중" : "특성 포인트 +1";
+                if(lootView==null)LootPosition=actor.transform.position;
                 ShowLoot();
+                return true;
             }
+            return false;
+        }
+
+        public void OfferClearLoot(int completedRuns,Vector2 position)
+        {
+            int roll=completedRuns%3;
+            var item=new WeaponItem("clear:"+rewards.EncounterId,"사원의 강철검",11+roll,2+roll,
+                roll==0?"날카로움":roll==1?"잿불":"묵직함","AffixGenerated/EmberSword","Rare");
+            if(Progression.TryCreatePendingLoot(item))
+            {LootPosition=position;ProgressionNotice="던전 보상 발견 · 자동 회수 중";ShowLoot();}
         }
 
         private void ShowLoot()
@@ -176,7 +201,7 @@ namespace AffixZero.Presentation
             if (texture == null) { Debug.LogError("Loot icon resource is missing.", this); return; }
             lootSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f), 24);
             lootView = new GameObject("Dropped Weapon", typeof(SpriteRenderer));
-            lootView.transform.position = (enemy != null ? enemy.transform.position : transform.position) + Vector3.up * .65f;
+            lootView.transform.position = (Vector3)LootPosition + Vector3.up * .3f;
             var renderer = lootView.GetComponent<SpriteRenderer>();
             renderer.sprite = lootSprite;
             renderer.sortingOrder = 250;

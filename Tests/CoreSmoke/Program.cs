@@ -64,6 +64,7 @@ internal static class Program
             CombatHealthChecks.Run(Check, Throws);
             EncounterRewardsChecks.Run(Check, Throws);
             ProgressionChecks.Run(Check, Throws);
+            NavigationChecks.Run(Check, Throws);
             Console.WriteLine("CORE_SMOKE_PASSED checks=" + passed + " scope=pure-CSharp-not-Unity-editor");
             return 0;
         }

@@ -31,6 +31,10 @@ namespace AffixZero.Presentation
         private TalentPanel talentPanel;
         private ForgePanel forgePanel;
         private VisualElement dungeonTab, equipmentTab, talentTab, forgeTab;
+        private VisualElement huntButton;
+        private Label huntCaption, huntStatus;
+        private Label enemyTitle;
+        private readonly HashSet<MeleeActor> observedActors=new HashSet<MeleeActor>();
         private int selectedItemIndex = -1;
         private Image actionIcon;
         private string actionIconResource;
@@ -66,8 +70,7 @@ namespace AffixZero.Presentation
             if (room == null || attackIcon == null) Debug.LogError("HUD art missing: TempleRoom-v1 or AttackIcon", this);
             BuildTop(); BuildEnemy(); BuildMap(); BuildBottom(); BuildCharacter(); BuildResult();
             if (encounter == null) return;
-            if (encounter.Hero != null) encounter.Hero.Damaged += OnDamaged;
-            if (encounter.Enemy != null) encounter.Enemy.Damaged += OnDamaged;
+            ObserveActor(encounter.Hero);ObserveActor(encounter.Enemy);
             Refresh();
         }
 
@@ -81,6 +84,10 @@ namespace AffixZero.Presentation
             equipmentTab = Click(top, "character-tab", "장비 [I]", 384, 8, 100, 33, () => ToggleManagement(ManagementScreen.Equipment), Surface);
             talentTab = Click(top, "talents-tab", "특성 [K]", 492, 8, 100, 33, () => ToggleManagement(ManagementScreen.Talents), Surface);
             forgeTab = Click(top, "forge-tab", "대장간 [F]", 600, 8, 112, 33, () => ToggleManagement(ManagementScreen.Forge), Surface);
+            huntButton=Click(top,"autohunt-toggle","자동사냥 시작",728,8,134,33,()=> {
+                if(encounter.Hunt.Running)encounter.Hunt.StopHunt();else encounter.Hunt.StartHunt();
+            },Crimson);
+            huntCaption=huntButton.Q<Label>();
             currency = Text(top, "", 0, 16, 210, 21, 12, Gold);
             currency.name = "gold-value";
             currency.style.left = StyleKeyword.Auto; currency.style.right = 136;
@@ -92,13 +99,14 @@ namespace AffixZero.Presentation
         {
             var enemy = Box(root, "enemy-health", 0, 62, 570, 60, Surface);
             enemy.style.left = Length.Percent(50); enemy.style.marginLeft = -285;
-            Text(enemy, "훈련 상대  /  MELEE ENEMY", 12, 7, 275, 19, 13, Cream);
+            enemyTitle=Text(enemy, "사원 경비병", 12, 7, 275, 19, 13, Cream);
             enemyValue = Text(enemy, "", 296, 9, 262, 17, 11, new Color32(255,179,180,255));
             enemyValue.name = "enemy-hp-value";
             enemyValue.style.unityTextAlign = TextAnchor.MiddleRight;
             var track = Box(enemy, "enemy-track", 12, 33, 546, 12, Ink);
             enemyFill = Box(track, "enemy-fill", 0, 0, 546, 12, Crimson);
             clock = Text(root, "", 20, 65, 170, 20, 11, Muted);
+            huntStatus=Text(root,"",20,91,245,48,12,Gold);huntStatus.name="autohunt-status";huntStatus.style.whiteSpace=WhiteSpace.Normal;
             paused = Text(root, "일시정지  /  PAUSED", 0, 132, 210, 24, 12, Gold);
             paused.style.left = Length.Percent(50); paused.style.marginLeft = -105;
             paused.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -253,8 +261,19 @@ namespace AffixZero.Presentation
         {
             if(encounter==null || encounter.Hero==null || encounter.Enemy==null) return;
             var hero=encounter.Hero;var enemy=encounter.Enemy;
+            var hunt=encounter.Hunt;
+            if(hunt!=null)
+            {
+                foreach(var actor in hunt.Enemies)ObserveActor(actor);
+                huntButton.SetEnabled(hunt.Initialized);
+                huntCaption.text=hunt.Running?"자동사냥 중지":"자동사냥 시작";
+                huntStatus.text=hunt.StateCaption+"\n구역 "+(hunt.SectionIndex+1)+" / 3  ·  클리어 "+hunt.CompletedRuns;
+            }
             enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
             enemyValue.text=enemy.Hp+" / "+enemy.MaxHp+" HP";
+            bool hasTarget=hero.CurrentTarget!=null&&hero.CurrentTarget.isActiveAndEnabled&&!hero.CurrentTarget.IsDead;
+            enemyTitle.text=hasTarget?"사원 경비병  /  현재 사냥 대상":"사원 순찰  /  자동 탐색";
+            if(!hasTarget){enemyFill.style.width=0;enemyValue.text="다음 목표 탐색 중";}
             healthFill.style.height=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+"\n/ "+hero.MaxHp;
             currency.text="GOLD  "+encounter.Progression.TotalGold+"     XP  "+encounter.Progression.TotalExperience;
@@ -281,7 +300,8 @@ namespace AffixZero.Presentation
                 actionIcon.image=Resources.Load<Texture2D>(actionIconResource);
             }
             bool ended=encounter.HasEnded&&encounter.SecondsSinceEnd>=0.8f;
-            result.style.display=ended&&!encounter.ManagementVisible?DisplayStyle.Flex:DisplayStyle.None;
+            // Auto hunting owns recovery, loot and reruns; no per-kill Continue prompt.
+            result.style.display=DisplayStyle.None;
             var loot=encounter.Progression==null?null:encounter.Progression.PendingLoot;
             lootText.text=loot==null?encounter.ProgressionNotice:"전리품  ·  "+loot.Name;
             pickupLoot.SetEnabled(loot!=null && !hero.IsDead);pickupLoot.style.opacity=loot==null?0.4f:1;
@@ -296,7 +316,7 @@ namespace AffixZero.Presentation
         }
         private void OnDamaged(MeleeActor actor,HitReceipt receipt)
         {
-            if(!receipt.Accepted || root==null) return;
+            if(!receipt.Accepted || root==null || encounter.ManagementVisible) return;
             if(damageLabels.Count==16) {damageLabels[0].label.RemoveFromHierarchy();damageLabels.RemoveAt(0);}
             var label=Text(root,receipt.Damage.ToString(),0,0,90,32,22,actor==encounter.Hero?new Color(1,0.48f,0.36f):Gold);
             label.style.unityFontStyleAndWeight=FontStyle.Bold;label.style.unityTextAlign=TextAnchor.MiddleCenter;
@@ -308,7 +328,7 @@ namespace AffixZero.Presentation
             for(int i=damageLabels.Count-1;i>=0;i--)
             {
                 var item=damageLabels[i];float age=Time.time-item.time;
-                if(age>0.7f) {item.label.RemoveFromHierarchy();damageLabels.RemoveAt(i);continue;}
+                if(age>0.7f || encounter.ManagementVisible) {item.label.RemoveFromHierarchy();damageLabels.RemoveAt(i);continue;}
                 if(camera==null || root.panel==null) continue;
                 Vector3 screen=camera.WorldToScreenPoint(item.position+Vector3.up*(age*0.65f));
                 Vector2 point=RuntimePanelUtils.ScreenToPanel(root.panel,new Vector2(screen.x,Screen.height-screen.y));
@@ -317,13 +337,11 @@ namespace AffixZero.Presentation
         }
         private void OnDestroy()
         {
-            if(encounter!=null) {
-                if(encounter.Hero!=null) encounter.Hero.Damaged-=OnDamaged;
-                if(encounter.Enemy!=null) encounter.Enemy.Damaged-=OnDamaged;
-            }
+            foreach(var actor in observedActors)if(actor!=null)actor.Damaged-=OnDamaged;
             if(document!=null) Destroy(document);
             if(panelSettings!=null) Destroy(panelSettings);
         }
+        private void ObserveActor(MeleeActor actor){if(actor!=null&&observedActors.Add(actor))actor.Damaged+=OnDamaged;}
         private static void Place(VisualElement element,float x,float y,float width,float height)
         {
             element.style.position=Position.Absolute;element.style.left=x;element.style.top=y;element.style.width=width;element.style.height=height;
