@@ -149,7 +149,7 @@ namespace AffixZero.Presentation
 
         public void StartHunt()
         {
-            if(!Initialized)return;
+            if(!Initialized || !owner.CanProgress)return;
             if(owner.Progression.PendingLoot!=null&&owner.Progression.Inventory.Count>=HeroProgression.InventoryCapacity)
             {LastFault="가방 공간을 먼저 비우세요.";return;}
             LastFault="";Running=true;owner.SetPaused(false);

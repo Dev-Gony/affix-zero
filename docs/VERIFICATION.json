@@ -36,7 +36,7 @@
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
   "remote_history_rewritten": false,
-  "scope": "Latest autonomous runtime evidence in auto_hunt; all earlier snapshots historical.",
+  "scope": "Current save integration in local_persistence; prior autohunt and management records remain historical.",
   "current_u1": {
     "implementation_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
     "recorded_date": "2026-09-26",
@@ -268,5 +268,21 @@
     "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified.",
     "core_checks": 126,
     "static_compile": "Editor/Player DLL reference compilation PASS, 0 errors/warnings; separate from actual Windows build."
+  },
+  "local_persistence": {
+    "schema": 1,
+    "path": "%USERPROFILE%/AppData/LocalLow/Dev-Gony/AFFIX ZERO/profile-v1.json",
+    "build_guid": "baf9e73795d3447e9adc1d13daabe1d2",
+    "reports": "docs/validation/save/",
+    "core_checks": 202,
+    "unity_json_checks": 4,
+    "write_run": "0609829f35f74ee5bb7c6dd5180c4498",
+    "read_run": "a7e98c28ae5940278eba0789938e976c",
+    "saved": "150XP/40gold/attack52/enhancement1/Fury2Precision1/3unspent/bag1/pending clear weapon",
+    "restored_and_resumed": "Exact canonical state before mutations; pending collected; 2 new kills -> 200XP/56gold/5unspent/bag2; old kill token rejected",
+    "recovery": "Actual Windows: good backup recovered and corrupt primary preserved; both-corrupt and future schema blocked without file changes",
+    "tests_isolated": true,
+    "autosave": "Each committed progression mutation, application pause and normal quit; no save for ephemeral test profiles",
+    "limits": "No offline rewards or in-combat position resume; 2MiB payload limit and growing deduplication history; editor uses ephemeral profile"
   }
 }

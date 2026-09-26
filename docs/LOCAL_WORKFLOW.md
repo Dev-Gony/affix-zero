@@ -1,5 +1,7 @@
 # 로컬 실행 — 현재 Stitch 전투 HUD
 
+현재 저장 연결: 장비·가방·어픽스·강화·특성·XP·골드·미수거 전리품을 로컬 자동 저장하고 실제 별도 Windows 프로세스에서 복원·사냥 재개를 검증했다. 상세 기준과 최신 결과는 [SAVE_PERSISTENCE.md](SAVE_PERSISTENCE.md), `validation/save/`를 우선한다. 아래 저장 추가 전 보고는 당시 상태이며 전체 MVP 완료를 뜻하지 않는다. 20분 실행·별도 경로 막힘/안전 중단 재개·물리 입력과 사용자 시각 검수는 남아 있다.
+
 고정 Unity6000.3.24f1, D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe. 프로젝트는 D:/github/affix-unity. 설치/라이선스는 검증됐다.
 
 ## 무료 원본 반입

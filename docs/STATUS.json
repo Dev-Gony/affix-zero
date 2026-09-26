@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "AUTONOMOUS_DUNGEON_LOOP",
-  "implementation_commit": "8b4df924076b30c387fd9df674a1cbf7dbf52694",
+  "stage": "LOCAL_SAVED_AUTONOMOUS_HUNT",
+  "implementation_commit": null,
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -21,7 +21,7 @@
   "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
   "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
   "ui_direction": "USER_STITCH_SEVEN_REFERENCE_SCREENS_NATIVE_UNITY",
-  "windows_build": "SUCCEEDED_2026-09-26T06:36:34Z_ZERO_ERRORS_WARNINGS",
+  "windows_build": "SUCCEEDED_2026-09-26T07:00:29Z_ZERO_ERRORS_WARNINGS",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,14 +30,14 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "MVP step2: persistent local save and repeat-growth verification, then 20-minute unattended validation",
+  "next": "Validate blocked-path and safety-stop recovery, then 20-minute unattended endurance and physical controls",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
-  "core_checks": 126,
+  "core_checks": 202,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_AUTO_HUNT_720_1080_AND_SEPARATE_SAFETY_SCENARIOS",
+  "windows_player": "PASS_TWO_PROCESS_SAVE_RESTORE_AND_RECOVERY_FIXTURES; PASS_1080_AUTO_HUNT_REGRESSION",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/autohunt/",
+  "actual_game_capture": "docs/media/save/",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
   "new_direction_validation": "THREE_AUTONOMOUS_CYCLES_ZERO_DEATHS_PER_RESOLUTION; FULL_MVP_INCOMPLETE",
   "previous_technical_checks_scope": "management/progression/stitch are historical. Current runtime evidence: autohunt.",
@@ -46,10 +46,10 @@
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
     "engine_or_package_changes": false,
     "current_scope": "Native combat, equipment, dedicated talent detail/investment, equipped weapon enhancement; seven reference screens inspected",
-    "build_guid": "6c03e8d2bc6e457abc31582911701d3d",
-    "reports": "docs/validation/autohunt/",
+    "build_guid": "baf9e73795d3447e9adc1d13daabe1d2",
+    "reports": "docs/validation/save/",
     "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; SEVEN_UI_CLICKEVENT_CALLBACKS_PER_BASELINE",
-    "other_screens": "Hero selection/town/pets not implemented; no disk save, mana, active skill loadout or socket/reforge systems"
+    "other_screens": "Hero selection/town/pets/mana/active skill loadout/socket/reforge not implemented."
   },
   "progression": {
     "weapon_slots": 1,
@@ -62,7 +62,7 @@
     ],
     "verified_upgraded_impact_after_defense": 41,
     "talent_branch": "Fury2 -> Precision1 -> Keystone1; one point per unique kill",
-    "session_persistence": "Gear, bag, talents, total XP/gold preserved across scene reload; not disk save",
+    "session_persistence": "Disk autosave of gear/bag/pending/talents/gold/XP and deduplication ledgers. On launch starts stopped at entrance; no offline rewards.",
     "input_test": "UI Toolkit ClickEvent callbacks, not OS mouse/keyboard input",
     "historical_verification": "Prior equipment slice; latest enhanced attack results in management."
   },
@@ -87,21 +87,20 @@
     },
     "screen_state": "Exclusive Equipment/Talents/Forge; hunting continues while open. Explicit manual pause still freezes simulation.",
     "verified_example": "Attack 43 -> 45, gold 8 -> 0, actual next-encounter impact 43 after defense2",
-    "session_only": true,
+    "session_only": false,
     "pet_scope": "Reference intake only, no pet runtime"
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "mvp": {
     "status": "NOT_READY",
-    "current": "Automatic three-area loop verified; separate blocked-path and post-safety-stop recovery checks remain before all step1 criteria are closed",
+    "current": "Automatic hunting plus persistent character growth verified; full MVP acceptance remains open",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
-      "persistent local save and restart recovery",
-      "repeat-growth effectiveness validation in autonomous runs",
       "20-minute unattended endurance",
+      "separate blocked-path and post-safety-stop recovery checks",
       "physical controls and user visual approval"
     ],
-    "release_date": "NOT_COMMITTED; persistent save and endurance validation remain",
+    "release_date": "NOT_COMMITTED; endurance and remaining recovery/input acceptance still pending",
     "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
   },
   "autohunt": {
@@ -140,6 +139,23 @@
       }
     },
     "safety": "PASS on build0a94c21a725b4d3a9a01e269067fa423: separate attack=1 death injection and 24-item bag fixture; stop held4sec. Final build only adds HUD label filtering and report fields.",
-    "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified."
+    "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified.",
+    "historical_scope": "Prior autonomous-loop build; current integration regression in persistence reports."
+  },
+  "persistence": {
+    "schema": 1,
+    "path": "%USERPROFILE%/AppData/LocalLow/Dev-Gony/AFFIX ZERO/profile-v1.json",
+    "build_guid": "baf9e73795d3447e9adc1d13daabe1d2",
+    "reports": "docs/validation/save/",
+    "core_checks": 202,
+    "unity_json_checks": 4,
+    "write_run": "0609829f35f74ee5bb7c6dd5180c4498",
+    "read_run": "a7e98c28ae5940278eba0789938e976c",
+    "saved": "150XP/40gold/attack52/enhancement1/Fury2Precision1/3unspent/bag1/pending clear weapon",
+    "restored_and_resumed": "Exact canonical state before mutations; pending collected; 2 new kills -> 200XP/56gold/5unspent/bag2; old kill token rejected",
+    "recovery": "Actual Windows: good backup recovered and corrupt primary preserved; both-corrupt and future schema blocked without file changes",
+    "tests_isolated": true,
+    "autosave": "Each committed progression mutation, application pause and normal quit; no save for ephemeral test profiles",
+    "limits": "No offline rewards or in-combat position resume; 2MiB payload limit and growing deduplication history; editor uses ephemeral profile"
   }
 }

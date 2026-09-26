@@ -44,7 +44,7 @@ namespace AffixZero.Core
         }
     }
 
-    // In-memory run state only. The presentation layer owns its lifetime across scenes.
+    // The presentation layer owns lifetime and file I/O; snapshots contain only domain state.
     public sealed class HeroProgression
     {
         public const int InventoryCapacity = 24;
@@ -187,6 +187,100 @@ namespace AffixZero.Core
             UnspentPoints += SpentPoints;
             FuryRank = PrecisionRank = KeystoneRank = 0;
         }
+
+        public ProgressionSnapshot CaptureSnapshot()
+        {
+            var items = new WeaponSnapshot[inventory.Count];
+            for (int i = 0; i < items.Length; i++) items[i] = CaptureWeapon(inventory[i]);
+            var tokens = new List<string>(killTokens);
+            var ids = new List<string>(issuedItemIds);
+            tokens.Sort(StringComparer.Ordinal);
+            ids.Sort(StringComparer.Ordinal);
+            return new ProgressionSnapshot
+            {
+                totalExperience = TotalExperience, totalGold = TotalGold, unspentPoints = UnspentPoints,
+                furyRank = FuryRank, precisionRank = PrecisionRank, keystoneRank = KeystoneRank,
+                firstDropWaiting = firstDropWaiting, hasPendingLoot = PendingLoot != null, equippedWeapon = CaptureWeapon(EquippedWeapon),
+                inventory = items, pendingLoot = CaptureWeapon(PendingLoot),
+                killTokens = tokens.ToArray(), issuedItemIds = ids.ToArray()
+            };
+        }
+
+        public static HeroProgression RestoreSnapshot(ProgressionSnapshot snapshot)
+        {
+            if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
+            if (snapshot.schemaVersion != 1) throw new NotSupportedException("Unsupported progression snapshot version.");
+            if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.unspentPoints < 0 ||
+                snapshot.furyRank < 0 || snapshot.furyRank > 2 || snapshot.precisionRank < 0 || snapshot.precisionRank > 1 ||
+                snapshot.keystoneRank < 0 || snapshot.keystoneRank > 1 ||
+                (snapshot.precisionRank > 0 && snapshot.furyRank != 2) ||
+                (snapshot.keystoneRank > 0 && snapshot.precisionRank != 1))
+                throw new ArgumentException("Invalid balances or talent prerequisites.", nameof(snapshot));
+            if (snapshot.inventory == null || snapshot.inventory.Length > InventoryCapacity || snapshot.equippedWeapon == null)
+                throw new ArgumentException("An equipped weapon and a bounded inventory are required.", nameof(snapshot));
+
+            HashSet<string> tokens = RestoreIdentifiers(snapshot.killTokens);
+            HashSet<string> ids = RestoreIdentifiers(snapshot.issuedItemIds);
+            long earnedPoints = (long)snapshot.unspentPoints + snapshot.furyRank + snapshot.precisionRank + snapshot.keystoneRank;
+            if (earnedPoints != tokens.Count || snapshot.totalExperience != (long)tokens.Count * 25 ||
+                snapshot.totalGold > (long)tokens.Count * 8 || snapshot.totalGold % 8 != 0)
+                throw new ArgumentException("Reward balances disagree with the kill ledger.", nameof(snapshot));
+            if (!ids.Contains("equipped:starting-sword") ||
+                (tokens.Count == 0 && (snapshot.firstDropWaiting || ids.Contains(FirstDropId))) ||
+                (tokens.Count > 0 && snapshot.firstDropWaiting == ids.Contains(FirstDropId)) ||
+                (snapshot.firstDropWaiting && !snapshot.hasPendingLoot))
+                throw new ArgumentException("Invalid first-drop or issued-item history.", nameof(snapshot));
+
+            var ownedIds = new HashSet<string>(StringComparer.Ordinal);
+            WeaponItem equipped = RestoreWeapon(snapshot.equippedWeapon, ids, ownedIds);
+            var items = new List<WeaponItem>();
+            foreach (WeaponSnapshot item in snapshot.inventory) items.Add(RestoreWeapon(item, ids, ownedIds));
+            // Unity serializes inline null classes as empty objects; the explicit tag owns optionality.
+            WeaponItem pending = snapshot.hasPendingLoot ? RestoreWeapon(snapshot.pendingLoot, ids, ownedIds) : null;
+
+            var restored = new HeroProgression
+            {
+                TotalExperience = snapshot.totalExperience, TotalGold = snapshot.totalGold,
+                UnspentPoints = snapshot.unspentPoints, FuryRank = snapshot.furyRank,
+                PrecisionRank = snapshot.precisionRank, KeystoneRank = snapshot.keystoneRank,
+                firstDropWaiting = snapshot.firstDropWaiting, EquippedWeapon = equipped, PendingLoot = pending
+            };
+            restored.inventory.AddRange(items);
+            restored.killTokens.UnionWith(tokens);
+            restored.issuedItemIds.Clear();
+            restored.issuedItemIds.UnionWith(ids);
+            return restored;
+        }
+
+        private static HashSet<string> RestoreIdentifiers(string[] values)
+        {
+            if (values == null) throw new ArgumentException("Identifier ledger is required.");
+            var result = new HashSet<string>(StringComparer.Ordinal);
+            foreach (string value in values)
+                if (string.IsNullOrWhiteSpace(value) || !result.Add(value))
+                    throw new ArgumentException("Identifier ledger contains an empty or duplicate entry.");
+            return result;
+        }
+
+        private static WeaponItem RestoreWeapon(WeaponSnapshot item, HashSet<string> issued, HashSet<string> owned)
+        {
+            if (item == null) throw new ArgumentException("Inventory cannot contain a null weapon.");
+            // Deliberate version-1 allowlist: save data cannot introduce unreviewed resource paths.
+            if (item.iconResource != "AffixGenerated/AttackIcon" && item.iconResource != "AffixGenerated/EmberSword")
+                throw new ArgumentException("Weapon icon is not an authored version-1 resource.");
+            var weapon = new WeaponItem(item.id, item.name, item.flatDamage, item.affixDamage,
+                item.affixName, item.iconResource, item.rarity, item.enhancementRank);
+            if (!issued.Contains(weapon.Id) || !owned.Add(weapon.Id))
+                throw new ArgumentException("Owned weapon identity is unissued or duplicated.");
+            return weapon;
+        }
+
+        private static WeaponSnapshot CaptureWeapon(WeaponItem item) => item == null ? null : new WeaponSnapshot
+        {
+            id = item.Id, name = item.Name, flatDamage = item.FlatDamage, affixDamage = item.AffixDamage,
+            affixName = item.AffixName, iconResource = item.IconResource, rarity = item.Rarity,
+            enhancementRank = item.EnhancementRank
+        };
 
         private bool ValidIndex(int index) => index >= 0 && index < inventory.Count;
     }

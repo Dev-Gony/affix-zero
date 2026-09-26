@@ -1,6 +1,14 @@
-# 인수인계 — 자동 던전 순환 검증
+# 인수인계 — 로컬 저장 연결
 
-갱신: 2026-09-26. `restart/unity-6`, Draft PR #19. 먼저 STATUS.json, PRODUCT_BRIEF.md, AUTO_HUNT_MVP.md를 읽는다.
+갱신2026-09-26. restart/unity-6, Draft PR19, Unity6000.3.24f1/Built-in2D 유지. STATUS.json, PRODUCT_BRIEF.md, SAVE_PERSISTENCE.md를 먼저 읽는다.
+
+최신 Windows빌드 GUID `baf9e73795d3447e9adc1d13daabe1d2`, 2026-09-26T07:00:29.9473535Z, 오류0/경고0. Core202 checks와 실제 Unity JsonUtility4검사 PASS. 저장을 사용하는 Windows720p 두 프로세스 write/read에서 성장·미수거 전리품의 동일 복원을 검증했다. write는 실제6처치 후 장착·특성·강화로52공격/150XP/40골드, read는동일복원후 미수거회수·새2처치로200XP/56골드다. 기록은 `docs/validation/save/`.
+
+별도 실제 Windows 손상 fixture에서 백업 복구·손상 원본 보존, 둘 다 손상/미지원 버전의 덮어쓰기 차단 PASS. 최신1080p 임시프로필 자동사냥도3순환·18처치·4수거·사망0·XP450/G144 PASS. 검증 flag는 사용자 저장과 격리한다. 기존 profile을 지우거나 초기화하지 않는다.
+
+저장 경로는 `%USERPROFILE%/AppData/LocalLow/Dev-Gony/AFFIX ZERO/profile-v1.json`. 성장 변경마다 저장하며 실패 시 사냥을 중단하고 HUD에 재시도를 표시한다. 읽기 실패는 새 프로필로 덮어쓰지 않는다. 재실행은 입구·정지 상태이며 진행 중 공격이나 오프라인 보상을 이어받지 않는다. IsPaused는 수동 정지뿐 아니라 자동사냥 중지/저장 실패도 유지하여 일시정지 버튼으로 우회하지 못하게 했다.
+
+전체 MVP는 미완료다. 다음은 별도 막힌 경로·안전 중단 후 재개,20분 연속 실행,물리입력/사용자시각검수다. 아래 자동사냥보고는 저장추가전이력이며 최신빌드를대체하지않는다.
 
 ## 현재 기준
 
@@ -21,19 +29,19 @@ HeroSiegeEncounter에서 무료 Soldier/Orc와 생성 사원 방·석재 장애�
 - 대장간: 현재 장착 무기의 강화 전후 수치를 보여주고 골드를 소비한다. 최대 +3, 단계마다 피해 +2, 비용 8/16/24. 확정 강화이며 실패·파괴는 없다. 부족한 골드나 최대 단계에서는 상태를 바꾸지 않는다. 강화는 무기 객체에 남아 교체해도 보존된다.
 - `TotalGold`는 강화 비용을 뺀 가용 잔액이다. `Experience/Gold`는 해당 전투 보상이며 세션의 `TotalExperience/TotalGold`와 구분한다.
 - `FirstEncounter.Screen`으로 Equipment/Talents/Forge는 하나만 열지만 사냥은 계속된다. `IsPaused`는 수동 정지 상태만 읽는다. 메뉴 전환이나 닫기는 수동 정지를 해제하지 않는다.
-- 장비·가방·강화·특성·XP·골드는 장면 재시작에 보존되지만 프로세스 종료 후 저장되지는 않는다. 공격 시작 시 피해를 고정하므로 변경은 다음 스윙부터 적용된다.
+- 장비·가방·강화·특성·XP·골드는 장면 재시작에 보존되지만 현재는 프로세스 종료 후에도 로컬 저장으로 복원된다. 공격 시작 시 피해를 고정하므로 변경은 다음 스윙부터 적용된다.
 
-## 실제 검증
+## 이전 자동사냥 빌드 검증 (저장 추가 전)
 
 최종 Windows 자동사냥 실행은 [720p 보고](validation/autohunt/player-720.json)와 [1080p 보고](validation/autohunt/player-1080.json) 모두 PASS다. 실행 ID는 각각 `26b0296dea004e06a40c4a3cfab8caa8`(70.9288초), `23dbebd8a24b4397bca82dce83b771bd`(70.6474초), Build GUID는 `6c03e8d2bc6e457abc31582911701d3d`다. 두 실행 모두 실제 1배속으로 3구간·3순환·18처치·4개 수거, 사망 0회·재시도 0회, XP 450·골드 144를 확인했다. 영웅 HP 120/공격력 30·적 HP 54/공격력 6을 바꾸지 않았다. 메뉴 중 사냥과 수동 정지/재개, UI 콜백 7회·실제 framebuffer 6개도 검사했다. [720p 전투](media/autohunt/720-combat.png) · [1080p 관리 중 사냥](media/autohunt/1080-management.png). 로컬 원본은 `Build/Reports/autohunt-diagnostic-{720,1080}/auto-hunt-smoke.json`이다.
 
-최종 빌드는 `Build/Reports/windows-build.json`의 2026-09-26T06:36:34.0607289Z Succeeded, 오류 0/경고 0이다. 정상 두 해상도는 위 최종 빌드의 근거다. 안전 중단은 아래 명시한 직전 빌드에서 검사했으며 safety-build/source-fingerprint 보고서로 구분한다. 앞선 `autohunt-fixed-720` 후보 실행은 이력으로 구분한다. 이전 `docs/validation/management/`는 관리 기능 시제품의 역사적 근거다. 디스크 저장, 20분 연속 실행, OS 물리 입력 검사, 사용자 시각 승인은 완료되지 않았다.
+최종 빌드는 `Build/Reports/windows-build.json`의 2026-09-26T06:36:34.0607289Z Succeeded, 오류 0/경고 0이다. 정상 두 해상도는 위 최종 빌드의 근거다. 안전 중단은 아래 명시한 직전 빌드에서 검사했으며 safety-build/source-fingerprint 보고서로 구분한다. 앞선 `autohunt-fixed-720` 후보 실행은 이력으로 구분한다. 이전 `docs/validation/management/`는 관리 기능 시제품의 역사적 근거다. 당시 빌드에는 디스크 저장이 없었다. 현재 저장 검증은 위 내용을 우선하며 20분·OS 입력·사용자 승인은 남아 있다.
 
 연속 피격으로 공격이 막힌 이전 실패(run `86b8d28820274fabb557631bb0c16821`)는 85.2초·0순환·재시도 5회를 기록했다. 실패를 삭제하지 않고 `Build/Reports/autohunt-stagger-failure/`에 보존한다. 원인과 계약은 IDLE_COMBAT_CONTRACT.md를 참조한다.
 
 ## 남은 범위와 다음 순서
 
-완료된 정상 두 해상도·연속 실패·포화 중단 검사에 더해 경로 막힘과 중단 후 재개를 검증한다. 이어서 로컬 저장/복원과 20분 연속 실행을 완료해야 MVP로 전달할 수 있다. 최종 정상 3순환 성공만으로 저장·장시간 검사를 완료 처리하지 않는다. 영웅 선택·타운·펫, 대형 스킬 계열, 마나/능동 스킬, 소켓·재련·분해와 여러 장비 슬롯은 후속 범위다. 배경은 단일 그림이고 이동/시야는 그리드이며 벽 가림·실시간 조명은 없다. 손의 무기는 sprite에 포함되어 교체·강화 외형이 바뀌지 않는다.
+완료된 정상 두 해상도·연속 실패·포화 중단 검사에 더해 경로 막힘과 중단 후 재개를 검증한다. 로컬 저장/복원은 새 빌드에서 검증했고 20분 연속 실행은 남아 있다. 최종 정상 3순환 성공만으로 저장·장시간 검사를 완료 처리하지 않는다. 영웅 선택·타운·펫, 대형 스킬 계열, 마나/능동 스킬, 소켓·재련·분해와 여러 장비 슬롯은 후속 범위다. 배경은 단일 그림이고 이동/시야는 그리드이며 벽 가림·실시간 조명은 없다. 손의 무기는 sprite에 포함되어 교체·강화 외형이 바뀌지 않는다.
 
 공개 저장소에는 Zerie 원본이 없다. `Assets/LocalLicensed`는 Git 제외다. 공식 무료 ZIP → `Tools/Local/Import-FreeCharacters.ps1` → `HeroSiegeArtSetup.Build`의 검증 반입 절차를 사용한다. 누락·해시 불일치면 씬 생성 전에 중단한다. `LOCAL_WORKFLOW.md`를 참조한다.
 

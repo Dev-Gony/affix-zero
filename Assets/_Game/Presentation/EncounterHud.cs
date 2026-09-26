@@ -34,6 +34,8 @@ namespace AffixZero.Presentation
         private VisualElement huntButton;
         private Label huntCaption, huntStatus;
         private Label enemyTitle;
+        private Label saveStatus;
+        private VisualElement saveRetry;
         private readonly HashSet<MeleeActor> observedActors=new HashSet<MeleeActor>();
         private int selectedItemIndex = -1;
         private Image actionIcon;
@@ -129,6 +131,9 @@ namespace AffixZero.Presentation
             bottom.style.top = StyleKeyword.Auto; bottom.style.bottom = 0; bottom.style.right = 0; bottom.style.width = StyleKeyword.Auto;
             healthFill = Orb(bottom,"health-orb",34,12,96,Crimson,out healthValue);
             healthValue.name = "hero-hp-value";
+            saveStatus=Text(bottom,"",156,76,295,28,11,Muted);saveStatus.name="save-status";
+            saveStatus.style.whiteSpace=WhiteSpace.Normal;
+            saveRetry=Click(bottom,"save-retry","저장 다시 시도",156,40,170,28,()=>encounter.RetrySave(),Crimson);
             Text(bottom,"생명력 / HP",32,111,102,19,11,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
             var mana = Orb(bottom,"mana-orb",0,12,96,new Color32(23,67,94,255),out Label manaValue);
             var manaShell=mana.parent;
@@ -255,6 +260,9 @@ namespace AffixZero.Presentation
         private void LateUpdate()
         {
             if(root==null || encounter==null) return;
+            saveStatus.text=encounter.Persistence.Status;
+            saveStatus.style.color=encounter.CanProgress?Muted:Gold;
+            saveRetry.style.display=!encounter.CanProgress && encounter.Persistence.CanRetry?DisplayStyle.Flex:DisplayStyle.None;
             Refresh();UpdateDamage();
         }
         private void Refresh()

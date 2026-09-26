@@ -1,0 +1,11 @@
+{
+  "sourcePreserved": true,
+  "buildGuid": "baf9e73795d3447e9adc1d13daabe1d2",
+  "scope": "Isolated fixture files only; no player save edited",
+  "expectedPlayerResult": "PASS",
+  "mode": "backup",
+  "result": "PASS",
+  "runId": "f7cd3bb7716141afaa6a08210141967b",
+  "probeReport": "D:\\github\\affix-unity\\Build\\Reports\\save-recovery-b1d2cf424cac46e7a01c9247692d527b\\backup\\reports\\profile-save-read.json",
+  "actualPlayerResult": "PASS"
+}

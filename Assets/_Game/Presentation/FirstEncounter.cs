@@ -15,19 +15,21 @@ namespace AffixZero.Presentation
         private bool manuallyPaused;
         private float previousTimeScale;
         private float endedAt = -1;
-        private static HeroProgression sessionProgression;
+        private static ProfilePersistence persistence;
         private GameObject lootView;
         private Sprite lootSprite;
-        public Vector2 LootPosition { get; private set; }
+        public Vector2 LootPosition { get; private set; } = new Vector2(-10,-4);
         public AutoHuntDirector Hunt { get; private set; }
-        public HeroProgression Progression => sessionProgression ?? (sessionProgression = new HeroProgression());
+        public ProfilePersistence Persistence => persistence ?? (persistence = new ProfilePersistence());
+        public HeroProgression Progression => Persistence.Profile;
+        public bool CanProgress => Persistence.CanPlay;
         public string ProgressionNotice { get; private set; } = "";
         public int Experience => rewards == null ? 0 : rewards.Experience;
         public int Gold => rewards == null ? 0 : rewards.Gold;
         public int RewardCollectionCount => rewards == null ? 0 : rewards.CollectionCount;
         public MeleeActor Hero => hero;
         public MeleeActor Enemy => enemy;
-        public bool IsPaused => manuallyPaused;
+        public bool IsPaused => manuallyPaused || !CanProgress || (Hunt!=null && !Hunt.Running);
         public ManagementScreen Screen { get; private set; }
         public bool EquipmentVisible => Screen == ManagementScreen.Equipment;
         public bool ManagementVisible => Screen != ManagementScreen.None;
@@ -56,7 +58,17 @@ namespace AffixZero.Presentation
         }
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void BeginSession() { sessionProgression = null; }
+        private static void BeginSession() { persistence?.Dispose(); persistence = null; }
+
+        private void OnApplicationQuit(){if(persistence!=null){if(persistence.CanPlay)persistence.Save();persistence.Dispose();}}
+        private void OnApplicationPause(bool paused){if(paused && persistence!=null && persistence.CanPlay)SaveProgress();}
+        public bool SaveProgress()
+        {
+            bool saved=Persistence.Save();
+            if(!saved){Hunt?.StopHunt();ApplyPause();}
+            return saved;
+        }
+        public void RetrySave(){Persistence.Retry();ApplyPause();}
 
         private void ApplyBuild()
         {
@@ -65,6 +77,7 @@ namespace AffixZero.Presentation
 
         public bool CollectLoot()
         {
+            if(!CanProgress)return false;
             string name = Progression.PendingLoot?.Name;
             if (!Progression.PickUp())
             {
@@ -74,41 +87,51 @@ namespace AffixZero.Presentation
             ProgressionNotice = name + " 획득 · 가방에서 비교할 수 있습니다.";
             ClearLootView();
             if (Progression.PendingLoot != null) ShowLoot();
+            SaveProgress();
             return true;
         }
 
         public bool EquipItem(int index)
         {
+            if(!CanProgress)return false;
             if (!Progression.Equip(index)) { ProgressionNotice = "장착할 아이템을 선택하세요."; return false; }
             ApplyBuild();
             ProgressionNotice = Progression.EquippedWeapon.Name + " 장착 · 다음 공격부터 적용";
+            SaveProgress();
             return true;
         }
 
         public bool DiscardItem(int index)
         {
+            if(!CanProgress)return false;
             if (!Progression.Discard(index)) { ProgressionNotice = "버릴 아이템을 선택하세요."; return false; }
             ProgressionNotice = "선택한 아이템을 버렸습니다.";
+            SaveProgress();
             return true;
         }
 
         public bool SpendTalent(TalentId talent)
         {
+            if(!CanProgress)return false;
             if (!Progression.TrySpendPoint(talent)) { ProgressionNotice = "남은 포인트와 선행 특성을 확인하세요."; return false; }
             ApplyBuild();
             ProgressionNotice = "특성 적용 · 다음 공격부터 피해 증가";
+            SaveProgress();
             return true;
         }
 
         public void ResetTalents()
         {
+            if(!CanProgress)return;
             Progression.ResetTalents();
             ApplyBuild();
             ProgressionNotice = "특성을 초기화하고 사용한 포인트를 돌려받았습니다.";
+            SaveProgress();
         }
 
         public bool EnhanceWeapon()
         {
+            if(!CanProgress)return false;
             if (!Progression.TryEnhanceEquipped())
             {
                 ProgressionNotice = Progression.EquippedWeapon.EnhancementRank >= WeaponItem.MaxEnhancementRank
@@ -117,6 +140,7 @@ namespace AffixZero.Presentation
             }
             ApplyBuild();
             ProgressionNotice = "+" + Progression.EquippedWeapon.EnhancementRank + " 강화 완료 · 다음 공격부터 피해 +2";
+            SaveProgress();
             return true;
         }
 
@@ -173,13 +197,15 @@ namespace AffixZero.Presentation
 
         public bool RegisterDefeat(MeleeActor actor)
         {
+            if(!CanProgress)return false;
             if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
             {
-                Progression.TryRegisterKill(rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount);
+                if(!Progression.TryRegisterKill(rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount))return false;
                 ProgressionNotice = Progression.PendingLoot != null ? "전리품 발견 · 자동 회수 중" : "특성 포인트 +1";
                 if(lootView==null)LootPosition=actor.transform.position;
                 ShowLoot();
+                SaveProgress();
                 return true;
             }
             return false;
@@ -187,11 +213,12 @@ namespace AffixZero.Presentation
 
         public void OfferClearLoot(int completedRuns,Vector2 position)
         {
+            if(!CanProgress)return;
             int roll=completedRuns%3;
             var item=new WeaponItem("clear:"+rewards.EncounterId,"사원의 강철검",11+roll,2+roll,
                 roll==0?"날카로움":roll==1?"잿불":"묵직함","AffixGenerated/EmberSword","Rare");
             if(Progression.TryCreatePendingLoot(item))
-            {LootPosition=position;ProgressionNotice="던전 보상 발견 · 자동 회수 중";ShowLoot();}
+            {LootPosition=position;ProgressionNotice="던전 보상 발견 · 자동 회수 중";ShowLoot();SaveProgress();}
         }
 
         private void ShowLoot()

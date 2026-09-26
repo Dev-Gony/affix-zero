@@ -1,0 +1,11 @@
+{
+  "sourcePreserved": true,
+  "buildGuid": "baf9e73795d3447e9adc1d13daabe1d2",
+  "scope": "Isolated fixture files only; no player save edited",
+  "expectedPlayerResult": "FAIL: blocked invalid/unsupported save",
+  "mode": "both-corrupt",
+  "result": "PASS",
+  "runId": "a9911dfa9c1249eeb83bc31a1c0497c7",
+  "probeReport": "D:\\github\\affix-unity\\Build\\Reports\\save-recovery-b1d2cf424cac46e7a01c9247692d527b\\both-corrupt\\reports\\profile-save-read.json",
+  "actualPlayerResult": "FAIL"
+}
