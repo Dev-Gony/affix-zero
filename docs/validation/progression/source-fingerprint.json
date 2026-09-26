@@ -1,0 +1,98 @@
+{
+  "build_guid": "e86a4c30328a47ec9bf8cf3ba918d0f8",
+  "scope": "Runtime C# source, UI theme, CC0 item/skill icons and package manifests at Windows verification. Prior fixed room/font/private-character provenance remains in their manifests.",
+  "files": [
+    {
+      "path": "Assets/_Game/Core/AttackTimeline.cs",
+      "sha256": "2ebb4a6ff975f8547f2b97bd217837139d3718cb71032d95153d21b6c0eae878"
+    },
+    {
+      "path": "Assets/_Game/Core/CombatHealth.cs",
+      "sha256": "39c067ba38609f48b8ddb15655dfbaf8a57747b10eb28e9f61b3815c17192fdb"
+    },
+    {
+      "path": "Assets/_Game/Core/EncounterRewards.cs",
+      "sha256": "b3436803fd49c8ba3647437298d29089461b3e8de465aec30f9c5e7284452b16"
+    },
+    {
+      "path": "Assets/_Game/Core/HeroProgression.cs",
+      "sha256": "7a46a2b4bf9b094b5b9190849ffe5469e4daedf1bc3aa24017794bde9a09aab7"
+    },
+    {
+      "path": "Assets/_Game/Editor/EncounterVerification.cs",
+      "sha256": "9fea49ccef7ca594dbed116ca1208bdb0c53d383304dd91cb0f63b2290839047"
+    },
+    {
+      "path": "Assets/_Game/Editor/FoundationSetup.cs",
+      "sha256": "29e7e5a9b68f98d015c4bad43b201a945903b14b3ef99d89a4640ef71df5c4a3"
+    },
+    {
+      "path": "Assets/_Game/Editor/HeroSiegeArtSetup.cs",
+      "sha256": "e191fd5f9f59db94ef5f48b0bcdea69e995443862324ff22fd4427e76bbbdb74"
+    },
+    {
+      "path": "Assets/_Game/Editor/ProjectDashboard.cs",
+      "sha256": "da9ff6aff045fc04c4861d9b596c362033a59ff88bc2fbae2a5fa14ed6ec20ce"
+    },
+    {
+      "path": "Assets/_Game/Editor/ReviewedArtSetup.cs",
+      "sha256": "855c925b708d3eb8a132a165ac776058ea10d291eb6b85bbf8bfc013f6f8a708"
+    },
+    {
+      "path": "Assets/_Game/Presentation/ActorAnimationSet.cs",
+      "sha256": "ac5c0098c39d4ca61a04c44e522e8b3ed131fd998f8144deae634f5856e2da5e"
+    },
+    {
+      "path": "Assets/_Game/Presentation/EncounterHud.cs",
+      "sha256": "78684752db188363c59033a40b766097276bb244ad9519b46dee7f57fe62288b"
+    },
+    {
+      "path": "Assets/_Game/Presentation/EquipmentPanel.cs",
+      "sha256": "40552950bec8e76b2780b22a1b959a254bae9f1e5ed0d04a75a25fa1c8478ee7"
+    },
+    {
+      "path": "Assets/_Game/Presentation/FirstEncounter.cs",
+      "sha256": "efa97e1d999200d9324ad443df18ba97d2ec5575a4af45f8fbe780ccd504c12a"
+    },
+    {
+      "path": "Assets/_Game/Presentation/MeleeActor.cs",
+      "sha256": "b10578fd8c53f3a715b46b6a2d263d05b14f06962b62a121fb646ae5a083fc9c"
+    },
+    {
+      "path": "Assets/_Game/Presentation/PlayerSmokeProbe.cs",
+      "sha256": "7164a89b8d299af9ab7a390a400e1adf960b96398852ec1d3fa10785c8675bb3"
+    },
+    {
+      "path": "Assets/_Game/Resources/AffixUI/RuntimeTheme.tss",
+      "sha256": "682e2b1c6cc1d6e332c15f56c840f7d8282cb1e5bc627eb6664580352a752fda"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/AttackIcon.png",
+      "sha256": "33dac9cf80969fdc25f938cc4fcace2f97d66490f3f73bf401df1171fdffdafb"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/EmberSword.png",
+      "sha256": "62f3addf897614cf749de57e91315f5b5cc9657d9771a928bd075d52466d56b2"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/PowerRune.png",
+      "sha256": "74e3c506f081ecb0daaddf731f6bacdec8137b6ba9c08b7463338508edfdc283"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/PrecisionRune.png",
+      "sha256": "ba94d6f86715bcca8f58241f5d19e5eb056d17ecfd7537bbe84ab96a4764f0c5"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/VeteranRune.png",
+      "sha256": "22f86eb8850009f6c7c521bca792bd1d7cbab09ebdfcc6938cc563da8575b347"
+    },
+    {
+      "path": "Packages/manifest.json",
+      "sha256": "78b9072dcc6fa529087a495056f52028f48162434cd7fff8ffff0b6258405f3b"
+    },
+    {
+      "path": "Packages/packages-lock.json",
+      "sha256": "16b25471a4769a00dd0cf95fcabc7790c1ee6c6c94f3b527dc0183f669934e5f"
+    }
+  ]
+}

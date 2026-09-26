@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "STITCH_NATIVE_COMBAT_HUD_FIRST_SLICE",
-  "implementation_commit": "0685bbb03a47b94bd31dcbfa6c1472a6d8dc3fa8",
+  "stage": "STITCH_EQUIPMENT_TALENT_LOOP",
+  "implementation_commit": "See docs/validation/progression/source-fingerprint.json; current implementation commit pending",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -21,7 +21,7 @@
   "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
   "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
   "ui_direction": "USER_STITCH_FOUR_SCREENS_NATIVE_UNITY",
-  "windows_build": "SUCCEEDED_2026-09-26T04:55:46Z_ZERO_ERRORS_WARNINGS",
+  "windows_build": "SUCCEEDED_2026-09-26T05:22:48Z_ZERO_ERRORS_WARNINGS",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,25 +30,39 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Implement real loot comparison/equip and one talent branch in the user Stitch management layout",
+  "next": "Implement hero selection and town-to-dungeon navigation using the user Stitch screens",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
-  "core_checks": 56,
+  "core_checks": 90,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_NATIVE_HUD_720_1080",
+  "windows_player": "PASS_LOOT_EQUIPMENT_TALENT_NEXT_ENCOUNTER_720_1080",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/stitch/",
+  "actual_game_capture": "docs/media/progression/",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
-  "new_direction_validation": "NATIVE_COMBAT_HUD_PLAYER_PASS_720_1080; FULL_UI_NOT_IMPLEMENTED",
-  "previous_technical_checks_scope": "Unity PASS fields refer only to the rejected technical prototype, not Hero Siege direction.",
+  "new_direction_validation": "LOOT_EQUIP_TALENT_CALLBACKS_AND_REAL_HIT_PASS; FULL_PRODUCT_INCOMPLETE",
+  "previous_technical_checks_scope": "Historical Ninja and first HUD reports remain historical; current scope is progression below.",
   "stitch": {
     "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
     "engine_or_package_changes": false,
-    "current_scope": "First combat HUD only; readonly character information, not item inventory or skill tree",
-    "build_guid": "54d35624853d494cbee6127fe860214e",
-    "reports": "docs/validation/stitch/",
-    "actual_mouse_keyboard_input": "NOT_RUN",
-    "other_screens": "Hero selection, town, management inventory/talents not implemented"
+    "current_scope": "Combat HUD plus one weapon inventory/equip/compare and one three-node talent branch; scene-to-scene session progression",
+    "build_guid": "e86a4c30328a47ec9bf8cf3ba918d0f8",
+    "reports": "docs/validation/progression/",
+    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; NINE_NATIVE_UI_CLICKEVENT_CALLBACKS_VERIFIED",
+    "other_screens": "Hero selection and town not implemented; no save, mana or active skill loadout"
+  },
+  "progression": {
+    "weapon_slots": 1,
+    "bag_slots": 24,
+    "guaranteed_drop": "First kill only: Ember Steel Sword, base12 + affix4",
+    "damage_example": [
+      30,
+      40,
+      43
+    ],
+    "verified_upgraded_impact_after_defense": 41,
+    "talent_branch": "Fury2 -> Precision1 -> Keystone1; one point per unique kill",
+    "session_persistence": "Gear, bag, talents, total XP/gold preserved across scene reload; not disk save",
+    "input_test": "UI Toolkit ClickEvent callbacks, not OS mouse/keyboard input"
   }
 }

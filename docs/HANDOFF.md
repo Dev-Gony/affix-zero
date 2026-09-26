@@ -8,29 +8,33 @@
 
 Unity6000.3.24f1 / C# / Built-in2D 유지. 실제 에디터 D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe. 설치/라이선스는 작동하므로 재설치 요구를 반복하지 않는다. 이번 UI 때문에 엔진/패키지/렌더러를 변경하지 않았다.
 
-## 현재 구현
+## 현재 구현 — 장비·특성 순환 완료
 
-HeroSiegeEncounter에서 새 무료 Soldier/Orc 애니메이션·생성 방·CC0 Lucifer 공격 아이콘·OFL Noto Sans KR로 1대1 전투한다. EncounterHud는 OnGUI를 제거하고 C# UI Toolkit UIDocument/PanelSettings/VisualElement로 만들었다. 상단 메뉴와 실제 적 HP, 우측 실제 위치 미니맵, 하단 HP 구체/공격 경과/획득 XP를 연결했다. MP는 아직 없고, 장비 창은 읽기 전용이다. 생성 HudFrames-v1은 앞선 중간 산출물이며 새 HUD가 로드하지 않는다.
+HeroSiegeEncounter에서 무료 Soldier/Orc·생성 방·CC0 아이콘·OFL 한글 폰트로 전투한다. 네이티브 UI Toolkit 관리 화면 EquipmentPanel은 왼쪽 장착 무기/능력치/24칸 가방, 오른쪽3노드 특성과 실제 아이템 비교다. 화면참고는 Stitch03이다.
 
-지금은 **전투 화면 첫 단계**다. 영웅 선택·타운·실제 인벤토리/비교/장착·특성 트리·마나·능동 스킬·저장·오프라인 보상은 구현되지 않았다. 캐릭터는 좌우 방향에 한정되고 방은 단일 그림으로 충돌/가림이 없다. UI 위에 원작 스크린샷을 붙여 완성으로 처리하지 않는다.
+HeroProgression(순수C#)은 기본24+시작검6=30을 제공한다. 첫 적 처치로만 잿불 강철검(12+잿불4) 하나가 월드에 나타나며 회수 버튼으로 가방에 들어온다. 장착하면 이전 무기를 같은 가방 칸에 돌려주고 공격력40이 된다. 각 고유 처치마다특성1point/25XP/8Gold. 분노2(+3/rank)→정밀1(+4)→숙련1(+6)이며 초기화는 사용분만 환불한다. 버리기는 두 클릭 확인이며 재화 보상은 없다.
+
+FirstEncounter는 세션 모델을 장면재시작에도 보존한다. 다음 전투는 종료 후 대기 전리품을 회수해야 가능하다. 누적XP/골드와 해당전투의보상은 분리한다. MeleeActor는 공격 시작시에피해를잠가 장착/특성이 이미진행중인타격을 바꾸지 않는다. 과정/계약은 EQUIPMENT_LOOP.md와 ARCHITECTURE.md.
 
 ## 실제 확인
 
-- 새 아트 Editor Play: 04:38:29Z PASS. Camera.Render 월드 전용, 새 Stitch HUD 검사가 아님.
-- 새 네이티브 HUD Windows build: 04:55:46Z 성공, 오류0/경고0.
-- buildGuid: 54d35624853d494cbee6127fe860214e.
-- 720 player run: 15048b15916b455daa9126e3372c7ac1 PASS.
-- 1080 player run: c689d0cd4e0041bd8c5217777dae77b3 PASS.
-- 두 실행에서 이동/공격/타격프레임/적사망/단발보상/일시정지/정보창/재시작과 네이티브 HP·XP·골드 텍스트·창 표시를 확인. 5상태씩 framebuffer 캡처.
-- 에이전트가 720 전투·장비,1080 결과 PNG를 직접 확인. 한글 표시와 화면 가장자리 배치 관찰. 사용자 시각 승인 아님.
-- **실제 마우스/키보드 입력 미검사**. probe는 UI와 공유한 API를 직접 호출한다.
+- 순수 코어90검사 PASS.
+- 최신 Windows build 2026-09-26T05:22:48Z, 오류0/경고0, GUID e86a4c30328a47ec9bf8cf3ba918d0f8.
+- 720 run e3f3eec47a4b4751b59f5dc715697a93,1080 run4b47acfcaa8948a8a003eca4e936c4db 모두PASS.
+- 실제 전투/타격/단발보상/pause를 유지하면서 UI ClickEvent9개로 회수/선택/장착/특성투자/초기화/재투자/닫기/다음전투검증. 강화후 첫 타격41(43-방어2), 다음장면빌드와누적보상유지.
+- 각9상태framebuffer캡처; 에이전트가720비교/특성,1080비교화면을관찰했다. 실제OS입력/사용자시각승인은NOT_RUN.
+- 최초player에서는SpriteImage에sourceRect를설정해실패. TextureImage에top-left crop으로수정해위최종실행통과. 기본RuntimeTheme.tss도명시반입했다.
 
-보고서와 소스 SHA는 docs/validation/stitch, 무손실 캡처는 docs/media/stitch에 있다. Build/Windows/AffixZero.exe는 이제 위 새 네이티브 HUD 빌드다. 이전 docs/media/first-encounter-* 미추적 캡처를 최신 결과로 추가하지 않는다.
+보고서/소스SHA는 docs/validation/progression, 캡처는docs/media/progression. 앞선docs/validation/stitch는이전HUD단계이며현재검증으로혼동하지않는다. Build/Windows/AffixZero.exe는위최신빌드다.
 
-## 재현과 다음 작업
+## 제한과 다음 작업
+
+게임 종료 후 저장/불러오기, 영웅선택·타운, 마나/능동스킬, 여러장비슬롯은미구현. 첫보장검이후추가무기드랍은없고처치포인트는계속얻는다. 캐릭터손무기는이미지에포함되어장착외형은그대로다. 방은단일그림이고지형충돌/가림이없다. 다음우선순위는사용자Stitch의영웅선택→타운→던전진입과귀환연결이다. 여러적/가챠/시즌부터늘리지않는다.
+
+## 반입과 작업 주의
 
 공개 저장소에는 Zerie PNG원본10개가 없으며 Assets/LocalLicensed 전체가 Git 제외다. 공식 무료 ZIP → Tools/Local/Import-FreeCharacters.ps1 → HeroSiegeArtSetup.Build 순서로 반입한다. 누락/해시 불일치 시 새 씬을 만들기 전에 중단한다. 자세한 실행은 LOCAL_WORKFLOW.md.
 
-다음 우선순위는 Stitch 장비 화면에 실제 드랍→비교→장착→타격 변화와 특성1분기를 연결하는 것이다. 고정 수치표를 인벤토리 완성으로 부르지 않는다. 이후 영웅 선택→타운→던전→귀환 전환으로 확장한다. 다수 스폰·시즌·가챠부터 늘리지 않는다. 사용자 시각 피드백이 오면 현재 시안과 대조해 수정한다.
+사용자 시각 피드백이 오면 현재 시안과 대조해 수정한다. 원본 시안 전체와의 시각 일치를 검사 PASS만으로 주장하지 않는다.
 
 45c6205 및 이전 실행 PASS는 거절된 Ninja 시제품의 기술 기록이다. 이후 시안 검토 문서 1802dae와 네이티브 UI 소스 변경을 구분한다. Git 상태를 먼저 확인하고 미추적 거절 시안/개인 라이선스 원본을 git add .로 반입하지 않는다. 원작 이미지·Godot/E0/V0/PR18 복원, 사용자 자료 삭제, 자동 stash, force push, PR 병합은 금지한다.

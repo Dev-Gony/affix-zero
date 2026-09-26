@@ -36,7 +36,7 @@
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
   "remote_history_rewritten": false,
-  "scope": "Historical records retained below; current native Stitch combat HUD checks are in stitch_native_hud.",
+  "scope": "Current progression checks are in progression_loop; previous records retained as historical evidence.",
   "current_u1": {
     "implementation_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
     "recorded_date": "2026-09-26",
@@ -146,6 +146,46 @@
       "MP resource and active skill loadout unimplemented",
       "Single painted room, no terrain collision/occlusion",
       "Two-direction characters; private raw art not in public Git"
+    ]
+  },
+  "progression_loop": {
+    "build_guid": "e86a4c30328a47ec9bf8cf3ba918d0f8",
+    "windows_build": {
+      "recordedUtc": "2026-09-26T05:22:48.0498079Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "core_checks": 90,
+    "player_720": "docs/validation/progression/player-720.json",
+    "player_1080": "docs/validation/progression/player-1080.json",
+    "result": "PASS",
+    "ui_callback_count_each": 9,
+    "framebuffer_captures_each": 9,
+    "actual_upgraded_hit_damage": 41,
+    "checks": [
+      "first kill pending loot and point",
+      "pickup transfer",
+      "item comparison +10",
+      "equipment swap retains old weapon",
+      "talent spend and exact refund/reinvest",
+      "scene reload preserves gear/talents/total rewards",
+      "real upgraded impact 43 minus defense2",
+      "prior combat/pause/overlay/duplicate reward checks"
+    ],
+    "physical_input": "NOT_RUN",
+    "visual_review": "Agent viewed 720 comparison/talent and 1080 comparison; user visual approval NOT_RUN",
+    "initial_failure": "Sprite Image sourceRect is invalid; changed preview to texture with converted top-left crop; saved failing report and retested actual player",
+    "limitations": [
+      "One guaranteed weapon drop, one weapon slot, three-node offensive branch",
+      "Run memory only, no save",
+      "Handheld weapon in actor sprite is baked and does not change appearance with equipment",
+      "No hero-selection/town/mana/active abilities"
     ]
   }
 }

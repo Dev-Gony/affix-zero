@@ -36,3 +36,8 @@
 - python Tools/validate_reviewed_art.py (남겨 둔 이전 CC0 기술 fixture 검사이며 새 Zerie 아트 검증이 아님)
 
 정적 DLL 컴파일/.NET CI는 Unity import·Play·실행·시각 검수를 대체하지 않는다. 소스 예시 art-preview.html도 게임이 아니다. 사용자 폴더·세이브·stash·Git history는 삭제하지 않는다.
+
+
+## 최신 장비·특성 실행
+
+같은 실행 진입점에서 현재빌드GUID e86a4c30328a47ec9bf8cf3ba918d0f8을 사용한다. 최신 보고서는 docs/validation/progression, 캡처는 docs/media/progression이다. probe는회수→가방선택→장착→특성투자→초기화→재투자→닫기→다음전투를 네이티브 ClickEvent로검사한다. 창을클릭하는OS입력은아니다. 첫검보장드랍후공격력30→40→43,다음전투실제41피해를확인했다. Tab/I는관리창toggle,K는특성창열기,Esc닫기/일시정지. 게임종료시세션은소멸하며저장기능은아직없다.

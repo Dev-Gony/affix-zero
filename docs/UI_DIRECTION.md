@@ -9,3 +9,6 @@ Stitch 기준의 전투 HUD는 **하단 좌우 HP/MP 구체 + 중앙 스킬바/�
 현행 기준은 [HERO_SIEGE_UX_SPEC](HERO_SIEGE_UX_SPEC.md)와 [ART_DIRECTION](ART_DIRECTION.md)이다. [UI_REFERENCE_REVIEW](UI_REFERENCE_REVIEW.md)는 과거 조사/실패 원인 기록이며 Survivor.io 내용을 현행 요구로 사용하지 않는다.
 
 현재 EncounterHud와 FirstEncounter 화면은 거절된 기술 시제품이다. 자동 검사 통과를 UI/UX 방향 승인으로 해석하지 않는다. 새 에셋/상호작용 검수 없이 평면 패널 색상·좌표 수정만 반복하지 않는다.
+
+
+후속 구현: 현재 관리 화면은 [EQUIPMENT_LOOP](EQUIPMENT_LOOP.md)의 단일무기24칸가방·비교/장착·특성1분기를 실제데이터에연결한 상태다. 작은읽기전용창은교체됐다. 실물시안의전체기능/아트/사용자승인이완료됐다는뜻은아니다.

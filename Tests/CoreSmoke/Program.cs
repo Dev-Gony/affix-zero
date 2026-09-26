@@ -63,6 +63,7 @@ internal static class Program
                 "new encounter starts without prior attack state");
             CombatHealthChecks.Run(Check, Throws);
             EncounterRewardsChecks.Run(Check, Throws);
+            ProgressionChecks.Run(Check, Throws);
             Console.WriteLine("CORE_SMOKE_PASSED checks=" + passed + " scope=pure-CSharp-not-Unity-editor");
             return 0;
         }

@@ -20,6 +20,7 @@ namespace AffixZero.Presentation
         private AttackTimeline timeline;
         private CombatHealth health;
         private MeleeActor attackTarget;
+        private int swingDamage;
         private double clipTime;
         private double hurtRemaining;
         private ActorClip clip = ActorClip.Idle;
@@ -42,6 +43,11 @@ namespace AffixZero.Presentation
         public void Configure(ActorAnimationSet set, int id, int hp, int attackDamage)
         { animationSet = set; actorId = id; maximumHp = hp; damage = attackDamage; }
         public void SetTarget(MeleeActor other) { target = other; }
+        public void SetAttackDamage(int value)
+        {
+            if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
+            damage = value;
+        }
 
         private void OnDisable()
         {
@@ -89,7 +95,7 @@ namespace AffixZero.Presentation
                 // A skipped render frame still displays the impact pose when applying its hit.
                 view.sprite = impact.Occurred ? animationSet.ImpactSprite : animationSet.AttackFrame(timeline);
                 RenderWeapon(impact.Occurred);
-                if (impact.Occurred) attackTarget.Receive(actorId, impact.AttackId, damage);
+                if (impact.Occurred) attackTarget.Receive(actorId, impact.AttackId, swingDamage);
                 if (!timeline.IsRunning) attackTarget = null;
                 return;
             }
@@ -109,6 +115,8 @@ namespace AffixZero.Presentation
             else
             {
                 timeline.Begin(target.actorId);
+                // Gear changes apply to the next swing, never to an already prepared hit.
+                swingDamage = damage;
                 attackTarget = target;
                 SetClip(ActorClip.Attack);
                 view.sprite = animationSet.AttackFrame(timeline);

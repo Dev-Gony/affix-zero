@@ -17,7 +17,7 @@
 
 ## 구현 방식
 
-현재 Packages/packages-lock.json에 com.unity.modules.uielements 1.0.0이 이미 존재하고, 설치된 에디터에 UnityEngine.UIElementsModule.dll이 있다. 이 프로젝트에는 **UI Toolkit의 UXML/USS + C#**를 우선 적용할 수 있다. 이는 Unity 네이티브 런타임 UI이며 HTML을 띄우는 웹뷰가 아니다. 현행 EncounterHud.cs는 OnGUI/IMGUI 방식이므로 새 구조로 교체하는 작업이 필요하다.
+현재 Packages/packages-lock.json에 com.unity.modules.uielements 1.0.0이 이미 존재하고, 설치된 에디터에 UnityEngine.UIElementsModule.dll이 있다. 이 프로젝트에는 **UI Toolkit의 UXML/USS + C#**를 우선 적용할 수 있다. 이는 Unity 네이티브 런타임 UI이며 HTML을 띄우는 웹뷰가 아니다. 기존 EncounterHud.cs의 OnGUI/IMGUI를 C# UI Toolkit 네이티브 구조로 교체했다.
 
 - UXML/USS: 공통 상단 메뉴, 패널, 리스트, 가방 슬롯, 탭, 스크롤, 색상·간격·선택 상태.
 - C#: 화면 전환, 포커스와 단축키, 장착·특성 명령, 툴팁·비교, 모델 변경에 따른 수치 갱신. 슬롯 드래그는 런타임 pointer capture로 별도 구현한다.
@@ -53,3 +53,6 @@ DESIGN.md는 각진 고딕 픽셀 UI를 말하지만 일부 실제 화면에는 
 최초 판단 시점에는 ZIP/화면/소스 검토와 모듈/공식 문서 대조만 완료했다. 이후 사용자의 계속 진행 요청에 따라 **전투 HUD의 첫 네이티브 UI 구현**을 진행했다. 현재는 C# VisualElement로 구성하며 재사용 레이아웃을 UXML/USS로 분리하는 작업은 후속 범위다.
 
 후속 검사: Unity Windows 빌드 2026-09-26T04:55:46Z 오류0/경고0, 실제 1280×720 및 1920×1080 player PASS. UIDocument의 실제 체력/보상 표시·정보 창 상태와 framebuffer를 검사했고 한글 표시를 직접 관찰했다. [검증 기록](validation/stitch/)과 [실제 캡처](media/stitch/)를 참조한다. 마우스/키보드 실제 입력은 NOT_RUN이며 사용자 시각 승인도 받지 않았다. 영웅 선택·타운·실제 인벤토리/특성·MP/스킬은 아직 구현되지 않았다. 기존 HeroSiegeEncounter의 04:38:29Z Editor Play PASS는 전투·에셋 검증이며 새 HUD의 Editor Play 검사로 취급하지 않는다.
+
+
+후속 개발: [장비·특성 순환](EQUIPMENT_LOOP.md)을 연결했다. 단일 무기24칸가방·비교/장착·한분기투자/환불·다음전투상태유지는 구현됐으며, 최신 검증은 validation/progression에 있다. 위 최초 전투 HUD의 제한은 당시 기록이다. 전체 영웅 선택/타운/여러장비슬롯/능동스킬은 여전히 후속 범위다.

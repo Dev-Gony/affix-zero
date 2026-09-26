@@ -23,7 +23,7 @@ namespace AffixZero.Presentation
         private bool finishing, restarted;
         private FrozenState frozen;
         private readonly HashSet<string> completedCaptures = new HashSet<string>();
-        private static readonly string[] RequiredCaptures = { "walk", "impact", "cleared", "paused", "equipment" };
+        private static readonly string[] RequiredCaptures = { "walk", "impact", "cleared", "paused", "equipment", "loot", "comparison", "equipped", "talent" };
         private readonly HashSet<string> requestedCaptures = new HashSet<string>();
         private readonly List<string> screenshots = new List<string>();
 
@@ -65,8 +65,8 @@ namespace AffixZero.Presentation
             if (finishing || report == null) return;
             try
             {
-                if (Time.realtimeSinceStartup - started > 30)
-                    throw new TimeoutException("Player smoke exceeded 30 seconds in phase " + phase);
+                if (Time.realtimeSinceStartup - started > 45)
+                    throw new TimeoutException("Player smoke exceeded 45 seconds in phase " + phase);
                 Tick();
             }
             catch (Exception error) { Finish(false, error.ToString()); }
@@ -90,6 +90,15 @@ namespace AffixZero.Presentation
                 Require(!found.IsPaused && !found.EquipmentVisible && Time.timeScale > 0,
                     "New encounter retained pause or equipment overlay state.");
                 report.actorsInitialized = true;
+                if (restarted)
+                {
+                    Require(found.Progression.TotalDamage == 43 && hero.Damage == 43 && found.Progression.FuryRank == 1 &&
+                        found.Progression.Inventory.Count == 1 && found.Progression.EquippedWeapon.DamageBonus == 16,
+                        "Equipment or talents did not survive the next encounter.");
+                    Require(found.Progression.TotalExperience == 25 && found.Progression.TotalGold == 8,
+                        "Accumulated rewards were lost on scene reload.");
+                    report.buildPreservedAcrossEncounters = true;
+                }
                 if (restarted) report.restartPauseAndOverlayReset = true;
                 if (restarted) { report.restartFullHp = true; report.restartRewardsReset = true; }
                 heroStart = hero.transform.position;
@@ -101,6 +110,11 @@ namespace AffixZero.Presentation
             if (IsPausePhase())
             {
                 TickPauseChecks();
+                return;
+            }
+            if (phase.StartsWith("progression", StringComparison.Ordinal))
+            {
+                TickProgression();
                 return;
             }
             if (phase == "combat")
@@ -155,14 +169,10 @@ namespace AffixZero.Presentation
                     report.noDamageAfterDeath = true;
                     report.rewardCollectedOnce = true;
                     report.firstClearHeroHp = hero.Hp;
-                    DetachActors();
-                    oldEncounterId = encounter.GetInstanceID();
-                    restarted = true;
-                    phase = "restartWaiting";
-                    encounter.SetPaused(true);
-                    encounter.SetEquipmentVisible(true);
-                    Require(encounter.IsPaused && encounter.EquipmentVisible, "Could not prepare paused overlay restart.");
-                    encounter.RestartEncounter(); // Direct API call shared with the player's button; not a click.
+                    Require(encounter.Progression.PendingLoot != null && encounter.Progression.UnspentPoints == 1,
+                        "First enemy death did not grant guaranteed loot and a talent point.");
+                    CaptureOnce("loot");
+                    ProgressionPhase("progressionLoot");
                 }
             }
             if (phase == "complete" && pendingCaptures == 0)
@@ -171,6 +181,8 @@ namespace AffixZero.Presentation
                     report.enemyDeathObserved && report.impactPoseObserved && report.noDamageAfterDeath &&
                     report.rewardCollectedOnce && report.restartFullHp && report.restartRewardsReset &&
                     report.restartCombatObserved && report.restartPauseAndOverlayReset &&
+                    report.lootPickupVerified && report.equipmentSwapVerified && report.talentResetVerified &&
+                    report.buildPreservedAcrossEncounters && report.improvedRealHitVerified &&
                     report.movementPauseStable && report.attackPauseStable && report.equipmentPauseStable &&
                     report.equipmentCloseResumed && report.manualPauseSurvivesOverlay && report.combatResumedAfterPause,
                     "Required combat or pause observations are missing.");
@@ -178,6 +190,95 @@ namespace AffixZero.Presentation
                     Require(completedCaptures.Contains(label), "Required screenshot is missing: " + label);
                 Finish(true, "");
             }
+        }
+
+        private void ProgressionPhase(string next)
+        {
+            phase = next;
+            phaseStarted = Time.realtimeSinceStartup;
+        }
+
+        private void TickProgression()
+        {
+            if (pendingCaptures > 0 || Time.realtimeSinceStartup - phaseStarted < 0.25f) return;
+            var build = encounter.Progression;
+            if (phase == "progressionLoot")
+            {
+                DispatchUiClick("pickup-loot");
+                Require(build.PendingLoot == null && build.Inventory.Count == 1 && build.TotalDamage == 30,
+                    "Pickup callback failed or automatically equipped the drop.");
+                report.lootPickupVerified = true;
+                DispatchUiClick("character-tab");
+                Require(encounter.EquipmentVisible && encounter.IsPaused, "Management callback did not open and pause.");
+                ProgressionPhase("progressionOpen");
+            }
+            else if (phase == "progressionOpen")
+            {
+                DispatchUiClick("inventory-slot-0");
+                ProgressionPhase("progressionSelected");
+            }
+            else if (phase == "progressionSelected")
+            {
+                var root = encounter.GetComponent<UIDocument>().rootVisualElement;
+                Require(root.Q<Label>("selected-item-name")?.text == "잿불 강철검" &&
+                    root.Q<Label>("comparison-delta")?.text == "공격력 +10", "Item comparison binding is wrong.");
+                CaptureOnce("comparison");
+                ProgressionPhase("progressionEquip");
+            }
+            else if (phase == "progressionEquip")
+            {
+                DispatchUiClick("equip-button");
+                Require(hero.Damage == 40 && build.EquippedWeapon.DamageBonus == 16 && build.Inventory.Count == 1 &&
+                    build.Inventory[0].DamageBonus == 6, "Equip callback did not swap the old weapon and update attack.");
+                report.equipmentSwapVerified = true;
+                CaptureOnce("equipped");
+                ProgressionPhase("progressionInvest");
+            }
+            else if (phase == "progressionInvest")
+            {
+                DispatchUiClick("talent-fury");
+                Require(hero.Damage == 43 && build.FuryRank == 1 && build.UnspentPoints == 0,
+                    "Talent callback did not spend one point and apply attack.");
+                CaptureOnce("talent");
+                ProgressionPhase("progressionReset");
+            }
+            else if (phase == "progressionReset")
+            {
+                DispatchUiClick("talent-reset");
+                Require(hero.Damage == 40 && build.FuryRank == 0 && build.UnspentPoints == 1,
+                    "Talent reset did not refund and recalculate.");
+                report.talentResetVerified = true;
+                ProgressionPhase("progressionReinvest");
+            }
+            else if (phase == "progressionReinvest")
+            {
+                DispatchUiClick("talent-fury");
+                Require(hero.Damage == 43 && build.UnspentPoints == 0, "Refunded point could not be invested again.");
+                DispatchUiClick("close-character");
+                ProgressionPhase("progressionNext");
+            }
+            else if (phase == "progressionNext")
+            {
+                encounter.SetPaused(true);
+                DetachActors();
+                oldEncounterId = encounter.GetInstanceID();
+                restarted = true;
+                phase = "restartWaiting";
+                DispatchUiClick("next-encounter");
+            }
+        }
+
+        // Callback dispatch is not physical mouse hit-testing or an OS-input playtest.
+        private void DispatchUiClick(string name)
+        {
+            var element = encounter.GetComponent<UIDocument>().rootVisualElement.Q(name);
+            Require(element != null && element.enabledInHierarchy && element.worldBound.width > 0 &&
+                element.resolvedStyle.display != DisplayStyle.None && element.resolvedStyle.visibility == Visibility.Visible,
+                "UI control is absent, disabled or hidden: " + name);
+            for (var parent = element.parent; parent != null; parent = parent.parent)
+                Require(parent.resolvedStyle.display != DisplayStyle.None, "UI control has hidden ancestor: " + name);
+            using (var click = ClickEvent.GetPooled()) { click.target = element; element.SendEvent(click); }
+            report.uiCallbacksDispatched++;
         }
 
         private bool IsPausePhase() => phase == "movementPaused" || phase == "equipmentPaused" ||
@@ -275,6 +376,12 @@ namespace AffixZero.Presentation
                 Require(!encounter.IsPaused, "Damage was accepted while the encounter was paused.");
                 if (actor == hero) report.heroDamageObserved = true;
                 if (actor == enemy) report.enemyDamageObserved = true;
+                if (actor == enemy && restarted && !report.improvedRealHitVerified)
+                {
+                    Require(receipt.Damage == 41, "Upgraded attack did not apply 43 minus enemy defense 2 at impact.");
+                    report.improvedRealHitVerified = true;
+                    report.upgradedHitDamage = receipt.Damage;
+                }
                 var attacker = actor == hero ? enemy : hero;
                 Require(attacker.GetComponent<SpriteRenderer>().sprite == attacker.AnimationSet.ImpactSprite,
                     "Damage did not coincide with the actual impact sprite.");
@@ -326,8 +433,8 @@ namespace AffixZero.Presentation
             Require(root.worldBound.width > 0 && root.worldBound.height > 0, "Stitch HUD has no layout area.");
             Require(root.Q<Label>("hero-hp-value")?.text == hero.Hp + "\n/ " + hero.MaxHp, "Hero HP label differs from combat state.");
             Require(root.Q<Label>("enemy-hp-value")?.text == enemy.Hp + " / " + enemy.MaxHp + " HP", "Enemy HP label differs from combat state.");
-            Require(root.Q<Label>("xp-value")?.text == "획득 경험치  " + encounter.Experience + " XP", "XP label differs from awarded XP.");
-            Require(root.Q<Label>("gold-value")?.text == "GOLD  " + encounter.Gold + "     XP  " + encounter.Experience, "Gold label differs from awarded gold.");
+            Require(root.Q<Label>("xp-value")?.text == "획득 경험치  " + encounter.Progression.TotalExperience + " XP", "XP label differs from awarded XP.");
+            Require(root.Q<Label>("gold-value")?.text == "GOLD  " + encounter.Progression.TotalGold + "     XP  " + encounter.Progression.TotalExperience, "Gold label differs from awarded gold.");
             var panel = root.Q("character-panel");
             Require(panel != null && (panel.resolvedStyle.display != DisplayStyle.None) == encounter.EquipmentVisible,
                 "Character panel visibility differs from encounter state.");
@@ -423,8 +530,8 @@ namespace AffixZero.Presentation
             public string buildGuid = Application.buildGUID;
             public string result = "RUNNING";
             public string problem = "";
-            public string scope = "Actual Windows player combat, pause/overlay state checks and scene restart through shared public APIs.";
-            public string interactionMethod = "Direct API calls shared with UI controls; no mouse clicks or keyboard input were generated.";
+            public string scope = "Actual Windows combat, pause, loot/equip/talent callbacks, build persistence and upgraded impact.";
+            public string interactionMethod = "Pause checks use shared APIs; loot/equip/talent/next controls receive UI Toolkit ClickEvent dispatch. No physical mouse or keyboard input generated.";
             public string actualUiClickVerification = "NOT_RUN";
             public string screenshotScope = "Uncompressed 24-bit BMP from end-of-frame ReadPixels framebuffer, including the actual runtime UI Toolkit HUD.";
             public string userVisualApproval = "NOT_APPROVED";
@@ -435,6 +542,9 @@ namespace AffixZero.Presentation
             public bool manualPauseSurvivesOverlay, combatResumedAfterPause, restartPauseAndOverlayReset;
             public bool nativeHudStateVerified;
             public int nativeHudCaptureChecks;
+            public bool lootPickupVerified, equipmentSwapVerified, talentResetVerified;
+            public bool buildPreservedAcrossEncounters, improvedRealHitVerified;
+            public int uiCallbacksDispatched, upgradedHitDamage;
             public int firstClearHeroHp;
             public string[] screenshots = Array.Empty<string>();
         }

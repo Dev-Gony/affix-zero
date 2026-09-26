@@ -2,9 +2,13 @@
 
 갱신: 2026-09-26. 최신 정책은 **탕탕특공대 요소 폐기, 유료 에셋 구매 제외, 무료 원본 + 직접 제작**이다. Ninja·밝은 초원·기존 두 HUD 시안은 deprecated다. 과거 기술 검사와 현행 생성 아트 씬의 결과를 구분한다.
 
-**사용자 제공 Stitch 4개 시안이 UI 배치의 최우선 기준**이다. 현재는 전투 화면을 네이티브 UI Toolkit으로 구현한 첫 단계이며 영웅 선택·타운·완전한 장비/특성 화면은 후속 범위다. 현재 연결은 무료 Zerie Soldier/Orc10 PNG(로컬 제한 원본), 생성 TempleRoom, Lucifer CC0 공격 아이콘, Noto Sans KR OFL 폰트다. HudFrames-v1은 원본 이력으로 보존하고 현행 UI에서는 사용하지 않는다.
+**사용자 제공 Stitch 4개 시안이 UI 배치의 최우선 기준**이다. 현재는 전투와 단일 무기·24칸 가방·3노드 특성을 네이티브 UI Toolkit으로 구현했다. 전리품 회수 → 비교/장착 → 특성 배분/초기화 → 다음 전투의 피해 증가가 연결된다. 버리기는 같은 아이템에 두 번 눌러 확인한다. 영웅 선택·타운·다중 장비 부위·마나·능동 스킬·영구 저장은 후속 범위다. 현재 연결은 무료 Zerie Soldier/Orc10 PNG(로컬 제한 원본), 생성 TempleRoom, Lucifer CC0 아이콘5개, Noto Sans KR OFL 폰트다. HudFrames-v1은 원본 이력으로 보존하고 현행 UI에서는 사용하지 않는다.
 
-Windows build는 `Build/Reports/windows-build.json`의 2026-09-26T04:55:46Z Succeeded, 오류0/경고0이다. 실제 UI Toolkit HUD를 포함한 Windows 실행은 buildGuid=`54d35624853d494cbee6127fe860214e`, 1280×720 run=`15048b15916b455daa9126e3372c7ac1`과 1920×1080 run=`c689d0cd4e0041bd8c5217777dae77b3` 모두 PASS다. 각 보고는 `Build/Reports/stitch-720/player-smoke.json`, `stitch-1080/player-smoke.json`에 있다. 전투·양측 피해·적 사망·단발 보상·pause/열람 상태·재시작과 native HUD 상태/캡처5개를 확인했다. UI와 공유하는 API를 호출한 검사이며 **실제 클릭 NOT_RUN, 사용자 시각 승인 NOT_APPROVED**다. 04:38:29Z의 생성 아트 씬 Play PASS는 이전 월드 검증이며 Stitch UI 증거와 분리한다.
+성장은 `FirstEncounter.Progression`의 static 상태로 같은 실행 세션의 다음 전투에서 유지된다. 총 XP/Gold는 누적되며 전투별 보상은 초기화된다. 첫 처치의 확정 무기1개 이후에는 추가 무기 없이 처치 보상과 특성 포인트만 늘어난다. 프로세스 종료 후 저장은 없고, 장착 변경은 피해·UI에 적용되지만 원본에 구워진 월드 무기 외형은 바뀌지 않는다.
+
+Windows build는 `Build/Reports/windows-build.json`의 2026-09-26T05:22:48Z Succeeded, 오류0/경고0이다. buildGuid=`e86a4c30328a47ec9bf8cf3ba918d0f8`, 1280×720 run=`e3f3eec47a4b4751b59f5dc715697a93`과 1920×1080 run=`4b47acfcaa8948a8a003eca4e936c4db` 모두 PASS다. 보존 보고는 [player-720.json](validation/progression/player-720.json), [player-1080.json](validation/progression/player-1080.json), [windows-build.json](validation/progression/windows-build.json)에 있다. 로컬 원본은 `Build/Reports/progression-{720,1080}/player-smoke.json`이다.
+
+각 실행에서 실제 전투·pause·전리품 회수·무기 교체·특성 초기화·다음 전투의 성장 유지와 강화 후 실타격41을 확인했다. 각 9개 HUD framebuffer 캡처와 UI Toolkit `ClickEvent` 콜백9회를 검사했다. pause는 공유 API 호출, 장비·특성·다음 전투는 UI 이벤트 전달로 검사했다. **OS 물리 마우스/키보드 입력 NOT_RUN, 사용자 시각 승인 NOT_APPROVED**다. 코어 검사는90개 통과했으며 Unity 표시 검증과 구분한다. 04:38:29Z의 생성 아트 Play와 04:55:46Z의 첫 native HUD 결과는 이전 범위의 기록이다.
 
 | 문서 | 역할 |
 |---|---|

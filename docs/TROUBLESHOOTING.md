@@ -40,3 +40,13 @@
 | UI 재차 거절 | 기존 코너 HUD 수정은 사용자 의도와 달랐고 이후 직접 제작한 Stitch 시안이 제공됨 | 화면4개를 직접 보고 HTML/의존성/실제JS를 조사, 전투 HUD를 UI Toolkit으로 재작성하고 실제1대1 상태 연결 | 기능 PASS와 시안의 구조·상호작용 일치는 별도다 |
 | 네이티브 HUD 검사 시 화면 갱신 순서 차이 | probe가 LateUpdate에서 pause/창상태를 바꾸면 같은 프레임의 Update UI에는 반영 전일 수 있음 | HUD 수치 갱신을 LateUpdate로, 캡처는 다음 프레임 EndOfFrame 후 실제 label/visibility 비교 | 화면 캡처 전 모델과 레이아웃의 갱신 주기를 일치시킨다 |
 | 참조 문서 hash 확인 도구의 첫 assertion 실패 | 파일 정렬 첫 항목이 DESIGN.md일 것이라고 가정 | 파일명으로 명시 선택해4개동일hash확인 | 경로 목록의 정렬 순서를 파일의 의미로 간주하지 않는다 |
+
+
+## 장비·특성 화면 — 2026-09-26
+
+| 문제 발생 지점 | 원인 분석 | 해결 방법 및 적용된 코드 개념 | 배운 점 |
+|---|---|---|---|
+| 캐릭터 초상 때문에 실제 player 시작 실패 | UI Toolkit Image.sprite 모드에서 sourceRect를 설정하면 런타임 오류 | Image.image에 원본 Texture를 사용하고 Sprite의 bottom-left rect를 Texture top-left crop으로 변환 | 정적 API 컴파일은 속성 조합의 런타임 제한을 검증하지 못한다 |
+| 새 HUD PanelSettings에 기본 테마 경고 | 동적 PanelSettings에 ThemeStyleSheet 미지정 | RuntimeTheme.tss에서 unity-theme://default를 import하고 Resources로 명시 연결 | 요소에 직접 스타일을 지정해도 기본 런타임 패널 설정은 갖춘다 |
+| 장착 중 진행하던 공격의 피해까지 바뀔 가능성 | impact 시점에 현재 damage 필드를 읽음 | 스윙 시작에 damage를 저장하고 해당 공격이 끝날 때까지 사용 | 빌드 변경과 진행 중 공격의 판정 시점을 분리한다 |
+| 다음 전투에서 누적 보상이 사라져 보임 | HUD가 해당전투의 일회성 rewards만 표시 | 중복 처치 방지 모델에 세션 TotalExperience/TotalGold를 추가하고 HUD에 연결 | 전투별 검증 값과 플레이어 누적 진행 값은 분리해야 한다 |
