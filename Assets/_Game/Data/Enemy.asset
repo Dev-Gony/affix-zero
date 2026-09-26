@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f023e83e054164b3e252b251019d13, type: 3}
+  m_Name: Enemy
+  m_EditorClassIdentifier: AffixZero.Presentation::AffixZero.Presentation.ActorAnimationSet
+  idle:
+  - {fileID: 4723107735738678597, guid: 067c1c56ccd352c798873a53afcc87fb, type: 3}
+  - {fileID: -7385789195546760866, guid: 067c1c56ccd352c798873a53afcc87fb, type: 3}
+  - {fileID: 3234629978573100161, guid: 067c1c56ccd352c798873a53afcc87fb, type: 3}
+  - {fileID: 6373048116405451881, guid: 067c1c56ccd352c798873a53afcc87fb, type: 3}
+  walk:
+  - {fileID: 4035959289877228764, guid: 79d195d11bf85eabbacc777dfd65890e, type: 3}
+  - {fileID: -982904232830982447, guid: 79d195d11bf85eabbacc777dfd65890e, type: 3}
+  - {fileID: -350908408369970039, guid: 79d195d11bf85eabbacc777dfd65890e, type: 3}
+  - {fileID: -5409570386352685021, guid: 79d195d11bf85eabbacc777dfd65890e, type: 3}
+  attack:
+  - {fileID: -7008412969330441016, guid: bb28560652e8505684dd3906a645278b, type: 3}
+  - {fileID: -7763475090823894447, guid: bb28560652e8505684dd3906a645278b, type: 3}
+  - {fileID: 302641331129538988, guid: bb28560652e8505684dd3906a645278b, type: 3}
+  - {fileID: -6329420634031446844, guid: bb28560652e8505684dd3906a645278b, type: 3}
+  hit:
+  - {fileID: 4457663794195168306, guid: 1be7f3fd8bc2549db828e78458eef904, type: 3}
+  - {fileID: -5364657433725072944, guid: 1be7f3fd8bc2549db828e78458eef904, type: 3}
+  death:
+  - {fileID: 2649847697073447219, guid: e92f68d49648538d88bca2d92eec85ea, type: 3}
+  - {fileID: -8293461521501190705, guid: e92f68d49648538d88bca2d92eec85ea, type: 3}
+  attackWeapon:
+  - {fileID: -5825250732961213246, guid: 1c796effd642554c9938a34f3ed161e6, type: 3}
+  - {fileID: -316209040919722149, guid: 1c796effd642554c9938a34f3ed161e6, type: 3}
+  - {fileID: -991003136700231826, guid: 1c796effd642554c9938a34f3ed161e6, type: 3}
+  - {fileID: -2309517609140583403, guid: 1c796effd642554c9938a34f3ed161e6, type: 3}
+  attackFps: 10
+  movementFps: 8
+  reactionFps: 10
+  impactFrame: 1
+  sourceFacesRight: 1
+  sourceLicenseRecord: docs/assets/ninja-adventure.md

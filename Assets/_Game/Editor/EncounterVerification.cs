@@ -27,6 +27,8 @@ namespace AffixZero.Editor
         private static int frozenEnemyHp;
         private static int pass;
         private static string phase;
+        private static bool startupCallbacksDrained;
+        private static double editorIdleSince;
         private static readonly HashSet<string> frames = new HashSet<string>();
 
         [Serializable]
@@ -86,14 +88,26 @@ namespace AffixZero.Editor
             SessionState.SetBool(Key + "active", true);
             SessionState.SetString(Key + "deadline", DateTime.UtcNow.AddSeconds(90).Ticks.ToString());
             Persist();
-            try
-            {
-                ValidateScene();
-                phase = "waitingForActors";
-                phaseStarted = EditorApplication.timeSinceStartup;
-                EditorApplication.EnterPlaymode();
-            }
-            catch (Exception ex) { Finish(false, ex.ToString()); }
+            // Search and other editor startup services initialize via delayCall. Entering
+            // Play directly from -executeMethod can prevent their first-use setup.
+            phase = "editorStartup";
+            startupCallbacksDrained = false;
+            editorIdleSince = 0;
+            EditorApplication.delayCall += DrainStartupCallbacks;
+        }
+
+        private static void DrainStartupCallbacks()
+        {
+            if (!SessionState.GetBool(Key + "active", false) || phase != "editorStartup") return;
+            // A second cycle also allows callbacks queued by the first cycle to finish.
+            EditorApplication.delayCall += MarkStartupCallbacksDrained;
+        }
+
+        private static void MarkStartupCallbacksDrained()
+        {
+            if (!SessionState.GetBool(Key + "active", false) || phase != "editorStartup") return;
+            startupCallbacksDrained = true;
+            editorIdleSince = EditorApplication.timeSinceStartup;
         }
 
         private static void ValidateScene()
@@ -137,6 +151,21 @@ namespace AffixZero.Editor
             {
                 if (DateTime.UtcNow.Ticks > long.Parse(SessionState.GetString(Key + "deadline", "0")))
                     throw new TimeoutException("Play verification exceeded 90 seconds in phase " + phase);
+                if (phase == "editorStartup")
+                {
+                    if (!startupCallbacksDrained) return;
+                    if (EditorApplication.isCompiling || EditorApplication.isUpdating)
+                    {
+                        editorIdleSince = EditorApplication.timeSinceStartup;
+                        return;
+                    }
+                    if (EditorApplication.timeSinceStartup - editorIdleSince < 1.0) return;
+                    ValidateScene();
+                    phase = "waitingForActors";
+                    phaseStarted = EditorApplication.timeSinceStartup;
+                    EditorApplication.EnterPlaymode();
+                    return;
+                }
                 if (!EditorApplication.isPlaying || EditorApplication.isPaused) return;
                 // LoadScene completes on a later player-loop frame; never inspect the old defeated actors.
                 if (phase == "restartLoading") return;
@@ -351,28 +380,41 @@ namespace AffixZero.Editor
         public static void BuildWindows()
         {
             Directory.CreateDirectory("Build/Reports");
+            var data = new BuildReportData { output = "Build/Windows/AffixZero.exe" };
+            int exitCode = 1;
             try
             {
                 ValidateScene();
+                PlayerSettings.productName = "AFFIX ZERO";
+                PlayerSettings.companyName = "Dev-Gony";
+                PlayerSettings.defaultScreenWidth = 1280;
+                PlayerSettings.defaultScreenHeight = 720;
+                PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
+                PlayerSettings.runInBackground = true;
+                AssetDatabase.SaveAssets();
                 Directory.CreateDirectory("Build/Windows");
                 var build = BuildPipeline.BuildPlayer(new BuildPlayerOptions {
                     scenes = new[] { ScenePath }, locationPathName = "Build/Windows/AffixZero.exe",
                     target = BuildTarget.StandaloneWindows64, options = BuildOptions.None
                 });
-                bool success = build.summary.result == BuildResult.Succeeded;
-                File.WriteAllText("Build/Reports/windows-build.json", JsonUtility.ToJson(new BuildReportData {
-                    result = build.summary.result.ToString(), errors = (int)build.summary.totalErrors,
-                    warnings = (int)build.summary.totalWarnings, output = build.summary.outputPath
-                }, true));
-                if (!success) throw new InvalidOperationException("Windows build failed: " + build.summary.result);
-                if (Application.isBatchMode) EditorApplication.Exit(0);
+                data.summaryAvailable = true;
+                data.result = build.summary.result.ToString();
+                data.errors = (int)build.summary.totalErrors;
+                data.warnings = (int)build.summary.totalWarnings;
+                data.output = build.summary.outputPath;
+                if (build.summary.result != BuildResult.Succeeded)
+                    throw new InvalidOperationException("Windows build failed: " + build.summary.result);
+                exitCode = 0;
             }
             catch (Exception ex)
             {
-                File.WriteAllText("Build/Reports/windows-build.json", JsonUtility.ToJson(new BuildReportData { result = "FAIL", problem = ex.ToString() }, true));
+                // Preserve BuildPipeline's counts and output when a failed summary exists.
+                if (!data.summaryAvailable) data.result = "FAIL";
+                data.problem = ex.ToString();
                 Debug.LogException(ex);
-                if (Application.isBatchMode) EditorApplication.Exit(1);
             }
+            File.WriteAllText("Build/Reports/windows-build.json", JsonUtility.ToJson(data, true));
+            if (Application.isBatchMode) EditorApplication.Exit(exitCode);
         }
 
         [Serializable]
@@ -381,8 +423,9 @@ namespace AffixZero.Editor
             public string recordedUtc = DateTime.UtcNow.ToString("O");
             public string result;
             public string problem = "";
-            public int errors;
-            public int warnings;
+            public bool summaryAvailable;
+            public int errors = -1;
+            public int warnings = -1;
             public string output;
             public string playerLaunched = "NOT_RUN";
             public string userVisualApproval = "NOT_RUN";

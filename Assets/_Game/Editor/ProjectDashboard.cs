@@ -93,6 +93,9 @@ namespace AffixZero.Editor
             camera.transform.position = new Vector3(0, 0, -10);
             camera.orthographic = true;
             camera.orthographicSize = 4.2f;
+            // MSAA samples outside atlas rectangles at subpixel tile boundaries.
+            // Point-filtered pixel sprites must not borrow pixels from neighboring tiles.
+            camera.allowMSAA = false;
             camera.transparencySortMode = UnityEngine.TransparencySortMode.CustomAxis;
             camera.transparencySortAxis = Vector3.up;
             camera.clearFlags = CameraClearFlags.SolidColor;
