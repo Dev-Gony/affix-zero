@@ -1,4 +1,22 @@
-# 인수인계 — 로컬 저장 연결
+# 인수인계 — Stitch UI 재구성 검증 완료
+
+2026-09-26. `restart/unity-6`, draft PR #19, Unity6000.3.24f1 / Built-in2D 유지. 구현 커밋 `81c4b2aac57cad0cc9f8abc0faba10a943a6836e`. STATUS.json, PRODUCT_BRIEF.md, STITCH_REFERENCE_REFRESH.md를 우선 읽는다. 아래 이전 저장/자동사냥 단계는 당시 검증 기록이며 최신 빌드를 대체하지 않는다.
+
+사용자 지시대로 Stitch 07–12를 확인하고 네이티브 전투 HUD·장비·특성·대장간의 배치와 정보 위계를 재구성했다. 13개 ZIP 반입 기록 중 07/09/10/11/12는 기존 추출 콘텐츠와 동일하다. 08은 HTML이 기존01과 같고 PNG byte만 다르다. 중복 자료도 기준으로 재확인했으며 내용이 새 기능을 자동 승인하는 것은 아니다. 사용자 목표는 Hero Siege 오마주 RPG + 자동 던전 사냥이며 탕탕특공대 요소는 제외한다.
+
+최신 Windows 빌드 `e8115fc90b424d58a3fc868b8e140204`, 2026-09-26T07:39:41Z, 오류0/경고0. `docs/validation/ui-refresh/`에 실제720p/1080p UI·자동사냥·저장재실행 보고와 source fingerprint가 있다. Core202 PASS. Editor Play는 이번 UI 작업에서 다시 실행하지 않았다.
+
+- UI 두 실행은 실제 첫 공격 후 검사용 임시 프로필에 장비를 공급해 네이티브 ClickEvent로 장착·비교·분노2/정밀1·강화1을 검사했다. 30→40→50→52공격,48→40골드. 주요 컨트롤 경계/비중첩 PASS, 8개 실제 framebuffer를 직접 열어 검수했다. 검사용 가방9칸은 자연 드랍 성과가 아니다. 사용자 저장 접근0; 물리 입력/사용자 시각 승인은 미완료.
+- 새 빌드 별도 기본수치1080p 자동사냥: 실제1배속70.70초,3순환18처치4수거사망0,450XP144골드. 메뉴 중 사냥과 수동 정지/재개 PASS.
+- 별도 디스크 시험 폴더에서 write/read 두 프로세스 PASS.6처치·장착/특성/강화 후52공격150XP40골드와 미수거검 저장, 동일복원/HUD52 확인 후 회수·새2처치로200XP56골드. 손상/미지원 복구는 이전 `validation/save/` 근거를 유지하며 이번에 반복하지 않았다.
+
+`Build/Windows/AffixZero.exe`가 수정 실행본이다. 일반 실행은 실제 저장을 쓰며 입구 정지 상태로 시작한다. `-affixUiReferenceTest`는 항상 메모리 프로필이며 다른 시험flag와 같이 주면 probe가 거절한다. 새 probe/meta만 공개하고 원본 Stitch ZIP/HTML·제한된 캐릭터 원본은 ignored 영역에 유지했다.
+
+다음은 별도 막힘·안전중단 후 재개와20분무조작/물리입력 검증이다. 그 다음 실제 능동스킬·전리품/빌드 선택을 보강한다. 여섯 빈 슬롯과 빈MP구체는 아직 없는 기능이며 영웅 선택·타운·펫·소켓은 후속범위다. 전체MVP완료로 보고하지 않는다. 이번작업은 UI표시 및 검증용저장격리 변경이며 전투수치/경로/실제보상은 변경하지 않았다.
+
+기존 Ninja 관련 더티 파일/이미지/오래된 미추적 검증 파일은 그대로 남긴다. `git add .`, PR병합, forcepush, reset/clean, 사용자세이브삭제 금지.
+
+# 이전 단계 — 로컬 저장 연결
 
 갱신2026-09-26. restart/unity-6, Draft PR19, Unity6000.3.24f1/Built-in2D 유지. STATUS.json, PRODUCT_BRIEF.md, SAVE_PERSISTENCE.md를 먼저 읽는다.
 

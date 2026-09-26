@@ -10,7 +10,7 @@ DTO는 순수 C#이고 Unity JsonUtility는 표시 계층의 어댑터에서만 
 
 저장은 같은 폴더의 임시 파일을 디스크까지 flush한 뒤 원자 교체한다. 이전 정상 파일은 `.bak`으로 남긴다. 정상 파일이 손상됐고 백업이 유효하면 백업을 복원하며, 이후 저장할 때 손상 원본을 별도 이름으로 보존한다. 미완료 `.tmp`도 별도 이름으로 보존한다. 지원하지 않는 버전·접근 오류·둘 다 손상된 경우 자동 초기화하지 않는다. `.lock`을 세션 동안 독점 열어 두 실행본의 동시 쓰기를 막고, 로드 뒤 외부에서 바뀐 파일도 임의로 덮어쓰지 않는다. 파일 크기는 2MiB로 제한하며 초과 시 실패를 표시한다. 긴 기간의 이력 축약은 후속 범위다.
 
-기존 `-affixAutoHuntTest`·`-affixAutoHuntSafetyTest`·`-affixSmokeTest`와 Editor 검증은 임시 메모리 프로필로 격리해 사용자 저장을 읽거나 쓰지 않는다. 저장 검사는 `-affixSaveTest -affixSaveMode write|read -affixSaveDir <절대 시험 폴더> -affixReportDir <절대 보고 폴더>`를 사용하는 별도 실제 Windows 프로세스다. 생산 저장 경로를 시험 폴더로 지정하면 거절한다. 파일을 고장 내는 검사는 새 시험 폴더 안에서만 수행하며 사용자 저장은 손대지 않는다.
+기존 `-affixUiReferenceTest`·`-affixAutoHuntTest`·`-affixAutoHuntSafetyTest`·`-affixSmokeTest`와 Editor 검증은 임시 메모리 프로필로 격리해 사용자 저장을 읽거나 쓰지 않는다. 저장 검사는 `-affixSaveTest -affixSaveMode write|read -affixSaveDir <절대 시험 폴더> -affixReportDir <절대 보고 폴더>`를 사용하는 별도 실제 Windows 프로세스다. 생산 저장 경로를 시험 폴더로 지정하면 거절한다. 파일을 고장 내는 검사는 새 시험 폴더 안에서만 수행하며 사용자 저장은 손대지 않는다.
 
 저장 추가는 MVP의 한 단계다. 전체 MVP 완료에는 저장 재실행·복구 검사뿐 아니라 장시간 사냥, 안전 중단 후 재개, 실제 조작 검수가 필요하다.
 
@@ -24,3 +24,5 @@ DTO는 순수 C#이고 Unity JsonUtility는 표시 계층의 어댑터에서만 
 - 최신1080p 자동사냥 회귀: 임시프로필3순환18처치4수거/사망0, XP450·골드144. 이 검사는 파일 저장 부하 검사가 아니다. 저장이 활성인 실행은 위write/read다.
 
 보고서는 `validation/save/`. OS 물리 입력 검사·사용자 시각 승인·강제 OS종료/전원차단 실험은 하지 않았다. Core 파일 검사는 교체 실패/임시파일 보존을 검사한다. 저장 덕분에 종료 후 성장 유지는 가능하지만 전체 MVP는 아직 아니다.
+
+UI 재구성 빌드 e8115fc90b424d58a3fc868b8e140204에서도 실제write/read 두프로세스를 재실행해 동일복원·HUD52·미수거회수·새2처치 PASS. 최신근거 `validation/ui-refresh/save-write.json`, `save-read.json`. UIreference flag는 다른시험flag가 함께있어도 실제저장을열지않도록 메모리격리를우선한다.

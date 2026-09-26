@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "LOCAL_SAVED_AUTONOMOUS_HUNT",
-  "implementation_commit": "59d4d067693ac3f0f627ccb5b4a6b988539199f5",
+  "stage": "STITCH_UI_REFRESH_WITH_SAVED_AUTONOMOUS_HUNT",
+  "implementation_commit": "81c4b2aac57cad0cc9f8abc0faba10a943a6836e",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -20,8 +20,8 @@
   "unity_editor_import": "PASS",
   "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
   "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
-  "ui_direction": "USER_STITCH_SEVEN_REFERENCE_SCREENS_NATIVE_UNITY",
-  "windows_build": "SUCCEEDED_2026-09-26T07:00:29Z_ZERO_ERRORS_WARNINGS",
+  "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
+  "windows_build": "SUCCEEDED_2026-09-26T07:39:41Z_ZERO_ERRORS_WARNINGS",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,25 +30,25 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Validate blocked-path and safety-stop recovery, then 20-minute unattended endurance and physical controls",
+  "next": "Separate blocked-path and safety-stop recovery; 20-minute unattended endurance and physical controls, then real skills and deeper loot/build choices",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 202,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_TWO_PROCESS_SAVE_RESTORE_AND_RECOVERY_FIXTURES; PASS_1080_AUTO_HUNT_REGRESSION",
+  "windows_player": "PASS_720_1080_NATIVE_UI_FIXTURE; PASS_1080_AUTONOMOUS_3_CYCLES; PASS_TWO_PROCESS_SAVE_RESTORE",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/save/",
+  "actual_game_capture": "docs/media/ui-refresh/",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
   "new_direction_validation": "THREE_AUTONOMOUS_CYCLES_ZERO_DEATHS_PER_RESOLUTION; FULL_MVP_INCOMPLETE",
-  "previous_technical_checks_scope": "management/progression/stitch are historical. Current runtime evidence: autohunt.",
+  "previous_technical_checks_scope": "Earlier reports remain historical; newest integration runtime evidence is docs/validation/ui-refresh/.",
   "stitch": {
     "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
     "engine_or_package_changes": false,
-    "current_scope": "Native combat, equipment, dedicated talent detail/investment, equipped weapon enhancement; seven reference screens inspected",
-    "build_guid": "baf9e73795d3447e9adc1d13daabe1d2",
-    "reports": "docs/validation/save/",
-    "actual_mouse_keyboard_input": "PHYSICAL_NOT_RUN; SEVEN_UI_CLICKEVENT_CALLBACKS_PER_BASELINE",
+    "current_scope": "Native combat HUD, equipment comparison, single-branch talent and equipped-weapon forge refreshed to inspected references 08/10/12/11; 13 archives inventoried, duplicates identified",
+    "build_guid": "e8115fc90b424d58a3fc868b8e140204",
+    "reports": "docs/validation/ui-refresh/",
+    "actual_mouse_keyboard_input": "NATIVE_CLICK_EVENT_CALLBACKS_TESTED_720_1080; PHYSICAL_NOT_RUN",
     "other_screens": "Hero selection/town/pets/mana/active skill loadout/socket/reforge not implemented."
   },
   "progression": {
@@ -93,7 +93,7 @@
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "mvp": {
     "status": "NOT_READY",
-    "current": "Automatic hunting plus persistent character growth verified; full MVP acceptance remains open",
+    "current": "Playable automatic hunt and disk persistence with refreshed native UI verified; full acceptance remains open",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
       "20-minute unattended endurance",
@@ -157,5 +157,21 @@
     "tests_isolated": true,
     "autosave": "Each committed progression mutation, application pause and normal quit; no save for ephemeral test profiles",
     "limits": "No offline rewards or in-combat position resume; 2MiB payload limit and growing deduplication history; editor uses ephemeral profile"
+  },
+  "ui_refresh": {
+    "implementation_commit": "81c4b2aac57cad0cc9f8abc0faba10a943a6836e",
+    "build_guid": "e8115fc90b424d58a3fc868b8e140204",
+    "assessment": "docs/STITCH_REFERENCE_REFRESH.md",
+    "reports": "docs/validation/ui-refresh/",
+    "ui_720": "1478dfcf08a24529860a1b7348ee2ae7",
+    "ui_1080": "1b6f4688b9b541f8b27b21250083e6d4",
+    "fixture_scope": "Management frames use 6 seeded unique kill tokens and 8 extra weapons in an ephemeral profile; not actual farm drops. Native equip/talent/forge -> attack30/40/50/52, gold48/40.",
+    "visual_review": "Eight actual screenshots opened and inspected; user approval remains absent.",
+    "autohunt_run": "b0ae5eac92e6459dbcd491f28553fca9",
+    "autohunt": "PASS_1X_70.70S_3_RUNS_18_KILLS_4_ITEMS_ZERO_DEATHS_XP450_G144",
+    "save_write": "6d225fb2022e4c0c8611d9ec5f7b14d4",
+    "save_read": "34d654c481e74728be6181c370b2d8f1",
+    "save_regression": "PASS exact process-restart state/HUD52/pending pickup/new kills; test directory isolated",
+    "unimplemented": "Active skills, mana, extra classes/gear slots, socket/reforge, town/pets. Six dock cells are empty."
   }
 }
