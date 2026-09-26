@@ -5,7 +5,7 @@
   "branch": "restart/unity-6",
   "pr": 19,
   "stage": "STITCH_EQUIPMENT_TALENT_LOOP",
-  "implementation_commit": "See docs/validation/progression/source-fingerprint.json; current implementation commit pending",
+  "implementation_commit": "80b5eb494b8624aef1c7458b52aa518efa64e526",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
