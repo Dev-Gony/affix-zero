@@ -1,76 +1,18 @@
 # AFFIX: ZERO
 
-AFFIX: ZERO is a playable Godot 4.3 idle hack-and-slash prototype under active development. It combines fixed-center, top-down automatic combat with randomized Diablo-style equipment, six playable classes, permanent rebirth progression, and a compact Korean-language pixel UI.
+Unity 6000.3.24f1 / C# / Built-in 2D로 만드는 PC 가로형 Hero Siege 오마주 자동사냥 방치형 RPG입니다. 개발선은 `restart/unity-6`, [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19)입니다.
 
-## Run the game
+캐릭터가 사원 마당의 세 구간을 탐색하고 적을 공격하며 전리품을 회수한 뒤 반복 사냥합니다. 장비·특성·대장간을 열어도 사냥합니다. 일반 피격이 공격을 끊지 않으며 연속 두 번 사망하거나 가방이 가득 차면 멈춥니다. 단일 마당 프로토타입이며 별도 방 세 개나 절차 생성 던전은 아닙니다.
 
-1. Open `project.godot` in Godot 4.3.
-2. Press **F6/F5** to run `scenes/main.tscn`.
-3. Select Warrior or Mage. The remaining four classes unlock through rebirths.
+장비·어픽스·강화·가방·특성·XP·골드·미수거 전리품을 자동 저장합니다. 재실행하면 성장 상태를 복원하고 입구에서 시작을 기다립니다. 정상 백업 복원과 손상 원본 보존, 실패 시 덮어쓰기 차단을 제공합니다. [저장 규칙](docs/SAVE_PERSISTENCE.md).
 
-The internal pixel-art resolution is 640x400 and the default desktop window is 1280x800. The extra vertical room preserves the battle view while the compatibility renderer keeps the project suitable for desktop and web exports.
+실제 Windows 두 프로세스에서 공격력52·강화+1·특성·150XP·40골드·미수거 무기의 동일 복원을 확인했습니다. 재개 후 전리품을 회수하고 새 두 처치로200XP·56골드가 됐으며 이전 보상 토큰은 거절했습니다. 별도 손상/미지원 스키마 검사도 통과했습니다. Core202 checks, 실제 Unity JSON4검사, Windows빌드 오류0/경고0. [현재 검증 기록](docs/validation/save/).
 
-Keyboard shortcuts: `1`-`5` open or close the equipment, inventory, skill, rebirth, and stats windows, while `Escape` closes the active window. `Z` / `X` / `C` select x1 / x2 / x5 combat speed. In the inventory, double-click an item or press `E` to equip the selected item. Class cards and all buttons support keyboard focus and activation.
+**전체 MVP 완료는 아닙니다.** 20분 연속 실행, 별도 경로 막힘·안전 중단 후 재개, 물리 입력과 사용자 시각 검수가 남아 있습니다. 최신 저장 빌드의1080p 자동사냥 회귀는 무사망3순환·18처치·4개 수거·450XP·144골드 PASS입니다. 과거720/1080 자동사냥과 관리 기능 검사는 각 당시 빌드의 기록으로 구분합니다.
 
-Every pull request CI run also publishes two downloadable playable artifacts:
+사용자 Stitch7개 시안이 UI 기준입니다. 전투·장비·특성·대장간을 연결했고, 타운·영웅 선택·펫·마나/능동 스킬·다중 장비 슬롯은 후속 범위입니다. 무기 외형은 캐릭터 sprite에 포함되어 교체·강화 외형이 바뀌지 않습니다. 오프라인 보상은 없습니다.
 
-- `AFFIX-ZERO-windows`: unzip and run `AFFIX_ZERO.exe`.
-- `AFFIX-ZERO-web`: serve the extracted folder with any static HTTP server and open `index.html`.
+- [인수인계](docs/HANDOFF.md) · [현재 상태](docs/STATUS.json) · [MVP 기준](docs/AUTO_HUNT_MVP.md)
+- [로컬 실행](docs/LOCAL_WORKFLOW.md) · [구조](docs/ARCHITECTURE.md) · [트러블슈팅](docs/TROUBLESHOOTING.md)
 
-## Implemented systems
-
-- Fixed-center automatic combat with nearest-target attacks and 3-second class skills
-- Floor-scaled waves, eight resource-driven enemy movement personalities, death, immediate revival, and floor retreat
-- Six classes with distinct stats, unlock requirements, and skill visuals
-- Five loot rarities, seven equipment slots, 29 individually illustrated item bases, and ten non-duplicating affixes
-- Diablo-style 3x3 equipment paper doll, 60-slot scrollable loot grid, item comparison, selling, passive skill cards, stats, and rebirth windows
-- Compact five-button management dock with focused right-side windows so combat remains visible while managing a build
-- Level progression, permanent upgrades, class unlocks, and multiplicative rebirth gold gain
-- Player attack/skill/hit motion, monster movement/hit/attack/death animation, damage numbers, pixel fragments, critical feedback, level-up effects, legendary flash, and camera shake
-- Original dark-fantasy pixel courtyard plus production class, enemy, and equipment atlases
-- Visible edge-spawn telegraphs, nearest-target markers, rarity/iLv inventory badges, individual loot icons, and equipment comparison deltas
-- x1/x2/x5 combat speed control
-- Complete JSON save/load state with a real-time 30-second autosave interval
-- Three floor-range BGM themes and fourteen SFX channels with built-in procedural chiptune fallbacks
-- Drop-in OGG overrides under `assets/bgm/` and `assets/sfx/` automatically replace procedural audio
-
-Procedural audio is active by default. Matching `.ogg` files placed in `assets/bgm/` and `assets/sfx/` override it automatically; expected filenames are documented in `scripts/autoloads/AudioManager.gd`.
-
-## Project structure
-
-```text
-affix-zero/
-|-- project.godot
-|-- scenes/
-|   |-- main.tscn
-|   |-- battle/
-|   |-- ui/
-|   `-- effects/
-|-- scripts/
-|   |-- autoloads/       # State, save, loot, and audio managers
-|   |-- combat/          # Battle loop, enemies, damage, projectiles, effects
-|   |-- loot/            # Resource-driven item generation
-|   |-- progression/     # Level and rebirth systems
-|   `-- ui/              # HUD, tabs, inventory, and class selection
-|-- resources/
-|   |-- items/           # Item bases, rarities, and affixes
-|   |-- enemies/         # Eight enemy balance resources
-|   `-- classes/         # Six class balance resources
-|-- assets/
-|   |-- sprites/
-|   |-- sfx/
-|   `-- bgm/
-`-- tests/              # Automated smoke test and visual-QA capture scenes
-```
-
-## Validation
-
-Run the automated Godot smoke test from a terminal:
-
-```powershell
-godot --headless --path . res://tests/smoke_test.tscn
-```
-
-The test exercises automatic combat and floor progression, all six class skills, loot generation, equipment, JSON state serialization, rebirth, and UI loading. Persistence is disabled by the test runner, so it never overwrites the player's `user://save.json` file.
-
-Pull requests and pushes to `main` run the same smoke test through `.github/workflows/godot-smoke-test.yml` using Godot 4.3.
+공개 clone에는 재배포가 제한된 무료 Zerie 캐릭터 원본이 없습니다. 공식 무료 팩을 로컬 반입해야 합니다. 무료/직접 생성 에셋만 사용하며 기존 Godot 코드·아트는 복원하지 않습니다.

@@ -1,0 +1,44 @@
+Lucifer RPG UI 1.0 - single icon intake
+Source: https://foozlecc.itch.io/lucifer-rpg-ui
+Downloaded: 2026-09-26 via official free download
+ZIP: Foozle_UI_0002_Lucifer_RPG_UI_Pixel_Art.zip
+Original path: Skill Icons/Warrior Icons/Warrior Green Skills/Png/Warrior Icon 01.png
+Destination: Resources/AffixGenerated/AttackIcon.png
+SHA-256: 33dac9cf80969fdc25f938cc4fcace2f97d66490f3f73bf401df1171fdffdafb
+Original 16x16 PNG copied without alteration. Used as a basic melee attack icon.
+License: CC0 1.0, see unmodified bundled LICENSE.txt. No font imported.
+Credit discrepancy preserved: website credits David/chroma_dave, bundled README credits Baldur/the__baldur; distributor and CC0 agree.
+
+Additional static icons - first drop and talent nodes
+Intake date: 2026-09-26
+Same official free Lucifer RPG UI 1.0 package and unmodified bundled CC0 LICENSE.txt apply. No purchase or new pack download. Original PNG bytes copied, without recoloring, cropping, resizing or generation.
+Visual review: a local nearest-neighbor contact sheet of the 37 Warrior icons was inspected; source pixels were not modified. Review sheet stays under ignored Build/Downloads/HeroSiegeCandidates/LuciferUI/warrior-icon-review.png.
+Import settings inherit the reviewed AttackIcon: Default Texture2D, Point, Clamp, mipmaps off, NPOT none, transparency, uncompressed. No Unity import or runtime verification performed in this intake.
+
+Resource: AffixGenerated/EmberSword
+Original path: Skill Icons/Warrior Icons/Warrior Red Skills/Png/Warrior Skill Icon 01.png
+Destination: Resources/AffixGenerated/EmberSword.png
+Dimensions: 16x16; bytes: 373
+SHA-256: 62f3addf897614cf749de57e91315f5b5cc9657d9771a928bd075d52466d56b2
+Observed visual and assigned game meaning: White diagonal blade against a warm red/orange field. Assigned to the Ember Steel Sword first drop; rarity and item name are game semantics, not source metadata.
+
+Resource: AffixGenerated/PowerRune
+Original path: Skill Icons/Warrior Icons/Warrior Red Skills/Png/Warrior Skill Icon 08.png
+Destination: Resources/AffixGenerated/PowerRune.png
+Dimensions: 16x16; bytes: 361
+SHA-256: 74e3c506f081ecb0daaddf731f6bacdec8137b6ba9c08b7463338508edfdc283
+Observed visual and assigned game meaning: Crossed weapon shapes on a red field. Assigned to Fury / offensive power; source has a numbered icon name only.
+
+Resource: AffixGenerated/PrecisionRune
+Original path: Skill Icons/Warrior Icons/Warrior Green Skills/Png/Warrior Icon 07.png
+Destination: Resources/AffixGenerated/PrecisionRune.png
+Dimensions: 16x16; bytes: 385
+SHA-256: ba94d6f86715bcca8f58241f5d19e5eb056d17ecfd7537bbe84ab96a4764f0c5
+Observed visual and assigned game meaning: Concentric square target with a red center. Assigned to Precision; a target visual distinct from the weapon and shield.
+
+Resource: AffixGenerated/VeteranRune
+Original path: Skill Icons/Warrior Icons/Warrior Purple Skills/Png/Warrior Purple Skill 07.png
+Destination: Resources/AffixGenerated/VeteranRune.png
+Dimensions: 16x16; bytes: 262
+SHA-256: 22f86eb8850009f6c7c521bca792bd1d7cbab09ebdfcc6938cc563da8575b347
+Observed visual and assigned game meaning: Solid white shield silhouette on a purple field. Assigned to Veteran / Keystone; final talent behavior belongs to gameplay code, not the source icon.

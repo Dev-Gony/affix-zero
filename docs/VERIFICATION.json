@@ -1,0 +1,288 @@
+{
+  "schema": "affix-verification-v2",
+  "historical_foundation": {
+    "source_commit": "a7134227e7c0b646d912ece86cf2bb86e4a2aca4",
+    "run_id": 36169362337,
+    "old_engine_files_removed": 178,
+    "old_engine_files_remaining": 0,
+    "core_checks_passed": 23
+  },
+  "u1_verified": {
+    "source_commit": "64dc3f272de97fcb808c143402e9eeed4866ff67",
+    "run_id": 36174597389,
+    "core_job_id": 108202114244,
+    "core_job_result": "success",
+    "core_checks_passed": 39,
+    "core_scope": "Pure C# AttackTimeline and CombatHealth; no UnityEngine/Editor compilation",
+    "audit_result": "success",
+    "audit_scope": "Current tree and .meta plus historical Godot removal check",
+    "storage_job_id": 108202114680,
+    "storage_job_result": "success",
+    "storage_scope": "Windows PowerShell synthetic fixtures: report creation, source preservation, missing path/non-repository handling, successful exit code. Not actual user disk inspection."
+  },
+  "storage_initial_failure": {
+    "source_commit": "009740a1cee5b1e7846c5531f9a6269439b192eb",
+    "run_id": 36174165918,
+    "job_id": 108200697247,
+    "result": "failure",
+    "reason": "Expected non-repository Git reads left nonzero LASTEXITCODE despite report assertions passing.",
+    "resolution": "Keep informational read failure in JSON; reset process status only after successful report creation; add exit-code assertion. Retest passed at 64dc3f2."
+  },
+  "unity_editor_import": "PASS",
+  "unity_animation_render": "PASS_EDITOR_AND_WINDOWS_PLAYER",
+  "windows_build": "SUCCEEDED",
+  "user_playtest": "REJECTED_BOTH_NINJA_UI_ITERATIONS",
+  "new_licensed_art_import": "PASS",
+  "actual_user_storage_measurement": "NOT_RUN",
+  "actual_user_deletion": false,
+  "remote_history_rewritten": false,
+  "scope": "Current save integration in local_persistence; prior autohunt and management records remain historical.",
+  "current_u1": {
+    "implementation_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
+    "recorded_date": "2026-09-26",
+    "core_checks_passed": 56,
+    "core_scope": "AttackTimeline, CombatHealth, EncounterRewards; pure C#",
+    "static_csharp_compile": {
+      "result": "PASS",
+      "errors": 0,
+      "warnings": 0,
+      "reference_editor": "6000.3.24f1_4e7b9b5b6244",
+      "scope": "Installed Unity API DLL references; not Unity asmdef/package compilation, asset import, rendering, Play or player build",
+      "reproduce": "Tools/Local/Test-UnitySources.ps1"
+    },
+    "asset_integrity": {
+      "result": "PASS",
+      "source_files": 13,
+      "source_pngs": 11,
+      "right_facing_body_frames": 16,
+      "environment_rectangles": 15,
+      "reproduce": "python Tools/validate_reviewed_art.py"
+    },
+    "art_preview": {
+      "result": "BROWSER_SOURCE_RENDER_PAUSE_AND_IMPACT_STEP_VERIFIED",
+      "scope": "HTML canvas original body+weapon frames, not Unity or user visual approval"
+    },
+    "restart_audit": "PASS",
+    "balance_simulation": {
+      "result": "6 scenarios at 30/60/120fps and both actor update orders: hero96HP, enemy0HP after reactionFps10 adjustment",
+      "scope": "Translated numerical runtime logic, NOT Unity Play"
+    },
+    "editor_attempt": {
+      "result": "BLOCKED_BEFORE_IMPORT",
+      "exit_code": 198,
+      "reason": "No valid Unity Editor license found",
+      "local_log": "Build/Reports/unity-initial-import.log",
+      "latest_user_report": "Unity Hub editor installation in progress; wait for completion notification",
+      "resolved": "User installation completed; later setup imported source art and generated scene with exit0"
+    },
+    "github_ci": {
+      "source_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
+      "run_id": 36216464777,
+      "result": "success",
+      "scope": "56 core checks, art pixel/source validation, tracked-tree audit and synthetic Windows storage report; actual Unity checks below are local"
+    },
+    "actual_unity": {
+      "engine": "6000.3.24f1",
+      "import_and_scene_setup": "PASS_EXIT_0",
+      "editor_play_report": "docs/validation/encounter-verification.json",
+      "editor_play_result": "PASS",
+      "editor_play_scope": "Real Play; short controlled idle prelude; approach, both damage, impact sprite, enemy death, no ghost damage, reward once, actual scene reload. This preceded the render-only camera MSAA fix.",
+      "windows_build_report": "docs/validation/windows-build.json",
+      "windows_build_result": "Succeeded",
+      "build_errors": 0,
+      "build_warnings": 0,
+      "windows_player_report": "docs/validation/player-smoke.json",
+      "windows_player_result": "PASS",
+      "player_run_id": "5e2e20982fa94fbe8567e4264a342ab3",
+      "player_build_guid": "347ef2213a534417b347c04cfbc4f400",
+      "player_scope": "Final executable after camera MSAA fix; normal auto combat, actual HUD captures, one restart and renewed combat. Visible game window required for framebuffer captures.",
+      "final_hero_hp": 96,
+      "reward_xp": 25,
+      "reward_gold": 8,
+      "user_visual_approval": "REJECTED_PREVIOUS_UI_DIRECTION",
+      "captures": "docs/media/first-encounter-{walk,impact,cleared}.png",
+      "capture_conversion": "Pixel-equivalent BMP-to-PNG, no compositing or image edits"
+    }
+  },
+  "windows_player": "PASS",
+  "hero_siege_direction": {
+    "status": "STITCH_NATIVE_COMBAT_HUD_FIRST_SLICE",
+    "new_assets_imported": true,
+    "unity_visual_scene": "HeroSiegeEncounter",
+    "visual_approval": "NOT_RUN"
+  },
+  "stitch_native_hud": {
+    "engine": "6000.3.24f1",
+    "renderer": "Built-in 2D",
+    "engine_package_renderer_changes": false,
+    "build": {
+      "recordedUtc": "2026-09-26T04:55:46.5840664Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "player_720": {
+      "result": "PASS",
+      "run_id": "15048b15916b455daa9126e3372c7ac1",
+      "report": "docs/validation/stitch/player-720.json"
+    },
+    "player_1080": {
+      "result": "PASS",
+      "run_id": "c689d0cd4e0041bd8c5217777dae77b3",
+      "report": "docs/validation/stitch/player-1080.json"
+    },
+    "native_ui_checks": "UIDocument attached, nonempty layout, actual HP/XP/gold labels, character visibility, attack slot, five end-of-frame captures per run",
+    "capture_conversion": "BMP to PNG identical RGB pixels; no compositing",
+    "visual_review": "Agent viewed 720 walk/equipment and 1080 clear; Korean text visible and edge HUD fits. Not user visual acceptance.",
+    "core_checks": 56,
+    "input_verification": "NOT_RUN; pause/overlay/restart exercised through shared APIs, not physical clicks/keys",
+    "limitations": [
+      "Only first combat HUD slice; hero selection/town/actual inventory/talent tree unimplemented",
+      "MP resource and active skill loadout unimplemented",
+      "Single painted room, no terrain collision/occlusion",
+      "Two-direction characters; private raw art not in public Git"
+    ]
+  },
+  "progression_loop": {
+    "build_guid": "e86a4c30328a47ec9bf8cf3ba918d0f8",
+    "windows_build": {
+      "recordedUtc": "2026-09-26T05:22:48.0498079Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "core_checks": 90,
+    "player_720": "docs/validation/progression/player-720.json",
+    "player_1080": "docs/validation/progression/player-1080.json",
+    "result": "PASS",
+    "ui_callback_count_each": 9,
+    "framebuffer_captures_each": 9,
+    "actual_upgraded_hit_damage": 41,
+    "checks": [
+      "first kill pending loot and point",
+      "pickup transfer",
+      "item comparison +10",
+      "equipment swap retains old weapon",
+      "talent spend and exact refund/reinvest",
+      "scene reload preserves gear/talents/total rewards",
+      "real upgraded impact 43 minus defense2",
+      "prior combat/pause/overlay/duplicate reward checks"
+    ],
+    "physical_input": "NOT_RUN",
+    "visual_review": "Agent viewed 720 comparison/talent and 1080 comparison; user visual approval NOT_RUN",
+    "initial_failure": "Sprite Image sourceRect is invalid; changed preview to texture with converted top-left crop; saved failing report and retested actual player",
+    "limitations": [
+      "One guaranteed weapon drop, one weapon slot, three-node offensive branch",
+      "Run memory only, no save",
+      "Handheld weapon in actor sprite is baked and does not change appearance with equipment",
+      "No hero-selection/town/mana/active abilities"
+    ]
+  },
+  "management_screens": {
+    "build_guid": "863e316feb2d4b01b0667c7d636282c0",
+    "windows_build": {
+      "recordedUtc": "2026-09-26T05:42:27.8768512Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "core_checks": 105,
+    "player_720": "docs/validation/management/player-720.json",
+    "player_1080": "docs/validation/management/player-1080.json",
+    "result": "PASS",
+    "ui_callback_count_each": 17,
+    "framebuffer_captures_each": 12,
+    "actual_enhanced_impact": 43,
+    "checks": [
+      "prior combat/loot/equip/talent/restart regression",
+      "management tabs preserve frozen combat and manual pause",
+      "locked node selection does not spend points; invest disabled",
+      "explicit invest/refund/reinvest",
+      "forge preview equals actual attack 43 to45 and gold8 to0",
+      "insufficient gold disables UI and rejects controller command without mutation",
+      "scene reload retains enhancement rank1 and remaining gold0"
+    ],
+    "static_compile": "Editor and player DLL reference compile pass; initial Color32 conditional conversion CS0029 fixed using explicit Color cast",
+    "physical_input": "NOT_RUN",
+    "visual_review": "Agent viewed 720 talent/forge preview and 1080 forge enhanced; layouts fit and Korean visible. Not user visual approval.",
+    "source_fingerprint": "docs/validation/management/source-fingerprint.json",
+    "limitations": [
+      "Single three-node offensive branch, no active skill loadout",
+      "Equipped weapon deterministic +1..+3 only; no sockets/reforge/salvage/random success",
+      "Pets reference-only; hero selection/town remain unimplemented",
+      "Session memory only; no disk save",
+      "Actor-held weapon image unchanged"
+    ]
+  },
+  "auto_hunt": {
+    "build_guid": "6c03e8d2bc6e457abc31582911701d3d",
+    "reports": "docs/validation/autohunt/",
+    "world": "One authored courtyard, three patrol areas, two pooled enemies, shared visual/grid obstacles",
+    "baseline_stats": {
+      "hero_hp": 120,
+      "hero_attack": 30,
+      "enemy_hp": 54,
+      "enemy_attack": 6
+    },
+    "normal_hits": "Damage/flash only; no attack/movement cancellation. Death cancels attacks.",
+    "baseline": {
+      "720": {
+        "run_id": "26b0296dea004e06a40c4a3cfab8caa8",
+        "seconds": 70.92882537841797,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      },
+      "1080": {
+        "run_id": "23dbebd8a24b4397bca82dce83b771bd",
+        "seconds": 70.64736938476562,
+        "runs": 3,
+        "kills": 18,
+        "items": 4,
+        "death_retries": 0,
+        "zero_deaths_assertion": "PASS",
+        "experience": 450,
+        "gold": 144
+      }
+    },
+    "safety": "PASS: separate explicit attack=1 death injection and 24-item full-bag fixture. Each stop held 4 seconds.",
+    "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified.",
+    "core_checks": 126,
+    "static_compile": "Editor/Player DLL reference compilation PASS, 0 errors/warnings; separate from actual Windows build."
+  },
+  "local_persistence": {
+    "schema": 1,
+    "path": "%USERPROFILE%/AppData/LocalLow/Dev-Gony/AFFIX ZERO/profile-v1.json",
+    "build_guid": "baf9e73795d3447e9adc1d13daabe1d2",
+    "reports": "docs/validation/save/",
+    "core_checks": 202,
+    "unity_json_checks": 4,
+    "write_run": "0609829f35f74ee5bb7c6dd5180c4498",
+    "read_run": "a7e98c28ae5940278eba0789938e976c",
+    "saved": "150XP/40gold/attack52/enhancement1/Fury2Precision1/3unspent/bag1/pending clear weapon",
+    "restored_and_resumed": "Exact canonical state before mutations; pending collected; 2 new kills -> 200XP/56gold/5unspent/bag2; old kill token rejected",
+    "recovery": "Actual Windows: good backup recovered and corrupt primary preserved; both-corrupt and future schema blocked without file changes",
+    "tests_isolated": true,
+    "autosave": "Each committed progression mutation, application pause and normal quit; no save for ephemeral test profiles",
+    "limits": "No offline rewards or in-combat position resume; 2MiB payload limit and growing deduplication history; editor uses ephemeral profile"
+  }
+}

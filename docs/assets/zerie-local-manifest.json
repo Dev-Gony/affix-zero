@@ -1,0 +1,57 @@
+{
+  "source": "https://zerie.itch.io/tiny-rpg-character-asset-pack",
+  "version": "01 v2.0 Free Soldier&Orc",
+  "license": "commercial game use allowed; raw redistribution/reupload prohibited; local files excluded from Git",
+  "files": [
+    {
+      "path": "Assets/LocalLicensed/Zerie/Soldier/Idle.png",
+      "bytes": 1452,
+      "sha256": "572776014e1b348e8386ce587855c53e3ebd84b8fbe9041f680a917a9d3b955a"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Soldier/Walk.png",
+      "bytes": 1860,
+      "sha256": "47ad61833e22238123b591b11d985e08858bfb5098348adee496fecb41e54954"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Soldier/Attack01.png",
+      "bytes": 1978,
+      "sha256": "907f5bd89b18492e7051ff3b1014a687fb8ffa501ac4486a24a1f58d198b4b20"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Soldier/Hurt.png",
+      "bytes": 1840,
+      "sha256": "aaa0768cc7da2ce1fed3afd02ef7d8c9b2efeb4bdf797723f51c088bf729f1a6"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Soldier/Death.png",
+      "bytes": 1673,
+      "sha256": "2968064e9692c43f7e4941a0106e5b370471f0e9beaedc5c40631d9daeb4c84e"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Orc/Idle.png",
+      "bytes": 1433,
+      "sha256": "0116b83877b5d503b54625059e3124383e572f0175ab311eb10e6d82e40d67ba"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Orc/Walk.png",
+      "bytes": 1797,
+      "sha256": "dac8a01a4013d35c852abf337d1f8ba05004ae9ebb03e8c41ac68b3666e837be"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Orc/Attack01.png",
+      "bytes": 2315,
+      "sha256": "80e5ca7053c7e3d4c956588670fe1949c056fc0367be1d348d0cec9fe4df38ea"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Orc/Hurt.png",
+      "bytes": 1969,
+      "sha256": "100d59c2230266f91dc8772de973389ef26b800b66ba61a18a7d74c2a4a125c0"
+    },
+    {
+      "path": "Assets/LocalLicensed/Zerie/Orc/Death.png",
+      "bytes": 1822,
+      "sha256": "b96a0dd17d736ffed677c88f291fab70bb762481062d459ed665dba1fef5f5a5"
+    }
+  ]
+}

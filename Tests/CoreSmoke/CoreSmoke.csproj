@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="../../Assets/_Game/Core/AttackTimeline.cs" Link="AttackTimeline.cs" />
+    <Compile Include="../../Assets/_Game/Core/CombatHealth.cs" Link="CombatHealth.cs" />
+    <Compile Include="../../Assets/_Game/Core/EncounterRewards.cs" Link="EncounterRewards.cs" />
+    <Compile Include="../../Assets/_Game/Core/HeroProgression.cs" Link="HeroProgression.cs" />
+    <Compile Include="../../Assets/_Game/Core/DungeonNavigation.cs" Link="DungeonNavigation.cs" />
+    <Compile Include="../../Assets/_Game/Core/AtomicProfileStore.cs" Link="AtomicProfileStore.cs" />
+    <Compile Include="../../Assets/_Game/Core/ProgressionSnapshot.cs" Link="ProgressionSnapshot.cs" />
+  </ItemGroup>
+</Project>

@@ -1,36 +1,31 @@
-# AFFIX: ZERO - Codex Project Context
+# AFFIX: ZERO 현행 개발 규칙
 
-## Game concept
+## 유일한 현재 기준
 
-AFFIX: ZERO is an idle top-down hack-and-slash game built with Godot 4.3. Its direction combines Hero Siege-style pixel combat with Diablo-style randomized loot. Automatic combat, item affixes, progression, class selection, rebirth, effects, and the tabbed management UI are implemented.
+`restart/unity-6`, PR #19, Unity `6000.3.24f1`, C#, Built-in 2D. 먼저 `docs/HANDOFF.md`, `docs/STATUS.json`, `docs/PRODUCT_BRIEF.md`, 해당 작업 문서를 읽는다. 사용자는 Unity D드라이브 설치를 확인했다. 재설치나 이전 Godot의 pull/stash 절차를 반복 요구하지 않는다.
 
-The game uses a 640x400 pixel-art viewport. Preserve crisp scaling and keep combat as the primary full-screen layer. Management UI opens as focused right-side windows from the compact bottom dock instead of permanently consuming the battle area.
+기존 Godot/E0/V0 소스·아트는 폐기됐다. 현재 트리, 텍스트 회고, 승인된 새 라이선스 리소스만 작업 기준으로 삼는다. 과거 Git 커밋·PR #18·백업에서 코드나 이미지를 복원/이식하지 않는다. 기능 아이디어만 새 설계에 반영한다.
 
-## Folder structure
+## 아트와 MVP
 
-- `scenes/`: Godot scenes. Use `battle/`, `ui/`, and `effects/` for their respective scene types.
-- `scripts/autoloads/`: project-wide state, save, loot, and audio managers registered in `project.godot`.
-- `scripts/combat/`: combatants, attacks, targeting, damage, and waves.
-- `scripts/loot/`: item generation, rarities, affixes, and equipment behavior.
-- `scripts/progression/`: levels, classes, upgrades, and long-term progression.
-- `scripts/ui/`: UI controllers and presentation logic.
-- `resources/items/`: item data resources.
-- `resources/enemies/`: enemy data resources.
-- `resources/classes/`: player-class data resources.
-- `assets/sprites/`, `assets/sfx/`, `assets/bgm/`: source game assets.
-- `tests/`: headless Godot smoke tests. Keep tests deterministic and do not write over a player's save file.
+2026-09-26 사용자 재확인: **자동 던전 탐색·자동사냥이 주력인 방치형 게임**이며 나머지 RPG 시스템/UI는 Hero Siege 오마주다. 자동사냥을 편의 옵션으로 낮추지 않는다. `docs/AUTO_HUNT_MVP.md`를 읽고 자동 경로·대상 전환·회수·구간 이동·반복 사냥을 관리 화면 확장보다 먼저 구현한다. 현재 1대1 씬과 UI 검사 PASS는 방치형 MVP 완료가 아니다.
 
-## Coding conventions
+2026-09-26 최신 사용자 지시: **탕탕특공대 요소 전면 폐기, PC 가로형 Hero Siege 오마주**. 사용자가 첨부한 실제 Hero Siege 전투 화면의 작은 캐릭터/넓은 전장/질감 있는 던전/고밀도 아이콘 HUD/장비 비교 UX를 기준으로 아트를 다시 선정한다. 이전 밝은 초원 고정·어두운 던전 금지 지침은 이 최신 지시로 대체됐다. 폐기한 Godot 코드·아트 복원 금지는 계속 유지한다. Ninja Adventure 및 두 차례의 평면 패널 HUD는 시각적으로 거절됐으며 현행 제품 아트로 재활용하지 않는다.
 
-- Use GDScript compatible with Godot 4.3.
-- Use static typing for variables, parameters, return values, arrays, and dictionaries where practical.
-- Use `snake_case` for variables, functions, and general script filenames. Use `PascalCase` for node types, enums, and the existing autoload filenames.
-- Prefer signals for communication between independent systems; avoid tight cross-system node references.
-- Model reusable game data with custom `Resource` classes and `.tres` files rather than hard-coded dictionaries.
-- Keep scene scripts focused on scene behavior and place reusable rules in the appropriate system directory.
-- Keep autoloads small and intentional. Do not turn them into catch-all dependency containers.
-- Add gameplay systems only within the scope of the active task.
-- Keep balance values in `.tres` resources. Code may contain resource paths and algorithms, but not duplicate resource balance tables.
-- Treat the 640x400 internal viewport as the layout source of truth. Verify both 640x400 and the default 1280x800 desktop presentation.
-- Read `design-system/affix-zero/MASTER.md` and the relevant page override before changing UI. The game HUD override is `design-system/affix-zero/pages/game-hud.md`.
-- Run `res://tests/smoke_test.tscn` headlessly after changes to combat, progression, loot, saves, or UI state.
+신규 외부 팩의 정확한 라이선스·공개 재배포 권리·프레임·방향·pivot·impact를 먼저 검수한다. 게임 사용 허가와 공개 GitHub 원본 재배포 허가는 별개다. 원본 공개 금지 팩은 공개 저장소에 올리지 않는다. 정지 그림의 이동/반전은 걷기/공격 애니메이션 완성이 아니다. 라이선스 문자열이 존재한다고 법적·시각 검수가 끝난 것도 아니다.
+
+영웅1/근접적1의 실제 애니메이션과 타격이 먼저다. 대량 스폰, 성능 검사, 펫·가챠·시즌부터 확장하지 않는다. 새 아트 미확보 상태를 빈 씬이나 임시 캐릭터로 완료 처리하지 않는다.
+
+## 구현·검증
+
+코어 C#과 Unity 표시·편집 도구를 분리한다. 기존 프로토타입의 실제 Unity import/Play·Windows 빌드·실행 검사는 기술 근거로만 남는다. 새 Hero Siege 방향의 아트·UI/UX는 미검증이며 기존 PASS로 승인 처리하지 않는다. `.NET` CI는 `UnityEngine` 코드를 컴파일하지 않는다. 로컬 설치 DLL 참조 정적 컴파일도 Unity import/Play 검증을 대체하지 않는다. 소스 작성, 코어 테스트, Unity import, Play, Windows build, 사용자 시각 승인 상태를 구분한다. 공개 반입이 허용된 `Assets/**/*.meta`를 추적한다. Unity 6000.3.24f1 유지. 사용자는 엔진 수정이 필요하면 알리라고 했으며 엔진·패키지·렌더러 변경을 일괄 승인한 것은 아니다.
+
+## 과거 자료와 용량
+
+과거 시행착오는 `docs/history/LEGACY_RETROSPECTIVE.md`에 텍스트로만 보존한다. 대용량 옛 코드/이미지/ZIP 사본을 현재 프로젝트에 넣지 않는다. 사용자 용량 측정 전 GB 절감 수치를 만들지 않는다. 로컬 검사기는 읽기 전용이다. 사용자의 구체적 삭제 승인과 보호 대상 확인 전 폴더·세이브·stash·Git history를 삭제하지 않는다. worktree의 공용 Git 디렉터리와 새 Unity 폴더 독립성을 먼저 확인한다.
+
+## 작업 방식
+
+ChatGPT 채팅+GitHub로 개발한다. Codex 실행을 요구하지 않는다. 읽기 → 제한된 변경 → 실제 검사 → 필요한 사용자 동작 → 문서/인수인계 순서. 승인 없는 PR 병합, force push, reset --hard, git clean, 자동 stash pop은 하지 않는다. 모든 로컬 명령은 정확한 대상과 실패 시 중단 조건을 포함한다.
+
+트러블슈팅은 `문제 발생 지점 | 원인 분석 | 해결 방법 및 적용된 코드 개념 | 배운 점` 표에 기록한다. 모든 답변은 3항목 진행 상황 체크포인트로 끝난다. 실제 수행하지 않은 테스트나 백그라운드 작업을 약속하지 않는다.

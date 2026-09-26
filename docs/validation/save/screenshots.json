@@ -1,0 +1,48 @@
+{
+  "buildGuid": "baf9e73795d3447e9adc1d13daabe1d2",
+  "scope": "Actual 1080p framebuffer; ephemeral hunting regression, not disk-save screenshots.",
+  "captures": [
+    {
+      "path": "docs/media/save/1080-exploration.png",
+      "state": "exploration",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "cd6f1eb1947712666fb21e6122be74face6474285da9aee45523bd666a8e9943"
+    },
+    {
+      "path": "docs/media/save/1080-combat.png",
+      "state": "combat",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "9eb79be0c66095b812d6c28e122d6a2bba5890f0c8ba957cbab85de6e84e0734"
+    },
+    {
+      "path": "docs/media/save/1080-management.png",
+      "state": "management",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "7b8b353c452f2bfae021b0c4fbd98cb24b2d0ac4cdea9930e2b14b7acd1b0fcc"
+    },
+    {
+      "path": "docs/media/save/1080-paused.png",
+      "state": "paused",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "8f5eae420bd927180cfbe904cd20879748d0087f94ed183f850c5b3f67062c54"
+    },
+    {
+      "path": "docs/media/save/1080-loot.png",
+      "state": "loot",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "000660364f90dd72d00b7c97f5ff598b29e4af39b0156cbbc1905375a3b1b2cd"
+    },
+    {
+      "path": "docs/media/save/1080-run-complete.png",
+      "state": "run-complete",
+      "runId": "1ac9d786c7b54894a57bec0e6797054a",
+      "rgbPreserved": true,
+      "sha256": "ba47cfa4afeba20fe16b35af180a7adfd1a094da347ed1efb041c18ccdb1efee"
+    }
+  ]
+}

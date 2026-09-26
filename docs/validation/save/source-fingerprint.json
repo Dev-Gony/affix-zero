@@ -1,0 +1,122 @@
+{
+  "files": [
+    {
+      "sha256": "24e1ffd6c66495fc2af1f85f7f0aac096335a9a2f04a2a58ef58b4f7a9dd4ca2",
+      "path": "Assets/_Game/Core/AtomicProfileStore.cs"
+    },
+    {
+      "sha256": "2ebb4a6ff975f8547f2b97bd217837139d3718cb71032d95153d21b6c0eae878",
+      "path": "Assets/_Game/Core/AttackTimeline.cs"
+    },
+    {
+      "sha256": "39c067ba38609f48b8ddb15655dfbaf8a57747b10eb28e9f61b3815c17192fdb",
+      "path": "Assets/_Game/Core/CombatHealth.cs"
+    },
+    {
+      "sha256": "2930e0fb2501498dfbe09cfc7fb0d7192d632d8c29d4bca2b465549ac11eb0ab",
+      "path": "Assets/_Game/Core/DungeonNavigation.cs"
+    },
+    {
+      "sha256": "b3436803fd49c8ba3647437298d29089461b3e8de465aec30f9c5e7284452b16",
+      "path": "Assets/_Game/Core/EncounterRewards.cs"
+    },
+    {
+      "sha256": "4d6aed2588b07b73eb6b1a14931633eca2bbd15a9f099cb085f84e45138260a2",
+      "path": "Assets/_Game/Core/HeroProgression.cs"
+    },
+    {
+      "sha256": "ad84e3eb0226f851e2500d11f1a849e03d75b7045f4ff50c0ae145f2adac65c5",
+      "path": "Assets/_Game/Core/ProgressionSnapshot.cs"
+    },
+    {
+      "sha256": "9fea49ccef7ca594dbed116ca1208bdb0c53d383304dd91cb0f63b2290839047",
+      "path": "Assets/_Game/Editor/EncounterVerification.cs"
+    },
+    {
+      "sha256": "29e7e5a9b68f98d015c4bad43b201a945903b14b3ef99d89a4640ef71df5c4a3",
+      "path": "Assets/_Game/Editor/FoundationSetup.cs"
+    },
+    {
+      "sha256": "e191fd5f9f59db94ef5f48b0bcdea69e995443862324ff22fd4427e76bbbdb74",
+      "path": "Assets/_Game/Editor/HeroSiegeArtSetup.cs"
+    },
+    {
+      "sha256": "fb14b737d706907901d37061a50778e8f3f3cb7c8bf0aa03418fc7a1123e2be9",
+      "path": "Assets/_Game/Editor/ProfileSerializationVerification.cs"
+    },
+    {
+      "sha256": "da9ff6aff045fc04c4861d9b596c362033a59ff88bc2fbae2a5fa14ed6ec20ce",
+      "path": "Assets/_Game/Editor/ProjectDashboard.cs"
+    },
+    {
+      "sha256": "855c925b708d3eb8a132a165ac776058ea10d291eb6b85bbf8bfc013f6f8a708",
+      "path": "Assets/_Game/Editor/ReviewedArtSetup.cs"
+    },
+    {
+      "sha256": "ac5c0098c39d4ca61a04c44e522e8b3ed131fd998f8144deae634f5856e2da5e",
+      "path": "Assets/_Game/Presentation/ActorAnimationSet.cs"
+    },
+    {
+      "sha256": "8756841da5f1bbd6176ad3161b0f97dfa300971caf8d93fd994316d85bba408d",
+      "path": "Assets/_Game/Presentation/AutoHuntDirector.cs"
+    },
+    {
+      "sha256": "2ac5b03060f74a76a45cc8752e4bfafdf26914d24592e556393deb5d5362d18e",
+      "path": "Assets/_Game/Presentation/AutoHuntSafetyProbe.cs"
+    },
+    {
+      "sha256": "4e078e99fa675f331cd86c3cce3b612e783704ad3f9d86d360f3afae8f517669",
+      "path": "Assets/_Game/Presentation/AutoHuntSmokeProbe.cs"
+    },
+    {
+      "sha256": "334739e3322aa30f93f4479d0eda168bde152db119c58f8e925886d9a5e5726f",
+      "path": "Assets/_Game/Presentation/DungeonWorld.cs"
+    },
+    {
+      "sha256": "823ca1b638ad98a67e7bb6aac96e1f22210d385d555d36a7aaf65193c2cbe5e9",
+      "path": "Assets/_Game/Presentation/EncounterHud.cs"
+    },
+    {
+      "sha256": "40552950bec8e76b2780b22a1b959a254bae9f1e5ed0d04a75a25fa1c8478ee7",
+      "path": "Assets/_Game/Presentation/EquipmentPanel.cs"
+    },
+    {
+      "sha256": "ede5603ba752fa885443b76701cad4a884b37e25f8c7216d634990c3797b69e8",
+      "path": "Assets/_Game/Presentation/FirstEncounter.cs"
+    },
+    {
+      "sha256": "97ebaf70ca8338716d78d9ba3baabfad9b73e112b18c3ad95a234c23359d8f1a",
+      "path": "Assets/_Game/Presentation/ForgePanel.cs"
+    },
+    {
+      "sha256": "8152fc9d53a246afcabe5aa6e7286235de696dd24189878dea92da44791df7b3",
+      "path": "Assets/_Game/Presentation/MeleeActor.cs"
+    },
+    {
+      "sha256": "ab0d82ca0c073f4243b3803c4826d033065d54b383a8ffe4c8a908892227acd8",
+      "path": "Assets/_Game/Presentation/PlayerSmokeProbe.cs"
+    },
+    {
+      "sha256": "efc6b6bc967d1b6e13b761c9bae59aaeafaf80937649c514182888d14da9aeb9",
+      "path": "Assets/_Game/Presentation/ProfilePersistence.cs"
+    },
+    {
+      "sha256": "7ea01d2c3996e8c267b2194eb6c01443839f084eccb8dff9b447b76dbb500018",
+      "path": "Assets/_Game/Presentation/ProfileSaveProbe.cs"
+    },
+    {
+      "sha256": "a5239c4219af0a0f2db5d4e6d14b2618d012bce08a257bba628d4cc08644869a",
+      "path": "Assets/_Game/Presentation/TalentPanel.cs"
+    },
+    {
+      "sha256": "78b9072dcc6fa529087a495056f52028f48162434cd7fff8ffff0b6258405f3b",
+      "path": "Packages/manifest.json"
+    },
+    {
+      "sha256": "16b25471a4769a00dd0cf95fcabc7790c1ee6c6c94f3b527dc0183f669934e5f",
+      "path": "Packages/packages-lock.json"
+    }
+  ],
+  "scope": "Exact local bytes for C# sources/UI theme/packages at save Windows build; existing art unchanged.",
+  "build_guid": "baf9e73795d3447e9adc1d13daabe1d2"
+}

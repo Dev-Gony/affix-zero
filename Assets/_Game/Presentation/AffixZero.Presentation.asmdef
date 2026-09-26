@@ -1,0 +1,6 @@
+{
+  "name": "AffixZero.Presentation",
+  "rootNamespace": "AffixZero.Presentation",
+  "references": ["AffixZero.Core"],
+  "autoReferenced": true
+}

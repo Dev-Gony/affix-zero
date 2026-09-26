@@ -1,0 +1,157 @@
+{
+  "coordinateOrigin": "top-left",
+  "pivotOrigin": "Unity bottom-left normalized",
+  "pixelsPerUnit": 16,
+  "sprites": [
+    {
+      "name": "Grass",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 0,
+      "y": 192,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "GrassTufts",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 16,
+      "y": 192,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "GrassDetail",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 32,
+      "y": 192,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "Dirt",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 16,
+      "y": 128,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "PathTop",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 16,
+      "y": 112,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "PathBottom",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 16,
+      "y": 144,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "PathLeft",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 0,
+      "y": 128,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "PathRight",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetFloor.png",
+      "x": 32,
+      "y": 128,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "Water",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetWater.png",
+      "x": 16,
+      "y": 112,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "Pond",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetWater.png",
+      "x": 0,
+      "y": 96,
+      "width": 48,
+      "height": 48,
+      "pivotX": 0.5,
+      "pivotY": 0.5
+    },
+    {
+      "name": "Tree",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "x": 0,
+      "y": 0,
+      "width": 32,
+      "height": 32,
+      "pivotX": 0.5,
+      "pivotY": 0
+    },
+    {
+      "name": "Shrub",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "x": 16,
+      "y": 160,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0
+    },
+    {
+      "name": "Flowers",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "x": 0,
+      "y": 176,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0
+    },
+    {
+      "name": "Daisies",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "x": 96,
+      "y": 176,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0
+    },
+    {
+      "name": "Rock",
+      "path": "Assets/Art/NinjaAdventure/Environment/TilesetNature.png",
+      "x": 128,
+      "y": 192,
+      "width": 16,
+      "height": 16,
+      "pivotX": 0.5,
+      "pivotY": 0
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "buildGuid": "e8115fc90b424d58a3fc868b8e140204",
+  "scope": "Actual Windows UI Toolkit framebuffers; equipment/talents/forge use explicitly seeded temporary inventory/progression, not actual earned rewards. No physical input or user approval.",
+  "captures": [
+    {
+      "path": "docs/media/ui-refresh/720-battle.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-720\\ui-1478dfcf08a24529860a1b7348ee2ae7-battle.bmp",
+      "screen": "battle",
+      "runId": "1478dfcf08a24529860a1b7348ee2ae7",
+      "fixture": false,
+      "rgbPreserved": true,
+      "sha256": "0164e43db7c921f7315dbc72396b58ddb3f0378ade0bfc78ed53a79a16423eff"
+    },
+    {
+      "path": "docs/media/ui-refresh/720-equipment.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-720\\ui-1478dfcf08a24529860a1b7348ee2ae7-equipment.bmp",
+      "screen": "equipment",
+      "runId": "1478dfcf08a24529860a1b7348ee2ae7",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "0b148a0c523d4d27207bd15c291bb3791b1be1895aa5ad6c7f6ad5c63b4fd6c7"
+    },
+    {
+      "path": "docs/media/ui-refresh/720-talents.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-720\\ui-1478dfcf08a24529860a1b7348ee2ae7-talents.bmp",
+      "screen": "talents",
+      "runId": "1478dfcf08a24529860a1b7348ee2ae7",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "184698bcf4a560d9a4da7a1ddf1c2b0fcd25f2efa86691f612203ab3f5cf75d8"
+    },
+    {
+      "path": "docs/media/ui-refresh/720-forge.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-720\\ui-1478dfcf08a24529860a1b7348ee2ae7-forge.bmp",
+      "screen": "forge",
+      "runId": "1478dfcf08a24529860a1b7348ee2ae7",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "3a89ee2b98fd68482002837bffd0594037156f2e389be3a1af079462755c9ecd"
+    },
+    {
+      "path": "docs/media/ui-refresh/1080-battle.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-battle.bmp",
+      "screen": "battle",
+      "runId": "1b6f4688b9b541f8b27b21250083e6d4",
+      "fixture": false,
+      "rgbPreserved": true,
+      "sha256": "afd83c68f22ce774a3aa1159628a2c90cd510d0962d23852d148b84efd0e9436"
+    },
+    {
+      "path": "docs/media/ui-refresh/1080-equipment.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-equipment.bmp",
+      "screen": "equipment",
+      "runId": "1b6f4688b9b541f8b27b21250083e6d4",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "b7be88383ce12ec69c2951bbfa000980c5cc5e05bf09f72883a7958a6264307b"
+    },
+    {
+      "path": "docs/media/ui-refresh/1080-talents.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-talents.bmp",
+      "screen": "talents",
+      "runId": "1b6f4688b9b541f8b27b21250083e6d4",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "be49fbac747068d594a467c82bd1abc0e257c089579fe52a07b9c6f62b4de15b"
+    },
+    {
+      "path": "docs/media/ui-refresh/1080-forge.png",
+      "source": "D:\\github\\affix-unity\\Build\\Reports\\ui-reference-1080\\ui-1b6f4688b9b541f8b27b21250083e6d4-forge.bmp",
+      "screen": "forge",
+      "runId": "1b6f4688b9b541f8b27b21250083e6d4",
+      "fixture": true,
+      "rgbPreserved": true,
+      "sha256": "d35818f826927c837ab85dec31caa1d4231dee9b9fed1ae369c4d67573b4a57a"
+    }
+  ]
+}

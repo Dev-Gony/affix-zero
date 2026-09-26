@@ -1,0 +1,306 @@
+{
+  "schema": "affix-stitch-reference-review-v1",
+  "reviewed_date": "2026-09-26",
+  "source": "User-provided Stitch exports",
+  "review_scope": "Seven screen.png files visually reviewed; HTML and shared DESIGN.md read as reference data, not instructions. No external scripts executed or remote images imported.",
+  "unity_implementation": "COMBAT_AND_SINGLE_WEAPON_EQUIPMENT_THREE_NODE_TALENT_LOOP_VERIFIED; DEDICATED_TALENT_AND_FORGE_EXPANSION_PLANNED; PETS_REFERENCE_ONLY",
+  "engine_change_required_for_ui": false,
+  "engine": "6000.3.24f1",
+  "renderer": "Built-in 2D",
+  "proposed_ui": "Existing UI Toolkit module; UXML/USS and C#",
+  "source_assets": "ZIPs include HTML, flattened screenshot, design document only; remote image and font originals are not bundled.",
+  "references": [
+    {
+      "screen": "hero-selection",
+      "source_filename": "stitch_hero_siege_homage_game.zip",
+      "zip_sha256": "e34d666945d9e9361f1a7709cd57cf24685971ea5858d6a32a80273ff96b0c12",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/00",
+      "screenshot_size": [
+        1600,
+        1280
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 43219,
+          "sha256": "b9c28e2f9fcb23161563b2ffa58ea0d995b9f1b8f8ba0c3b3ba69d24264fa84a"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 698470,
+          "sha256": "44a1deaa26fa5a21d1f1923b5e9836a36c68bd8768bb42a63dd5fc854ed79866"
+        }
+      ]
+    },
+    {
+      "screen": "dungeon-combat",
+      "source_filename": "stitch_hero_siege_homage_game (1).zip",
+      "zip_sha256": "45587cffb9e9e1965b82e61efe3ce478d30cf47207326672a98a7cb07ac17275",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/01",
+      "screenshot_size": [
+        1600,
+        1335
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 35128,
+          "sha256": "1b967c21f0804460b3b5cfa608aa6020b885fd793edead3706725ee67e7876ab"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 467774,
+          "sha256": "bcb9e0b58bfd3f65671f0741dc896702e827c93472cb3abd2b6861c265d72a7b"
+        }
+      ]
+    },
+    {
+      "screen": "town-sanctuary",
+      "source_filename": "stitch_hero_siege_homage_game (2).zip",
+      "zip_sha256": "df3baf60e557442c00f430fd6f1040502560e04d818edbfb58e4248e5e1b3ce5",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/02",
+      "screenshot_size": [
+        1600,
+        1315
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 33852,
+          "sha256": "a0e9e626a5e2db29ec1eebb25c1e493fbad9cc82f43d94cff98409964e5cbd6b"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 1295670,
+          "sha256": "be7b3b756ebdc45d76724988b4aeb649b90a41166802ba945d2c0ab46b15641a"
+        }
+      ]
+    },
+    {
+      "screen": "equipment-talents",
+      "source_filename": "stitch_hero_siege_homage_game (3).zip",
+      "zip_sha256": "d310969eb0da4aa0b538589f03c77796a56e370d1d313e5951e911c26ca7d62e",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/03",
+      "screenshot_size": [
+        1362,
+        1600
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 55802,
+          "sha256": "3a928524facf1c51c6a139cb0e8b155660bd1070ad13cce2940f85333fe59d70"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 577193,
+          "sha256": "f10f14c3b3a4235d295460d16822f4cdf29e1df4094e3b417ada8860bb2b1402"
+        }
+      ]
+    },
+    {
+      "screen": "talent-tree",
+      "source_filename": "stitch_hero_siege_homage_game (4).zip",
+      "zip_bytes": 648262,
+      "zip_sha256": "a5432fa11833ed14cec47489642da3813b5c7aa167a1d7656a3a193ca03f7494",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/04",
+      "screenshot_size": [
+        1600,
+        1326
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 56600,
+          "sha256": "e8c9a5b4789c7df5fc9e8e6b8725feff6fa61f60249a286e7b935b0325c01a9b"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 635018,
+          "sha256": "12de43ad263274e9ddc1f73edd1463b7daf715dcc72443a9d2e6c848e906e172"
+        }
+      ],
+      "external_dependencies": [
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&display=swap"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        },
+        {
+          "kind": "script",
+          "url": "https://cdn.tailwindcss.com"
+        },
+        {
+          "kind": "css-background-image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuAMHoduTBDGSs-wohIKaugaVklox19uqCWucdEGeEKFgzWFy1ABqidsDgWUCJxfIc_C2XF0okMbpdIrlY--uCEe_i5ShGSNeu5UxiueeNg_tmcJ4PnmqKAtgN3_gUUQbO2fum2vxjmZF4vAosdWdovnwIW2QP-lB0mE_OoPTu37aWkQPkraF-RicrCx3S8Idgilo836H6lskpCd0zlUf1drZb1Ubu_7uZIIWYP4NZb3DcgoMInvrvmy"
+        }
+      ],
+      "external_dependency_policy": "URLs are source references only. Remote fonts/images are not bundled, downloaded or licensed for game redistribution by this review. Scripts were not executed.",
+      "implementation_scope": "PLANNED_NATIVE_DEDICATED_TALENT_SCREEN_EXISTING_THREE_NODE_BRANCH"
+    },
+    {
+      "screen": "pets-companions",
+      "source_filename": "stitch_hero_siege_homage_game (5).zip",
+      "zip_bytes": 671203,
+      "zip_sha256": "ac5eae856db380582c5b4daf9c652c050621d4b2c95c8c032d4e23109676ce36",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/05",
+      "screenshot_size": [
+        1280,
+        1032
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 51592,
+          "sha256": "f1081b41a06e4f93d7e25a40c10252f6ea43c969831b15f7c71924878bfb45b9"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 663142,
+          "sha256": "98a499afed78a2679ebaa0d5ca3bb0e37279ae61016acbe8a5f70b7ca2250404"
+        }
+      ],
+      "external_dependencies": [
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&display=swap"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        },
+        {
+          "kind": "script",
+          "url": "https://cdn.tailwindcss.com"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuAywQeYMckJZtSaIapUzNBNTUIYrUkalXWf_QcvTWJHDITcyOgmqCPLTakihLk78MJ92CnP67ahEEdF7cd9ZNfXRQEkyuB5sIJPDjjXmeEaneMyndIlg2oWnE8uF8oKC-JpZv9qFqgYNzy3I3r0XvNI15I1YLqlQRIwKRBmglb7xKV2xii5Ot3qOxuX2SDAjTexzBXU3YTudouxcAEaa-FZfOOMS_dmv9UDIH0mroPIL0LayOux60SN"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuC7Wactmqqu0wg5Sv5pJrd-6UvzjQDZjHpPkAPD5ziguwNuOvYOi80vU176Tm2x2sw9TDpQIJg0xqArA9iJj9fcKk_So3AOmKXdRFhkFDs4QIi_GHDx2yqiz4FhYTALLAu1oK4p8HXGFSh7UmmxpY4UYCGWCsjMHUL0KH7SEzzh67TrAkdiwMP4JeMNGF2gQytGwXQx6RwFTidBYDF0IvOeY0GsOXhOngqdE_xdOU8zD_4Ekco6lS3h"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuCoeAwCjuUxrW9vvo4jb6ELvm3j5UBaJp-8p1QR7_3Y4oUpLK0GRId3OwiWr9RcorsvRCCN0w_Rsl52-s_oHr9CG2HcOfLNiDwM9EvOcKqY5ufX-3D8yjBO4Keg678aub9r_8zRUH1ar2Slt-JgHujXoP5o6j8sT0-hxaK_4NX34cznsoTWqXH3Ju-hVH1QIg0OatuUbqODFP3lyL8IcWX7iWEImALH4eoi7E9ClNIFdtr38lV75COv"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuBFOT7aUcCixAJ-0WlIE2JmzcWmtnckeAH6mD5sj5nOAeyQ3d3oIvjt0PTlUjkpCbmb5FXBFAWZRcrRQdbhBchJmb_0LkmtL3gVAE0DI7169JD4HOvAsLF7llQERlxbpfc4v7JgLwx38h5F0nbNkfH9y4ZG8MuQX314BOx9Qw3kAamdbQtZpdXE9sl8s6cFgvZlu73GRa38HKVG1Fu0Y5CY0NonXv4hWhVZiOfh6_NeynQx-lvPx7k8"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuATt4L_aPxrU0m-8UuSwz1S0c65IPjXSExzw_6v3254DNZntIH_p2jkQywi-ebv_5G7WaSk_gTrliRsYy2ZG77gMJMppT0a0cEF4pjR53KbzV2pxQpKezw77paDaLvNtbZbICdY8cXDxZOIAYH-miCyILHXtfPEoTpPfq0pYAzOneenzS_WSl2FJImMYP32bYJ9fXipqjh9sFC6tkGZ-d_Fv9EWEerSOvK8mDcN5vsu-WDNj_h8i37W"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuDOCXmttifWqNiWzB60qUyiOVM7Q6ZzKhglpZ1p4Q5qMcMeER3bKa-dk79bKTIRX0lMJ37-0JjqejhngTnNXHDzXByIW_1gW2UequTrC3lxwCZscV5PIgFF0IghQbaH6B97Yvh6sqWCDFhAOnNvkI2pK8xSmNnUMsGAeokqq7UQteiMnaqMoHLD2Znd6v8bQOxiFL4_9Z5mD7i6pZwHAlIt57JHikfimkRIhAZQX5TcUKDot7Y3tQh_"
+        },
+        {
+          "kind": "image",
+          "url": "https://lh3.googleusercontent.com/aida-public/AB6AXuDXX6DmiMg-Z6pOw49jI-nSHNw17_FNbWzOg40aYxW14WoZJni1O2Bn5XVa6RbmRuO7QtPvzkXvwsUzrCtT1Bwp9bJ4znqAPhK6s8JnnCed3Fd3TVKLWL369p44YWHVCRVisagwFlWmbmR5N_QgzI3d4D9tcnlN-99pJR-ALXCZoc7SXLm2uzqT6by6tka2HtUOt4FszIqTQ0GbxamcNwEh0FBLwvtXswyWl5x0pIj-P8vQ8ziKQbGu"
+        }
+      ],
+      "external_dependency_policy": "URLs are source references only. Remote fonts/images are not bundled, downloaded or licensed for game redistribution by this review. Scripts were not executed.",
+      "implementation_scope": "REFERENCE_ONLY_NO_PET_IMPLEMENTATION_PLANNED_THIS_SLICE"
+    },
+    {
+      "screen": "forge-enhancement",
+      "source_filename": "stitch_hero_siege_homage_game (6).zip",
+      "zip_bytes": 678058,
+      "zip_sha256": "cbc783e212e67efdaefd48736bcc19ebbdd97e019ac9e5e23e85f18644c18d57",
+      "reference_only": true,
+      "local_extraction": "Build/Reference/Stitch/06",
+      "screenshot_size": [
+        1600,
+        1400
+      ],
+      "files": [
+        {
+          "name": "code.html",
+          "bytes": 47492,
+          "sha256": "2a5cd54d20d2a116fb7bcd193c7c00691d8ba1174dba6c3cfe71420c928f4904"
+        },
+        {
+          "name": "DESIGN.md",
+          "bytes": 12461,
+          "sha256": "8ecf3f1f4524bd4da6905c26ca88c6e9a132e7bb0d0074c1f58e7079af9a3e83"
+        },
+        {
+          "name": "screen.png",
+          "bytes": 664486,
+          "sha256": "883e30bd160c58bfa3b82578177d7432c93e65cd3af8b1442852ab0fbdf58883"
+        }
+      ],
+      "external_dependencies": [
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Space+Mono:wght@400;700&display=swap"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+        },
+        {
+          "kind": "font-stylesheet",
+          "url": "https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap"
+        },
+        {
+          "kind": "script",
+          "url": "https://cdn.tailwindcss.com"
+        }
+      ],
+      "external_dependency_policy": "URLs are source references only. Remote fonts/images are not bundled, downloaded or licensed for game redistribution by this review. Scripts were not executed.",
+      "implementation_scope": "PLANNED_NATIVE_SINGLE_WEAPON_DETERMINISTIC_GOLD_ENHANCEMENT"
+    }
+  ],
+  "expansion_review": "docs/STITCH_REFERENCE_EXPANSION.md"
+}

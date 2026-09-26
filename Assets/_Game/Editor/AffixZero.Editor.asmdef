@@ -1,0 +1,7 @@
+{
+  "name": "AffixZero.Editor",
+  "rootNamespace": "AffixZero.Editor",
+  "references": ["AffixZero.Presentation", "AffixZero.Core"],
+  "includePlatforms": ["Editor"],
+  "autoReferenced": true
+}

@@ -1,9 +1,24 @@
-# Godot 4 generated files
-.godot/
+# Track metas for public Assets; restricted raw art has the explicit exception below.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Bb]uilds/
+/[Bb]uild/
+/.vs/
+/.idea/
+*.csproj.user
+*.sln
+*.slnx
+/Assembly-CSharp*.csproj
+/Artifacts/
+**/bin/
+**/obj/
+.DS_Store
+Thumbs.db
+__pycache__/
 
-# Local/editor artifacts
-*.tmp
-*.translation
-
-# Local export output
-build/
+# Licensed raw art: permitted in games, prohibited from public redistribution.
+/Assets/LocalLicensed/
+/Assets/LocalLicensed.meta

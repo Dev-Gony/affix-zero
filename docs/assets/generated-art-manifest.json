@@ -1,0 +1,33 @@
+{
+  "schema": "affix-generated-art-v1",
+  "generator": "Built-in image_gen via imagegen skill",
+  "date": "2026-09-26",
+  "status": "ROOM_IMPORTED_PLAY_PASS_STITCH_UI_PENDING",
+  "userInstruction": "Free assets plus directly generated original assets; no asset purchases.",
+  "assets": [
+    {
+      "path": "Assets/Art/Generated/Resources/AffixGenerated/TempleRoom-v1.png",
+      "type": "Single painted room background, NOT a seamless tile set or layered geometry",
+      "width": 1536,
+      "height": 1024,
+      "transparent": false,
+      "prompt": "Use case: stylized-concept. Asset type: production raster background texture for an original PC top-down pixel-art action RPG, NOT a mockup, NOT concept illustration. Create a new 1536 x 1024 landscape dungeon room floor/background asset. Orthographic top-down with vertical north wall faces, classic detailed 16-bit pixel-art rendering, crisp hard pixel clusters, no antialiasing, no painterly brushwork. Original basalt-and-aged-sandstone underground temple: varied worn brown-gray rectangular stone paving, chipped edges, restrained cracks, dark mortar, muted warm amber torch recesses along perimeter. The center 75 percent must be fully traversable broad floor with low visual contrast so small 24-pixel heroes and bright spell effects read clearly. A north wall and doorway centered near the top, left and right perimeter walls, modest perimeter steps and masonry details. Keep all pillars and blocking props on perimeter, no tall props across the central floor. Consistent overhead view; no isometric diamond projection, no horizon or vanishing point. An understated cool-shadow/warm-stone palette, enough stone texture to feel substantial but not noisy. No characters, enemies, items, UI, text, numbers, logos, borders around the image, no huge central emblem, no red rifts, no grassy terrain. This is an ORIGINAL modular-game starting room surface, not a copy of any existing game's map. Clean usable game artwork filling the full image; do not show an art sheet on a desk."
+    },
+    {
+      "path": "Assets/Art/Generated/Resources/AffixGenerated/HudFrames-v1.png",
+      "type": "Transparent component atlas; generated layout differs from requested regular grid, use reviewed explicit rectangles",
+      "width": 1774,
+      "height": 887,
+      "transparent": true,
+      "prompt": "Use case: stylized-concept. Asset type: ORIGINAL transparent production pixel-art GUI component atlas for a PC dark-fantasy action RPG. Make a 1024x512 PNG on genuine transparent background, precise 4 columns x 2 rows of 256x256 cells, each isolated component centered within its cell with at least 16 pixels of transparent padding; components must never touch another cell. No labels, letters, numbers, icons inside slots, mockup scene, characters, arrows or watermark. Restrained intricate gunmetal and aged-bronze frames with small bevels, clipped corners and subtle rivets, muted cold steel and worn brass highlights. Crisp intentional 16-bit pixel clusters, no smooth vector roundrects, no painterly blur, no thick toy borders, no exaggerated spikes. Row 1 left-to-right: (1) square portrait frame 112x112 with empty transparent inner portrait aperture, small engraved bronze crest at top; (2) long thin horizontal HP track frame 220x28, empty near-black inner channel, no fill; (3) compact square ability slot frame 64x64, empty dark recessed inner well; (4) second square item slot frame 64x64, subdued steel variant. Row 2 left-to-right: (1) compact horizontal action-dock outer frame 224x88, empty dark inner panel, no internal slots; (2) tooltip/character-window outer frame 224x224, empty almost-black dark translucent interior, fine bronze edging; (3) square minimap frame 176x176, empty transparent map aperture, tiny unobtrusive corner brackets; (4) small blank button frame 160x40 with dark gunmetal interior. Keep each piece discrete, with no connecting ornament. The atlas is for slicing and composing a working game HUD, not a screen design. Avoid bright green/ivory cards. All artwork must be original, not extracted or copied from any game.",
+      "usage": "SUPERSEDED_BY_USER_STITCH_LAYOUT; generated frame source retained locally, not used by native Stitch HUD"
+    }
+  ],
+  "limitations": [
+    "Baked torch illumination and wall shadows; not real-time lighting.",
+    "Room is one raster surface; collision and occlusion must be modeled separately.",
+    "GUI component coordinates and alpha margins require actual runtime review.",
+    "No claim of user approval or hand-authored pixel-by-pixel provenance."
+  ],
+  "validation_scope": "HeroSiegeEncounter Play 2026-09-26T04:38:29Z; world-only capture, not Stitch UI or user visual approval"
+}
