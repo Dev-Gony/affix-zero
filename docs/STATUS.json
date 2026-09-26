@@ -5,7 +5,7 @@
   "branch": "restart/unity-6",
   "pr": 19,
   "stage": "AUTONOMOUS_DUNGEON_LOOP",
-  "implementation_commit": null,
+  "implementation_commit": "8b4df924076b30c387fd9df674a1cbf7dbf52694",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -93,7 +93,7 @@
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "mvp": {
     "status": "NOT_READY",
-    "current": "Automatic three-area courtyard loop, two concurrent enemies, recurring clear weapons, safety stops; step1 runtime checks passed",
+    "current": "Automatic three-area loop verified; separate blocked-path and post-safety-stop recovery checks remain before all step1 criteria are closed",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
       "persistent local save and restart recovery",
@@ -101,7 +101,7 @@
       "20-minute unattended endurance",
       "physical controls and user visual approval"
     ],
-    "release_date": "NOT_COMMITTED; estimate after first autonomous dungeon integration",
+    "release_date": "NOT_COMMITTED; persistent save and endurance validation remain",
     "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
   },
   "autohunt": {
@@ -139,7 +139,7 @@
         "gold": 144
       }
     },
-    "safety": "PASS: separate explicit attack=1 death injection and 24-item full-bag fixture. Each stop held 4 seconds.",
+    "safety": "PASS on build0a94c21a725b4d3a9a01e269067fa423: separate attack=1 death injection and 24-item bag fixture; stop held4sec. Final build only adds HUD label filtering and report fields.",
     "limits": "No disk save, active skills, 20-minute test, physical input or user visual approval. Safety stop recovery after intervention not separately verified."
   }
 }
