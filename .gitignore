@@ -1,4 +1,4 @@
-# Unity-generated caches only. Never ignore Assets/**/*.meta.
+# Track metas for public Assets; restricted raw art has the explicit exception below.
 /[Ll]ibrary/
 /[Tt]emp/
 /[Oo]bj/
@@ -18,3 +18,7 @@
 .DS_Store
 Thumbs.db
 __pycache__/
+
+# Licensed raw art: permitted in games, prohibited from public redistribution.
+/Assets/LocalLicensed/
+/Assets/LocalLicensed.meta

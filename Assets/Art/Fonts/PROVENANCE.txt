@@ -1,0 +1,27 @@
+Noto Sans KR Regular - Korean HUD font intake
+Date: 2026-09-26
+Official repository: https://github.com/notofonts/noto-cjk
+Pinned source revision: f8d157532fbfaeda587e826d4cd5b21a49186f7c
+Font: https://raw.githubusercontent.com/notofonts/noto-cjk/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/SubsetOTF/KR/NotoSansKR-Regular.otf
+License: https://raw.githubusercontent.com/notofonts/noto-cjk/f8d157532fbfaeda587e826d4cd5b21a49186f7c/Sans/LICENSE
+Unity documentation: https://docs.unity3d.com/6000.3/Documentation/Manual/create-meshes-text-strings.html
+
+Original font: NotoSansKR-Regular.otf, Version 2.004
+Destination: Assets/Art/Fonts/Resources/AffixUI/Korean.otf
+Resource path: Resources.Load<Font>("AffixUI/Korean")
+Bytes: 4644748 (about 4.43 MiB)
+SHA256: 69975a0ac8472717870aefeab0a4d52739308d90856b9955313b2ad5e0148d68
+License file SHA256: 6a73f9541c2de74158c0e7cf6b0a58ef774f5a780bf191f2d7ec9cc53efe2bf2
+
+Copyright notice from the unmodified font name table:
+© 2014-2021 Adobe (http://www.adobe.com/).
+Family: Noto Sans KR. Style: Regular. PostScript name: NotoSansKR-Regular.
+License: SIL Open Font License 1.1, matching both the source LICENSE and embedded name13.
+The source third-party README also labels versions from 1.002 as OFL; a later paragraph still mentions the historical Apache license. The exact 2.004 font metadata and bundled LICENSE both identify OFL 1.1; this intake uses OFL, not Apache.
+
+Rights: OFL permits redistribution of the unmodified font with this software, including a public Git repository, while retaining the copyright notice and OFL text. Do not sell the font by itself or relicense it. Keep LICENSE.txt and this notice with copies of the font. The font does not impose OFL on game code or rendered text.
+Reserved names: No font data, outlines, internal names or format were modified. Only the project file path is Korean.otf. No FontTools instancing or custom subsetting occurred; this is the upstream static Korean subset. The OFL modified-font naming restriction therefore does not arise for this unchanged binary. Do not later modify/relicense the font under a reserved name without a fresh review.
+
+Read-only SFNT checks: OTTO/CFF static font, no fvar table, OS/2 fsType=0. Unicode cmap format12 covers 23174 mapped codepoints including all 11172 Hangul syllables U+AC00-U+D7A3, all 95 printable ASCII characters, and 94 compatibility Jamo U+3131-U+318E. Punctuation and other scripts are not claimed universally complete.
+Unity meta: dynamic TrueTypeFontImporter with embedded font data, fontSize16, Noto Sans KR family, no externally installed OS-font dependency intended.
+Validation: downloaded raw bytes and copied target SHA match; Pillow/FreeType can load the static OTF and measure Korean text. Unity import and final UI Toolkit/IMGUI rendering were NOT executed in this intake. Unity may normalize importer metadata during its first import. No engine, package, manifest script, or other art was changed.

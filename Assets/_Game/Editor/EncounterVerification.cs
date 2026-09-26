@@ -14,7 +14,7 @@ namespace AffixZero.Editor
     [InitializeOnLoad]
     public static class EncounterVerification
     {
-        private const string ScenePath = "Assets/_Game/Scenes/FirstEncounter.unity";
+        private const string ScenePath = "Assets/_Game/Scenes/HeroSiegeEncounter.unity";
         private const string ReportPath = "Build/Reports/encounter-verification.json";
         private const string Key = "Affix.EncounterVerification.";
         private static Report report;
@@ -41,7 +41,7 @@ namespace AffixZero.Editor
             public string problem = "";
             public string scene = ScenePath;
             public string userVisualApproval = "NOT_RUN";
-            public string screenshotScope = "Camera.Render world only; IMGUI HUD is not included.";
+            public string screenshotScope = "Camera.Render world only; screen-space HUD is not included.";
             public string testScope = "Real Play Start/Update; controlled idle prelude then normal 1v1; scene reload restart.";
             public bool actorsInitialized;
             public bool approachObserved;
@@ -114,7 +114,7 @@ namespace AffixZero.Editor
         {
             if (Application.unityVersion != "6000.3.24f1")
                 throw new InvalidOperationException("Unexpected Unity version: " + Application.unityVersion);
-            if (!File.Exists(ScenePath)) throw new FileNotFoundException("Licensed FirstEncounter scene is absent.", ScenePath);
+            if (!File.Exists(ScenePath)) throw new FileNotFoundException("New art encounter scene is absent. Run the reviewed art setup first.", ScenePath);
             EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             var actors = UnityEngine.Object.FindObjectsByType<MeleeActor>(FindObjectsSortMode.None);
             if (actors.Length != 2) throw new InvalidOperationException("Expected exactly two actors.");

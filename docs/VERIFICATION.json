@@ -28,17 +28,17 @@
     "reason": "Expected non-repository Git reads left nonzero LASTEXITCODE despite report assertions passing.",
     "resolution": "Keep informational read failure in JSON; reset process status only after successful report creation; add exit-code assertion. Retest passed at 64dc3f2."
   },
-  "unity_editor_import": "BLOCKED_BEFORE_IMPORT_EXIT_198",
-  "unity_animation_render": "NOT_RUN",
-  "windows_build": "NOT_RUN",
-  "user_playtest": "NOT_RUN",
-  "new_licensed_art_import": "RAW_SOURCES_REVIEWED_UNITY_SLICING_PENDING",
+  "unity_editor_import": "PASS",
+  "unity_animation_render": "PASS_EDITOR_AND_WINDOWS_PLAYER",
+  "windows_build": "SUCCEEDED",
+  "user_playtest": "REJECTED_BOTH_NINJA_UI_ITERATIONS",
+  "new_licensed_art_import": "PASS",
   "actual_user_storage_measurement": "NOT_RUN",
   "actual_user_deletion": false,
   "remote_history_rewritten": false,
-  "scope": "Current source art verification, 56 core checks and installed-API static C# compile. Unity import/Play/build/user approval not completed.",
+  "scope": "Historical records retained below; current native Stitch combat HUD checks are in stitch_native_hud.",
   "current_u1": {
-    "implementation_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
+    "implementation_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
     "recorded_date": "2026-09-26",
     "core_checks_passed": 56,
     "core_scope": "AttackTimeline, CombatHealth, EncounterRewards; pure C#",
@@ -72,13 +72,80 @@
       "exit_code": 198,
       "reason": "No valid Unity Editor license found",
       "local_log": "Build/Reports/unity-initial-import.log",
-      "latest_user_report": "Unity Hub editor installation in progress; wait for completion notification"
+      "latest_user_report": "Unity Hub editor installation in progress; wait for completion notification",
+      "resolved": "User installation completed; later setup imported source art and generated scene with exit0"
     },
     "github_ci": {
-      "source_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
-      "run_id": 36215204628,
+      "source_commit": "45c62059bfaf388c48e869be813bf6bfdf8b5954",
+      "run_id": 36216464777,
       "result": "success",
-      "scope": "Core tests, tracked-tree audit and synthetic Windows storage report; not Unity"
+      "scope": "56 core checks, art pixel/source validation, tracked-tree audit and synthetic Windows storage report; actual Unity checks below are local"
+    },
+    "actual_unity": {
+      "engine": "6000.3.24f1",
+      "import_and_scene_setup": "PASS_EXIT_0",
+      "editor_play_report": "docs/validation/encounter-verification.json",
+      "editor_play_result": "PASS",
+      "editor_play_scope": "Real Play; short controlled idle prelude; approach, both damage, impact sprite, enemy death, no ghost damage, reward once, actual scene reload. This preceded the render-only camera MSAA fix.",
+      "windows_build_report": "docs/validation/windows-build.json",
+      "windows_build_result": "Succeeded",
+      "build_errors": 0,
+      "build_warnings": 0,
+      "windows_player_report": "docs/validation/player-smoke.json",
+      "windows_player_result": "PASS",
+      "player_run_id": "5e2e20982fa94fbe8567e4264a342ab3",
+      "player_build_guid": "347ef2213a534417b347c04cfbc4f400",
+      "player_scope": "Final executable after camera MSAA fix; normal auto combat, actual HUD captures, one restart and renewed combat. Visible game window required for framebuffer captures.",
+      "final_hero_hp": 96,
+      "reward_xp": 25,
+      "reward_gold": 8,
+      "user_visual_approval": "REJECTED_PREVIOUS_UI_DIRECTION",
+      "captures": "docs/media/first-encounter-{walk,impact,cleared}.png",
+      "capture_conversion": "Pixel-equivalent BMP-to-PNG, no compositing or image edits"
     }
+  },
+  "windows_player": "PASS",
+  "hero_siege_direction": {
+    "status": "STITCH_NATIVE_COMBAT_HUD_FIRST_SLICE",
+    "new_assets_imported": true,
+    "unity_visual_scene": "HeroSiegeEncounter",
+    "visual_approval": "NOT_RUN"
+  },
+  "stitch_native_hud": {
+    "engine": "6000.3.24f1",
+    "renderer": "Built-in 2D",
+    "engine_package_renderer_changes": false,
+    "build": {
+      "recordedUtc": "2026-09-26T04:55:46.5840664Z",
+      "result": "Succeeded",
+      "problem": "",
+      "summaryAvailable": true,
+      "errors": 0,
+      "warnings": 0,
+      "output": "D:/github/affix-unity/Build/Windows/AffixZero.exe",
+      "playerLaunched": "NOT_RUN",
+      "userVisualApproval": "NOT_RUN"
+    },
+    "player_720": {
+      "result": "PASS",
+      "run_id": "15048b15916b455daa9126e3372c7ac1",
+      "report": "docs/validation/stitch/player-720.json"
+    },
+    "player_1080": {
+      "result": "PASS",
+      "run_id": "c689d0cd4e0041bd8c5217777dae77b3",
+      "report": "docs/validation/stitch/player-1080.json"
+    },
+    "native_ui_checks": "UIDocument attached, nonempty layout, actual HP/XP/gold labels, character visibility, attack slot, five end-of-frame captures per run",
+    "capture_conversion": "BMP to PNG identical RGB pixels; no compositing",
+    "visual_review": "Agent viewed 720 walk/equipment and 1080 clear; Korean text visible and edge HUD fits. Not user visual acceptance.",
+    "core_checks": 56,
+    "input_verification": "NOT_RUN; pause/overlay/restart exercised through shared APIs, not physical clicks/keys",
+    "limitations": [
+      "Only first combat HUD slice; hero selection/town/actual inventory/talent tree unimplemented",
+      "MP resource and active skill loadout unimplemented",
+      "Single painted room, no terrain collision/occlusion",
+      "Two-direction characters; private raw art not in public Git"
+    ]
   }
 }

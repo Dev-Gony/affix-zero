@@ -18,6 +18,7 @@ namespace AffixZero.Presentation
         [SerializeField, Min(1)] private float attackFps = 12;
         [SerializeField, Min(1)] private float movementFps = 10;
         [SerializeField, Min(1)] private float reactionFps = 10;
+        [SerializeField, Min(1)] private float deathFps = 10;
         [SerializeField, Min(1)] private int impactFrame = 2;
         [SerializeField] private bool sourceFacesRight = true;
         [SerializeField] private string sourceLicenseRecord = "";
@@ -26,6 +27,8 @@ namespace AffixZero.Presentation
         public string SourceLicenseRecord => sourceLicenseRecord;
         public Sprite ImpactSprite => attack[impactFrame];
         public double HitDuration => hit.Length / (double)reactionFps;
+        public double AttackDuration => attack.Length / (double)attackFps;
+        public Sprite WeaponPreview => HasAttackWeapon ? attackWeapon[0] : null;
         public bool HasAttackWeapon => attackWeapon != null && attackWeapon.Length > 0;
 
         public string ValidateSet()
@@ -39,7 +42,7 @@ namespace AffixZero.Presentation
                 problem = Check(attackWeapon, 3, "attack weapon");
                 if (problem != null) return problem;
             }
-            if (!PositiveFinite(attackFps) || !PositiveFinite(movementFps) || !PositiveFinite(reactionFps))
+            if (!PositiveFinite(attackFps) || !PositiveFinite(movementFps) || !PositiveFinite(reactionFps) || !PositiveFinite(deathFps))
                 return "Animation FPS must be positive and finite.";
             if (impactFrame <= 0 || impactFrame >= attack.Length - 1)
                 return "Impact needs both anticipation and recovery frames.";
@@ -71,7 +74,7 @@ namespace AffixZero.Presentation
             Sprite[] frames = clip == ActorClip.Idle ? idle : clip == ActorClip.Walk ? walk
                 : clip == ActorClip.Hit ? hit : clip == ActorClip.Death ? death : attack;
             double fps = clip == ActorClip.Attack ? attackFps
-                : (clip == ActorClip.Hit || clip == ActorClip.Death) ? reactionFps : movementFps;
+                : clip == ActorClip.Death ? deathFps : clip == ActorClip.Hit ? reactionFps : movementFps;
             bool loop = clip == ActorClip.Idle || clip == ActorClip.Walk;
             double frame = Math.Floor(Math.Max(0, elapsed) * fps);
             int index = loop ? (int)(frame % frames.Length) : (int)Math.Min(frames.Length - 1, frame);

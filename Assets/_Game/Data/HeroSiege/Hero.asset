@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a9f023e83e054164b3e252b251019d13, type: 3}
+  m_Name: Hero
+  m_EditorClassIdentifier: AffixZero.Presentation::AffixZero.Presentation.ActorAnimationSet
+  idle:
+  - {fileID: 158769443076238877, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  - {fileID: -505370004992808522, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  - {fileID: 6462466780419140417, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  - {fileID: 4123099160991176434, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  - {fileID: 7383037940895606465, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  - {fileID: 8947646204421631047, guid: 046d73a6e021ae844b38c2cb32b4451a, type: 3}
+  walk:
+  - {fileID: -2591493528391553126, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: 7332984803022984741, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: -2371979278044710020, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: -3981376392849803724, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: -4539893925889546448, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: 5451998976570690809, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: 926823840912197710, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  - {fileID: 133550442147006211, guid: 2b38fc59215b075419d4debd1a4e0d40, type: 3}
+  attack:
+  - {fileID: 7910559428569697300, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  - {fileID: -7154323420533974858, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  - {fileID: -4641108960818903939, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  - {fileID: 7942381002039436589, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  - {fileID: 8588442572215889599, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  - {fileID: 6157717469394697298, guid: 15603bb566f33d24c8bde4db5db226b6, type: 3}
+  hit:
+  - {fileID: 8630477589669776686, guid: a780fbaa3a9d1514aa15c9a3cff41b84, type: 3}
+  - {fileID: 4919724638609061145, guid: a780fbaa3a9d1514aa15c9a3cff41b84, type: 3}
+  - {fileID: 597670072187442082, guid: a780fbaa3a9d1514aa15c9a3cff41b84, type: 3}
+  - {fileID: 3780520540572519831, guid: a780fbaa3a9d1514aa15c9a3cff41b84, type: 3}
+  death:
+  - {fileID: -426213304501471441, guid: ff536741478ecb346805f907332bb554, type: 3}
+  - {fileID: -7491649208074860366, guid: ff536741478ecb346805f907332bb554, type: 3}
+  - {fileID: -1149680786065566933, guid: ff536741478ecb346805f907332bb554, type: 3}
+  - {fileID: -1754621879115005390, guid: ff536741478ecb346805f907332bb554, type: 3}
+  attackWeapon: []
+  attackFps: 10
+  movementFps: 10
+  reactionFps: 20
+  deathFps: 10
+  impactFrame: 3
+  sourceFacesRight: 1
+  sourceLicenseRecord: docs/assets/HERO_SIEGE_CHARACTER_CANDIDATES.md

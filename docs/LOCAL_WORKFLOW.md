@@ -1,39 +1,38 @@
-# 로컬 실행과 검증
+# 로컬 실행 — 현재 Stitch 전투 HUD
 
-프로젝트 D:\github\affix-unity, 브랜치 restart/unity-6, Unity 6000.3.24f1. 사용자는 현재 Hub에서 에디터를 설치 중이며 완료 후 알리기로 했다. 완료 안내 전 추가 실행은 보류한다.
+고정 Unity6000.3.24f1, D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe. 프로젝트는 D:/github/affix-unity. 설치/라이선스는 검증됐다.
 
-기존 설치본 D:\Program Files\Unity 6000.3.24f1\Editor\Unity.exe의 버전/revision은 프로젝트와 일치했다. 최초 batch 실행은 No valid Unity Editor license found, exit198로 import 이전 중단됐다. 설치 완료 후에도 지속되면 Hub 본인 계정 로그인/사용 가능한 라이선스 활성화가 필요하다. 재설치부터 요구하지 않는다.
+## 무료 원본 반입
 
-## 에디터에서
+1. [공식 Zerie 무료 Soldier/Orc](https://zerie.itch.io/tiny-rpg-character-asset-pack)의 검수 버전 ZIP을 로컬 확보한다. ZIP SHA256과 파일 SHA는 docs/assets/zerie-local-manifest.json 및 Tools/Local/Import-FreeCharacters.ps1을 따른다.
+2. PowerShell에서 `$ErrorActionPreference='Stop'`을 설정하고 프로젝트 루트에서 `./Tools/Local/Import-FreeCharacters.ps1 -ZipPath '<공식 ZIP 절대경로>'`를 실행한다. script가 경로/ZIP/파일해시/Git제외를 검증한다. 다른 버전이나 기존 파일 불일치는 중단하며 덮어쓰지 않는다.
+3. Unity의 `AFFIX/Setup/Build Hero Siege Art Review Scene`을 실행한다. Assets/LocalLicensed 캐릭터는 공개 재배포하지 않는다. 공개 clone의 기존 animation data 참조는 이 단계에서 새 로컬 원본으로 갱신한다.
 
-1. Hub에서 기존 D:\github\affix-unity를 연다. 같은 폴더에 New Project를 만들지 않는다.
-2. AFFIX → Setup → Import Reviewed Art and Create Encounter. CC0 PNG를 slice하고 Hero/Enemy 세트, 초원 씬, Build Settings를 생성한다. 기존 FirstEncounter 씬은 보존한다.
-3. Play에서 걷기/몸·무기 공격/피격/사망, HP, XP25·Gold8 자동수령 1회, HUNT AGAIN 초기화를 확인한다.
-4. 생성된 .asset/.unity/.meta/ProjectSettings 변경을 검토·기록한다. 코어 PASS만으로 완료 처리하지 않는다.
+현재 실제 반입 스크립트 실행 결과 기존 PNG10개·ZIP·script·manifest의 해시/크기/수정시각이 그대로 유지됐다. 생성 방·CC0 아이콘·OFL 폰트는 공개 추적된다. 예전 ReviewedArtSetup은 거절된 Ninja용이며 새 씬에 사용하지 않는다.
 
-AFFIX → Project Dashboard → Export setup report는 설치/로드 보고 도구다. 경로가 포함되므로 공유 전 확인한다.
+## Unity 실행
 
-## 실행 진입점
+같은 프로젝트를 다른 Unity 프로세스가 열고 있지 않을 때 실행한다. 모든 batch 명령에 정확한 `-projectPath`와 `-logFile`을 지정하고 exit0 및 최신 보고서 성공을 확인한 뒤 다음 단계로 이동한다.
 
-같은 프로젝트를 다른 Unity 프로세스가 열고 있지 않을 때만 실행한다. 각 프로세스 exit0과 오류 없는 로그를 확인하지 못하면 다음 단계로 가지 않는다. -projectPath는 위 프로젝트 루트, -logFile은 해당 Build/Reports 아래를 지정한다.
-
-| 단계 | executeMethod | 플래그/완료 근거 |
+| 단계 | executeMethod | 플래그 |
 |---|---|---|
-| slice·씬 생성 | AffixZero.Editor.ReviewedArtSetup.Build | -batchmode -quit, scene/data 생성 및 로그 오류 없음 |
-| 실제 Play | AffixZero.Editor.EncounterVerification.Run | -batchmode, **-quit 금지**, JSON PASS와 exit0 |
-| Windows build | AffixZero.Editor.EncounterVerification.BuildWindows | -batchmode, windows-build.json Succeeded와 exit0 |
+| 신규 자산 slice·씬 | AffixZero.Editor.HeroSiegeArtSetup.Build | -batchmode -quit |
+| 월드 Editor Play | AffixZero.Editor.EncounterVerification.Run | -batchmode, -quit 제외 |
+| Windows 빌드 | AffixZero.Editor.EncounterVerification.BuildWindows | -batchmode, -quit 제외 |
 
-Play 검사는 짧은 idle 관측 후 정상 1대1 실행, 양측 피해/적 사망/유령 피해 없음/단발 보상/실제 씬 reload를 관측한다. 최대90초이며 로그 오류도 실패로 기록한다. PNG는 월드 카메라만 포함해 HUD는 별도 확인한다. 빌드 성공은 exe 실행·사용자 시각 승인이 아니다.
+빌드 출력은 Build/Windows/AffixZero.exe. 일반 실행은 자동 검사 파일을 만들지 않는다. `-affixSmokeTest -affixReportDir '<절대 보고서 폴더>' -screen-fullscreen 0 -screen-width 1280 -screen-height 720`로 검사 실행할 수 있다. 1920×1080도 별도로 검증했다. 검사 실행은 완료 후 종료한다.
 
-## 에디터 없이 가능한 검사
+실제 화면 캡처를 위해 검수 게임 창은 표시해야 한다. Unity batch 에디터만 숨긴 창으로 실행한다. probe는 공유 API로 pause/정보창/재시작을 검증하고, 매 캡처에서 UIDocument·HP·XP·골드·창 상태를 검사한다. 실제 버튼 클릭/키보드 자동화는 아니다. Editor Camera.Render 캡처는 HUD를 포함하지 않는다.
 
-모든 명령은 PowerShell에서 $ErrorActionPreference = 'Stop'을 설정하고 정확한 프로젝트 루트로 이동한 뒤 실행한다. 네이티브 명령 후 $LASTEXITCODE가 0이 아니면 throw로 중단한다.
+최신 결과는 docs/validation/stitch와 docs/media/stitch. 새 빌드 GUID54d35624853d494cbee6127fe860214e, 720/1080 player모두PASS. BMP→PNG는 동일 RGB 픽셀임을 검사했다. 시안 전체 구현이나 사용자 승인으로 읽지 않는다.
+
+## 빠른 소스 검사
+
+프로젝트 루트에서 `$ErrorActionPreference='Stop'`을 설정하고 네이티브 명령마다 `$LASTEXITCODE`가 0이 아니면 throw로 중단한다.
 
 - dotnet run --project Tests/CoreSmoke/CoreSmoke.csproj --configuration Release
-- Tools/Local/Test-UnitySources.ps1 -UnityEditorPath 'D:\Program Files\Unity 6000.3.24f1\Editor\Unity.exe'
-- python Tools/validate_reviewed_art.py
-- python Tools/preview_reviewed_art.py
+- Tools/Local/Test-UnitySources.ps1 -UnityEditorPath 'D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe'
+- python Tools/audit_restart.py --require-history
+- python Tools/validate_reviewed_art.py (남겨 둔 이전 CC0 기술 fixture 검사이며 새 Zerie 아트 검증이 아님)
 
-에셋 도구에는 Python/Pillow가 필요하다. C# 정적 검사는 설치 DLL API 참조만 컴파일하므로 Unity asmdef/패키지/import/렌더/Play를 대신하지 않는다. Build/Reports/art-preview.html도 원본 재생 도구이며 게임 실행화면이 아니다.
-
-옛 저장소 용량은 Tools/Local/Inspect-Storage.cmd의 읽기 전용 보고만 사용한다. 이번 개발에서 옛 폴더 삭제나 stash 적용을 하지 않았다.
+정적 DLL 컴파일/.NET CI는 Unity import·Play·실행·시각 검수를 대체하지 않는다. 소스 예시 art-preview.html도 게임이 아니다. 사용자 폴더·세이브·stash·Git history는 삭제하지 않는다.

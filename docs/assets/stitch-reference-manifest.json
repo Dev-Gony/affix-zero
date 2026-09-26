@@ -3,7 +3,7 @@
   "reviewed_date": "2026-09-26",
   "source": "User-provided Stitch exports",
   "review_scope": "All four screen.png files viewed; HTML and shared design read as reference data. No external scripts executed.",
-  "unity_implementation": "NOT_IMPLEMENTED",
+  "unity_implementation": "DUNGEON_HUD_FIRST_NATIVE_SLICE_VERIFIED; OTHER_SCREENS_NOT_IMPLEMENTED",
   "engine_change_required_for_ui": false,
   "engine": "6000.3.24f1",
   "renderer": "Built-in 2D",

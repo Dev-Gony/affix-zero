@@ -1,0 +1,102 @@
+{
+  "build_guid": "54d35624853d494cbee6127fe860214e",
+  "scope": "Runtime source, current scene/data, package files and main art bytes at native HUD verification; private characters identified separately in zerie-local-manifest.json.",
+  "files": [
+    {
+      "path": "Assets/_Game/Core/AttackTimeline.cs",
+      "sha256": "2ebb4a6ff975f8547f2b97bd217837139d3718cb71032d95153d21b6c0eae878"
+    },
+    {
+      "path": "Assets/_Game/Core/CombatHealth.cs",
+      "sha256": "39c067ba38609f48b8ddb15655dfbaf8a57747b10eb28e9f61b3815c17192fdb"
+    },
+    {
+      "path": "Assets/_Game/Core/EncounterRewards.cs",
+      "sha256": "b3436803fd49c8ba3647437298d29089461b3e8de465aec30f9c5e7284452b16"
+    },
+    {
+      "path": "Assets/_Game/Data/HeroSiege/Enemy.asset",
+      "sha256": "ca4dcce139004b098297c9ff59b6fcc348b3ec4b124d1056949672691821cbc8"
+    },
+    {
+      "path": "Assets/_Game/Data/HeroSiege/Enemy.asset.meta",
+      "sha256": "8ad8de2f14ca8dd6272f59ad6b1d9c120ba63eddf9c187d3bdb90b7871277ad0"
+    },
+    {
+      "path": "Assets/_Game/Data/HeroSiege/Hero.asset",
+      "sha256": "81583e931450a9942844d9b6cc72539dfef753dd1ec90a295404b0812ff18065"
+    },
+    {
+      "path": "Assets/_Game/Data/HeroSiege/Hero.asset.meta",
+      "sha256": "706770ad3a09e86fc17b6231cf2b6ad15678c07f9569c6f119ccd8aaed965dfc"
+    },
+    {
+      "path": "Assets/_Game/Editor/EncounterVerification.cs",
+      "sha256": "9fea49ccef7ca594dbed116ca1208bdb0c53d383304dd91cb0f63b2290839047"
+    },
+    {
+      "path": "Assets/_Game/Editor/FoundationSetup.cs",
+      "sha256": "29e7e5a9b68f98d015c4bad43b201a945903b14b3ef99d89a4640ef71df5c4a3"
+    },
+    {
+      "path": "Assets/_Game/Editor/HeroSiegeArtSetup.cs",
+      "sha256": "e191fd5f9f59db94ef5f48b0bcdea69e995443862324ff22fd4427e76bbbdb74"
+    },
+    {
+      "path": "Assets/_Game/Editor/ProjectDashboard.cs",
+      "sha256": "da9ff6aff045fc04c4861d9b596c362033a59ff88bc2fbae2a5fa14ed6ec20ce"
+    },
+    {
+      "path": "Assets/_Game/Editor/ReviewedArtSetup.cs",
+      "sha256": "855c925b708d3eb8a132a165ac776058ea10d291eb6b85bbf8bfc013f6f8a708"
+    },
+    {
+      "path": "Assets/_Game/Presentation/ActorAnimationSet.cs",
+      "sha256": "ac5c0098c39d4ca61a04c44e522e8b3ed131fd998f8144deae634f5856e2da5e"
+    },
+    {
+      "path": "Assets/_Game/Presentation/EncounterHud.cs",
+      "sha256": "3a466df938d3344ba2681b48356cf2925c6f0082fb795910c7a9ba9f848e8fb2"
+    },
+    {
+      "path": "Assets/_Game/Presentation/FirstEncounter.cs",
+      "sha256": "2205c8ef633d82be86efe7d44f00007209d1e462142aca0382a618c8846eb591"
+    },
+    {
+      "path": "Assets/_Game/Presentation/MeleeActor.cs",
+      "sha256": "187163b12d525ba0ea221488376a75d7abcbd381ad08d3f03df552c023522f4f"
+    },
+    {
+      "path": "Assets/_Game/Presentation/PlayerSmokeProbe.cs",
+      "sha256": "67d4fc0b0d9cb73e19b7b6d95de3bb41ac9cab02f6015f42ab0a335a02fd1c0a"
+    },
+    {
+      "path": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
+      "sha256": "95b1f27d3b2e9a788c00f5b11bcc3fa50fa61655aae80614d8d01f6978bc341c"
+    },
+    {
+      "path": "Assets/_Game/Scenes/HeroSiegeEncounter.unity.meta",
+      "sha256": "51a36bc64094ae8f0d1a61483d9066f01202e5438389d5746ca96a3cc267c556"
+    },
+    {
+      "path": "Assets/Art/Fonts/Resources/AffixUI/Korean.otf",
+      "sha256": "69975a0ac8472717870aefeab0a4d52739308d90856b9955313b2ad5e0148d68"
+    },
+    {
+      "path": "Assets/Art/Generated/Resources/AffixGenerated/TempleRoom-v1.png",
+      "sha256": "3a3adf4ca336020800248defacdf3ca865664d937b27a6d477bd198ceb544802"
+    },
+    {
+      "path": "Assets/Art/Lucifer/Resources/AffixGenerated/AttackIcon.png",
+      "sha256": "33dac9cf80969fdc25f938cc4fcace2f97d66490f3f73bf401df1171fdffdafb"
+    },
+    {
+      "path": "Packages/manifest.json",
+      "sha256": "78b9072dcc6fa529087a495056f52028f48162434cd7fff8ffff0b6258405f3b"
+    },
+    {
+      "path": "Packages/packages-lock.json",
+      "sha256": "16b25471a4769a00dd0cf95fcabc7790c1ee6c6c94f3b527dc0183f669934e5f"
+    }
+  ]
+}

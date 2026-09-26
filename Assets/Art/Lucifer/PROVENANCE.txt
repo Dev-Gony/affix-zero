@@ -1,0 +1,10 @@
+Lucifer RPG UI 1.0 - single icon intake
+Source: https://foozlecc.itch.io/lucifer-rpg-ui
+Downloaded: 2026-09-26 via official free download
+ZIP: Foozle_UI_0002_Lucifer_RPG_UI_Pixel_Art.zip
+Original path: Skill Icons/Warrior Icons/Warrior Green Skills/Png/Warrior Icon 01.png
+Destination: Resources/AffixGenerated/AttackIcon.png
+SHA-256: 33dac9cf80969fdc25f938cc4fcace2f97d66490f3f73bf401df1171fdffdafb
+Original 16x16 PNG copied without alteration. Used as a basic melee attack icon.
+License: CC0 1.0, see unmodified bundled LICENSE.txt. No font imported.
+Credit discrepancy preserved: website credits David/chroma_dave, bundled README credits Baldur/the__baldur; distributor and CC0 agree.

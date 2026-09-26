@@ -1,39 +1,36 @@
-# 현재 인수인계 | 신규 CC0 아트와 U1 실행 준비
+# 인수인계 — 사용자 Stitch 시안의 네이티브 Unity 구현
 
-갱신: 2026-09-26. 저장소 Dev-Gony/affix-zero, 브랜치 restart/unity-6, PR #19 Draft. 구현 기준 커밋 dbe8d76e286cdecfcf302dd42a9672a40fb87b9a. 이후 도구/문서 커밋은 최신 HEAD를 확인한다.
+갱신: 2026-09-26. `restart/unity-6`, Draft PR19. 먼저 STATUS.json, PRODUCT_BRIEF.md, STITCH_UNITY_ASSESSMENT.md, UI_DIRECTION.md를 읽는다.
 
-## 사용자와 환경
+## 유효 방향
 
-사용자는 현재 Unity Hub에서 에디터 설치 중이며 완료 후 알려주겠다고 했다. 그때까지 추가 Unity 실행을 보류한다. 이미 존재하는 D:\Program Files\Unity 6000.3.24f1\Editor\Unity.exe의 ProductVersion은 6000.3.24f1_4e7b9b5b6244로 프로젝트와 일치했다. 1회 batch 실행은 import 전에 라이선스 부재로 종료 코드 198을 반환했다. 설치·라이선스 문제를 해결됐다고 추정하지 않는다. 재설치나 옛 Godot 폴더 동기화를 요구하지 않는다.
+사용자 제공 Stitch ZIP4의 영웅 선택/던전 전투/타운/장비·특성이 구체적인 UI 기준이다. 기존 Hero Siege 참고만으로 임의 배치를 반복하지 않는다. 탕탕특공대와 3지선다, 이전 Ninja·밝은 초원·코너 HUD는 폐기 방향이다. 무료 에셋+직접 제작만 사용하며 유료 구매를 진행하지 않는다. 전체 ZIP 원본은 ignored Build/Reference/Stitch/00..03, 참조 SHA와 구성은 docs/assets/stitch-reference-manifest.json에 있다.
 
-## 실제 반영한 것
+Unity6000.3.24f1 / C# / Built-in2D 유지. 실제 에디터 D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe. 설치/라이선스는 작동하므로 재설치 요구를 반복하지 않는다. 이번 UI 때문에 엔진/패키지/렌더러를 변경하지 않았다.
 
-- 새 Ninja Adventure 제작자 원본과 CC0 전문 확인, 최소 11 PNG와 라이선스/README 반입. SHA·프레임·방향·pivot·impact는 docs/assets에 기록. Tiny Swords CC0 구버전은 Hit 결손으로 미채택.
-- NinjaGreen의 실제 idle/walk/attack/hit/death와 Katana/Axe 공격 프레임을 연결하는 ReviewedArtSetup. 영웅과 첫 적은 같은 신규 캐릭터를 공유하며 적은 진영 tint와 Axe로 구분한다. 별도 몬스터 아트를 완성한 것이 아니다.
-- 몸·무기의 공통 공격 시간표, 공격 대상 object 잠금, 치명타 뒤 회복 동작, 취소/중복 피해 차단.
-- 밝은 초원·흙길·연못·나무 씬 생성기, 아이보리/초록 HUD, 자동 접근·공격, 처치 후 XP25/Gold8 자동수령 1회, 재시작 초기화. 접촉 드랍·영구 저장은 없다.
-- 실제 Play/피해/사망/보상/씬 재시작을 검사하는 EncounterVerification과 Windows 빌드 진입점. 도구 작성과 실행 성공은 별개.
-- Tools/validate_reviewed_art.py와 preview_reviewed_art.py: 원본 SHA/실프레임 검사, 원본 재생 HTML 생성. HTML은 Unity 게임 실행화면이 아니다.
+## 현재 구현
 
-## 실행한 검사와 한계
+HeroSiegeEncounter에서 새 무료 Soldier/Orc 애니메이션·생성 방·CC0 Lucifer 공격 아이콘·OFL Noto Sans KR로 1대1 전투한다. EncounterHud는 OnGUI를 제거하고 C# UI Toolkit UIDocument/PanelSettings/VisualElement로 만들었다. 상단 메뉴와 실제 적 HP, 우측 실제 위치 미니맵, 하단 HP 구체/공격 경과/획득 XP를 연결했다. MP는 아직 없고, 장비 창은 읽기 전용이다. 생성 HudFrames-v1은 앞선 중간 산출물이며 새 HUD가 로드하지 않는다.
 
-코어 56 checks PASS. 설치된 Unity DLL을 참조한 전체 C# 정적 컴파일 오류0/경고0. 현재 트리 감사 PASS, 이전 엔진 잔존 파일0. 정적 컴파일은 Unity asmdef/패키지/import/Play 검증을 대신하지 않는다.
+지금은 **전투 화면 첫 단계**다. 영웅 선택·타운·실제 인벤토리/비교/장착·특성 트리·마나·능동 스킬·저장·오프라인 보상은 구현되지 않았다. 캐릭터는 좌우 방향에 한정되고 방은 단일 그림으로 충돌/가림이 없다. UI 위에 원작 스크린샷을 붙여 완성으로 처리하지 않는다.
 
-수치 시뮬에서 2프레임 피격을 6fps로 재생하면 영웅이 계속 경직됨을 확인해 reactionFps10으로 조정했다. hero attack8fps/enemy10fps, impact index1, 이동8fps. 시뮬은 실제 Unity Play 결과가 아니다.
+## 실제 확인
 
-**Unity import/씬 생성/Play/Windows build/사용자 시각 승인은 미완료.** 현재 PNG .meta는 GUID를 보존하는 초기 설정이며 실제 slice와 .asset/.unity는 승인 버전 에디터에서 생성한다. 빈 씬을 완성 게임으로 보고하지 않는다.
+- 새 아트 Editor Play: 04:38:29Z PASS. Camera.Render 월드 전용, 새 Stitch HUD 검사가 아님.
+- 새 네이티브 HUD Windows build: 04:55:46Z 성공, 오류0/경고0.
+- buildGuid: 54d35624853d494cbee6127fe860214e.
+- 720 player run: 15048b15916b455daa9126e3372c7ac1 PASS.
+- 1080 player run: c689d0cd4e0041bd8c5217777dae77b3 PASS.
+- 두 실행에서 이동/공격/타격프레임/적사망/단발보상/일시정지/정보창/재시작과 네이티브 HP·XP·골드 텍스트·창 표시를 확인. 5상태씩 framebuffer 캡처.
+- 에이전트가 720 전투·장비,1080 결과 PNG를 직접 확인. 한글 표시와 화면 가장자리 배치 관찰. 사용자 시각 승인 아님.
+- **실제 마우스/키보드 입력 미검사**. probe는 UI와 공유한 API를 직접 호출한다.
 
-## 설치 완료 후 순서
+보고서와 소스 SHA는 docs/validation/stitch, 무손실 캡처는 docs/media/stitch에 있다. Build/Windows/AffixZero.exe는 이제 위 새 네이티브 HUD 빌드다. 이전 docs/media/first-encounter-* 미추적 캡처를 최신 결과로 추가하지 않는다.
 
-1. 완료 안내 후 프로젝트를 사용하는 다른 Unity 프로세스가 없는지 확인하고 현행 버전으로 실행. 라이선스 오류가 지속될 때만 Hub 로그인/라이선스 활성화를 요청한다.
-2. AffixZero.Editor.ReviewedArtSetup.Build를 -batchmode -quit -projectPath와 함께 실행하거나 에디터 AFFIX → Setup → Import Reviewed Art and Create Encounter를 사용. 기존 씬은 덮어쓰지 않는다.
-3. AffixZero.Editor.EncounterVerification.Run은 -batchmode와 **-quit 없이** 실행. 실제 Play와 domain reload를 기다려 Build/Reports/encounter-verification.json을 생성. PNG는 Camera.Render 월드만 포함하며 HUD는 별도 확인.
-4. Play 통과 후 AffixZero.Editor.EncounterVerification.BuildWindows 실행. 생성된 scene/data/.meta/ProjectSettings를 검토·추적. Windows 실행과 사용자 시각 승인은 따로 확인.
+## 재현과 다음 작업
 
-U2 웨이브·펫·가챠·시즌은 U1 승인 전 확장하지 않는다. PR 병합, 옛 사용자 폴더/세이브/stash/Git history 삭제는 수행하지 않았다.
+공개 저장소에는 Zerie PNG원본10개가 없으며 Assets/LocalLicensed 전체가 Git 제외다. 공식 무료 ZIP → Tools/Local/Import-FreeCharacters.ps1 → HeroSiegeArtSetup.Build 순서로 반입한다. 누락/해시 불일치 시 새 씬을 만들기 전에 중단한다. 자세한 실행은 LOCAL_WORKFLOW.md.
 
-## 진행 상황 체크포인트
+다음 우선순위는 Stitch 장비 화면에 실제 드랍→비교→장착→타격 변화와 특성1분기를 연결하는 것이다. 고정 수치표를 인벤토리 완성으로 부르지 않는다. 이후 영웅 선택→타운→던전→귀환 전환으로 확장한다. 다수 스폰·시즌·가챠부터 늘리지 않는다. 사용자 시각 피드백이 오면 현재 시안과 대조해 수정한다.
 
-1. 완료: 신규 원본 검수, U1 연결 소스, 코어/정적 검사, GitHub 구현 업데이트.
-2. 준비: 실제 씬 생성·Play·빌드 도구와 원본 애니메이션 미리보기.
-3. 대기: 설치 완료 안내 후 실제 Unity 검증과 시각 승인.
+45c6205 및 이전 실행 PASS는 거절된 Ninja 시제품의 기술 기록이다. 이후 시안 검토 문서 1802dae와 네이티브 UI 소스 변경을 구분한다. Git 상태를 먼저 확인하고 미추적 거절 시안/개인 라이선스 원본을 git add .로 반입하지 않는다. 원작 이미지·Godot/E0/V0/PR18 복원, 사용자 자료 삭제, 자동 stash, force push, PR 병합은 금지한다.

@@ -26,6 +26,8 @@ namespace AffixZero.Presentation
 
         public int Hp => health == null ? maximumHp : health.Current;
         public int MaxHp => maximumHp;
+        public int Damage => damage;
+        public int Defense => defense;
         public bool IsDead => health != null && health.IsDead;
         public bool IsReady => health != null;
         public int ActorId => actorId;

@@ -4,8 +4,8 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "restart/unity-6",
   "pr": 19,
-  "stage": "U1_REVIEWED_ART_AND_INTEGRATION_AWAITING_UNITY_SETUP",
-  "implementation_commit": "dbe8d76e286cdecfcf302dd42a9672a40fb87b9a",
+  "stage": "STITCH_NATIVE_COMBAT_HUD_FIRST_SLICE",
+  "implementation_commit": "See docs/validation/stitch/source-fingerprint.json; pending current source commit",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
   "installation": {
@@ -13,15 +13,16 @@
     "drive": "D:",
     "actual_editor_version": "6000.3.24f1_4e7b9b5b6244",
     "exact_editor_path": "D:/Program Files/Unity 6000.3.24f1/Editor/Unity.exe",
-    "latest_user_report": "HUB_EDITOR_INSTALL_IN_PROGRESS_WILL_NOTIFY_WHEN_READY",
-    "further_editor_launches": "WAIT_FOR_USER_INSTALL_COMPLETION"
+    "latest_user_report": "INSTALLATION_COMPLETE",
+    "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "SOURCE_IMPORTED_AND_REVIEWED_UNITY_SLICING_PENDING",
-  "unity_editor_import": "BLOCKED_BEFORE_IMPORT_EXIT_198_NO_VALID_LICENSE",
-  "unity_play": "NOT_RUN",
-  "visual_approval": "NOT_RUN",
-  "windows_build": "NOT_RUN",
-  "first_encounter_scene": "REVIEWED_ART_BUILDER_READY_NOT_GENERATED",
+  "new_art": "FREE_ZERIE_PRIVATE_RAW_GENERATED_ROOM_CC0_ICON_OFL_FONT_IMPORTED",
+  "unity_editor_import": "PASS",
+  "unity_play": "PRE_STITCH_WORLD_PLAY_PASS; NATIVE_HUD_VERIFIED_IN_WINDOWS_PLAYER",
+  "visual_approval": "NOT_APPROVED; PREVIOUS_NINJA_UI_REJECTED",
+  "ui_direction": "USER_STITCH_FOUR_SCREENS_NATIVE_UNITY",
+  "windows_build": "SUCCEEDED_2026-09-26T04:55:46Z_ZERO_ERRORS_WARNINGS",
+  "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
     "local_sizes": "NOT_MEASURED",
@@ -29,9 +30,25 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User will report Hub installation completion; then reviewed asset setup, actual Play, Windows build and visual acceptance",
-  "rewards": "SOURCE_WRITTEN_AUTO_COLLECT_25_XP_8_GOLD_ONCE_PER_DEATH_TRANSIENT_ONLY",
+  "next": "Implement real loot comparison/equip and one talent branch in the user Stitch management layout",
+  "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 56,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
-  "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay"
+  "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
+  "windows_player": "PASS_NATIVE_HUD_720_1080",
+  "executable": "Build/Windows/AffixZero.exe",
+  "actual_game_capture": "docs/media/stitch/",
+  "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
+  "new_direction_validation": "NATIVE_COMBAT_HUD_PLAYER_PASS_720_1080; FULL_UI_NOT_IMPLEMENTED",
+  "previous_technical_checks_scope": "Unity PASS fields refer only to the rejected technical prototype, not Hero Siege direction.",
+  "stitch": {
+    "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
+    "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
+    "engine_or_package_changes": false,
+    "current_scope": "First combat HUD only; readonly character information, not item inventory or skill tree",
+    "build_guid": "54d35624853d494cbee6127fe860214e",
+    "reports": "docs/validation/stitch/",
+    "actual_mouse_keyboard_input": "NOT_RUN",
+    "other_screens": "Hero selection, town, management inventory/talents not implemented"
+  }
 }

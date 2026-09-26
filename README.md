@@ -1,26 +1,21 @@
 # AFFIX: ZERO
 
-자동사냥을 중심으로 캐주얼 슈팅·로그라이크·핵앤슬래시·액션 RPG를 결합하는 새 Unity 프로젝트입니다.
+Unity 6000.3.24f1 / C# / Built-in 2D로 만드는 PC 가로형 Hero Siege 오마주 액션 RPG입니다. 개발선은 `restart/unity-6`, [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19)입니다.
 
-**개발선:** restart/unity-6 · [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19) · Unity 6000.3.24f1 · C# · Built-in 2D.
+## 현재 작업
 
-## 현재 구현
+사용자가 직접 제공한 Stitch의 영웅 선택·던전 전투·타운·장비/특성 화면을 UI 기준으로 삼습니다. 네 화면 모두 현행 Unity에서 구현 가능합니다. [시안 검토와 구현 판단](docs/STITCH_UNITY_ASSESSMENT.md).
 
-새 CC0 Ninja Adventure 원본의 실제 걷기·공격·피격·사망 프레임과 Katana/Axe를 반입했습니다. 첫 영웅과 적은 같은 신규 캐릭터를 공유하고 무기·진영 색으로 구분합니다. 밝은 초원 씬 생성, 자동 접근·공격, 몸/무기 타격 동기화, HP HUD, 처치 보상 1회, 재시작을 연결했습니다. 폐기한 Godot 코드와 이미지는 사용하지 않습니다.
+현재 **던전 전투 HUD의 첫 네이티브 구현**을 만들었습니다. UI Toolkit의 상단 적 HP·우측 미니맵·하단 HP 구체/공격 슬롯에 실제 1대1 전투 상태를 연결했습니다. 무료 캐릭터, 직접 생성한 방, CC0 공격 아이콘, OFL 한글 폰트를 사용합니다. HTML이나 웹뷰를 게임에 띄우지 않습니다.
 
-코어 **56 checks PASS**, 설치 Unity API 참조 C# 정적 컴파일 **오류0/경고0**입니다. **실제 Unity import·Play·Windows 빌드는 미검증**입니다. 사용자는 Hub에서 에디터 설치 중이며, 발견한 설치본의 실행 시도는 라이선스 오류198로 import 이전 중단됐습니다. 첫 빌드 완료 상태가 아닙니다.
+Unity Windows 빌드 오류0/경고0, 실제 1280×720 및 1920×1080 실행 검사 PASS. [실제 실행 캡처](docs/media/stitch/1080-cleared.png) · [검증 기록](docs/validation/stitch/). 실제 마우스/키보드 조작과 사용자 시각 승인은 별도 미완료입니다. 이것은 전체 시안 완성이 아닙니다. 영웅 선택·타운·인벤토리 장착·특성·마나/능동 스킬은 남아 있습니다.
 
-## 설치 완료 후
+## 시작과 문서
 
-프로젝트 루트를 승인 버전 Unity에서 연 뒤 AFFIX → Setup → Import Reviewed Art and Create Encounter로 검수 원본을 slice하고 첫 씬을 생성합니다. 기존 씬은 덮어쓰지 않습니다. 실행 검사와 현재 인수인계는 [HANDOFF](docs/HANDOFF.md), 자세한 절차는 [LOCAL_WORKFLOW](docs/LOCAL_WORKFLOW.md)에 있습니다.
+- [인수인계](docs/HANDOFF.md) · [현재 상태](docs/STATUS.json) · [제품 목표](docs/PRODUCT_BRIEF.md)
+- [로컬 반입/실행](docs/LOCAL_WORKFLOW.md) · [구조](docs/ARCHITECTURE.md) · [에셋 반입](docs/ASSET_INTAKE.md)
+- [검증 범위](docs/VERIFICATION.json) · [트러블슈팅](docs/TROUBLESHOOTING.md)
 
-원본 프레임 미리보기는 python Tools/preview_reviewed_art.py로 Build/Reports/art-preview.html에 만듭니다. 이는 Unity 실행화면이 아닙니다.
+공개 clone에는 게임 사용만 허가된 Zerie 캐릭터 원본이 없습니다. 공식 무료 팩을 확보한 뒤 검증 반입 스크립트와 새 씬 설정을 실행해야 합니다. 원본 공개 재배포 제한을 구매 여부와 구분합니다. 유료 에셋 구매·엔진/패키지/렌더러 변경·PR 병합은 하지 않았습니다.
 
-## 문서
-
-- [제품 기획](docs/PRODUCT_BRIEF.md) · [로드맵](docs/ROADMAP.md) · [구조](docs/ARCHITECTURE.md)
-- [신규 아트 검수](docs/assets/ninja-adventure.md) · [아트 방향](docs/ART_DIRECTION.md) · [반입 원칙](docs/ASSET_INTAKE.md)
-- [현재 상태](docs/STATUS.json) · [검증 기록](docs/VERIFICATION.json) · [트러블슈팅](docs/TROUBLESHOOTING.md)
-- [문서 목차](docs/README.md) · [텍스트 전용 과거 회고](docs/history/LEGACY_RETROSPECTIVE.md)
-
-Assets/**/*.meta는 추적하고 Library, Build, 원본 ZIP/검사 임시 출력은 제외합니다. 옛 폴더·세이브·stash·Git history 삭제와 PR 병합은 수행하지 않았습니다.
+이전 Ninja/초원/코너 HUD는 사용자가 거절한 기술 시제품이며 현재 방향이 아닙니다. 옛 Godot 코드·아트는 복원하지 않습니다.

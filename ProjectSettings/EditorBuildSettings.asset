@@ -6,6 +6,9 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
+    path: Assets/_Game/Scenes/HeroSiegeEncounter.unity
+    guid: c3706c21034d9a64e8e6698e98e0f998
+  - enabled: 0
     path: Assets/_Game/Scenes/FirstEncounter.unity
     guid: c29171be1f7ad404a9f433290b317e31
   m_configObjects: {}
