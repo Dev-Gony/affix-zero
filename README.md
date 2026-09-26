@@ -1,8 +1,10 @@
 # AFFIX: ZERO
 
-Unity 6000.3.24f1 / C# / Built-in 2D로 만드는 PC 가로형 Hero Siege 오마주 액션 RPG입니다. 개발선은 `restart/unity-6`, [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19)입니다.
+Unity 6000.3.24f1 / C# / Built-in 2D로 만드는 PC 가로형 Hero Siege 오마주 **자동사냥 방치형 RPG**입니다. 개발선은 `restart/unity-6`, [Draft PR #19](https://github.com/Dev-Gony/affix-zero/pull/19)입니다.
 
 ## 현재 작업
+
+**현재는 MVP 이전의 1대1 전투·성장 프로토타입입니다.** 목표는 캐릭터가 던전을 스스로 탐색·사냥·수거·반복하는 게임입니다. 다음 작업은 관리 UI 추가보다 자동 던전 순환이며, 이어서 반복 성장과 저장을 연결합니다. [자동사냥 MVP 기준](docs/AUTO_HUNT_MVP.md).
 
 사용자가 제공한 Stitch 시안 7개를 UI 기준으로 삼습니다. 새 특성·펫·대장간 레퍼런스를 검토하고, 전용 특성 화면과 무기 강화를 현재 Unity 전투에 연결했습니다. [추가 시안 검토](docs/STITCH_REFERENCE_EXPANSION.md).
 

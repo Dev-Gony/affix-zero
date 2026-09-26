@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Implement hero selection and town-to-dungeon navigation using the user Stitch screens",
+  "next": "AUTO_HUNT_MVP: traversable dungeon routes, autonomous target selection/combat/loot, next section and automatic rerun before more management screens",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 105,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
@@ -89,5 +89,20 @@
     "verified_example": "Attack 43 -> 45, gold 8 -> 0, actual next-encounter impact 43 after defense2",
     "session_only": true,
     "pet_scope": "Reference intake only, no pet runtime"
+  },
+  "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
+  "mvp": {
+    "status": "NOT_READY",
+    "current": "One-on-one combat and management prototype",
+    "plan": "docs/AUTO_HUNT_MVP.md",
+    "missing": [
+      "autonomous dungeon navigation and target switching",
+      "automatic item pickup and section/rerun loop",
+      "repeat loot growth and persistent save",
+      "hunt continues while management menus open",
+      "unattended endurance and physical controls validation"
+    ],
+    "release_date": "NOT_COMMITTED; estimate after first autonomous dungeon integration",
+    "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
   }
 }
