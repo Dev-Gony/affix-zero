@@ -1,0 +1,2077 @@
+fileFormatVersion: 2
+guid: 74675651aa2aafc4786194fa27e0b923
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 420276372459648215
+    second: EnemyAtlas-v1_0
+  - first:
+      213: 8868696572963463081
+    second: EnemyAtlas-v1_1
+  - first:
+      213: -8207771351534606874
+    second: EnemyAtlas-v1_2
+  - first:
+      213: -3156474841917884476
+    second: EnemyAtlas-v1_3
+  - first:
+      213: 7790346089013850125
+    second: EnemyAtlas-v1_4
+  - first:
+      213: 7892494263606108635
+    second: EnemyAtlas-v1_5
+  - first:
+      213: 4913530044177170998
+    second: EnemyAtlas-v1_6
+  - first:
+      213: 3714201014851253115
+    second: EnemyAtlas-v1_7
+  - first:
+      213: 1905027636582622127
+    second: EnemyAtlas-v1_8
+  - first:
+      213: 1532285827125782737
+    second: EnemyAtlas-v1_9
+  - first:
+      213: 1068106271567067990
+    second: EnemyAtlas-v1_10
+  - first:
+      213: -8459103598660242131
+    second: EnemyAtlas-v1_11
+  - first:
+      213: 3217564438493285079
+    second: EnemyAtlas-v1_12
+  - first:
+      213: -4434373109074518409
+    second: EnemyAtlas-v1_13
+  - first:
+      213: -7625557624894101915
+    second: EnemyAtlas-v1_14
+  - first:
+      213: 7679790462573407523
+    second: EnemyAtlas-v1_15
+  - first:
+      213: 81113949824784195
+    second: EnemyAtlas-v1_16
+  - first:
+      213: 1214948880605159564
+    second: EnemyAtlas-v1_17
+  - first:
+      213: 6152047224271321416
+    second: EnemyAtlas-v1_18
+  - first:
+      213: 8114057485474748364
+    second: EnemyAtlas-v1_19
+  - first:
+      213: 2255378866879783551
+    second: EnemyAtlas-v1_20
+  - first:
+      213: -3027592772923400863
+    second: EnemyAtlas-v1_21
+  - first:
+      213: 212034265123959506
+    second: EnemyAtlas-v1_22
+  - first:
+      213: 1142671934126790668
+    second: EnemyAtlas-v1_23
+  - first:
+      213: 6207461399052391454
+    second: EnemyAtlas-v1_24
+  - first:
+      213: 517542028167172820
+    second: EnemyAtlas-v1_25
+  - first:
+      213: 1373887430056454358
+    second: EnemyAtlas-v1_26
+  - first:
+      213: 1362525185994446138
+    second: EnemyAtlas-v1_27
+  - first:
+      213: -715567158265810148
+    second: EnemyAtlas-v1_28
+  - first:
+      213: -7928029148640345572
+    second: EnemyAtlas-v1_29
+  - first:
+      213: -1961921677110885821
+    second: EnemyAtlas-v1_30
+  - first:
+      213: 8291147414898283802
+    second: EnemyAtlas-v1_31
+  - first:
+      213: 9056505970366950323
+    second: EnemyAtlas-v1_32
+  - first:
+      213: -3004464973823303230
+    second: EnemyAtlas-v1_33
+  - first:
+      213: 1363708778271119087
+    second: EnemyAtlas-v1_34
+  - first:
+      213: 8892883777484288933
+    second: EnemyAtlas-v1_35
+  - first:
+      213: 8322388175278018432
+    second: EnemyAtlas-v1_36
+  - first:
+      213: 4030203432973791581
+    second: EnemyAtlas-v1_37
+  - first:
+      213: -6666469628109047939
+    second: EnemyAtlas-v1_38
+  - first:
+      213: 1732643702044228051
+    second: EnemyAtlas-v1_39
+  - first:
+      213: 7099705698015779841
+    second: EnemyAtlas-v1_40
+  - first:
+      213: -5840748632913228801
+    second: EnemyAtlas-v1_41
+  - first:
+      213: -4565956797739606920
+    second: EnemyAtlas-v1_42
+  - first:
+      213: 1525104768371283890
+    second: EnemyAtlas-v1_43
+  - first:
+      213: 3022958038741513503
+    second: EnemyAtlas-v1_44
+  - first:
+      213: -3835265101846293202
+    second: EnemyAtlas-v1_45
+  - first:
+      213: -6331564715736062261
+    second: EnemyAtlas-v1_46
+  - first:
+      213: 4867538601779750933
+    second: EnemyAtlas-v1_47
+  - first:
+      213: -3891572666185677681
+    second: EnemyAtlas-v1_48
+  - first:
+      213: -1665790830415314987
+    second: EnemyAtlas-v1_49
+  - first:
+      213: 8179620060989258035
+    second: EnemyAtlas-v1_50
+  - first:
+      213: 548560735785551745
+    second: EnemyAtlas-v1_51
+  - first:
+      213: -3408499135106689842
+    second: EnemyAtlas-v1_52
+  - first:
+      213: 2928964851112130842
+    second: EnemyAtlas-v1_53
+  - first:
+      213: 1651635229404634210
+    second: EnemyAtlas-v1_54
+  - first:
+      213: 220950883985902676
+    second: EnemyAtlas-v1_55
+  - first:
+      213: -3774136443199390688
+    second: EnemyAtlas-v1_56
+  - first:
+      213: -1187336693229584191
+    second: EnemyAtlas-v1_57
+  - first:
+      213: -1004059639887003801
+    second: EnemyAtlas-v1_58
+  - first:
+      213: -8260553049670412836
+    second: EnemyAtlas-v1_59
+  - first:
+      213: 8959899286148768384
+    second: EnemyAtlas-v1_60
+  - first:
+      213: -2913414787033653880
+    second: EnemyAtlas-v1_61
+  - first:
+      213: -8858818087472784912
+    second: EnemyAtlas-v1_62
+  - first:
+      213: -5260153539280540368
+    second: EnemyAtlas-v1_63
+  - first:
+      213: -2198493947326992292
+    second: EnemyAtlas-v1_64
+  - first:
+      213: -808241869665073783
+    second: EnemyAtlas-v1_65
+  - first:
+      213: -4227323163425464199
+    second: EnemyAtlas-v1_66
+  - first:
+      213: -8258292005432952
+    second: EnemyAtlas-v1_67
+  - first:
+      213: 5626058239534977376
+    second: EnemyAtlas-v1_68
+  - first:
+      213: 4078242684805339156
+    second: EnemyAtlas-v1_69
+  - first:
+      213: 3610101340531737951
+    second: EnemyAtlas-v1_70
+  - first:
+      213: -4969791567342623585
+    second: EnemyAtlas-v1_71
+  - first:
+      213: -1137451675896285627
+    second: EnemyAtlas-v1_72
+  - first:
+      213: -3846276880672606503
+    second: EnemyAtlas-v1_73
+  - first:
+      213: -6458187537907877337
+    second: Raider_Down_Idle_00
+  - first:
+      213: 804448042064076937
+    second: Raider_Down_Idle_01
+  - first:
+      213: -4721794515227364746
+    second: Raider_Down_Walk_00
+  - first:
+      213: -6274629206884258845
+    second: Raider_Down_Walk_01
+  - first:
+      213: 4464065777440289376
+    second: Raider_Down_Walk_02
+  - first:
+      213: -8036017265030523622
+    second: Raider_Down_Walk_03
+  - first:
+      213: -1011687515173502949
+    second: Raider_Down_Hit_00
+  - first:
+      213: 7703683418569535508
+    second: Raider_Down_Hit_01
+  - first:
+      213: -8885901105471548080
+    second: Raider_Down_Attack_00
+  - first:
+      213: 4253363361041875221
+    second: Raider_Down_Attack_01
+  - first:
+      213: -1398679982907191103
+    second: Raider_Down_Attack_02
+  - first:
+      213: 3199674746942172444
+    second: Raider_Down_Attack_03
+  - first:
+      213: 6902183738876930963
+    second: Raider_Down_Attack_04
+  - first:
+      213: 3499331259552361806
+    second: Raider_Down_Death_00
+  - first:
+      213: -8631621870425170494
+    second: Raider_Down_Death_01
+  - first:
+      213: 7422476418645318432
+    second: Raider_Down_Death_02
+  - first:
+      213: 3036270021640893210
+    second: Raider_Left_Idle_00
+  - first:
+      213: 6824395968145061314
+    second: Raider_Left_Idle_01
+  - first:
+      213: 6335486205494447433
+    second: Raider_Left_Walk_00
+  - first:
+      213: 9105456286889923338
+    second: Raider_Left_Walk_01
+  - first:
+      213: -7141525305986520495
+    second: Raider_Left_Walk_02
+  - first:
+      213: -8531806841761146452
+    second: Raider_Left_Walk_03
+  - first:
+      213: -7539974748280909228
+    second: Raider_Left_Hit_00
+  - first:
+      213: -7222613425372637798
+    second: Raider_Left_Hit_01
+  - first:
+      213: -5243878881390099495
+    second: Raider_Left_Attack_00
+  - first:
+      213: 5370107561025682718
+    second: Raider_Left_Attack_01
+  - first:
+      213: -9185358252276651186
+    second: Raider_Left_Attack_02
+  - first:
+      213: 2639289921514099400
+    second: Raider_Left_Attack_03
+  - first:
+      213: 632327217337416686
+    second: Raider_Left_Attack_04
+  - first:
+      213: 8949756614236063652
+    second: Raider_Left_Death_00
+  - first:
+      213: 8860127451947256933
+    second: Raider_Left_Death_01
+  - first:
+      213: -8013953444628984898
+    second: Raider_Left_Death_02
+  - first:
+      213: 829632160385105887
+    second: Raider_Right_Idle_00
+  - first:
+      213: -6314697760676392236
+    second: Raider_Right_Idle_01
+  - first:
+      213: -2575156874527542974
+    second: Raider_Right_Walk_00
+  - first:
+      213: -6383803279686494635
+    second: Raider_Right_Walk_01
+  - first:
+      213: -7209079338544022720
+    second: Raider_Right_Walk_02
+  - first:
+      213: 6648383865548603910
+    second: Raider_Right_Walk_03
+  - first:
+      213: -7127602667020115989
+    second: Raider_Right_Hit_00
+  - first:
+      213: 3474273326168658631
+    second: Raider_Right_Hit_01
+  - first:
+      213: -5648856068749613012
+    second: Raider_Right_Attack_00
+  - first:
+      213: -8686655595320250113
+    second: Raider_Right_Attack_01
+  - first:
+      213: 2908370233058041851
+    second: Raider_Right_Attack_02
+  - first:
+      213: -2266905962210691423
+    second: Raider_Right_Attack_03
+  - first:
+      213: 6267070296967728936
+    second: Raider_Right_Attack_04
+  - first:
+      213: 4823801988687660847
+    second: Raider_Right_Death_00
+  - first:
+      213: -2053807962447832805
+    second: Raider_Right_Death_01
+  - first:
+      213: -2910239624886825800
+    second: Raider_Right_Death_02
+  - first:
+      213: 630947385840718206
+    second: Raider_Up_Idle_00
+  - first:
+      213: -349456290628124810
+    second: Raider_Up_Idle_01
+  - first:
+      213: -4143374224750835161
+    second: Raider_Up_Walk_00
+  - first:
+      213: -8505019355021705625
+    second: Raider_Up_Walk_01
+  - first:
+      213: -1139782692453946560
+    second: Raider_Up_Walk_02
+  - first:
+      213: -2409886684552942241
+    second: Raider_Up_Walk_03
+  - first:
+      213: -1082581842816247067
+    second: Raider_Up_Hit_00
+  - first:
+      213: -7325872996666564434
+    second: Raider_Up_Hit_01
+  - first:
+      213: -2101145494579353573
+    second: Raider_Up_Attack_00
+  - first:
+      213: 57136838474002751
+    second: Raider_Up_Attack_01
+  - first:
+      213: -6684505051962306276
+    second: Raider_Up_Attack_02
+  - first:
+      213: -4223475997274245557
+    second: Raider_Up_Attack_03
+  - first:
+      213: -7360832129306144920
+    second: Raider_Up_Attack_04
+  - first:
+      213: 757582821406654794
+    second: Raider_Up_Death_00
+  - first:
+      213: 7102584092899961792
+    second: Raider_Up_Death_01
+  - first:
+      213: -1083850220016313675
+    second: Raider_Up_Death_02
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 80
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Raider_Down_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72a7526b6a8ef56a0800000000000000
+      internalID: -6458187537907877337
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 980ec7b6b39f92b00800000000000000
+      internalID: 804448042064076937
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6723c71d7e0d87eb0800000000000000
+      internalID: -4721794515227364746
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3eb6f521bf90ce8a0800000000000000
+      internalID: -6274629206884258845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0627e464c2c83fd30800000000000000
+      internalID: 4464065777440289376
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a1513f4cfd45a7090800000000000000
+      internalID: -8036017265030523622
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b10c26aa093c5f1f0800000000000000
+      internalID: -1011687515173502949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 41077e9d04bf8ea60800000000000000
+      internalID: 7703683418569535508
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0551e1b2600fea480800000000000000
+      internalID: -8885901105471548080
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 511009b017bf60b30800000000000000
+      internalID: 4253363361041875221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c01e5057f3e69ce0800000000000000
+      internalID: -1398679982907191103
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c1da640da37876c20800000000000000
+      internalID: 3199674746942172444
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 39bac3a8a8b79cf50800000000000000
+      internalID: 6902183738876930963
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4de9058d3f109030800000000000000
+      internalID: 3499331259552361806
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2cd90d124a1563880800000000000000
+      internalID: -8631621870425170494
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Down_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 02b511f0afee10760800000000000000
+      internalID: 7422476418645318432
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a13b2127f7ff22a20800000000000000
+      internalID: 3036270021640893210
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 2c5f4efc9ff15be50800000000000000
+      internalID: 6824395968145061314
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 94d42e5132b2ce750800000000000000
+      internalID: 6335486205494447433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a03dbe900441d5e70800000000000000
+      internalID: 9105456286889923338
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 15ae536529434ec90800000000000000
+      internalID: -7141525305986520495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ca9549081eee89980800000000000000
+      internalID: -8531806841761146452
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4521d493ae0ac5790800000000000000
+      internalID: -7539974748280909228
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a9552be4b5f14cb90800000000000000
+      internalID: -7222613425372637798
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9d3029dc0fff937b0800000000000000
+      internalID: -5243878881390099495
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1d339cef54768a40800000000000000
+      internalID: 5370107561025682718
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e4be85ee55d078080800000000000000
+      internalID: -9185358252276651186
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c2dd173334a0a420800000000000000
+      internalID: 2639289921514099400
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: eeb3533014a76c800800000000000000
+      internalID: 632327217337416686
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4a74eb9093ce33c70800000000000000
+      internalID: 8949756614236063652
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56cc00e79fe75fa70800000000000000
+      internalID: 8860127451947256933
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Left_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebb0f564dc7b8c090800000000000000
+      internalID: -8013953444628984898
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: fdf7ef5ed02738b00800000000000000
+      internalID: 829632160385105887
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4d2dde6e7dfad58a0800000000000000
+      internalID: -6314697760676392236
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 24171e46774334cd0800000000000000
+      internalID: -2575156874527542974
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 556105e6dbc2867a0800000000000000
+      internalID: -6383803279686494635
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04bb974798434fb90800000000000000
+      internalID: -7209079338544022720
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 602867ca6edc34c50800000000000000
+      internalID: 6648383865548603910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bef9324532ba51d90800000000000000
+      internalID: -7127602667020115989
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c2d5e2ce29173030800000000000000
+      internalID: 3474273326168658631
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c28aeda955b3b91b0800000000000000
+      internalID: -5648856068749613012
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff0f6ca82ccc27780800000000000000
+      internalID: -8686655595320250113
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bff9eb8515b9c5820800000000000000
+      internalID: 2908370233058041851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1a67737b9055a80e0800000000000000
+      internalID: -2266905962210691423
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 82fc9211b3b19f650800000000000000
+      internalID: 6267070296967728936
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f270d82e95691f240800000000000000
+      internalID: 4823801988687660847
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b199d692a886f73e0800000000000000
+      internalID: -2053807962447832805
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Right_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8bcca53fa70cc97d0800000000000000
+      internalID: -2910239624886825800
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e715ff4fd4391c800800000000000000
+      internalID: 630947385840718206
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 67fb59cea5b762bf0800000000000000
+      internalID: -349456290628124810
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 72a873a5817cf76c0800000000000000
+      internalID: -4143374224750835161
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76efb1845f918f980800000000000000
+      internalID: -8505019355021705625
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 04be4271eadae20f0800000000000000
+      internalID: -1139782692453946560
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f5d274a14dc5e8ed0800000000000000
+      internalID: -2409886684552942241
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5ea56aabc85e9f0f0800000000000000
+      internalID: -1082581842816247067
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ea0201cd255455a90800000000000000
+      internalID: -7325872996666564434
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b186f261e4b37d2e0800000000000000
+      internalID: -2101145494579353573
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f31f4d0e6adfac000800000000000000
+      internalID: 57136838474002751
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c119b7e321edb33a0800000000000000
+      internalID: -6684505051962306276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b46741915f23365c0800000000000000
+      internalID: -4223475997274245557
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 86fcc618d2219d990800000000000000
+      internalID: -7360832129306144920
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a41c1edef89738a00800000000000000
+      internalID: 757582821406654794
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0cb64a4f992719260800000000000000
+      internalID: 7102584092899961792
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Raider_Up_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5bad236a7f365f0f0800000000000000
+      internalID: -1083850220016313675
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      EnemyAtlas-v1_0: 420276372459648215
+      EnemyAtlas-v1_1: 8868696572963463081
+      EnemyAtlas-v1_10: 1068106271567067990
+      EnemyAtlas-v1_11: -8459103598660242131
+      EnemyAtlas-v1_12: 3217564438493285079
+      EnemyAtlas-v1_13: -4434373109074518409
+      EnemyAtlas-v1_14: -7625557624894101915
+      EnemyAtlas-v1_15: 7679790462573407523
+      EnemyAtlas-v1_16: 81113949824784195
+      EnemyAtlas-v1_17: 1214948880605159564
+      EnemyAtlas-v1_18: 6152047224271321416
+      EnemyAtlas-v1_19: 8114057485474748364
+      EnemyAtlas-v1_2: -8207771351534606874
+      EnemyAtlas-v1_20: 2255378866879783551
+      EnemyAtlas-v1_21: -3027592772923400863
+      EnemyAtlas-v1_22: 212034265123959506
+      EnemyAtlas-v1_23: 1142671934126790668
+      EnemyAtlas-v1_24: 6207461399052391454
+      EnemyAtlas-v1_25: 517542028167172820
+      EnemyAtlas-v1_26: 1373887430056454358
+      EnemyAtlas-v1_27: 1362525185994446138
+      EnemyAtlas-v1_28: -715567158265810148
+      EnemyAtlas-v1_29: -7928029148640345572
+      EnemyAtlas-v1_3: -3156474841917884476
+      EnemyAtlas-v1_30: -1961921677110885821
+      EnemyAtlas-v1_31: 8291147414898283802
+      EnemyAtlas-v1_32: 9056505970366950323
+      EnemyAtlas-v1_33: -3004464973823303230
+      EnemyAtlas-v1_34: 1363708778271119087
+      EnemyAtlas-v1_35: 8892883777484288933
+      EnemyAtlas-v1_36: 8322388175278018432
+      EnemyAtlas-v1_37: 4030203432973791581
+      EnemyAtlas-v1_38: -6666469628109047939
+      EnemyAtlas-v1_39: 1732643702044228051
+      EnemyAtlas-v1_4: 7790346089013850125
+      EnemyAtlas-v1_40: 7099705698015779841
+      EnemyAtlas-v1_41: -5840748632913228801
+      EnemyAtlas-v1_42: -4565956797739606920
+      EnemyAtlas-v1_43: 1525104768371283890
+      EnemyAtlas-v1_44: 3022958038741513503
+      EnemyAtlas-v1_45: -3835265101846293202
+      EnemyAtlas-v1_46: -6331564715736062261
+      EnemyAtlas-v1_47: 4867538601779750933
+      EnemyAtlas-v1_48: -3891572666185677681
+      EnemyAtlas-v1_49: -1665790830415314987
+      EnemyAtlas-v1_5: 7892494263606108635
+      EnemyAtlas-v1_50: 8179620060989258035
+      EnemyAtlas-v1_51: 548560735785551745
+      EnemyAtlas-v1_52: -3408499135106689842
+      EnemyAtlas-v1_53: 2928964851112130842
+      EnemyAtlas-v1_54: 1651635229404634210
+      EnemyAtlas-v1_55: 220950883985902676
+      EnemyAtlas-v1_56: -3774136443199390688
+      EnemyAtlas-v1_57: -1187336693229584191
+      EnemyAtlas-v1_58: -1004059639887003801
+      EnemyAtlas-v1_59: -8260553049670412836
+      EnemyAtlas-v1_6: 4913530044177170998
+      EnemyAtlas-v1_60: 8959899286148768384
+      EnemyAtlas-v1_61: -2913414787033653880
+      EnemyAtlas-v1_62: -8858818087472784912
+      EnemyAtlas-v1_63: -5260153539280540368
+      EnemyAtlas-v1_64: -2198493947326992292
+      EnemyAtlas-v1_65: -808241869665073783
+      EnemyAtlas-v1_66: -4227323163425464199
+      EnemyAtlas-v1_67: -8258292005432952
+      EnemyAtlas-v1_68: 5626058239534977376
+      EnemyAtlas-v1_69: 4078242684805339156
+      EnemyAtlas-v1_7: 3714201014851253115
+      EnemyAtlas-v1_70: 3610101340531737951
+      EnemyAtlas-v1_71: -4969791567342623585
+      EnemyAtlas-v1_72: -1137451675896285627
+      EnemyAtlas-v1_73: -3846276880672606503
+      EnemyAtlas-v1_8: 1905027636582622127
+      EnemyAtlas-v1_9: 1532285827125782737
+      Raider_Down_Attack_00: -8885901105471548080
+      Raider_Down_Attack_01: 4253363361041875221
+      Raider_Down_Attack_02: -1398679982907191103
+      Raider_Down_Attack_03: 3199674746942172444
+      Raider_Down_Attack_04: 6902183738876930963
+      Raider_Down_Death_00: 3499331259552361806
+      Raider_Down_Death_01: -8631621870425170494
+      Raider_Down_Death_02: 7422476418645318432
+      Raider_Down_Hit_00: -1011687515173502949
+      Raider_Down_Hit_01: 7703683418569535508
+      Raider_Down_Idle_00: -6458187537907877337
+      Raider_Down_Idle_01: 804448042064076937
+      Raider_Down_Walk_00: -4721794515227364746
+      Raider_Down_Walk_01: -6274629206884258845
+      Raider_Down_Walk_02: 4464065777440289376
+      Raider_Down_Walk_03: -8036017265030523622
+      Raider_Left_Attack_00: -5243878881390099495
+      Raider_Left_Attack_01: 5370107561025682718
+      Raider_Left_Attack_02: -9185358252276651186
+      Raider_Left_Attack_03: 2639289921514099400
+      Raider_Left_Attack_04: 632327217337416686
+      Raider_Left_Death_00: 8949756614236063652
+      Raider_Left_Death_01: 8860127451947256933
+      Raider_Left_Death_02: -8013953444628984898
+      Raider_Left_Hit_00: -7539974748280909228
+      Raider_Left_Hit_01: -7222613425372637798
+      Raider_Left_Idle_00: 3036270021640893210
+      Raider_Left_Idle_01: 6824395968145061314
+      Raider_Left_Walk_00: 6335486205494447433
+      Raider_Left_Walk_01: 9105456286889923338
+      Raider_Left_Walk_02: -7141525305986520495
+      Raider_Left_Walk_03: -8531806841761146452
+      Raider_Right_Attack_00: -5648856068749613012
+      Raider_Right_Attack_01: -8686655595320250113
+      Raider_Right_Attack_02: 2908370233058041851
+      Raider_Right_Attack_03: -2266905962210691423
+      Raider_Right_Attack_04: 6267070296967728936
+      Raider_Right_Death_00: 4823801988687660847
+      Raider_Right_Death_01: -2053807962447832805
+      Raider_Right_Death_02: -2910239624886825800
+      Raider_Right_Hit_00: -7127602667020115989
+      Raider_Right_Hit_01: 3474273326168658631
+      Raider_Right_Idle_00: 829632160385105887
+      Raider_Right_Idle_01: -6314697760676392236
+      Raider_Right_Walk_00: -2575156874527542974
+      Raider_Right_Walk_01: -6383803279686494635
+      Raider_Right_Walk_02: -7209079338544022720
+      Raider_Right_Walk_03: 6648383865548603910
+      Raider_Up_Attack_00: -2101145494579353573
+      Raider_Up_Attack_01: 57136838474002751
+      Raider_Up_Attack_02: -6684505051962306276
+      Raider_Up_Attack_03: -4223475997274245557
+      Raider_Up_Attack_04: -7360832129306144920
+      Raider_Up_Death_00: 757582821406654794
+      Raider_Up_Death_01: 7102584092899961792
+      Raider_Up_Death_02: -1083850220016313675
+      Raider_Up_Hit_00: -1082581842816247067
+      Raider_Up_Hit_01: -7325872996666564434
+      Raider_Up_Idle_00: 630947385840718206
+      Raider_Up_Idle_01: -349456290628124810
+      Raider_Up_Walk_00: -4143374224750835161
+      Raider_Up_Walk_01: -8505019355021705625
+      Raider_Up_Walk_02: -1139782692453946560
+      Raider_Up_Walk_03: -2409886684552942241
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

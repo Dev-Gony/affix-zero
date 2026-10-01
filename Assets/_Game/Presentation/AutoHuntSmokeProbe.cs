@@ -202,7 +202,8 @@ namespace AffixZero.Presentation
                 Require(hunt.World.LineOfSight(attacker.transform.position,defender.transform.position),"A hit crossed a blocking dungeon wall.");
                 report.lineOfSightChecks++;
                 var renderer=attacker.GetComponent<SpriteRenderer>();
-                Require(renderer!=null&&attacker.AnimationSet!=null&&renderer.sprite==attacker.AnimationSet.ImpactSprite,
+                Require(renderer!=null&&attacker.AnimationSet!=null&&
+                    renderer.sprite==attacker.AnimationSet.ImpactSpriteFor(attacker.CurrentFacing),
                     "Damage was applied without the real attack impact sprite.");
                 report.impactPoseChecks++;report.acceptedHits++;
                 if(defender==hero)report.heroHitObserved=true;

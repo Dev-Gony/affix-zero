@@ -24,6 +24,7 @@ namespace AffixZero.Presentation
         private double clipTime;
         private double hurtRemaining;
         private ActorClip clip = ActorClip.Idle;
+        private ActorFacing facing = ActorFacing.Down;
         private Func<Vector2, Vector2, Vector2> nextWaypoint;
         private Func<Vector2, Vector2, bool> lineOfSight;
         private Vector2? destination;
@@ -39,6 +40,7 @@ namespace AffixZero.Presentation
         public int ActorId => actorId;
         public int DeathCount => health == null ? 0 : health.DeathCount;
         public ActorClip CurrentClip => clip;
+        public ActorFacing CurrentFacing => facing;
         public ActorAnimationSet AnimationSet => animationSet;
         public MeleeActor CurrentTarget => target;
         public bool IsAttacking => timeline != null && timeline.IsRunning;
@@ -86,6 +88,7 @@ namespace AffixZero.Presentation
             swingDamage = 0;
             hurtRemaining = clipTime = 0;
             clip = ActorClip.Idle;
+            facing = ActorFacing.Down;
             transform.position = new Vector3(position.x, position.y, transform.position.z);
             PrepareRenderer();
             view.flipX = false;
@@ -113,7 +116,7 @@ namespace AffixZero.Presentation
             PrepareRenderer();
             if (timeline == null) timeline = animationSet.CreateTimeline();
             if (health == null) health = new CombatHealth(maximumHp, defense);
-            view.sprite = animationSet.Frame(ActorClip.Idle, 0);
+            view.sprite = animationSet.Frame(ActorClip.Idle, 0, facing);
         }
 
         private void PrepareRenderer()
@@ -148,7 +151,7 @@ namespace AffixZero.Presentation
                 Impact impact = timeline.Advance(delta, alive, inRange);
                 SetClip(ActorClip.Attack);
                 // A skipped render frame still displays the impact pose when applying its hit.
-                view.sprite = impact.Occurred ? animationSet.ImpactSprite : animationSet.AttackFrame(timeline);
+                view.sprite = impact.Occurred ? animationSet.ImpactSpriteFor(facing) : animationSet.AttackFrame(timeline, facing);
                 RenderWeapon(impact.Occurred);
                 if (impact.Occurred) attackTarget.Receive(actorId, impact.AttackId, swingDamage);
                 if (!timeline.IsRunning) attackTarget = null;
@@ -163,8 +166,7 @@ namespace AffixZero.Presentation
 
             Vector2 toTarget = target.transform.position - transform.position;
             // Preserve attack direction until recovery finishes.
-            if (Math.Abs(toTarget.x) > 0.01f)
-                view.flipX = animationSet.SourceFacesRight ? toTarget.x < 0 : toTarget.x > 0;
+            Face(toTarget);
             bool visible = CanSee(target.transform.position);
             if (toTarget.magnitude > reach || !visible)
             {
@@ -181,7 +183,7 @@ namespace AffixZero.Presentation
                 swingDamage = damage;
                 attackTarget = target;
                 SetClip(ActorClip.Attack);
-                view.sprite = animationSet.AttackFrame(timeline);
+                view.sprite = animationSet.AttackFrame(timeline, facing);
                 RenderWeapon(false);
             }
         }
@@ -201,8 +203,7 @@ namespace AffixZero.Presentation
             Vector2 motion = position - current;
             if (motion.sqrMagnitude <= 0.00000001f)
             { SetClip(ActorClip.Idle); RenderClip(); return; }
-            if (Math.Abs(motion.x) > 0.0001f)
-                view.flipX = animationSet.SourceFacesRight ? motion.x < 0 : motion.x > 0;
+            Face(motion);
             transform.position = new Vector3(position.x, position.y, transform.position.z);
             SetClip(ActorClip.Walk); RenderClip();
         }
@@ -213,6 +214,8 @@ namespace AffixZero.Presentation
             HitReceipt receipt = health.Receive(attacker, attack, power);
             if (!receipt.Accepted) return;
             LastAttackerId=attacker;
+            HitFxBurst.Spawn(transform.position + Vector3.up * .55f,
+                view == null ? 1 : view.sortingOrder + 2);
             // Ordinary hits carry damage and feedback, not hard crowd control.
             // Keep the committed swing and movement alive under multiple attackers.
             hurtRemaining=receipt.Killed?0:.12;
@@ -226,7 +229,7 @@ namespace AffixZero.Presentation
         private void SetClip(ActorClip next) { if (clip != next) { clip = next; clipTime = 0; } }
         private void RenderClip()
         {
-            view.sprite = animationSet.Frame(clip, clipTime);
+            view.sprite = animationSet.Frame(clip, clipTime, facing);
             if (weaponView != null) weaponView.enabled = false;
         }
         private void RenderWeapon(bool showImpact)
@@ -237,6 +240,21 @@ namespace AffixZero.Presentation
             weaponView.flipX = view.flipX;
             weaponView.sortingLayerID = view.sortingLayerID;
             weaponView.sortingOrder = view.sortingOrder + 1;
+        }
+        private void Face(Vector2 direction)
+        {
+            if (direction.sqrMagnitude <= .00000001f) return;
+            if (animationSet.UsesFourDirections)
+            {
+                facing = Math.Abs(direction.x) > Math.Abs(direction.y)
+                    ? (direction.x < 0 ? ActorFacing.Left : ActorFacing.Right)
+                    : (direction.y < 0 ? ActorFacing.Down : ActorFacing.Up);
+                view.flipX = false;
+            }
+            else if (Math.Abs(direction.x) > .0001f)
+            {
+                view.flipX = animationSet.SourceFacesRight ? direction.x < 0 : direction.x > 0;
+            }
         }
         private static bool FinitePositive(float x) => x > 0 && !float.IsNaN(x) && !float.IsInfinity(x);
         private static bool FinitePoint(Vector2 point) => !float.IsNaN(point.x) && !float.IsInfinity(point.x)

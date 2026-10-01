@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using AffixZero.Presentation;
 using UnityEditor;
 using UnityEditor.SceneManagement;
@@ -11,23 +10,21 @@ using UnityEngine.SceneManagement;
 
 namespace AffixZero.Editor
 {
-    // Sources stay local because the free pack permits game use, not raw redistribution.
-    // Public scene/data references are regenerated from the exact audited local sources.
+    // Imports the original, project-owned generated combat set and keeps the existing gameplay scene intact.
     public static class HeroSiegeArtSetup
     {
         public const string ScenePath = "Assets/_Game/Scenes/HeroSiegeEncounter.unity";
         public const string DataRoot = "Assets/_Game/Data/HeroSiege";
-        public const string SourceRoot = "Assets/LocalLicensed/Zerie";
-        public const string ManifestPath = "docs/assets/zerie-local-manifest.json";
-        public const string BackgroundPath = "Assets/Art/Generated/Resources/AffixGenerated/TempleRoom-v1.png";
-        private const string ProvenancePath = "docs/assets/HERO_SIEGE_CHARACTER_CANDIDATES.md";
+        public const string ArtRoot = "Assets/Art/OriginalTemple/Resources/AffixOriginal";
+        public const string HeroAtlasPath = ArtRoot + "/HeroAtlas-v1.png";
+        public const string EnemyAtlasPath = ArtRoot + "/EnemyAtlas-v1.png";
+        public const string ImpactAtlasPath = ArtRoot + "/ImpactFxAtlas-v1.png";
+        public const string BackgroundPath = ArtRoot + "/TempleRoom-v2.png";
+        public const string ObstaclePath = ArtRoot + "/TempleObstacle-v2.png";
+        private const string ProvenancePath = "docs/assets/original-temple-combat-set.md";
         private const string PreviousScene = "Assets/_Game/Scenes/FirstEncounter.unity";
         private const float WorldWidth = 32;
-        private static readonly string[] Clips = { "Idle", "Walk", "Attack01", "Hurt", "Death" };
-        private static readonly int[] FrameCounts = { 6, 8, 6, 4, 4 };
-
-        [Serializable] private sealed class SourceManifest { public SourceEntry[] files = Array.Empty<SourceEntry>(); }
-        [Serializable] private sealed class SourceEntry { public string path = ""; public string sha256 = ""; }
+        private static readonly string[] DirectionNames = { "Down", "Left", "Right", "Up" };
 
         [MenuItem("AFFIX/Setup/Build Hero Siege Art Review Scene")]
         public static void Build()
@@ -36,8 +33,10 @@ namespace AffixZero.Editor
             AssetDatabase.Refresh();
             EnsureFolder(DataRoot);
             EnsureFolder("Assets/_Game/Scenes");
-            ActorAnimationSet heroSet = ImportActor("Soldier", "Hero", new Vector2(.5f, .4f));
-            ActorAnimationSet enemySet = ImportActor("Orc", "Enemy", new Vector2(.55f, .43f));
+            ActorAnimationSet heroSet = ImportActor(HeroAtlasPath, "Vanguard", "Hero");
+            ActorAnimationSet enemySet = ImportActor(EnemyAtlasPath, "Raider", "Enemy");
+            ImportImpactFx();
+            ImportObstacle();
             Sprite room = ImportBackground();
             string issue = heroSet.ValidateSet() ?? enemySet.ValidateSet();
             if (issue != null || room == null)
@@ -53,46 +52,29 @@ namespace AffixZero.Editor
 
             if (File.Exists(ScenePath))
             {
-                EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                Scene existing = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+                ApplyExistingScene(heroSet, enemySet, room);
+                if (!EditorSceneManager.SaveScene(existing)) throw new IOException("Could not update the existing encounter scene art.");
                 RegisterBuildScene();
-                Debug.Log("Existing HeroSiegeEncounter opened without overwriting its scene content.");
+                Debug.Log("Existing HeroSiegeEncounter gameplay was preserved while the original temple combat art was reapplied.");
                 return;
             }
             CreateScene(heroSet, enemySet, room);
             RegisterBuildScene();
             AssetDatabase.SaveAssets();
-            Debug.Log("HeroSiegeEncounter created from audited local character sheets and a new generated room. This is a visual review scene; Play and user visual acceptance remain unverified.");
+            Debug.Log("HeroSiegeEncounter created from the original generated four-direction temple combat set. Play and visual acceptance remain unverified.");
         }
 
         private static void ValidateSources()
         {
             if (Application.unityVersion != "6000.3.24f1")
                 throw new InvalidOperationException("Use the approved Unity 6000.3.24f1 editor.");
-            if (!File.Exists(ManifestPath) || !File.Exists(ProvenancePath))
-                throw new FileNotFoundException("Local character audit manifest and provenance are required before import.");
-            var manifest = JsonUtility.FromJson<SourceManifest>(File.ReadAllText(ManifestPath));
-            if (manifest == null || manifest.files == null)
-                throw new InvalidDataException("Expected a files array in " + ManifestPath);
-            foreach (string actor in new[] { "Soldier", "Orc" })
-            for (int i = 0; i < Clips.Length; i++)
-            {
-                string path = SourceRoot + "/" + actor + "/" + Clips[i] + ".png";
-                if (!File.Exists(path))
-                    throw new FileNotFoundException("Required private source is missing. Acquire the documented free pack locally; no substitute scene will be created.", path);
-                SourceEntry[] entries = manifest.files.Where(e => e != null && e.path == path).ToArray();
-                if (entries.Length != 1 || entries[0].sha256 == null || entries[0].sha256.Length != 64)
-                    throw new InvalidDataException("Expected one exact SHA-256 audit entry for " + path);
-                using (var hash = SHA256.Create())
-                using (var stream = File.OpenRead(path))
-                {
-                    string actual = BitConverter.ToString(hash.ComputeHash(stream)).Replace("-", "").ToLowerInvariant();
-                    if (!string.Equals(actual, entries[0].sha256, StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidDataException("Source hash differs from the reviewed file: " + path);
-                }
-                RequirePngSize(path, FrameCounts[i] * 100, 100);
-            }
-            if (!File.Exists(BackgroundPath)) throw new FileNotFoundException("New generated room image is missing.", BackgroundPath);
+            if (!File.Exists(ProvenancePath)) throw new FileNotFoundException("Generated art provenance is missing.", ProvenancePath);
+            RequirePngSize(HeroAtlasPath, 1024, 1024);
+            RequirePngSize(EnemyAtlasPath, 1024, 1024);
+            RequirePngSize(ImpactAtlasPath, 1024, 1024);
             RequirePngSize(BackgroundPath, 1536, 1024);
+            RequirePngSize(ObstaclePath, 1024, 768);
         }
 
         private static void RequirePngSize(string path, int width, int height)
@@ -115,29 +97,29 @@ namespace AffixZero.Editor
         private static int ReadBigEndian(byte[] bytes, int offset) =>
             (bytes[offset] << 24) | (bytes[offset + 1] << 16) | (bytes[offset + 2] << 8) | bytes[offset + 3];
 
-        private static ActorAnimationSet ImportActor(string actor, string assetName, Vector2 pivot)
+        private static ActorAnimationSet ImportActor(string path, string actor, string assetName)
         {
-            var frames = new List<Sprite[]>();
-            for (int i = 0; i < Clips.Length; i++)
+            TextureImporter importer = TextureAt(path);
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritePixelsPerUnit = 80;
+            var slices = new List<SpriteMetaData>();
+            for (int direction = 0; direction < 4; direction++)
             {
-                string path = SourceRoot + "/" + actor + "/" + Clips[i] + ".png";
-                TextureImporter importer = TextureAt(path);
-                importer.spriteImportMode = SpriteImportMode.Multiple;
-                importer.spritePixelsPerUnit = 32;
-                var slices = Enumerable.Range(0, FrameCounts[i]).Select(frame => new SpriteMetaData {
-                    name = actor + "_" + Clips[i] + "_" + frame.ToString("00"),
-                    rect = new Rect(frame * 100, 0, 100, 100),
-                    alignment = (int)SpriteAlignment.Custom, pivot = pivot
-                }).ToArray();
-#pragma warning disable 0618
-                importer.spritesheet = slices;
-#pragma warning restore 0618
-                importer.SaveAndReimport();
-                Sprite[] loaded = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>()
-                    .OrderBy(sprite => sprite.name, StringComparer.Ordinal).ToArray();
-                if (loaded.Length != FrameCounts[i]) throw new InvalidDataException("Unexpected imported frame count: " + path);
-                frames.Add(loaded);
+                int locomotionRow = direction * 2;
+                int combatRow = locomotionRow + 1;
+                AddSlices(slices, actor, DirectionNames[direction], "Idle", locomotionRow, 0, 2);
+                AddSlices(slices, actor, DirectionNames[direction], "Walk", locomotionRow, 2, 4);
+                AddSlices(slices, actor, DirectionNames[direction], "Hit", locomotionRow, 6, 2);
+                AddSlices(slices, actor, DirectionNames[direction], "Attack", combatRow, 0, 5);
+                AddSlices(slices, actor, DirectionNames[direction], "Death", combatRow, 5, 3);
             }
+#pragma warning disable 0618
+            importer.spritesheet = slices.ToArray();
+#pragma warning restore 0618
+            importer.SaveAndReimport();
+            var loaded = AssetDatabase.LoadAllAssetsAtPath(path).OfType<Sprite>()
+                .ToDictionary(sprite => sprite.name, StringComparer.Ordinal);
+            if (loaded.Count != 64) throw new InvalidDataException("Expected 64 imported directional frames: " + path);
             string assetPath = DataRoot + "/" + assetName + ".asset";
             var set = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(assetPath);
             if (set == null)
@@ -146,20 +128,81 @@ namespace AffixZero.Editor
                 AssetDatabase.CreateAsset(set, assetPath);
             }
             var serialized = new SerializedObject(set);
-            string[] properties = { "idle", "walk", "attack", "hit", "death" };
-            for (int i = 0; i < properties.Length; i++) AssignFrames(serialized, properties[i], frames[i]);
+            AssignFrames(serialized, "idle", Clip(loaded, actor, "Idle", 2));
+            AssignFrames(serialized, "walk", Clip(loaded, actor, "Walk", 4));
+            AssignFrames(serialized, "attack", Clip(loaded, actor, "Attack", 5));
+            AssignFrames(serialized, "hit", Clip(loaded, actor, "Hit", 2));
+            AssignFrames(serialized, "death", Clip(loaded, actor, "Death", 3));
             AssignFrames(serialized, "attackWeapon", Array.Empty<Sprite>()); // Body sheets already contain the weapon.
-            serialized.FindProperty("attackFps").floatValue = 10;
-            serialized.FindProperty("movementFps").floatValue = 10;
-            // Reviewed timing hypothesis: shorten Hurt's flash playback to avoid perpetual hit-stun.
-            serialized.FindProperty("reactionFps").floatValue = 20;
-            serialized.FindProperty("deathFps").floatValue = 10;
-            serialized.FindProperty("impactFrame").intValue = 3;
+            serialized.FindProperty("fourDirections").boolValue = true;
+            serialized.FindProperty("idleFramesPerDirection").intValue = 2;
+            serialized.FindProperty("walkFramesPerDirection").intValue = 4;
+            serialized.FindProperty("attackFramesPerDirection").intValue = 5;
+            serialized.FindProperty("hitFramesPerDirection").intValue = 2;
+            serialized.FindProperty("deathFramesPerDirection").intValue = 3;
+            serialized.FindProperty("attackFps").floatValue = 12;
+            serialized.FindProperty("movementFps").floatValue = 8;
+            serialized.FindProperty("reactionFps").floatValue = 16;
+            serialized.FindProperty("deathFps").floatValue = 8;
+            serialized.FindProperty("impactFrame").intValue = 2;
             serialized.FindProperty("sourceFacesRight").boolValue = true;
             serialized.FindProperty("sourceLicenseRecord").stringValue = ProvenancePath;
             serialized.ApplyModifiedPropertiesWithoutUndo();
             EditorUtility.SetDirty(set);
             return set;
+        }
+
+        private static void AddSlices(List<SpriteMetaData> slices, string actor, string direction,
+            string clip, int topRow, int startColumn, int count)
+        {
+            for (int frame = 0; frame < count; frame++)
+                slices.Add(new SpriteMetaData {
+                    name = actor + "_" + direction + "_" + clip + "_" + frame.ToString("00"),
+                    rect = new Rect((startColumn + frame) * 128, 1024 - (topRow + 1) * 128, 128, 128),
+                    alignment = (int)SpriteAlignment.Custom,
+                    pivot = new Vector2(.5f, .14f)
+                });
+        }
+
+        private static Sprite[] Clip(Dictionary<string, Sprite> sprites, string actor, string clip, int count)
+        {
+            var result = new List<Sprite>(count * 4);
+            foreach (string direction in DirectionNames)
+            for (int frame = 0; frame < count; frame++)
+                result.Add(sprites[actor + "_" + direction + "_" + clip + "_" + frame.ToString("00")]);
+            return result.ToArray();
+        }
+
+        private static void ImportImpactFx()
+        {
+            TextureImporter importer = TextureAt(ImpactAtlasPath);
+            importer.spriteImportMode = SpriteImportMode.Multiple;
+            importer.spritePixelsPerUnit = 160;
+            var slices = new List<SpriteMetaData>();
+            for (int frame = 0; frame < 8; frame++)
+            {
+                int topRow = frame / 4;
+                int column = frame % 4;
+                slices.Add(new SpriteMetaData {
+                    name = "Impact_" + frame.ToString("00"),
+                    rect = new Rect(column * 256, 1024 - (topRow + 1) * 512, 256, 512),
+                    alignment = (int)SpriteAlignment.Custom,
+                    pivot = new Vector2(.5f, .5f)
+                });
+            }
+#pragma warning disable 0618
+            importer.spritesheet = slices.ToArray();
+#pragma warning restore 0618
+            importer.SaveAndReimport();
+        }
+
+        private static void ImportObstacle()
+        {
+            TextureImporter importer = TextureAt(ObstaclePath);
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = 1024 / 2.4f;
+            importer.spritePivot = new Vector2(.5f, .5f);
+            importer.SaveAndReimport();
         }
 
         private static TextureImporter TextureAt(string path)
@@ -195,6 +238,23 @@ namespace AffixZero.Editor
             for (int i = 0; i < sprites.Length; i++) array.GetArrayElementAtIndex(i).objectReferenceValue = sprites[i];
         }
 
+        private static void ApplyExistingScene(ActorAnimationSet heroSet, ActorAnimationSet enemySet, Sprite room)
+        {
+            foreach (MeleeActor actor in UnityEngine.Object.FindObjectsByType<MeleeActor>(FindObjectsSortMode.None))
+            {
+                ActorAnimationSet set = actor.ActorId == 1 ? heroSet : enemySet;
+                actor.Configure(set, actor.ActorId, actor.MaxHp, actor.Damage);
+                actor.GetComponent<SpriteRenderer>().sprite = set.Frame(ActorClip.Idle, 0, ActorFacing.Down);
+                EditorUtility.SetDirty(actor);
+            }
+            SpriteRenderer background = UnityEngine.Object.FindObjectsByType<SpriteRenderer>(FindObjectsSortMode.None)
+                .FirstOrDefault(renderer => renderer.sortingOrder <= -10000);
+            if (background == null) throw new InvalidDataException("Existing encounter background renderer was not found.");
+            background.sprite = room;
+            background.name = "Temple Room - original generated v2";
+            EditorUtility.SetDirty(background);
+        }
+
         private static void CreateScene(ActorAnimationSet heroSet, ActorAnimationSet enemySet, Sprite room)
         {
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
@@ -210,6 +270,7 @@ namespace AffixZero.Editor
             camera.transparencySortAxis = Vector3.up;
             var background = new GameObject("Temple Room — generated background", typeof(SpriteRenderer)).GetComponent<SpriteRenderer>();
             background.sprite = room;
+            background.name = "Temple Room - original generated v2";
             background.sortingOrder = -10000;
             // Explicit visual bounds markers, not a collision/navmesh implementation.
             Transform bounds = new GameObject("Room Visual Bounds").transform;

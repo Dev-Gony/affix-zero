@@ -20,9 +20,9 @@ namespace AffixZero.Editor
 
         private void OnEnable()
         {
-            hero = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(ReviewedArtSetup.DataRoot + "Hero.asset");
-            enemy = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(ReviewedArtSetup.DataRoot + "Enemy.asset");
-            ground = ReviewedArtSetup.EnvironmentSpriteNamed("Grass");
+            hero = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(HeroSiegeArtSetup.DataRoot + "/Hero.asset");
+            enemy = AssetDatabase.LoadAssetAtPath<ActorAnimationSet>(HeroSiegeArtSetup.DataRoot + "/Enemy.asset");
+            ground = AssetDatabase.LoadAssetAtPath<Sprite>(HeroSiegeArtSetup.BackgroundPath);
         }
 
         [MenuItem("AFFIX/Project Dashboard")]
@@ -40,7 +40,7 @@ namespace AffixZero.Editor
                 EditorGUILayout.HelpBox("Editor version differs. Do not silently upgrade project settings; record the version first.", MessageType.Warning);
             if (GUILayout.Button("Export setup report")) ExportReport();
             if (GUILayout.Button("Open current documentation")) EditorUtility.RevealInFinder(Path.GetFullPath("docs/README.md"));
-            if (GUILayout.Button("Import reviewed Ninja Adventure art and create encounter")) ReviewedArtSetup.Build();
+            if (GUILayout.Button("Import original temple combat set and update encounter")) HeroSiegeArtSetup.Build();
             EditorGUILayout.Space();
             EditorGUILayout.LabelField("First encounter assets", EditorStyles.boldLabel);
             hero = (ActorAnimationSet)EditorGUILayout.ObjectField("Hero animation set", hero, typeof(ActorAnimationSet), false);
@@ -72,7 +72,7 @@ namespace AffixZero.Editor
         {
             string issue = ReadinessIssue();
             if (issue != null) { Debug.LogError(issue); return; }
-            CreateReviewedEncounter(hero, enemy, ground);
+            HeroSiegeArtSetup.Build();
         }
 
         public static void CreateReviewedEncounter(ActorAnimationSet hero, ActorAnimationSet enemy, Sprite ground)
@@ -106,7 +106,7 @@ namespace AffixZero.Editor
             {
                 string name = y == 1 ? "PathTop" : y == 0 ? "Dirt" : y == -1 ? "PathBottom"
                     : (x * x + y * y) % 11 == 0 ? "GrassDetail" : (x - y + 30) % 5 == 0 ? "GrassTufts" : "Grass";
-                Sprite sprite = ReviewedArtSetup.EnvironmentSpriteNamed(name) ?? ground;
+                Sprite sprite = ground;
                 Place(sprite, name, new Vector2(x + .5f, y + .5f), world, -10000);
             }
             PlaceDecoration("Pond", new Vector2(4.4f, -2.7f), world, -9500);
@@ -137,7 +137,7 @@ namespace AffixZero.Editor
 
         private static void PlaceDecoration(string name, Vector2 position, Transform parent, int? order = null)
         {
-            Sprite sprite = ReviewedArtSetup.EnvironmentSpriteNamed(name);
+            Sprite sprite = null; // Deprecated meadow decorations are not part of the current temple path.
             if (sprite != null) Place(sprite, name, position, parent, order ?? -(int)(position.y * 100));
         }
 

@@ -1,0 +1,2109 @@
+fileFormatVersion: 2
+guid: 0d62db8d8e97d9f4ca7f6ab0f975afb6
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 6294347862937522991
+    second: HeroAtlas-v1_0
+  - first:
+      213: -8800222058197475153
+    second: HeroAtlas-v1_1
+  - first:
+      213: 6651197129864405402
+    second: HeroAtlas-v1_2
+  - first:
+      213: 7182439891916655327
+    second: HeroAtlas-v1_3
+  - first:
+      213: -4865573529353057666
+    second: HeroAtlas-v1_4
+  - first:
+      213: -7002581196597206455
+    second: HeroAtlas-v1_5
+  - first:
+      213: -3178318536543509380
+    second: HeroAtlas-v1_6
+  - first:
+      213: -5722214031123812503
+    second: HeroAtlas-v1_7
+  - first:
+      213: -4920278612823289231
+    second: HeroAtlas-v1_8
+  - first:
+      213: -2843799332764000004
+    second: HeroAtlas-v1_9
+  - first:
+      213: -4514188010584887294
+    second: HeroAtlas-v1_10
+  - first:
+      213: 8741327266974878127
+    second: HeroAtlas-v1_11
+  - first:
+      213: 1543448528898147623
+    second: HeroAtlas-v1_12
+  - first:
+      213: 150419674234919795
+    second: HeroAtlas-v1_13
+  - first:
+      213: -5162782114678924393
+    second: HeroAtlas-v1_14
+  - first:
+      213: -4079686494660916081
+    second: HeroAtlas-v1_15
+  - first:
+      213: -6887014614298860022
+    second: HeroAtlas-v1_16
+  - first:
+      213: 5246782258667701133
+    second: HeroAtlas-v1_17
+  - first:
+      213: 1829421966877737678
+    second: HeroAtlas-v1_18
+  - first:
+      213: -4110538948217253484
+    second: HeroAtlas-v1_19
+  - first:
+      213: -608271160100693927
+    second: HeroAtlas-v1_20
+  - first:
+      213: 1674574948892791164
+    second: HeroAtlas-v1_21
+  - first:
+      213: 1859787851092981752
+    second: HeroAtlas-v1_22
+  - first:
+      213: 4590433121754339610
+    second: HeroAtlas-v1_23
+  - first:
+      213: -5359799849578597545
+    second: HeroAtlas-v1_24
+  - first:
+      213: 1435080198015858191
+    second: HeroAtlas-v1_25
+  - first:
+      213: -4492343633153118067
+    second: HeroAtlas-v1_26
+  - first:
+      213: -5522879102652688907
+    second: HeroAtlas-v1_27
+  - first:
+      213: 4772293098747066013
+    second: HeroAtlas-v1_28
+  - first:
+      213: -6434764192158742798
+    second: HeroAtlas-v1_29
+  - first:
+      213: -8183536471890712929
+    second: HeroAtlas-v1_30
+  - first:
+      213: 6310375944570715107
+    second: HeroAtlas-v1_31
+  - first:
+      213: 5554517742713690286
+    second: HeroAtlas-v1_32
+  - first:
+      213: 4128156206000753179
+    second: HeroAtlas-v1_33
+  - first:
+      213: 4000346891347591745
+    second: HeroAtlas-v1_34
+  - first:
+      213: -4922922836060599172
+    second: HeroAtlas-v1_35
+  - first:
+      213: -3053071875351491499
+    second: HeroAtlas-v1_36
+  - first:
+      213: -8325593412584897015
+    second: HeroAtlas-v1_37
+  - first:
+      213: 2825814525018278510
+    second: HeroAtlas-v1_38
+  - first:
+      213: 1489158009172702756
+    second: HeroAtlas-v1_39
+  - first:
+      213: 7257576587161567718
+    second: HeroAtlas-v1_40
+  - first:
+      213: -5459640544408325192
+    second: HeroAtlas-v1_41
+  - first:
+      213: -868322491302264938
+    second: HeroAtlas-v1_42
+  - first:
+      213: -7533522503532376101
+    second: HeroAtlas-v1_43
+  - first:
+      213: -4589356335821072997
+    second: HeroAtlas-v1_44
+  - first:
+      213: 4441393141131840093
+    second: HeroAtlas-v1_45
+  - first:
+      213: 408063264938886761
+    second: HeroAtlas-v1_46
+  - first:
+      213: 1193154252242893055
+    second: HeroAtlas-v1_47
+  - first:
+      213: 3999309295323687224
+    second: HeroAtlas-v1_48
+  - first:
+      213: 7739274348893753484
+    second: HeroAtlas-v1_49
+  - first:
+      213: 4268357078609939085
+    second: HeroAtlas-v1_50
+  - first:
+      213: -2092274164235472177
+    second: HeroAtlas-v1_51
+  - first:
+      213: 1659103960916691108
+    second: HeroAtlas-v1_52
+  - first:
+      213: -5638640903852087384
+    second: HeroAtlas-v1_53
+  - first:
+      213: 678020653806695049
+    second: HeroAtlas-v1_54
+  - first:
+      213: 5940987864256555968
+    second: HeroAtlas-v1_55
+  - first:
+      213: 6611264290580372917
+    second: HeroAtlas-v1_56
+  - first:
+      213: 2295265293066804656
+    second: HeroAtlas-v1_57
+  - first:
+      213: -2029956215513744257
+    second: HeroAtlas-v1_58
+  - first:
+      213: -2442172146635165071
+    second: HeroAtlas-v1_59
+  - first:
+      213: -8337291192909633688
+    second: HeroAtlas-v1_60
+  - first:
+      213: 8167525313894616911
+    second: HeroAtlas-v1_61
+  - first:
+      213: 816680248573255564
+    second: HeroAtlas-v1_62
+  - first:
+      213: -3029996052094685861
+    second: HeroAtlas-v1_63
+  - first:
+      213: 4176133882013096014
+    second: HeroAtlas-v1_64
+  - first:
+      213: 140348109399307239
+    second: HeroAtlas-v1_65
+  - first:
+      213: -7118088546872609991
+    second: HeroAtlas-v1_66
+  - first:
+      213: -392263244903818304
+    second: HeroAtlas-v1_67
+  - first:
+      213: 2691043231407243345
+    second: HeroAtlas-v1_68
+  - first:
+      213: -5013972415400572955
+    second: HeroAtlas-v1_69
+  - first:
+      213: -6209310222401488675
+    second: HeroAtlas-v1_70
+  - first:
+      213: -3809646425796862743
+    second: HeroAtlas-v1_71
+  - first:
+      213: 1550740152847348413
+    second: HeroAtlas-v1_72
+  - first:
+      213: -7687093132729261882
+    second: HeroAtlas-v1_73
+  - first:
+      213: 5453355276334725025
+    second: HeroAtlas-v1_74
+  - first:
+      213: 6430469153976348487
+    second: HeroAtlas-v1_75
+  - first:
+      213: 8004899971403822099
+    second: HeroAtlas-v1_76
+  - first:
+      213: 8462224650134070054
+    second: HeroAtlas-v1_77
+  - first:
+      213: 3213972874929398183
+    second: HeroAtlas-v1_78
+  - first:
+      213: 2654726012688563739
+    second: HeroAtlas-v1_79
+  - first:
+      213: -5676721813824759754
+    second: HeroAtlas-v1_80
+  - first:
+      213: 2886933022180147238
+    second: HeroAtlas-v1_81
+  - first:
+      213: -4860688019173807608
+    second: Vanguard_Down_Idle_00
+  - first:
+      213: 729487931454897342
+    second: Vanguard_Down_Idle_01
+  - first:
+      213: 5073247341525348725
+    second: Vanguard_Down_Walk_00
+  - first:
+      213: -8158111281238541026
+    second: Vanguard_Down_Walk_01
+  - first:
+      213: -2835448987501823270
+    second: Vanguard_Down_Walk_02
+  - first:
+      213: -6560853479730990749
+    second: Vanguard_Down_Walk_03
+  - first:
+      213: 6513891457816868276
+    second: Vanguard_Down_Hit_00
+  - first:
+      213: 8770633890514366433
+    second: Vanguard_Down_Hit_01
+  - first:
+      213: -2112155378490215164
+    second: Vanguard_Down_Attack_00
+  - first:
+      213: 800101540583519176
+    second: Vanguard_Down_Attack_01
+  - first:
+      213: -6481031860800885601
+    second: Vanguard_Down_Attack_02
+  - first:
+      213: -3195662763834760384
+    second: Vanguard_Down_Attack_03
+  - first:
+      213: -3626675195922913193
+    second: Vanguard_Down_Attack_04
+  - first:
+      213: -5158909791748484785
+    second: Vanguard_Down_Death_00
+  - first:
+      213: 7853892689150064544
+    second: Vanguard_Down_Death_01
+  - first:
+      213: -8041299174595542525
+    second: Vanguard_Down_Death_02
+  - first:
+      213: 3442504125447235896
+    second: Vanguard_Left_Idle_00
+  - first:
+      213: 7490163195996013371
+    second: Vanguard_Left_Idle_01
+  - first:
+      213: -4784055753759434732
+    second: Vanguard_Left_Walk_00
+  - first:
+      213: 6970629819662887931
+    second: Vanguard_Left_Walk_01
+  - first:
+      213: -4250142147817412153
+    second: Vanguard_Left_Walk_02
+  - first:
+      213: 8465426367359919903
+    second: Vanguard_Left_Walk_03
+  - first:
+      213: 1850538971897207283
+    second: Vanguard_Left_Hit_00
+  - first:
+      213: -4939288963801639232
+    second: Vanguard_Left_Hit_01
+  - first:
+      213: -5340021386497938124
+    second: Vanguard_Left_Attack_00
+  - first:
+      213: 2996019073569739921
+    second: Vanguard_Left_Attack_01
+  - first:
+      213: 1426200019884766587
+    second: Vanguard_Left_Attack_02
+  - first:
+      213: 6847324928733773836
+    second: Vanguard_Left_Attack_03
+  - first:
+      213: -5516524013806367978
+    second: Vanguard_Left_Attack_04
+  - first:
+      213: -7319034259245368611
+    second: Vanguard_Left_Death_00
+  - first:
+      213: -6893090908302911940
+    second: Vanguard_Left_Death_01
+  - first:
+      213: -3040293561551135857
+    second: Vanguard_Left_Death_02
+  - first:
+      213: 4553775348218205190
+    second: Vanguard_Right_Idle_00
+  - first:
+      213: 3295024469334438090
+    second: Vanguard_Right_Idle_01
+  - first:
+      213: 3569433350440868949
+    second: Vanguard_Right_Walk_00
+  - first:
+      213: -9011668654038164379
+    second: Vanguard_Right_Walk_01
+  - first:
+      213: -2020325663553884135
+    second: Vanguard_Right_Walk_02
+  - first:
+      213: -8801352694993222732
+    second: Vanguard_Right_Walk_03
+  - first:
+      213: -7185945144019404781
+    second: Vanguard_Right_Hit_00
+  - first:
+      213: -5537770903765949172
+    second: Vanguard_Right_Hit_01
+  - first:
+      213: -5064606297157535692
+    second: Vanguard_Right_Attack_00
+  - first:
+      213: 7097805246605480025
+    second: Vanguard_Right_Attack_01
+  - first:
+      213: -8277867785502155144
+    second: Vanguard_Right_Attack_02
+  - first:
+      213: 9021409351189408449
+    second: Vanguard_Right_Attack_03
+  - first:
+      213: 870205294049824879
+    second: Vanguard_Right_Attack_04
+  - first:
+      213: 4447924342474312845
+    second: Vanguard_Right_Death_00
+  - first:
+      213: -5861078347599513297
+    second: Vanguard_Right_Death_01
+  - first:
+      213: 8901076115368214375
+    second: Vanguard_Right_Death_02
+  - first:
+      213: 3135008747160592035
+    second: Vanguard_Up_Idle_00
+  - first:
+      213: -1101488557793560305
+    second: Vanguard_Up_Idle_01
+  - first:
+      213: -2436144292203014684
+    second: Vanguard_Up_Walk_00
+  - first:
+      213: -5757241865476501109
+    second: Vanguard_Up_Walk_01
+  - first:
+      213: -8253972997914793274
+    second: Vanguard_Up_Walk_02
+  - first:
+      213: 2162172091244125476
+    second: Vanguard_Up_Walk_03
+  - first:
+      213: -14067336272137841
+    second: Vanguard_Up_Hit_00
+  - first:
+      213: -3976155808245013053
+    second: Vanguard_Up_Hit_01
+  - first:
+      213: -155449752917709900
+    second: Vanguard_Up_Attack_00
+  - first:
+      213: -4228632401609173990
+    second: Vanguard_Up_Attack_01
+  - first:
+      213: 6872271718243785711
+    second: Vanguard_Up_Attack_02
+  - first:
+      213: -578038774303947066
+    second: Vanguard_Up_Attack_03
+  - first:
+      213: -6514881256459949428
+    second: Vanguard_Up_Attack_04
+  - first:
+      213: -7202797103422164851
+    second: Vanguard_Up_Death_00
+  - first:
+      213: -1620660729318038851
+    second: Vanguard_Up_Death_01
+  - first:
+      213: 3867502768419571051
+    second: Vanguard_Up_Death_02
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 80
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 0
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: Vanguard_Down_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 80ae525effd5b8cb0800000000000000
+      internalID: -4860688019173807608
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ebcbd4e9869af1a00800000000000000
+      internalID: 729487931454897342
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5713051f39bc76640800000000000000
+      internalID: 5073247341525348725
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e1d7ba3630198ce80800000000000000
+      internalID: -8158111281238541026
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ada76313b2676a8d0800000000000000
+      internalID: -2835448987501823270
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 361bf35658a23f4a0800000000000000
+      internalID: -6560853479730990749
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b530a0d4cdf56a50800000000000000
+      internalID: 6513891457816868276
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 896
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ef6c1bfd0d87b970800000000000000
+      internalID: 8770633890514366433
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 405f8aabfdd10b2e0800000000000000
+      internalID: -2112155378490215164
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8c339beac188a1b00800000000000000
+      internalID: 800101540583519176
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f9c69fe4cdfbe06a0800000000000000
+      internalID: -6481031860800885601
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 043afabc5a9b6a3d0800000000000000
+      internalID: -3195662763834760384
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7586b4fcf167badc0800000000000000
+      internalID: -3626675195922913193
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f411c82a0eed768b0800000000000000
+      internalID: -5158909791748484785
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a7b3d00ac1aefc60800000000000000
+      internalID: 7853892689150064544
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Down_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 768
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 302479d5101976090800000000000000
+      internalID: -8041299174595542525
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 839691f434b36cf20800000000000000
+      internalID: 3442504125447235896
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b330c0ffdb762f760800000000000000
+      internalID: 7490163195996013371
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 418518393ae9b9db0800000000000000
+      internalID: -4784055753759434732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: bfb60c593e6acb060800000000000000
+      internalID: 6970629819662887931
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 7c96d6a1c367405c0800000000000000
+      internalID: -4250142147817412153
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f17a6baed6c3b7570800000000000000
+      internalID: 8465426367359919903
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3f913fee36f6ea910800000000000000
+      internalID: 1850538971897207283
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 640
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0c6989d5bde147bb0800000000000000
+      internalID: -4939288963801639232
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 43d2dc477de64e5b0800000000000000
+      internalID: -5340021386497938124
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1945b6c497ff39920800000000000000
+      internalID: 2996019073569739921
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b75f2eb9c51eac310800000000000000
+      internalID: 1426200019884766587
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c008ad67eb5960f50800000000000000
+      internalID: 6847324928733773836
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 61bc82223ae5173b0800000000000000
+      internalID: -5516524013806367978
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ddaf3ce7e119d6a90800000000000000
+      internalID: -7319034259245368611
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c36512e0752d650a0800000000000000
+      internalID: -6893090908302911940
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Left_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 512
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f8b56da2d15bec5d0800000000000000
+      internalID: -3040293561551135857
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6041a716d82423f30800000000000000
+      internalID: 4553775348218205190
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ac036ec0c474abd20800000000000000
+      internalID: 3295024469334438090
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 55cd57678bc298130800000000000000
+      internalID: 3569433350440868949
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 56c5882ea1f10f280800000000000000
+      internalID: -9011668654038164379
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 910f34d538c56f3e0800000000000000
+      internalID: -2020325663553884135
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4b380000b505bd580800000000000000
+      internalID: -8801352694993222732
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 318b74bd6f4664c90800000000000000
+      internalID: -7185945144019404781
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 384
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c05698114b2e523b0800000000000000
+      internalID: -5537770903765949172
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 438f7baf767e6b9b0800000000000000
+      internalID: -5064606297157535692
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 950d2d81448708260800000000000000
+      internalID: 7097805246605480025
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 87e9e7b6b1b1f1d80800000000000000
+      internalID: -8277867785502155144
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1ca2807e10c723d70800000000000000
+      internalID: 9021409351189408449
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f601189ba17931c00800000000000000
+      internalID: 870205294049824879
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d8c8ef49f933abd30800000000000000
+      internalID: 4447924342474312845
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f29f892db4449aea0800000000000000
+      internalID: -5861078347599513297
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Right_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 256
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 76f7c372199f68b70800000000000000
+      internalID: 8901076115368214375
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Idle_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3aedf3678d9c18b20800000000000000
+      internalID: 3135008747160592035
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Idle_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f09be8c1ef9b6b0f0800000000000000
+      internalID: -1101488557793560305
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Walk_00
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e5d4a96ca3113ed0800000000000000
+      internalID: -2436144292203014684
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Walk_01
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b81144ac60b2a10b0800000000000000
+      internalID: -5757241865476501109
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Walk_02
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6ca6f913a4ff37d80800000000000000
+      internalID: -8253972997914793274
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Walk_03
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 42d9ed1bf04910e10800000000000000
+      internalID: 2162172091244125476
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Hit_00
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: f81309a05d50ecff0800000000000000
+      internalID: -14067336272137841
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Hit_01
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 128
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3c523f5eb5bd1d8c0800000000000000
+      internalID: -3976155808245013053
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Attack_00
+      rect:
+        serializedVersion: 2
+        x: 0
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4bbeae8f54bb7ddf0800000000000000
+      internalID: -155449752917709900
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Attack_01
+      rect:
+        serializedVersion: 2
+        x: 128
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a14d0682c31e055c0800000000000000
+      internalID: -4228632401609173990
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Attack_02
+      rect:
+        serializedVersion: 2
+        x: 256
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: feb52e587b63f5f50800000000000000
+      internalID: 6872271718243785711
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Attack_03
+      rect:
+        serializedVersion: 2
+        x: 384
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 6c6063f1cc46af7f0800000000000000
+      internalID: -578038774303947066
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Attack_04
+      rect:
+        serializedVersion: 2
+        x: 512
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: c8aaadab30e7695a0800000000000000
+      internalID: -6514881256459949428
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Death_00
+      rect:
+        serializedVersion: 2
+        x: 640
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: d803f4d42368a0c90800000000000000
+      internalID: -7202797103422164851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Death_01
+      rect:
+        serializedVersion: 2
+        x: 768
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: db2a29f37a14289e0800000000000000
+      internalID: -1620660729318038851
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: Vanguard_Up_Death_02
+      rect:
+        serializedVersion: 2
+        x: 896
+        y: 0
+        width: 128
+        height: 128
+      alignment: 9
+      pivot: {x: 0.5, y: 0.14}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b650d77e6412ca530800000000000000
+      internalID: 3867502768419571051
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      HeroAtlas-v1_0: 6294347862937522991
+      HeroAtlas-v1_1: -8800222058197475153
+      HeroAtlas-v1_10: -4514188010584887294
+      HeroAtlas-v1_11: 8741327266974878127
+      HeroAtlas-v1_12: 1543448528898147623
+      HeroAtlas-v1_13: 150419674234919795
+      HeroAtlas-v1_14: -5162782114678924393
+      HeroAtlas-v1_15: -4079686494660916081
+      HeroAtlas-v1_16: -6887014614298860022
+      HeroAtlas-v1_17: 5246782258667701133
+      HeroAtlas-v1_18: 1829421966877737678
+      HeroAtlas-v1_19: -4110538948217253484
+      HeroAtlas-v1_2: 6651197129864405402
+      HeroAtlas-v1_20: -608271160100693927
+      HeroAtlas-v1_21: 1674574948892791164
+      HeroAtlas-v1_22: 1859787851092981752
+      HeroAtlas-v1_23: 4590433121754339610
+      HeroAtlas-v1_24: -5359799849578597545
+      HeroAtlas-v1_25: 1435080198015858191
+      HeroAtlas-v1_26: -4492343633153118067
+      HeroAtlas-v1_27: -5522879102652688907
+      HeroAtlas-v1_28: 4772293098747066013
+      HeroAtlas-v1_29: -6434764192158742798
+      HeroAtlas-v1_3: 7182439891916655327
+      HeroAtlas-v1_30: -8183536471890712929
+      HeroAtlas-v1_31: 6310375944570715107
+      HeroAtlas-v1_32: 5554517742713690286
+      HeroAtlas-v1_33: 4128156206000753179
+      HeroAtlas-v1_34: 4000346891347591745
+      HeroAtlas-v1_35: -4922922836060599172
+      HeroAtlas-v1_36: -3053071875351491499
+      HeroAtlas-v1_37: -8325593412584897015
+      HeroAtlas-v1_38: 2825814525018278510
+      HeroAtlas-v1_39: 1489158009172702756
+      HeroAtlas-v1_4: -4865573529353057666
+      HeroAtlas-v1_40: 7257576587161567718
+      HeroAtlas-v1_41: -5459640544408325192
+      HeroAtlas-v1_42: -868322491302264938
+      HeroAtlas-v1_43: -7533522503532376101
+      HeroAtlas-v1_44: -4589356335821072997
+      HeroAtlas-v1_45: 4441393141131840093
+      HeroAtlas-v1_46: 408063264938886761
+      HeroAtlas-v1_47: 1193154252242893055
+      HeroAtlas-v1_48: 3999309295323687224
+      HeroAtlas-v1_49: 7739274348893753484
+      HeroAtlas-v1_5: -7002581196597206455
+      HeroAtlas-v1_50: 4268357078609939085
+      HeroAtlas-v1_51: -2092274164235472177
+      HeroAtlas-v1_52: 1659103960916691108
+      HeroAtlas-v1_53: -5638640903852087384
+      HeroAtlas-v1_54: 678020653806695049
+      HeroAtlas-v1_55: 5940987864256555968
+      HeroAtlas-v1_56: 6611264290580372917
+      HeroAtlas-v1_57: 2295265293066804656
+      HeroAtlas-v1_58: -2029956215513744257
+      HeroAtlas-v1_59: -2442172146635165071
+      HeroAtlas-v1_6: -3178318536543509380
+      HeroAtlas-v1_60: -8337291192909633688
+      HeroAtlas-v1_61: 8167525313894616911
+      HeroAtlas-v1_62: 816680248573255564
+      HeroAtlas-v1_63: -3029996052094685861
+      HeroAtlas-v1_64: 4176133882013096014
+      HeroAtlas-v1_65: 140348109399307239
+      HeroAtlas-v1_66: -7118088546872609991
+      HeroAtlas-v1_67: -392263244903818304
+      HeroAtlas-v1_68: 2691043231407243345
+      HeroAtlas-v1_69: -5013972415400572955
+      HeroAtlas-v1_7: -5722214031123812503
+      HeroAtlas-v1_70: -6209310222401488675
+      HeroAtlas-v1_71: -3809646425796862743
+      HeroAtlas-v1_72: 1550740152847348413
+      HeroAtlas-v1_73: -7687093132729261882
+      HeroAtlas-v1_74: 5453355276334725025
+      HeroAtlas-v1_75: 6430469153976348487
+      HeroAtlas-v1_76: 8004899971403822099
+      HeroAtlas-v1_77: 8462224650134070054
+      HeroAtlas-v1_78: 3213972874929398183
+      HeroAtlas-v1_79: 2654726012688563739
+      HeroAtlas-v1_8: -4920278612823289231
+      HeroAtlas-v1_80: -5676721813824759754
+      HeroAtlas-v1_81: 2886933022180147238
+      HeroAtlas-v1_9: -2843799332764000004
+      Vanguard_Down_Attack_00: -2112155378490215164
+      Vanguard_Down_Attack_01: 800101540583519176
+      Vanguard_Down_Attack_02: -6481031860800885601
+      Vanguard_Down_Attack_03: -3195662763834760384
+      Vanguard_Down_Attack_04: -3626675195922913193
+      Vanguard_Down_Death_00: -5158909791748484785
+      Vanguard_Down_Death_01: 7853892689150064544
+      Vanguard_Down_Death_02: -8041299174595542525
+      Vanguard_Down_Hit_00: 6513891457816868276
+      Vanguard_Down_Hit_01: 8770633890514366433
+      Vanguard_Down_Idle_00: -4860688019173807608
+      Vanguard_Down_Idle_01: 729487931454897342
+      Vanguard_Down_Walk_00: 5073247341525348725
+      Vanguard_Down_Walk_01: -8158111281238541026
+      Vanguard_Down_Walk_02: -2835448987501823270
+      Vanguard_Down_Walk_03: -6560853479730990749
+      Vanguard_Left_Attack_00: -5340021386497938124
+      Vanguard_Left_Attack_01: 2996019073569739921
+      Vanguard_Left_Attack_02: 1426200019884766587
+      Vanguard_Left_Attack_03: 6847324928733773836
+      Vanguard_Left_Attack_04: -5516524013806367978
+      Vanguard_Left_Death_00: -7319034259245368611
+      Vanguard_Left_Death_01: -6893090908302911940
+      Vanguard_Left_Death_02: -3040293561551135857
+      Vanguard_Left_Hit_00: 1850538971897207283
+      Vanguard_Left_Hit_01: -4939288963801639232
+      Vanguard_Left_Idle_00: 3442504125447235896
+      Vanguard_Left_Idle_01: 7490163195996013371
+      Vanguard_Left_Walk_00: -4784055753759434732
+      Vanguard_Left_Walk_01: 6970629819662887931
+      Vanguard_Left_Walk_02: -4250142147817412153
+      Vanguard_Left_Walk_03: 8465426367359919903
+      Vanguard_Right_Attack_00: -5064606297157535692
+      Vanguard_Right_Attack_01: 7097805246605480025
+      Vanguard_Right_Attack_02: -8277867785502155144
+      Vanguard_Right_Attack_03: 9021409351189408449
+      Vanguard_Right_Attack_04: 870205294049824879
+      Vanguard_Right_Death_00: 4447924342474312845
+      Vanguard_Right_Death_01: -5861078347599513297
+      Vanguard_Right_Death_02: 8901076115368214375
+      Vanguard_Right_Hit_00: -7185945144019404781
+      Vanguard_Right_Hit_01: -5537770903765949172
+      Vanguard_Right_Idle_00: 4553775348218205190
+      Vanguard_Right_Idle_01: 3295024469334438090
+      Vanguard_Right_Walk_00: 3569433350440868949
+      Vanguard_Right_Walk_01: -9011668654038164379
+      Vanguard_Right_Walk_02: -2020325663553884135
+      Vanguard_Right_Walk_03: -8801352694993222732
+      Vanguard_Up_Attack_00: -155449752917709900
+      Vanguard_Up_Attack_01: -4228632401609173990
+      Vanguard_Up_Attack_02: 6872271718243785711
+      Vanguard_Up_Attack_03: -578038774303947066
+      Vanguard_Up_Attack_04: -6514881256459949428
+      Vanguard_Up_Death_00: -7202797103422164851
+      Vanguard_Up_Death_01: -1620660729318038851
+      Vanguard_Up_Death_02: 3867502768419571051
+      Vanguard_Up_Hit_00: -14067336272137841
+      Vanguard_Up_Hit_01: -3976155808245013053
+      Vanguard_Up_Idle_00: 3135008747160592035
+      Vanguard_Up_Idle_01: -1101488557793560305
+      Vanguard_Up_Walk_00: -2436144292203014684
+      Vanguard_Up_Walk_01: -5757241865476501109
+      Vanguard_Up_Walk_02: -8253972997914793274
+      Vanguard_Up_Walk_03: 2162172091244125476
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

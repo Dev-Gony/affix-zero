@@ -25,7 +25,7 @@ namespace AffixZero.Presentation
             foreach(int left in new[]{9,17})for(int x=left;x<left+2;x++)for(int y=7;y<9;y++)blocked.Add(new GridCell(x,y));
             Navigation=new DungeonNavigation(Width,Height,blocked);
             foreach(var cell in blocked)obstacles.Add(new Rect(Origin.x+cell.X-.15f,Origin.y+cell.Y-.15f,1.3f,1.3f));
-            var texture=Resources.Load<Texture2D>("AffixGenerated/TempleObstacle-v1");
+            var texture=Resources.Load<Texture2D>("AffixOriginal/TempleObstacle-v2");
             if(texture==null)throw new InvalidOperationException("Authored navigation obstacle art is missing.");
             obstacleSprite=Sprite.Create(texture,new Rect(0,0,texture.width,texture.height),new Vector2(.5f,.5f),texture.width/2.4f);
             scenery=new GameObject("Courtyard Navigation Obstacles");

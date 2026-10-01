@@ -69,9 +69,9 @@ namespace AffixZero.Presentation
             Font korean = Resources.Load<Font>("AffixUI/Korean");
             if (korean != null) root.style.unityFontDefinition = FontDefinition.FromFont(korean);
             else Debug.LogError("HUD font missing: Resources/AffixUI/Korean", this);
-            room = Resources.Load<Texture2D>("AffixGenerated/TempleRoom-v1");
+            room = Resources.Load<Texture2D>("AffixOriginal/TempleRoom-v2");
             attackIcon = Resources.Load<Texture2D>("AffixGenerated/AttackIcon");
-            if (room == null || attackIcon == null) Debug.LogError("HUD art missing: TempleRoom-v1 or AttackIcon", this);
+            if (room == null || attackIcon == null) Debug.LogError("HUD art missing: TempleRoom-v2 or AttackIcon", this);
             BuildTop(); BuildEnemy(); BuildMap(); BuildBottom(); BuildCharacter(); BuildResult();
             if (encounter == null) return;
             ObserveActor(encounter.Hero);ObserveActor(encounter.Enemy);
