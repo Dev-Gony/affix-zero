@@ -164,7 +164,7 @@ namespace AffixZero.Presentation
             HeroProgression p = owner.Progression;
             report.realKillsBeforeFixture = owner.Hunt.TotalKills;
             report.experienceBeforeFixture = p.TotalExperience; report.goldBeforeFixture = p.TotalGold;
-            for (int i = 0; i < 6; i++)
+            for (int i = 0; i < 40; i++)
                 Require(p.TryRegisterKill("reference-ui:" + report.runId + ":kill:" + i), "Fixture kill token was rejected.");
             if (p.PendingLoot != null) Require(owner.CollectLoot(), "Guaranteed fixture weapon was not collected.");
             for (int i = 0; i < 8; i++)
@@ -175,8 +175,9 @@ namespace AffixZero.Presentation
                     i % 2 == 0 ? "AffixGenerated/EmberSword" : "AffixGenerated/AttackIcon", i % 2 == 0 ? "Rare" : "Common");
                 Require(p.TryCreatePendingLoot(weapon) && owner.CollectLoot(), "Fixture weapon intake failed."); fixtureItems.Add(id);
             }
-            Require(p.TotalExperience == report.experienceBeforeFixture + 150 && p.TotalGold == report.goldBeforeFixture + 48 &&
-                p.Inventory.Count == 9 && p.EquippedWeapon.Id == "equipped:starting-sword" && p.TotalDamage == 30,
+            Require(p.TotalExperience == report.experienceBeforeFixture + 1000 && p.TotalGold == report.goldBeforeFixture + 320 &&
+                p.UnspentPoints == 4 && p.Inventory.Count == 8 &&
+                p.EquippedWeapon.Id == "equipped:starting-sword" && p.TotalDamage == 30,
                 "Fixture intake changed unexpected state.");
             report.fixtureApplied = true;
         }
@@ -255,17 +256,19 @@ namespace AffixZero.Presentation
                 running = owner.Hunt.Running, paused = owner.IsPaused };
             var bounds = new List<BoundReport>();
             Rect panel = Root.worldBound;
-            var top = Element("top-navigation"); var bottom = Element("bottom-hud");
+            var top = Element("hero-unit-frame"); var bottom = Element("bottom-hud");
             Record(top, panel, bounds); Record(bottom, panel, bounds); NoOverlap(top, bottom);
+            Record(Element("hero-portrait-medallion"), panel, bounds);
             string[] nav = { "dungeon-tab", "character-tab", "talents-tab", "forge-tab", "autohunt-toggle", "pause-button", "gold-value" };
-            CheckGroup(nav, top.worldBound, bounds, true);
-            CheckGroup(new[] { "hero-hp-value", "attack-slot", "xp-value" }, bottom.worldBound, bounds, true);
+            CheckGroup(nav, bottom.worldBound, bounds, true);
+            CheckGroup(new[] { "hero-hp-value", "xp-value" }, top.worldBound, bounds, true);
+            CheckGroup(new[] { "attack-slot" }, bottom.worldBound, bounds, true);
             string active = screen == "equipment" ? "character-panel" : screen == "talents" ? "talent-screen" : screen == "forge" ? "forge-screen" : null;
             foreach (string name in new[] { "character-panel", "talent-screen", "forge-screen" })
                 Require(Visible(Element(name)) == (name == active), "Management visibility differs from selected screen: " + name);
             if (active != null)
             {
-                var management = Element(active); Record(management, panel, bounds); NoOverlap(management, top); NoOverlap(management, bottom);
+                var management = Element(active); Record(management, panel, bounds); NoOverlap(management, bottom);
                 if (screen == "equipment")
                 {
                     var controls = new List<string> { "equip-button", "close-character" };
@@ -358,7 +361,7 @@ namespace AffixZero.Presentation
             public string schema = "affix-ui-reference-v1", runId = Guid.NewGuid().ToString("N"), startedUtc = DateTime.UtcNow.ToString("O"), finishedUtc = "";
             public string buildGuid = Application.buildGUID, unityVersion = Application.unityVersion, result = "RUNNING", status = "RUNNING", problem = "", phase;
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
-            public string fixture = "After a real first attack and native Stop callback: six unique Core kill tokens grant 150 XP, 48 gold and six points; guaranteed first drop plus eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
+            public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
             public bool ephemeralVerified, fixtureApplied, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified;
             public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture;

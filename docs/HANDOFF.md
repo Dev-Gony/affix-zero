@@ -1,3 +1,20 @@
+# 2026-10-02 compact combat HUD handoff
+
+The active `feature/open-dungeon-loot-skills` branch now replaces the previous
+full-width gauge dashboard with a compact Hero Siege-informed combat layout:
+top-left original hero portrait plus real HP/XP and cooldowns, centered current
+target, upper-right region plus minimap, and a lower-left skill/action dock.
+The implementation uses only project-native UI Toolkit styling and existing
+original AFFIX: ZERO art; it does not copy or extract commercial assets. Read
+`HERO_SIEGE_HUD_REDESIGN.md` for the exact reference mapping and evidence.
+
+Final build GUID `6e217fe60e554e19ad071d542189c03e` passes the 720p and
+1080p actual-framebuffer probes with four screens and 16 native callbacks at
+each resolution. CoreSmoke is 267 PASS. A 120-second normal-drop run passed
+with 75 kills, all three layouts/difficulties and disk round-trip, and the final
+executable passed a separate-process restore and continued combat. Physical OS
+input remains NOT RUN and user visual approval is pending.
+
 # 2026-10-02 dungeon-variety and difficulty handoff
 
 The same feature/open-dungeon-loot-skills branch now adds three materially
