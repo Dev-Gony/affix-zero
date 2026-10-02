@@ -2,13 +2,16 @@ using System;
 
 namespace AffixZero.Core
 {
-    // Version 1 persists only the two authored weapon icon resources used by this MVP.
-    // Adding another resource or changing reward accounting requires an explicit save-policy review.
+    // Payload v2 expands equipment and talents; v1 migrates with an explicit legacy point credit.
+    // Optional inline items require tags because Unity JsonUtility may produce empty objects.
     [Serializable]
     public sealed class ProgressionSnapshot
     {
-        public int schemaVersion = 1;
+        public int schemaVersion = 2;
         public int totalExperience, totalGold, unspentPoints, furyRank, precisionRank, keystoneRank;
+        public int vitalityRank, cleaveRank, hasteRank, legacyPointCredit;
+        public bool hasArmor, hasRelic, hasHelmet, hasGloves, hasBoots, hasRing, hasAmulet;
+        public WeaponSnapshot equippedArmor, equippedRelic, equippedHelmet, equippedGloves, equippedBoots, equippedRing, equippedAmulet;
         public bool firstDropWaiting;
         public bool hasPendingLoot;
         public WeaponSnapshot equippedWeapon;
@@ -22,5 +25,15 @@ namespace AffixZero.Core
     {
         public string id, name, affixName, iconResource, rarity;
         public int flatDamage, affixDamage, enhancementRank;
+        public int equipmentSlot, weaponStyle, flatDefense, flatHealth, cooldownReductionPercent;
+        public ItemOptionSnapshot[] options;
+    }
+
+    [Serializable]
+    public sealed class ItemOptionSnapshot
+    {
+        public int stat;
+        public string name;
+        public float value;
     }
 }

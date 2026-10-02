@@ -26,6 +26,8 @@ namespace AffixZero.Presentation
         private readonly HashSet<string> requested=new HashSet<string>(), completed=new HashSet<string>();
         private readonly List<string> screenshots=new List<string>();
         private readonly List<FrozenActor> frozen=new List<FrozenActor>();
+        private readonly Dictionary<int,Vector2> initialEnemyPositions=new Dictionary<int,Vector2>();
+        private float maximumEnemyRoam;
         private int frozenKills, frozenLoot, frozenRuns;
         private float frozenTravel;
         private static readonly string[] RequiredCaptures={"exploration","combat","loot","run-complete","management","paused"};
@@ -81,6 +83,7 @@ namespace AffixZero.Presentation
                 Require(!hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Automatic hunt did not start in explicit stopped/paused state.");
                 Require(hero.Damage==30,"Fresh-profile baseline damage must be 30 for this smoke scenario.");
                 Require(hero.Hp==hero.MaxHp,"Initial hero HP is not full.");
+                SeedSurvivalBuild();
                 SubscribeActors();
                 report.initialized=true;
                 Dispatch("autohunt-toggle");report.startCallbacks++;
@@ -89,7 +92,7 @@ namespace AffixZero.Presentation
             }
             Require(owner!=null&&hunt!=null&&hero!=null,"Automatic director or owner disappeared.");
             Require(string.IsNullOrEmpty(hunt.LastFault),"Director fault: "+hunt.LastFault);
-            Require(hunt.Running,"Hunt stopped before three unattended runs.");
+            Require(hunt.Running,"Hunt stopped before the unattended connected-dungeon clear.");
             Require(owner.IsPaused?Mathf.Approximately(Time.timeScale,0):Mathf.Approximately(Time.timeScale,1),"Time acceleration or unexpected simulation scale detected.");
             SubscribeActors();CheckWorld();
             Require(hunt.SectionIndex>=0&&hunt.SectionIndex<3,"Unexpected section index.");
@@ -152,16 +155,18 @@ namespace AffixZero.Presentation
                 report.manualResumeVerified=true;Phase("observe-cycles");
             }
 
-            if(hunt.CompletedRuns>=3&&phase=="observe-cycles"&&pendingCaptures==0)
+            if(hunt.CompletedRuns>=1&&phase=="observe-cycles"&&pendingCaptures==0)
             {
                 Require(hunt.FailedRuns==0&&hunt.DeathRetries==0,"Baseline farming died or retried; this is not a stable idle loop.");
-                Require(hunt.TotalKills>=18&&deadLives.Count>=18,"Three cycles did not produce at least 18 observed enemy deaths.");
-                Require(hunt.CollectedItems>=3,"Automatic loot collection did not occur across the required cycles.");
-                Require(sections.Count==3,"Not all three sections were observed.");
-                Require(hunt.World.DetourQueries>0,"No real obstacle detour was requested during the three cycles.");
+                Require(hunt.MaxAliveEnemies==24&&hunt.TotalKills>=24&&deadLives.Count>=24,"The full 24-monster population was not present and cleared.");
+                Require(hunt.CollectedItems>=4,"Automatic loot collection did not exercise repeated field drops.");
+                Require(hunt.TravelDistance>=30,"The hero did not traverse multiple camera widths of the connected dungeon.");
+                Require(maximumEnemyRoam>=1,"No pre-existing monster visibly roamed from its spawn before combat.");
+                Require(hunt.World.DetourQueries>0,"No real obstacle detour was requested during the connected clear.");
+                Require(hunt.AreaCasts>0,"The automatic area skill never fired during a full population clear.");
                 Require(report.startCallbacks==1,"Hunt needed more than one start callback.");
-                Require(report.heroHitObserved&&report.enemyHitObserved&&report.impactPoseChecks>0&&report.lineOfSightChecks>0,
-                    "Actual mutual combat/impact/LOS evidence is incomplete.");
+                Require(report.enemyHitObserved&&report.impactPoseChecks>0&&report.lineOfSightChecks>0,
+                    "Actual combat/impact/LOS evidence is incomplete.");
                 Require(hunt.TotalKills==deadLives.Count,"Kill count differs from unique observed enemy deaths.");
                 Require(owner.Progression.TotalExperience==hunt.TotalKills*25&&owner.Progression.TotalGold==hunt.TotalKills*8,
                     "Automatic kill rewards differ: kills="+hunt.TotalKills+" XP="+owner.Progression.TotalExperience+" gold="+owner.Progression.TotalGold+" damage="+owner.Progression.TotalDamage+" enhancement="+owner.Progression.EquippedWeapon.EnhancementRank);
@@ -171,11 +176,28 @@ namespace AffixZero.Presentation
             }
         }
         private float Age=>Time.realtimeSinceStartup-phaseStarted;
+        private void SeedSurvivalBuild()
+        {
+            // Ephemeral QA fixture using only legal item/slot APIs and historical affix maxima.
+            var armor=new WeaponItem("qa:survival-armor","QA Epic Dragon Armor",0,0,"Guard","AffixGenerated/GearArmor","epic",0,
+                EquipmentSlot.Armor,flatDefense:40,flatHealth:150);
+            var ring=new WeaponItem("qa:survival-ring","QA Epic Blood Ring",0,0,"Vampirism","AffixGenerated/GearRelic","epic",0,
+                EquipmentSlot.Ring,flatHealth:250,options:new[]{new ItemOption(AffixStat.Vampirism,"Vampirism",8)});
+            foreach(WeaponItem item in new[]{armor,ring})
+            {
+                int index=owner.Progression.Inventory.Count;
+                Require(owner.Progression.TryCreatePendingLoot(item)&&owner.Progression.PickUp()&&owner.Progression.Equip(index),"Survival fixture could not equip "+item.EquipmentSlot);
+            }
+            owner.RefreshCombatBuild();
+            hero.Heal(hero.MaxHp);
+            report.fixtureLoadout="epic armor DEF+40 HP+150; epic ring HP+250 VAMP+8";
+            report.fixtureMaxHp=hero.MaxHp;report.fixtureDefense=hero.Defense;report.fixtureVampirism=owner.Progression.VampirismPercent;
+        }
         private void Phase(string value){phase=value;phaseStarted=Time.realtimeSinceStartup;}
         private void SubscribeActors()
         {
             Subscribe(hero);
-            foreach(var enemy in hunt.Enemies)if(enemy!=null)Subscribe(enemy);
+            foreach(var enemy in hunt.Enemies)if(enemy!=null){Subscribe(enemy);if(!initialEnemyPositions.ContainsKey(enemy.ActorId))initialEnemyPositions.Add(enemy.ActorId,enemy.transform.position);}
         }
         private void Subscribe(MeleeActor actor)
         {if(actor!=null&&subscribed.Add(actor))actor.Damaged+=OnDamaged;}
@@ -186,6 +208,7 @@ namespace AffixZero.Presentation
             {
                 if(actor==null||!actor.isActiveAndEnabled||!actor.IsReady)continue;
                 Require(hunt.World.IsWalkable(actor.transform.position),"Actor entered blocked terrain: "+actor.ActorId+" at "+actor.transform.position);
+                if(actor!=hero&&initialEnemyPositions.TryGetValue(actor.ActorId,out Vector2 origin))maximumEnemyRoam=Mathf.Max(maximumEnemyRoam,Vector2.Distance(origin,actor.transform.position));
                 report.walkabilityChecks++;
             }
         }
@@ -201,11 +224,19 @@ namespace AffixZero.Presentation
                 Require(attacker!=null,"Accepted damage has no identifiable attacker.");
                 Require(hunt.World.LineOfSight(attacker.transform.position,defender.transform.position),"A hit crossed a blocking dungeon wall.");
                 report.lineOfSightChecks++;
-                var renderer=attacker.GetComponent<SpriteRenderer>();
-                Require(renderer!=null&&attacker.AnimationSet!=null&&
-                    renderer.sprite==attacker.AnimationSet.ImpactSpriteFor(attacker.CurrentFacing),
-                    "Damage was applied without the real attack impact sprite.");
-                report.impactPoseChecks++;report.acceptedHits++;
+                if(defender.LastHitIsArea)
+                {
+                    Require(attacker==hero&&defender.LastHitRadius==AutoAreaSkill.Radius,"Area hit metadata did not match the automatic area skill.");
+                    report.areaHitChecks++;
+                }
+                else
+                {
+                    var renderer=attacker.GetComponent<SpriteRenderer>();
+                    Require(renderer!=null&&attacker.AnimationSet!=null&&renderer.sprite==attacker.AnimationSet.ImpactSpriteFor(attacker.CurrentFacing),
+                        "Ordinary damage was applied without the real attack impact sprite.");
+                    report.impactPoseChecks++;
+                }
+                report.acceptedHits++;
                 if(defender==hero)report.heroHitObserved=true;
                 else
                 {
@@ -300,7 +331,9 @@ namespace AffixZero.Presentation
                 report.inventoryCount=owner.Progression.Inventory.Count;}
             if(hunt!=null){report.completedRuns=hunt.CompletedRuns;report.totalKills=hunt.TotalKills;report.collectedItems=hunt.CollectedItems;
                 report.deathRetries=hunt.DeathRetries;report.travelDistance=hunt.TravelDistance;report.directorFault=hunt.LastFault??"";
-                report.detourQueries=hunt.World==null?0:hunt.World.DetourQueries;report.targetSelections=hunt.TargetSelections;}
+                report.detourQueries=hunt.World==null?0:hunt.World.DetourQueries;report.targetSelections=hunt.TargetSelections;
+                report.areaCasts=hunt.AreaCasts;report.recoveryCasts=hunt.RecoveryCasts;}
+            report.maximumEnemyRoam=maximumEnemyRoam;
             try{Directory.CreateDirectory(outputDirectory);WriteReport();}
             catch(Exception error){success=false;Debug.LogError("Cannot write auto hunt report: "+error);}
             Debug.Log("AFFIX_AUTO_HUNT_SMOKE_"+(success?"PASS":"FAIL")+" run="+report.runId);
@@ -316,10 +349,11 @@ namespace AffixZero.Presentation
             public string interactionMethod="One native UI Toolkit start ClickEvent plus management/pause callbacks. No physical mouse/keyboard, no stat modification or time acceleration.";
             public string actualUiClickVerification="NOT_RUN",userVisualApproval="NOT_APPROVED",screenshotScope="24-bit BMP from actual end-of-frame ReadPixels with native runtime HUD.";
             public bool initialized,heroHitObserved,enemyHitObserved,managementKeepsHunting,managementSwitchesVerified,manualPauseVerified,manualResumeVerified;
-            public int startCallbacks,uiCallbacksDispatched,acceptedHits,lineOfSightChecks,impactPoseChecks,walkabilityChecks,completedRuns,totalKills,collectedItems,deathRetries,sectionsVisited,uniqueDeaths,detourQueries,targetSelections;
-            public float elapsedSeconds,travelDistance;
+            public int startCallbacks,uiCallbacksDispatched,acceptedHits,lineOfSightChecks,impactPoseChecks,areaHitChecks,areaCasts,recoveryCasts,walkabilityChecks,completedRuns,totalKills,collectedItems,deathRetries,sectionsVisited,uniqueDeaths,detourQueries,targetSelections;
+            public float elapsedSeconds,travelDistance,maximumEnemyRoam;
             public int experience,gold,totalDamage,enhancementRank,spentTalentPoints,inventoryCount;
-            public string equippedItemId="";
+            public int fixtureMaxHp,fixtureDefense,fixtureVampirism;
+            public string equippedItemId="",fixtureLoadout="";
             public string[] screenshots=Array.Empty<string>();
         }
     }

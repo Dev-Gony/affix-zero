@@ -29,7 +29,7 @@ namespace AffixZero.Presentation
                 string[] args=Environment.GetCommandLineArgs();
                 bool saveTest=Array.IndexOf(args,"-affixSaveTest")>=0;
                 // UI fixtures never open a save, even when incompatible test flags are supplied.
-                Ephemeral=Array.IndexOf(args,"-affixUiReferenceTest")>=0 || (!saveTest &&
+                Ephemeral=Array.IndexOf(args,"-affixCombatExperienceTest")>=0 || Array.IndexOf(args,"-affixUiReferenceTest")>=0 || (!saveTest &&
                     (Array.IndexOf(args,"-affixAutoHuntTest")>=0 || Array.IndexOf(args,"-affixAutoHuntSafetyTest")>=0 ||
                     Array.IndexOf(args,"-affixSmokeTest")>=0));
                 // Editor verification also stays separate from the player's persistent character.

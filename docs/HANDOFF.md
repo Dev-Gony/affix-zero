@@ -1,4 +1,8 @@
-# 인수인계 — Stitch UI 재구성 검증 완료
+# 인수인계 — 연결형 던전·전리품·자동 스킬
+
+2026-10-02 작업 브랜치 `feature/open-dungeon-loot-skills`. 최신 구현/검증 기준은 `OPEN_DUNGEON_LOOT_SKILLS.md`다. 이전의 3구간·2체 재사용·빈 스킬 슬롯 설명은 역사 기록일 뿐 현재 구현이 아니다. 현재는 한 연결형 사원, 시작부터 24체 상주/배회, 실제 6등급·29 base·7 역사 슬롯+Relic·10옵션, 8칸 장비 비교, 6노드/75랭크, 자동 범위/회복 스킬이다. 720p 실제 완주 PASS와 1080p 실제 완주/캡처가 있으며 사용자 시각 승인은 아직 없다. Draft PR #19를 병합하지 말고 기존 dirty `D:\github\affix-unity`도 건드리지 않는다.
+
+# 이전 인수인계 — Stitch UI 재구성 검증 완료
 
 2026-09-26. `restart/unity-6`, draft PR #19, Unity6000.3.24f1 / Built-in2D 유지. 구현 커밋 `81c4b2aac57cad0cc9f8abc0faba10a943a6836e`. STATUS.json, PRODUCT_BRIEF.md, STITCH_REFERENCE_REFRESH.md를 우선 읽는다. 아래 이전 저장/자동사냥 단계는 당시 검증 기록이며 최신 빌드를 대체하지 않는다.
 

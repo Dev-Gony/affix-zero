@@ -4,11 +4,42 @@ using System.Collections.ObjectModel;
 
 namespace AffixZero.Core
 {
-    public enum TalentId { Fury, Precision, Keystone }
+    public enum TalentId { Fury, Precision, Keystone, Vitality, Cleave, Haste }
+    // Numeric values 0-2 retain compatibility with the first expanded Unity draft.
+    public enum EquipmentSlot { Weapon = 0, Armor = 1, Relic = 2, Helmet = 3, Gloves = 4, Boots = 5, Ring = 6, Amulet = 7 }
+    public enum WeaponStyle { Sword, Axe, Staff }
+    public enum AffixStat { Attack, Defense, Health, Mana, Speed, Critical, Vampirism, Experience, Gold, Penetration }
+
+    public sealed class ItemOption
+    {
+        public AffixStat Stat { get; }
+        public string Name { get; }
+        public float Value { get; }
+        public ItemOption(AffixStat stat, string name, float value)
+        {
+            if (!Enum.IsDefined(typeof(AffixStat), stat) || string.IsNullOrWhiteSpace(name) ||
+                value <= 0 || float.IsNaN(value) || float.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));
+            Stat = stat; Name = name; Value = value;
+        }
+    }
+
+    public sealed class TalentDefinition
+    {
+        public TalentId Id { get; }
+        public string Name { get; }
+        public string Description { get; }
+        public int MaxRank { get; }
+        public TalentId? Prerequisite { get; }
+        public int RequiredRank { get; }
+        internal TalentDefinition(TalentId id, string name, string description, int cap,
+            TalentId? prerequisite = null, int requiredRank = 0)
+        { Id = id; Name = name; Description = description; MaxRank = cap;
+          Prerequisite = prerequisite; RequiredRank = requiredRank; }
+    }
 
     public sealed class WeaponItem
     {
-        public const int MaxEnhancementRank = 3;
+        public const int MaxEnhancementRank = 20;
         public string Id { get; }
         public string Name { get; }
         public int FlatDamage { get; }
@@ -17,22 +48,62 @@ namespace AffixZero.Core
         public string IconResource { get; }
         public string Rarity { get; }
         public int EnhancementRank { get; }
-        public int EnhancementDamage => EnhancementRank * 2;
-        public int DamageBonus => FlatDamage + AffixDamage + EnhancementDamage;
+        public EquipmentSlot EquipmentSlot { get; }
+        public WeaponStyle WeaponStyle { get; }
+        public int FlatDefense { get; }
+        public int FlatHealth { get; }
+        public int BaseCooldownReductionPercent { get; }
+        public IReadOnlyList<ItemOption> Options { get; }
+        private bool DefensiveSlot => EquipmentSlot == EquipmentSlot.Armor || EquipmentSlot == EquipmentSlot.Helmet ||
+            EquipmentSlot == EquipmentSlot.Gloves || EquipmentSlot == EquipmentSlot.Boots;
+        private float Option(AffixStat stat) { float total = 0; foreach (ItemOption option in Options) if (option.Stat == stat) total += option.Value; return total; }
+        public int EnhancementDamage => DefensiveSlot ? 0 : EnhancementRank * 2;
+        public int DamageBonus => FlatDamage + AffixDamage + MathfRound(Option(AffixStat.Attack)) + EnhancementDamage;
+        public int DefenseBonus => FlatDefense + MathfRound(Option(AffixStat.Defense)) + (DefensiveSlot ? EnhancementRank : 0);
+        public int HealthBonus => FlatHealth + MathfRound(Option(AffixStat.Health)) + (DefensiveSlot ? EnhancementRank * 5 : 0);
+        public int ManaBonus => MathfRound(Option(AffixStat.Mana));
+        public float SpeedBonus => Option(AffixStat.Speed);
+        public int CriticalChance => MathfRound(Option(AffixStat.Critical));
+        public int VampirismPercent => MathfRound(Option(AffixStat.Vampirism));
+        public int ExperienceBonusPercent => MathfRound(Option(AffixStat.Experience));
+        public int GoldBonusPercent => MathfRound(Option(AffixStat.Gold));
+        public int Penetration => MathfRound(Option(AffixStat.Penetration));
+        public int CooldownReductionPercent => BaseCooldownReductionPercent + MathfRound(SpeedBonus * 100f);
+        public int NextEnhancementDamage => EnhancementRank >= MaxEnhancementRank || DefensiveSlot ? 0 : 2;
+        public int NextEnhancementDefense => EnhancementRank < MaxEnhancementRank && DefensiveSlot ? 1 : 0;
+        public int NextEnhancementHealth => EnhancementRank < MaxEnhancementRank && DefensiveSlot ? 5 : 0;
+        public string EnhancementDescription => EnhancementRank >= MaxEnhancementRank ? "최대 강화 단계" :
+            DefensiveSlot ? "방어력 +1 · 최대 체력 +5" : "공격력 +2";
+        private static int MathfRound(float value) => (int)Math.Round(value, MidpointRounding.AwayFromZero);
 
         public WeaponItem(string id, string name, int flatDamage, int affixDamage,
-            string affixName, string iconResource, string rarity, int enhancementRank = 0)
+            string affixName, string iconResource, string rarity, int enhancementRank = 0,
+            EquipmentSlot equipmentSlot = EquipmentSlot.Weapon, WeaponStyle weaponStyle = WeaponStyle.Sword,
+            int flatDefense = 0, int flatHealth = 0, int cooldownReductionPercent = 0,
+            IEnumerable<ItemOption> options = null)
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name) ||
                 string.IsNullOrWhiteSpace(iconResource) || string.IsNullOrWhiteSpace(rarity))
                 throw new ArgumentException("Item identity, name, icon and rarity are required.");
             if (enhancementRank < 0 || enhancementRank > MaxEnhancementRank)
                 throw new ArgumentOutOfRangeException(nameof(enhancementRank));
-            // Reserve base attack, all talents and all enhancement ranks before intake.
+            // Preserve the legacy intake boundary; aggregate stats use saturating long arithmetic.
             if (flatDamage < 0 || affixDamage < 0 || (long)flatDamage + affixDamage > int.MaxValue - 46)
                 throw new ArgumentOutOfRangeException(nameof(flatDamage));
             if (affixDamage > 0 && string.IsNullOrWhiteSpace(affixName))
                 throw new ArgumentException("A damage affix requires a name.", nameof(affixName));
+            if (!Enum.IsDefined(typeof(EquipmentSlot), equipmentSlot) || !Enum.IsDefined(typeof(WeaponStyle), weaponStyle) ||
+                (equipmentSlot != EquipmentSlot.Weapon && weaponStyle != WeaponStyle.Sword))
+                throw new ArgumentOutOfRangeException(nameof(equipmentSlot));
+            if (flatDefense < 0 || flatDefense > int.MaxValue - 20 || flatHealth < 0 ||
+                flatHealth > int.MaxValue - 100 || cooldownReductionPercent < 0 || cooldownReductionPercent > 50)
+                throw new ArgumentOutOfRangeException(nameof(flatDefense));
+            EquipmentSlot = equipmentSlot; WeaponStyle = weaponStyle; FlatDefense = flatDefense;
+            FlatHealth = flatHealth; BaseCooldownReductionPercent = cooldownReductionPercent;
+            var optionList = options == null ? new List<ItemOption>() : new List<ItemOption>(options);
+            // Six random affixes may sit beside authored base stats on the same item.
+            if (optionList.Count > 8 || optionList.Contains(null)) throw new ArgumentException("An item supports at most eight non-null options.", nameof(options));
+            Options = optionList.AsReadOnly();
             Id = id;
             Name = name;
             FlatDamage = flatDamage;
@@ -49,6 +120,19 @@ namespace AffixZero.Core
     {
         public const int InventoryCapacity = 24;
         public const int BaseDamage = 24;
+        public const int ExperiencePerLevel = 250;
+        public const int TotalTalentCapacity = 75;
+        private static readonly ReadOnlyCollection<TalentDefinition> talentDefinitions = Array.AsReadOnly(new[]
+        {
+            new TalentDefinition(TalentId.Fury, "격노", "랭크마다 공격력 +3", 20),
+            new TalentDefinition(TalentId.Precision, "정밀", "랭크마다 공격력 +4", 10, TalentId.Fury, 2),
+            new TalentDefinition(TalentId.Keystone, "숙련", "랭크마다 공격력 +6", 5, TalentId.Precision, 1),
+            new TalentDefinition(TalentId.Vitality, "강인함", "랭크마다 최대 체력 +10", 20),
+            new TalentDefinition(TalentId.Cleave, "휩쓸기", "랭크마다 광역 반경 +0.08, 주변 피해 +2.5%", 10, TalentId.Fury, 2),
+            new TalentDefinition(TalentId.Haste, "가속", "랭크마다 공격 대기 시간 2% 감소", 10, TalentId.Precision, 1)
+        });
+        public static IReadOnlyList<TalentDefinition> TalentDefinitions => talentDefinitions;
+        private int legacyPointCredit;
         private const string FirstDropId = "loot:ember-steel:first";
         private readonly List<WeaponItem> inventory = new List<WeaponItem>();
         private readonly HashSet<string> killTokens = new HashSet<string>(StringComparer.Ordinal);
@@ -58,6 +142,13 @@ namespace AffixZero.Core
 
         public IReadOnlyList<WeaponItem> Inventory => inventoryView;
         public WeaponItem EquippedWeapon { get; private set; }
+        public WeaponItem EquippedArmor { get; private set; }
+        public WeaponItem EquippedRelic { get; private set; }
+        public WeaponItem EquippedHelmet { get; private set; }
+        public WeaponItem EquippedGloves { get; private set; }
+        public WeaponItem EquippedBoots { get; private set; }
+        public WeaponItem EquippedRing { get; private set; }
+        public WeaponItem EquippedAmulet { get; private set; }
         public WeaponItem PendingLoot { get; private set; }
         public int UnspentPoints { get; private set; }
         public int TotalExperience { get; private set; }
@@ -66,12 +157,72 @@ namespace AffixZero.Core
         public int FuryRank { get; private set; }
         public int PrecisionRank { get; private set; }
         public int KeystoneRank { get; private set; }
-        public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank;
+        public int VitalityRank { get; private set; }
+        public int CleaveRank { get; private set; }
+        public int HasteRank { get; private set; }
+        public int LegacyPointCredit => legacyPointCredit;
+        public int Level => 1 + TotalExperience / ExperiencePerLevel;
+        public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank + VitalityRank + CleaveRank + HasteRank;
         public int TalentDamage => FuryRank * 3 + PrecisionRank * 4 + KeystoneRank * 6;
-        public int TotalDamage => BaseDamage + EquippedWeapon.DamageBonus + TalentDamage;
-        public int EquippedEnhancementCost => EquippedWeapon.EnhancementRank >= WeaponItem.MaxEnhancementRank
-            ? 0 : (EquippedWeapon.EnhancementRank + 1) * 8;
-        public bool CanEnhanceEquipped => EquippedEnhancementCost > 0 && TotalGold >= EquippedEnhancementCost;
+        private IEnumerable<WeaponItem> EquippedItems
+        {
+            get
+            {
+                yield return EquippedWeapon;
+                if (EquippedHelmet != null) yield return EquippedHelmet;
+                if (EquippedArmor != null) yield return EquippedArmor;
+                if (EquippedGloves != null) yield return EquippedGloves;
+                if (EquippedBoots != null) yield return EquippedBoots;
+                if (EquippedRing != null) yield return EquippedRing;
+                if (EquippedAmulet != null) yield return EquippedAmulet;
+                if (EquippedRelic != null) yield return EquippedRelic;
+            }
+        }
+        private int Sum(Func<WeaponItem, int> read) { long total = 0; foreach (WeaponItem item in EquippedItems) total += read(item); return Saturate(total); }
+        public int TotalDamage => Saturate((long)BaseDamage + Sum(item => item.DamageBonus) + TalentDamage);
+        public int TotalMaxHp => Saturate(120L + VitalityRank * 10 + Sum(item => item.HealthBonus));
+        public int TotalDefense => Saturate(2L + Sum(item => item.DefenseBonus));
+        public int TotalMana => Saturate(30L + Sum(item => item.ManaBonus));
+        public int CriticalChance => Math.Min(75, 5 + Sum(item => item.CriticalChance));
+        public int VampirismPercent => Math.Min(40, Sum(item => item.VampirismPercent));
+        public int ExperienceBonusPercent => Math.Min(20, Sum(item => item.ExperienceBonusPercent));
+        public int GoldBonusPercent => Math.Min(30, Sum(item => item.GoldBonusPercent));
+        public int Penetration => Math.Min(50, Sum(item => item.Penetration));
+        public int CooldownReductionPercent => Math.Min(50, HasteRank * 2 + Sum(item => item.CooldownReductionPercent));
+        public float AttackSpeedMultiplier => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? .8f :
+            EquippedWeapon.WeaponStyle == WeaponStyle.Staff ? .9f : 1f) / (1f - CooldownReductionPercent / 100f);
+        public float AttackReach => EquippedWeapon.WeaponStyle == WeaponStyle.Staff ? 4.5f :
+            EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? 1.3f : 1.05f;
+        public float SplashRadius => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? 1.1f : 0f) + CleaveRank * .08f;
+        public float SplashDamageFraction => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? .5f : 0f) + CleaveRank * .025f;
+        public bool IsRanged => EquippedWeapon.WeaponStyle == WeaponStyle.Staff;
+        public int LastExperienceReward { get; private set; }
+        public int LastGoldReward { get; private set; }
+        public int EquippedEnhancementCost => GetEnhancementCost(EquipmentSlot.Weapon);
+        public bool CanEnhanceEquipped => CanEnhance(EquipmentSlot.Weapon);
+        private static int Saturate(long value) => (int)Math.Min(int.MaxValue, value);
+
+        public static TalentDefinition GetTalentDefinition(TalentId talent) =>
+            (int)talent >= 0 && (int)talent < talentDefinitions.Count ? talentDefinitions[(int)talent] : null;
+        public int GetTalentRank(TalentId talent)
+        {
+            switch (talent)
+            {
+                case TalentId.Fury: return FuryRank;
+                case TalentId.Precision: return PrecisionRank;
+                case TalentId.Keystone: return KeystoneRank;
+                case TalentId.Vitality: return VitalityRank;
+                case TalentId.Cleave: return CleaveRank;
+                case TalentId.Haste: return HasteRank;
+                default: return 0;
+            }
+        }
+        public bool CanSpendPoint(TalentId talent)
+        {
+            var definition = GetTalentDefinition(talent);
+            return definition != null && UnspentPoints > 0 && GetTalentRank(talent) < definition.MaxRank &&
+                (!definition.Prerequisite.HasValue || GetTalentRank(definition.Prerequisite.Value) >= definition.RequiredRank);
+        }
 
         public HeroProgression()
         {
@@ -85,17 +236,14 @@ namespace AffixZero.Core
         {
             if (string.IsNullOrWhiteSpace(uniqueToken) || killTokens.Contains(uniqueToken) ||
                 (long)UnspentPoints + SpentPoints >= int.MaxValue ||
-                TotalExperience > int.MaxValue - 25 || TotalGold > int.MaxValue - 8) return false;
-            bool firstKill = killTokens.Count == 0;
-            if (firstKill)
-            {
-                firstDropWaiting = true;
-                OfferFirstDrop();
-            }
+                TotalExperience > int.MaxValue - 30 || TotalGold > int.MaxValue - 11) return false;
             killTokens.Add(uniqueToken);
-            UnspentPoints++;
-            TotalExperience += 25;
-            TotalGold += 8;
+            int previousLevel = Level;
+            LastExperienceReward = 25 + 25 * ExperienceBonusPercent / 100;
+            LastGoldReward = 8 + 8 * GoldBonusPercent / 100;
+            TotalExperience += LastExperienceReward;
+            UnspentPoints += Level - previousLevel;
+            TotalGold += LastGoldReward;
             return true;
         }
 
@@ -114,6 +262,7 @@ namespace AffixZero.Core
             if (PendingLoot == null || inventory.Count >= InventoryCapacity) return false;
             inventory.Add(PendingLoot);
             PendingLoot = null;
+            // Only migrated v1 profiles can carry this deferred onboarding reward.
             OfferFirstDrop();
             return true;
         }
@@ -127,24 +276,67 @@ namespace AffixZero.Core
             firstDropWaiting = false;
         }
 
+        public WeaponItem GetEquipped(EquipmentSlot slot)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.Weapon: return EquippedWeapon;
+                case EquipmentSlot.Armor: return EquippedArmor;
+                case EquipmentSlot.Relic: return EquippedRelic;
+                case EquipmentSlot.Helmet: return EquippedHelmet;
+                case EquipmentSlot.Gloves: return EquippedGloves;
+                case EquipmentSlot.Boots: return EquippedBoots;
+                case EquipmentSlot.Ring: return EquippedRing;
+                case EquipmentSlot.Amulet: return EquippedAmulet;
+                default: return null;
+            }
+        }
+        private void SetEquipped(EquipmentSlot slot, WeaponItem item)
+        {
+            switch (slot)
+            {
+                case EquipmentSlot.Weapon: EquippedWeapon = item; break;
+                case EquipmentSlot.Armor: EquippedArmor = item; break;
+                case EquipmentSlot.Relic: EquippedRelic = item; break;
+                case EquipmentSlot.Helmet: EquippedHelmet = item; break;
+                case EquipmentSlot.Gloves: EquippedGloves = item; break;
+                case EquipmentSlot.Boots: EquippedBoots = item; break;
+                case EquipmentSlot.Ring: EquippedRing = item; break;
+                case EquipmentSlot.Amulet: EquippedAmulet = item; break;
+            }
+        }
         public bool Equip(int index)
         {
             if (!ValidIndex(index)) return false;
-            WeaponItem previous = EquippedWeapon;
-            EquippedWeapon = inventory[index];
-            inventory[index] = previous;
+            WeaponItem item = inventory[index];
+            WeaponItem previous = GetEquipped(item.EquipmentSlot);
+            SetEquipped(item.EquipmentSlot, item);
+            if (previous == null) inventory.RemoveAt(index); else inventory[index] = previous;
             return true;
         }
-
-        public bool TryEnhanceEquipped()
+        public static int EnhancementCostForRank(int currentRank)
         {
-            if (!CanEnhanceEquipped) return false;
-            WeaponItem current = EquippedWeapon;
+            if (currentRank < 0 || currentRank >= WeaponItem.MaxEnhancementRank) return 0;
+            int escalation = Math.Max(0, currentRank - 2);
+            return (currentRank + 1 + escalation * escalation) * 8;
+        }
+        public int GetEnhancementCost(EquipmentSlot slot)
+        {
+            var item = GetEquipped(slot);
+            return item == null ? 0 : EnhancementCostForRank(item.EnhancementRank);
+        }
+        public bool CanEnhance(EquipmentSlot slot) => GetEnhancementCost(slot) > 0 && TotalGold >= GetEnhancementCost(slot);
+        public bool TryEnhanceEquipped() => TryEnhance(EquipmentSlot.Weapon);
+        public bool TryEnhance(EquipmentSlot slot)
+        {
+            if (!CanEnhance(slot)) return false;
+            WeaponItem current = GetEquipped(slot);
             var enhanced = new WeaponItem(current.Id, current.Name, current.FlatDamage, current.AffixDamage,
-                current.AffixName, current.IconResource, current.Rarity, current.EnhancementRank + 1);
-            int cost = EquippedEnhancementCost;
-            TotalGold -= cost;
-            EquippedWeapon = enhanced;
+                current.AffixName, current.IconResource, current.Rarity, current.EnhancementRank + 1,
+                current.EquipmentSlot, current.WeaponStyle, current.FlatDefense, current.FlatHealth,
+                current.BaseCooldownReductionPercent, current.Options);
+            TotalGold -= GetEnhancementCost(slot);
+            SetEquipped(slot, enhanced);
             return true;
         }
 
@@ -157,35 +349,28 @@ namespace AffixZero.Core
         }
 
         public int? CompareDamage(int index) => ValidIndex(index)
-            ? (int?)(inventory[index].DamageBonus - EquippedWeapon.DamageBonus) : null;
+            ? (int?)(inventory[index].DamageBonus - (GetEquipped(inventory[index].EquipmentSlot)?.DamageBonus ?? 0)) : null;
 
         public bool TrySpendPoint(TalentId talent)
         {
-            if (UnspentPoints <= 0) return false;
+            if (!CanSpendPoint(talent)) return false;
             switch (talent)
             {
-                case TalentId.Fury:
-                    if (FuryRank >= 2) return false;
-                    FuryRank++;
-                    break;
-                case TalentId.Precision:
-                    if (FuryRank < 2 || PrecisionRank >= 1) return false;
-                    PrecisionRank++;
-                    break;
-                case TalentId.Keystone:
-                    if (PrecisionRank < 1 || KeystoneRank >= 1) return false;
-                    KeystoneRank++;
-                    break;
+                case TalentId.Fury: FuryRank++; break;
+                case TalentId.Precision: PrecisionRank++; break;
+                case TalentId.Keystone: KeystoneRank++; break;
+                case TalentId.Vitality: VitalityRank++; break;
+                case TalentId.Cleave: CleaveRank++; break;
+                case TalentId.Haste: HasteRank++; break;
                 default: return false;
             }
             UnspentPoints--;
             return true;
         }
-
         public void ResetTalents()
         {
             UnspentPoints += SpentPoints;
-            FuryRank = PrecisionRank = KeystoneRank = 0;
+            FuryRank = PrecisionRank = KeystoneRank = VitalityRank = CleaveRank = HasteRank = 0;
         }
 
         public ProgressionSnapshot CaptureSnapshot()
@@ -200,6 +385,14 @@ namespace AffixZero.Core
             {
                 totalExperience = TotalExperience, totalGold = TotalGold, unspentPoints = UnspentPoints,
                 furyRank = FuryRank, precisionRank = PrecisionRank, keystoneRank = KeystoneRank,
+                vitalityRank = VitalityRank, cleaveRank = CleaveRank, hasteRank = HasteRank, legacyPointCredit = legacyPointCredit,
+                hasArmor = EquippedArmor != null, hasRelic = EquippedRelic != null,
+                equippedArmor = CaptureWeapon(EquippedArmor), equippedRelic = CaptureWeapon(EquippedRelic),
+                hasHelmet = EquippedHelmet != null, hasGloves = EquippedGloves != null, hasBoots = EquippedBoots != null,
+                hasRing = EquippedRing != null, hasAmulet = EquippedAmulet != null,
+                equippedHelmet = CaptureWeapon(EquippedHelmet), equippedGloves = CaptureWeapon(EquippedGloves),
+                equippedBoots = CaptureWeapon(EquippedBoots), equippedRing = CaptureWeapon(EquippedRing),
+                equippedAmulet = CaptureWeapon(EquippedAmulet),
                 firstDropWaiting = firstDropWaiting, hasPendingLoot = PendingLoot != null, equippedWeapon = CaptureWeapon(EquippedWeapon),
                 inventory = items, pendingLoot = CaptureWeapon(PendingLoot),
                 killTokens = tokens.ToArray(), issuedItemIds = ids.ToArray()
@@ -209,40 +402,79 @@ namespace AffixZero.Core
         public static HeroProgression RestoreSnapshot(ProgressionSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
-            if (snapshot.schemaVersion != 1) throw new NotSupportedException("Unsupported progression snapshot version.");
+            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2)
+                throw new NotSupportedException("Unsupported progression snapshot version.");
+            bool legacy = snapshot.schemaVersion == 1;
+            int[] ranks = { snapshot.furyRank, snapshot.precisionRank, snapshot.keystoneRank,
+                snapshot.vitalityRank, snapshot.cleaveRank, snapshot.hasteRank };
+            int[] legacyCaps = { 2, 1, 1, 0, 0, 0 };
             if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.unspentPoints < 0 ||
-                snapshot.furyRank < 0 || snapshot.furyRank > 2 || snapshot.precisionRank < 0 || snapshot.precisionRank > 1 ||
-                snapshot.keystoneRank < 0 || snapshot.keystoneRank > 1 ||
-                (snapshot.precisionRank > 0 && snapshot.furyRank != 2) ||
-                (snapshot.keystoneRank > 0 && snapshot.precisionRank != 1))
-                throw new ArgumentException("Invalid balances or talent prerequisites.", nameof(snapshot));
+                snapshot.legacyPointCredit < 0 || (legacy && (snapshot.hasArmor || snapshot.hasRelic || snapshot.hasHelmet ||
+                snapshot.hasGloves || snapshot.hasBoots || snapshot.hasRing || snapshot.hasAmulet || snapshot.legacyPointCredit != 0)))
+                throw new ArgumentException("Invalid balances or legacy fields.", nameof(snapshot));
+            long spent = 0;
+            for (int i = 0; i < ranks.Length; i++)
+            {
+                var definition = talentDefinitions[i];
+                if (ranks[i] < 0 || ranks[i] > (legacy ? legacyCaps[i] : definition.MaxRank) ||
+                    (ranks[i] > 0 && definition.Prerequisite.HasValue && ranks[(int)definition.Prerequisite.Value] < definition.RequiredRank))
+                    throw new ArgumentException("Invalid talent rank or prerequisite.", nameof(snapshot));
+                spent += ranks[i];
+            }
             if (snapshot.inventory == null || snapshot.inventory.Length > InventoryCapacity || snapshot.equippedWeapon == null)
                 throw new ArgumentException("An equipped weapon and a bounded inventory are required.", nameof(snapshot));
 
             HashSet<string> tokens = RestoreIdentifiers(snapshot.killTokens);
             HashSet<string> ids = RestoreIdentifiers(snapshot.issuedItemIds);
-            long earnedPoints = (long)snapshot.unspentPoints + snapshot.furyRank + snapshot.precisionRank + snapshot.keystoneRank;
-            if (earnedPoints != tokens.Count || snapshot.totalExperience != (long)tokens.Count * 25 ||
-                snapshot.totalGold > (long)tokens.Count * 8 || snapshot.totalGold % 8 != 0)
+            long earnedPoints = snapshot.unspentPoints + spent;
+            long normalPoints = snapshot.totalExperience / ExperiencePerLevel;
+            long credit = legacy ? earnedPoints - normalPoints : snapshot.legacyPointCredit;
+            long minimumExperience = (long)tokens.Count * 25;
+            long maximumExperience = (long)tokens.Count * 30;
+            long maximumGold = (long)tokens.Count * 11;
+            if (credit < 0 || credit > tokens.Count - normalPoints ||
+                earnedPoints != (legacy ? tokens.Count : normalPoints + credit) ||
+                (legacy ? snapshot.totalExperience != minimumExperience : snapshot.totalExperience < minimumExperience || snapshot.totalExperience > maximumExperience) ||
+                snapshot.totalGold > (legacy ? (long)tokens.Count * 8 : maximumGold) || (legacy && snapshot.totalGold % 8 != 0))
                 throw new ArgumentException("Reward balances disagree with the kill ledger.", nameof(snapshot));
-            if (!ids.Contains("equipped:starting-sword") ||
-                (tokens.Count == 0 && (snapshot.firstDropWaiting || ids.Contains(FirstDropId))) ||
+            bool invalidLegacyFirstDrop = legacy && ((tokens.Count == 0 && (snapshot.firstDropWaiting || ids.Contains(FirstDropId))) ||
                 (tokens.Count > 0 && snapshot.firstDropWaiting == ids.Contains(FirstDropId)) ||
-                (snapshot.firstDropWaiting && !snapshot.hasPendingLoot))
+                (snapshot.firstDropWaiting && !snapshot.hasPendingLoot));
+            if (!ids.Contains("equipped:starting-sword") || invalidLegacyFirstDrop || (!legacy && snapshot.firstDropWaiting))
                 throw new ArgumentException("Invalid first-drop or issued-item history.", nameof(snapshot));
 
             var ownedIds = new HashSet<string>(StringComparer.Ordinal);
-            WeaponItem equipped = RestoreWeapon(snapshot.equippedWeapon, ids, ownedIds);
+            WeaponItem equipped = RestoreWeapon(snapshot.equippedWeapon, ids, ownedIds, legacy);
+            WeaponItem armor = snapshot.hasArmor ? RestoreWeapon(snapshot.equippedArmor, ids, ownedIds, legacy) : null;
+            WeaponItem relic = snapshot.hasRelic ? RestoreWeapon(snapshot.equippedRelic, ids, ownedIds, legacy) : null;
+            WeaponItem helmet = snapshot.hasHelmet ? RestoreWeapon(snapshot.equippedHelmet, ids, ownedIds, legacy) : null;
+            WeaponItem gloves = snapshot.hasGloves ? RestoreWeapon(snapshot.equippedGloves, ids, ownedIds, legacy) : null;
+            WeaponItem boots = snapshot.hasBoots ? RestoreWeapon(snapshot.equippedBoots, ids, ownedIds, legacy) : null;
+            WeaponItem ring = snapshot.hasRing ? RestoreWeapon(snapshot.equippedRing, ids, ownedIds, legacy) : null;
+            WeaponItem amulet = snapshot.hasAmulet ? RestoreWeapon(snapshot.equippedAmulet, ids, ownedIds, legacy) : null;
+            if (equipped.EquipmentSlot != EquipmentSlot.Weapon ||
+                (armor != null && armor.EquipmentSlot != EquipmentSlot.Armor) ||
+                (relic != null && relic.EquipmentSlot != EquipmentSlot.Relic) ||
+                (helmet != null && helmet.EquipmentSlot != EquipmentSlot.Helmet) ||
+                (gloves != null && gloves.EquipmentSlot != EquipmentSlot.Gloves) ||
+                (boots != null && boots.EquipmentSlot != EquipmentSlot.Boots) ||
+                (ring != null && ring.EquipmentSlot != EquipmentSlot.Ring) ||
+                (amulet != null && amulet.EquipmentSlot != EquipmentSlot.Amulet))
+                throw new ArgumentException("Item is in the wrong equipment slot.");
             var items = new List<WeaponItem>();
-            foreach (WeaponSnapshot item in snapshot.inventory) items.Add(RestoreWeapon(item, ids, ownedIds));
+            foreach (WeaponSnapshot item in snapshot.inventory) items.Add(RestoreWeapon(item, ids, ownedIds, legacy));
             // Unity serializes inline null classes as empty objects; the explicit tag owns optionality.
-            WeaponItem pending = snapshot.hasPendingLoot ? RestoreWeapon(snapshot.pendingLoot, ids, ownedIds) : null;
+            WeaponItem pending = snapshot.hasPendingLoot ? RestoreWeapon(snapshot.pendingLoot, ids, ownedIds, legacy) : null;
 
             var restored = new HeroProgression
             {
                 TotalExperience = snapshot.totalExperience, TotalGold = snapshot.totalGold,
                 UnspentPoints = snapshot.unspentPoints, FuryRank = snapshot.furyRank,
                 PrecisionRank = snapshot.precisionRank, KeystoneRank = snapshot.keystoneRank,
+                VitalityRank = snapshot.vitalityRank, CleaveRank = snapshot.cleaveRank, HasteRank = snapshot.hasteRank,
+                legacyPointCredit = (int)credit, EquippedArmor = armor, EquippedRelic = relic,
+                EquippedHelmet = helmet, EquippedGloves = gloves, EquippedBoots = boots,
+                EquippedRing = ring, EquippedAmulet = amulet,
                 firstDropWaiting = snapshot.firstDropWaiting, EquippedWeapon = equipped, PendingLoot = pending
             };
             restored.inventory.AddRange(items);
@@ -262,14 +494,32 @@ namespace AffixZero.Core
             return result;
         }
 
-        private static WeaponItem RestoreWeapon(WeaponSnapshot item, HashSet<string> issued, HashSet<string> owned)
+        private static WeaponItem RestoreWeapon(WeaponSnapshot item, HashSet<string> issued, HashSet<string> owned, bool legacy)
         {
             if (item == null) throw new ArgumentException("Inventory cannot contain a null weapon.");
-            // Deliberate version-1 allowlist: save data cannot introduce unreviewed resource paths.
-            if (item.iconResource != "AffixGenerated/AttackIcon" && item.iconResource != "AffixGenerated/EmberSword")
-                throw new ArgumentException("Weapon icon is not an authored version-1 resource.");
+            if (legacy && (item.enhancementRank > 3 || item.equipmentSlot != 0 || item.weaponStyle != 0 ||
+                item.flatDefense != 0 || item.flatHealth != 0 || item.cooldownReductionPercent != 0))
+                throw new ArgumentException("Version-1 item contains unsupported fields.");
+            switch (item.iconResource)
+            {
+                case "AffixGenerated/AttackIcon": case "AffixGenerated/EmberSword":
+                case "AffixGenerated/PowerRune": case "AffixGenerated/PrecisionRune": case "AffixGenerated/VeteranRune":
+                case "AffixGenerated/GearAxe": case "AffixGenerated/GearStaff":
+                case "AffixGenerated/GearArmor": case "AffixGenerated/GearRelic": break;
+                default: throw new ArgumentException("Item icon is not an authored resource.");
+            }
+            var options = new List<ItemOption>();
+            if (item.options != null)
+                foreach (ItemOptionSnapshot option in item.options)
+                {
+                    if (option == null || !Enum.IsDefined(typeof(AffixStat), option.stat))
+                        throw new ArgumentException("Saved item option is invalid.");
+                    options.Add(new ItemOption((AffixStat)option.stat, option.name, option.value));
+                }
             var weapon = new WeaponItem(item.id, item.name, item.flatDamage, item.affixDamage,
-                item.affixName, item.iconResource, item.rarity, item.enhancementRank);
+                item.affixName, item.iconResource, item.rarity, item.enhancementRank,
+                (EquipmentSlot)item.equipmentSlot, (WeaponStyle)item.weaponStyle, item.flatDefense, item.flatHealth,
+                item.cooldownReductionPercent, options);
             if (!issued.Contains(weapon.Id) || !owned.Add(weapon.Id))
                 throw new ArgumentException("Owned weapon identity is unissued or duplicated.");
             return weapon;
@@ -279,8 +529,18 @@ namespace AffixZero.Core
         {
             id = item.Id, name = item.Name, flatDamage = item.FlatDamage, affixDamage = item.AffixDamage,
             affixName = item.AffixName, iconResource = item.IconResource, rarity = item.Rarity,
-            enhancementRank = item.EnhancementRank
+            enhancementRank = item.EnhancementRank, equipmentSlot = (int)item.EquipmentSlot, weaponStyle = (int)item.WeaponStyle,
+            flatDefense = item.FlatDefense, flatHealth = item.FlatHealth, cooldownReductionPercent = item.BaseCooldownReductionPercent,
+            options = CaptureOptions(item.Options)
         };
+
+        private static ItemOptionSnapshot[] CaptureOptions(IReadOnlyList<ItemOption> options)
+        {
+            var result = new ItemOptionSnapshot[options.Count];
+            for (int i = 0; i < result.Length; i++) result[i] = new ItemOptionSnapshot
+            { stat = (int)options[i].Stat, name = options[i].Name, value = options[i].Value };
+            return result;
+        }
 
         private bool ValidIndex(int index) => index >= 0 && index < inventory.Count;
     }

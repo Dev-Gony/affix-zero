@@ -72,8 +72,12 @@ namespace AffixZero.Presentation
 
         private void ApplyBuild()
         {
-            if (hero != null) hero.SetAttackDamage(Progression.TotalDamage);
+            if (hero != null) hero.ApplyCombatBuild(Progression.TotalMaxHp,Progression.TotalDefense,Progression.TotalDamage,
+                Progression.AttackSpeedMultiplier,Progression.AttackReach,Progression.SplashRadius,
+                Progression.SplashDamageFraction,Progression.IsRanged,Progression.CriticalChance,
+                Progression.VampirismPercent,Progression.Penetration);
         }
+        public void RefreshCombatBuild()=>ApplyBuild();
 
         public bool CollectLoot()
         {
@@ -94,9 +98,10 @@ namespace AffixZero.Presentation
         public bool EquipItem(int index)
         {
             if(!CanProgress)return false;
+            EquipmentSlot slot=index>=0&&index<Progression.Inventory.Count?Progression.Inventory[index].EquipmentSlot:EquipmentSlot.Weapon;
             if (!Progression.Equip(index)) { ProgressionNotice = "장착할 아이템을 선택하세요."; return false; }
             ApplyBuild();
-            ProgressionNotice = Progression.EquippedWeapon.Name + " 장착 · 다음 공격부터 적용";
+            ProgressionNotice = Progression.GetEquipped(slot).Name + " 장착 · 다음 행동부터 적용";
             SaveProgress();
             return true;
         }
@@ -129,17 +134,18 @@ namespace AffixZero.Presentation
             SaveProgress();
         }
 
-        public bool EnhanceWeapon()
+        public bool EnhanceWeapon()=>EnhanceItem(EquipmentSlot.Weapon);
+        public bool EnhanceItem(EquipmentSlot slot)
         {
             if(!CanProgress)return false;
-            if (!Progression.TryEnhanceEquipped())
+            if (!Progression.TryEnhance(slot))
             {
-                ProgressionNotice = Progression.EquippedWeapon.EnhancementRank >= WeaponItem.MaxEnhancementRank
+                ProgressionNotice = Progression.GetEquipped(slot)==null ? "해당 부위의 장비를 먼저 장착하세요." : Progression.GetEquipped(slot).EnhancementRank >= WeaponItem.MaxEnhancementRank
                     ? "최대 강화 단계입니다." : "강화에 필요한 골드가 부족합니다.";
                 return false;
             }
             ApplyBuild();
-            ProgressionNotice = "+" + Progression.EquippedWeapon.EnhancementRank + " 강화 완료 · 다음 공격부터 피해 +2";
+            ProgressionNotice = Progression.GetEquipped(slot).Name+" +" + Progression.GetEquipped(slot).EnhancementRank + " 강화 완료";
             SaveProgress();
             return true;
         }
@@ -192,7 +198,7 @@ namespace AffixZero.Presentation
             rewards=new EncounterRewards(Guid.NewGuid().ToString("N"));
             endedAt=-1;
             // A failed run never deletes an uncollected weapon. Recover it at the entrance.
-            if(Progression.PendingLoot!=null){LootPosition=new Vector2(-10,-4);ClearLootView();ShowLoot();}
+            if(Progression.PendingLoot!=null){LootPosition=DungeonWorld.Entrance;ClearLootView();ShowLoot();}
         }
 
         public bool RegisterDefeat(MeleeActor actor)
@@ -201,24 +207,29 @@ namespace AffixZero.Presentation
             if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
             {
-                if(!Progression.TryRegisterKill(rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount))return false;
-                ProgressionNotice = Progression.PendingLoot != null ? "전리품 발견 · 자동 회수 중" : "특성 포인트 +1";
-                if(lootView==null)LootPosition=actor.transform.position;
-                ShowLoot();
+                int level=Progression.Level;
+                string token=rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount;
+                if(!Progression.TryRegisterKill(token))return false;
+                bool elite=actor.name.IndexOf("Elite",StringComparison.OrdinalIgnoreCase)>=0;
+                int floor=Math.Max(1,Progression.Level);
+                int seed=StableSeed(token);
+                bool fixture=Array.IndexOf(Environment.GetCommandLineArgs(),"-affixAutoHuntTest")>=0;
+                WeaponItem drop=fixture && rewards.CollectionCount%4==0
+                    ?LootGenerator.GenerateGuaranteed("loot:"+token,floor,seed)
+                    :LootGenerator.TryGenerate("loot:"+token,floor,elite,seed);
+                bool offered=drop!=null&&Progression.TryCreatePendingLoot(drop);
+                ProgressionNotice=Progression.Level>level?"레벨 상승 · 특성 포인트 +1":
+                    "처치 보상 +"+Progression.LastExperienceReward+" XP · +"+Progression.LastGoldReward+" GOLD";
+                if(offered){LootPosition=actor.transform.position;ProgressionNotice="["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
                 SaveProgress();
                 return true;
             }
             return false;
         }
 
-        public void OfferClearLoot(int completedRuns,Vector2 position)
+        private static int StableSeed(string value)
         {
-            if(!CanProgress)return;
-            int roll=completedRuns%3;
-            var item=new WeaponItem("clear:"+rewards.EncounterId,"사원의 강철검",11+roll,2+roll,
-                roll==0?"날카로움":roll==1?"잿불":"묵직함","AffixGenerated/EmberSword","Rare");
-            if(Progression.TryCreatePendingLoot(item))
-            {LootPosition=position;ProgressionNotice="던전 보상 발견 · 자동 회수 중";ShowLoot();SaveProgress();}
+            unchecked {int hash=(int)2166136261;foreach(char c in value){hash^=c;hash*=16777619;}return hash;}
         }
 
         private void ShowLoot()
@@ -226,7 +237,7 @@ namespace AffixZero.Presentation
             if (lootView != null || Progression.PendingLoot == null) return;
             var texture = Resources.Load<Texture2D>(Progression.PendingLoot.IconResource);
             if (texture == null) { Debug.LogError("Loot icon resource is missing.", this); return; }
-            lootSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f), 24);
+            lootSprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(.5f, .5f), texture.width/.7f);
             lootView = new GameObject("Dropped Weapon", typeof(SpriteRenderer));
             lootView.transform.position = (Vector3)LootPosition + Vector3.up * .3f;
             var renderer = lootView.GetComponent<SpriteRenderer>();

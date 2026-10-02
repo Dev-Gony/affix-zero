@@ -1,4 +1,5 @@
 using System;
+using AffixZero.Core;
 using UnityEngine;
 using UnityEngine.UIElements;
 
@@ -9,14 +10,16 @@ namespace AffixZero.Presentation
     {
         public sealed class ItemView
         {
-            public string Id, Name, Affix, Icon;
-            public int Damage, Defense;
+            public string Id, Name, Affix, Icon, SlotText, Summary, PrimaryValue, PrimaryLabel, Rarity;
+            public int Damage, Defense, Health;
+            public float Speed;
             public bool Equipped;
         }
         public sealed class View
         {
             public ItemView[] Items = Array.Empty<ItemView>();
-            public ItemView Equipped, Selected;
+            public ItemView[] EquippedSlots = Array.Empty<ItemView>();
+            public ItemView Selected;
             public string Health, Damage, Defense, Duration, Comparison, Delta, Affix, Status;
             public int Points, Fury, Precision, Keystone;
             public bool CanEquip, CanSalvage, CanFury, CanPrecision, CanKeystone, CanReset;
@@ -26,10 +29,12 @@ namespace AffixZero.Presentation
         private readonly Image[] slotImages = new Image[24];
         private readonly Label[] slotNames = new Label[24];
         private readonly Label[] slotBadges = new Label[24];
-        private readonly Label equippedName, equippedDetails, health, damage, defense, duration, bagCount, selectedName, comparison, delta, affix, points, status, selectedDamage;
+        private readonly Label health, damage, defense, duration, bagCount, selectedName, comparison, delta, affix, points, status, selectedDamage, selectedPrimaryLabel;
+        private readonly Label[] equippedNames=new Label[8],equippedSummaries=new Label[8];
+        private readonly Image[] equippedImages=new Image[8];
         private readonly Label furyCaption, precisionCaption, keystoneCaption;
         private readonly VisualElement equipButton, salvageButton, furyButton, precisionButton, keystoneButton, resetButton;
-        private readonly Image equippedIcon, selectedIcon;
+        private readonly Image selectedIcon;
         private readonly Func<View> read;
         private readonly Action<int> select;
         private readonly Action discard;
@@ -39,7 +44,7 @@ namespace AffixZero.Presentation
         private static readonly Color Crimson = new Color32(196,30,58,255), Gold = new Color32(233,195,73,255), Cream = new Color32(226,226,230,255), Muted = new Color32(175,177,184,255), Sky = new Color32(151,203,255,255), Rose = new Color32(255,179,180,255);
         private readonly System.Collections.Generic.Dictionary<string,Texture2D> textures = new System.Collections.Generic.Dictionary<string,Texture2D>();
 
-        public EquipmentPanel(VisualElement parent,Func<View> read,Action<int> select,Action equip,Action salvage,Action fury,Action precision,Action keystone,Action reset,Action close,Sprite heroPortrait)
+        public EquipmentPanel(VisualElement parent,Func<View> read,Action<int> select,Action equip,Action salvage,Action fury,Action precision,Action keystone,Action reset,Action close,Sprite heroPortrait,Action openTalents=null)
         {
             this.read=read;this.select=select;this.discard=salvage;
             Root=Box(parent,"character-panel",16,64,1248,516,Ink);Border(Root,Edge,1);
@@ -50,14 +55,20 @@ namespace AffixZero.Presentation
             Text(ribbon,"EQUIPMENT  /  TALENT RUNES",207,12,400,23,12,Rose);
             Button(ribbon,"close-character","던전으로  [TAB]",1098,6,136,30,close,Edge);
             var equipment=Box(Root,"equipment-section",12,52,706,220,Surface);
-            Header(equipment,"equipment-heading","장착 무기  /  EQUIPMENT",14,8,678);
+            Header(equipment,"equipment-heading","장착 장비  /  WEAPON · ARMOR · RELIC",14,8,678);
             var weaponCard=Box(equipment,"equipped-item-card",14,44,226,162,Ink);
-            Box(weaponCard,"equipped-accent",0,0,3,162,Gold);
-            Text(weaponCard,"EQUIPPED",12,5,200,18,11,Gold);
-            var weaponSlot=Box(weaponCard,"equipped-weapon",12,32,62,64,Edge);Border(weaponSlot,Gold,1);
-            equippedIcon=Icon(weaponSlot,7,7,48,48);
-            equippedName=Text(weaponCard,"",86,33,128,59,15,Gold);equippedName.style.whiteSpace=WhiteSpace.Normal;
-            equippedDetails=Text(weaponCard,"",12,107,202,46,12,Rose);equippedDetails.style.whiteSpace=WhiteSpace.Normal;
+            string[] equippedIds={"equipped-weapon","equipped-helmet","equipped-armor","equipped-gloves","equipped-boots","equipped-ring","equipped-amulet","equipped-relic"};
+            for(int i=0;i<8;i++)
+            {
+                float rowX=(i%2)*113,rowY=(i/2)*40;
+                var row=Box(weaponCard,equippedIds[i],rowX,rowY,111,37,Edge);
+                Box(row,"equipped-accent-"+i,0,0,3,37,i==0?Gold:i==2?Sky:Rose);
+                equippedImages[i]=Icon(row,6,5,27,27);
+                equippedNames[i]=Text(row,"",37,2,70,18,10,Cream);
+                equippedNames[i].style.overflow=Overflow.Hidden;equippedNames[i].style.textOverflow=TextOverflow.Ellipsis;
+                equippedSummaries[i]=Text(row,"",37,19,70,15,9,Muted);
+                equippedSummaries[i].style.overflow=Overflow.Hidden;equippedSummaries[i].style.textOverflow=TextOverflow.Ellipsis;
+            }
             var portraitBox=Box(equipment,"hero-portrait",250,44,214,162,Ink);
             Box(portraitBox,"hero-plinth",36,140,142,2,Edge);
             if(heroPortrait!=null)
@@ -99,13 +110,14 @@ namespace AffixZero.Presentation
             furyButton=Rune(talents,"talent-fury","PowerRune",19,51,128,69,fury,out furyCaption);
             precisionButton=Rune(talents,"talent-precision","PrecisionRune",184,51,128,69,precision,out precisionCaption);
             keystoneButton=Rune(talents,"talent-keystone","VeteranRune",350,51,137,69,keystone,out keystoneCaption);
-            furyButton.tooltip="포인트 1 · 공격력 +3 · 최대 2단계";
-            precisionButton.tooltip="분노 2 필요 · 포인트 1 · 공격력 +4";
-            keystoneButton.tooltip="정밀 1 필요 · 포인트 1 · 공격력 +6";
+            furyButton.tooltip="포인트 1 · 공격력 +3 · 최대 "+HeroProgression.GetTalentDefinition(TalentId.Fury).MaxRank+"단계";
+            precisionButton.tooltip="격노 2 필요 · 포인트 1 · 공격력 +4 · 최대 "+HeroProgression.GetTalentDefinition(TalentId.Precision).MaxRank+"단계";
+            keystoneButton.tooltip="정밀 1 필요 · 포인트 1 · 공격력 +6 · 최대 "+HeroProgression.GetTalentDefinition(TalentId.Keystone).MaxRank+"단계";
             Text(talents,"피해 +3 / 단계",18,123,132,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(talents,"분노 2 필요 · +4",175,123,146,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(talents,"격노 2 필요 · +4",175,123,146,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(talents,"정밀 1 필요 · +6",343,123,151,19,11,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(talents,"처치 1회 = 포인트 1  ·  초기화 시 전액 반환",20,151,468,20,11,Muted);
+            Text(talents,"250 XP = 포인트 1 · 초기화 시 전액 반환",20,151,338,20,11,Muted);
+            if(openTalents!=null)Button(talents,"open-full-talents","전체 특성 →",369,150,117,23,openTalents,Edge);
             var inspect=Box(Root,"item-comparison",730,244,506,260,Surface);
             Header(inspect,"comparison-heading","아이템 비교  /  EQUIPPED → LOOT",12,8,482);
             var selectedSlot=Box(inspect,"selected-weapon-icon",14,47,50,50,Ink);Border(selectedSlot,Crimson,1);
@@ -114,8 +126,8 @@ namespace AffixZero.Presentation
             delta=Text(inspect,"",76,77,410,22,13,Sky);delta.name="comparison-delta";
             var damageStrip=Box(inspect,"selected-damage-strip",14,106,478,51,Ink);
             selectedDamage=Text(damageStrip,"",10,0,106,33,28,Cream);
-            Text(damageStrip,"무기 피해",12,33,100,16,10,Muted);
-            comparison=Text(damageStrip,"",139,14,323,26,14,Rose);
+            selectedPrimaryLabel=Text(damageStrip,"능력치",12,33,114,16,10,Muted);
+            comparison=Text(damageStrip,"",139,5,323,42,12,Rose);comparison.style.whiteSpace=WhiteSpace.Normal;
             affix=Text(inspect,"",15,165,476,34,12,Gold);affix.style.whiteSpace=WhiteSpace.Normal;
             status=Text(inspect,"",15,199,476,18,11,Muted);status.style.overflow=Overflow.Hidden;status.style.textOverflow=TextOverflow.Ellipsis;
             equipButton=Button(inspect,"equip-button","장비 교체  /  EQUIP",14,223,288,26,equip,Rose);
@@ -130,16 +142,15 @@ namespace AffixZero.Presentation
             string nextId=v.Selected==null?null:v.Selected.Id;
             if(selectedId!=nextId){discardConfirm=false;selectedId=nextId;}
             salvageButton.Q<Label>().text=discardConfirm?"버리기 확인":"버리기";
-            equippedName.text=v.Equipped==null?"장착 무기 없음":v.Equipped.Name;
-            equippedDetails.text=v.Equipped==null?"":v.Equipped.Affix;
-            equippedIcon.image=Texture(v.Equipped==null?null:v.Equipped.Icon);
+            string[] equippedCaptions={"WEAPON","HELMET","ARMOR","GLOVES","BOOTS","RING","AMULET","RELIC"};
+            for(int i=0;i<equippedNames.Length;i++)RefreshEquipped(i,i<v.EquippedSlots.Length?v.EquippedSlots[i]:null,equippedCaptions[i]);
             health.text=v.Health;damage.text=v.Damage;defense.text=v.Defense;duration.text=v.Duration;
             bagCount.text="소지품 가방  "+v.Items.Length+" / 24";
             for(int i=0;i<24;i++)
             {
                 ItemView item=i<v.Items.Length?v.Items[i]:null;
                 slotImages[i].image=Texture(item==null?null:item.Icon);slotNames[i].text=item==null?"":item.Name;
-                slotBadges[i].text=item!=null&&item.Equipped?"장착 중":"";
+                slotBadges[i].text=item==null?"":item.Equipped?"장착 중":item.SlotText??"";
                 bool selected=item!=null&&v.Selected!=null&&item.Id==v.Selected.Id;
                 Border(slots[i],selected?Rose:Edge,selected?2:1);
                 slots[i].style.backgroundColor=selected?(Color)new Color32(61,30,38,255):item!=null?Edge:Ink;
@@ -147,12 +158,15 @@ namespace AffixZero.Presentation
                 slots[i].SetEnabled(item!=null);
             }
             selectedName.text=v.Selected==null?"비교할 아이템을 선택하세요":v.Selected.Name;
-            selectedDamage.text=v.Selected==null?"—":v.Selected.Damage.ToString();
+            selectedDamage.text=v.Selected==null?"—":v.Selected.PrimaryValue??v.Selected.Damage.ToString();
+            selectedPrimaryLabel.text=v.Selected==null?"능력치":v.Selected.PrimaryLabel??"무기 피해";
             selectedIcon.image=Texture(v.Selected==null?null:v.Selected.Icon);
             comparison.text=v.Comparison??"";delta.text=v.Delta??"";affix.text=v.Affix??"";status.text=v.Status??"";
-            status.tooltip=v.Status??"";equippedDetails.tooltip=v.Equipped==null?"":v.Equipped.Affix;
+            status.tooltip=v.Status??"";
             points.text="잔여 "+v.Points+" PT";
-            furyCaption.text="분노 "+v.Fury+" / 2";precisionCaption.text="정밀 "+v.Precision+" / 1";keystoneCaption.text="숙련 "+v.Keystone+" / 1";
+            furyCaption.text="격노 "+v.Fury+" / "+HeroProgression.GetTalentDefinition(TalentId.Fury).MaxRank;
+            precisionCaption.text="정밀 "+v.Precision+" / "+HeroProgression.GetTalentDefinition(TalentId.Precision).MaxRank;
+            keystoneCaption.text="숙련 "+v.Keystone+" / "+HeroProgression.GetTalentDefinition(TalentId.Keystone).MaxRank;
             SetAction(equipButton,v.CanEquip);SetAction(salvageButton,v.CanSalvage);SetAction(furyButton,v.CanFury);SetAction(precisionButton,v.CanPrecision);SetAction(keystoneButton,v.CanKeystone);SetAction(resetButton,v.CanReset);
         }
         private void RequestDiscard()
@@ -183,6 +197,14 @@ namespace AffixZero.Presentation
         private static Label Stat(VisualElement parent,float x,float y,string caption)
         {
             Text(parent,caption,x,y,94,23,12,Muted);var value=Text(parent,"",x+95,y,101,23,14,Cream);value.style.unityTextAlign=TextAnchor.MiddleRight;return value;
+        }
+        private void RefreshEquipped(int index,ItemView item,string slot)
+        {
+            equippedImages[index].image=Texture(item?.Icon);
+            equippedNames[index].text=item==null?slot+" 미장착":item.Name;
+            equippedSummaries[index].text=item==null?"가방에서 장비를 선택하세요":item.Summary??item.Affix??"";
+            string description=item==null?slot+" 슬롯":slot+" · "+item.Name+"\n"+(item.Summary??item.Affix??"");
+            equippedNames[index].tooltip=equippedSummaries[index].tooltip=description;
         }
         private static void Header(VisualElement parent,string name,string title,float x,float y,float width)
         {var band=Box(parent,name,x,y,width,28,Ink);Text(band,title,10,3,width-20,24,14,Cream);}

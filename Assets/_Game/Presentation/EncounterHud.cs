@@ -6,11 +6,10 @@ using UnityEngine.UIElements;
 
 namespace AffixZero.Presentation
 {
-    // Native runtime UI. Authored room dimensions are 32 x 21.333 world units.
+    // Native runtime UI for the connected 72 x 32 dungeon.
     // Stitch provides layout reference only; every changing value comes from FirstEncounter.
     public sealed class EncounterHud : MonoBehaviour
     {
-        private const float RoomWidth = 32f, RoomHeight = 21.333333f;
         private static readonly Color Surface = new Color32(26, 28, 31, 250);
         private static readonly Color Ink = new Color32(12, 14, 17, 250);
         private static readonly Color Edge = new Color32(51, 53, 56, 255);
@@ -22,8 +21,8 @@ namespace AffixZero.Presentation
         private FirstEncounter encounter;
         private UIDocument document;
         private PanelSettings panelSettings;
-        private VisualElement root, enemyFill, healthFill, attackFill, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
-        private Label enemyValue, healthValue, currency, clock, attackState, xpValue, resultText, paused, lootText;
+        private VisualElement root, enemyFill, healthFill, attackFill, mapArea, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
+        private Label enemyValue, healthValue, manaValue, areaCooldown, recoveryCooldown, currency, clock, attackState, xpValue, resultText, paused, lootText;
         private VisualElement pauseButton;
         private Label pauseCaption;
         private Texture2D room, attackIcon;
@@ -43,6 +42,7 @@ namespace AffixZero.Presentation
         private Image actionIcon;
         private string actionIconResource;
         private readonly List<DamageLabel> damageLabels = new List<DamageLabel>();
+        private readonly List<VisualElement> enemyMarkers = new List<VisualElement>();
         public void Configure(FirstEncounter owner) { encounter = owner; }
 
         private void Start()
@@ -134,11 +134,12 @@ namespace AffixZero.Presentation
             var frame = Box(root, "minimap", 0, 186, 172, 168, Surface);
             frame.style.left = StyleKeyword.Auto; frame.style.right = 16;
             Text(frame, "MAP  /  사원 마당", 8, 7, 157, 18, 10, Cream);
-            var map = Box(frame, "minimap-image", 8, 31, 156, 104, Ink);
+            var map = Box(frame, "minimap-image", 8, 31, 156, 104, Ink);mapArea=map;
             if (room != null) map.style.backgroundImage = new StyleBackground(room);
             else Text(map,"ROOM ART MISSING",4,40,150,20,10,Crimson);
             mapHero = Box(map,"hero-map-marker",0,0,5,5,Sky);
             mapEnemy = Box(map,"enemy-map-marker",0,0,5,5,Crimson);
+            enemyMarkers.Add(mapEnemy);
             Border(mapHero,Color.white,1); Border(mapEnemy,Gold,1);
             mapCaption=Text(frame,"",8,142,156,18,10,Sky);
         }
@@ -153,11 +154,10 @@ namespace AffixZero.Presentation
             saveStatus.style.whiteSpace=WhiteSpace.Normal;
             saveRetry=Click(bottom,"save-retry","저장 다시 시도",915,20,170,30,()=>encounter.RetrySave(),Crimson);
             Text(bottom,"생명력 / HP",27,91,106,16,10,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
-            var mana = Orb(bottom,"mana-orb",0,6,84,new Color32(0,81,129,255),out Label manaValue);
+            var mana = Orb(bottom,"mana-orb",0,6,84,new Color32(0,81,129,255),out manaValue);
             var manaShell=mana.parent;
             manaShell.style.left=StyleKeyword.Auto;manaShell.style.right=38;
-            mana.style.height=Length.Percent(0);manaValue.text="—";
-            manaShell.tooltip="현재 영웅은 마나와 능동 스킬을 사용하지 않습니다.";
+            mana.style.height=Length.Percent(100);manaShell.tooltip="자동 스킬 자원 · 현재 빌드의 최대 마나";
             var manaLabel=Text(bottom,"마나 / MP",0,91,106,16,10,Muted);
             manaLabel.style.left=StyleKeyword.Auto;manaLabel.style.right=27;manaLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             var actions=Box(bottom,"action-dock",0,11,440,84,Ink);
@@ -169,11 +169,19 @@ namespace AffixZero.Presentation
                 Place(icon,11,8,32,32);slot.Add(icon);actionIcon=icon;
             }
             Text(slot,"AUTO",8,39,42,14,9,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            for(int i=0;i<6;i++)
+            var area=Box(actions,"auto-area-skill",70,5,54,56,Surface);Border(area,Gold,1);
+            Text(area,"회전",0,5,54,20,11,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            areaCooldown=Text(area,"",0,26,54,22,12,Cream);areaCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
+            area.tooltip="적 2명 이상 접근 시 자동 범위 공격";
+            var recovery=Box(actions,"auto-recovery-skill",130,5,54,56,Surface);Border(recovery,Sky,1);
+            Text(recovery,"회복",0,5,54,20,11,Sky).style.unityTextAlign=TextAnchor.MiddleCenter;
+            recoveryCooldown=Text(recovery,"",0,26,54,22,12,Cream);recoveryCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
+            recovery.tooltip="체력 45% 이하에서 자동 회복";
+            for(int i=0;i<4;i++)
             {
-                var empty=Box(actions,"unassigned-skill-"+i,70+i*60,5,54,56,Surface);
+                var empty=Box(actions,"unassigned-skill-"+i,190+i*60,5,54,56,Surface);
                 Border(empty,Edge,1);Text(empty,"—",0,13,54,29,17,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
-                empty.tooltip="빈 스킬 슬롯 · 능동 스킬은 아직 지원되지 않습니다.";
+                empty.tooltip="확장 가능한 자동 스킬 슬롯";
             }
             Text(actions,"기본 공격",10,66,92,17,10,Cream);
             attackState=Text(actions,"",108,66,122,17,10,Gold);
@@ -213,7 +221,8 @@ namespace AffixZero.Presentation
             talentPanel=new TalentPanel(root,()=> {
                 var p=encounter.Progression;
                 return new TalentPanel.View {Points=p.UnspentPoints,Spent=p.SpentPoints,Fury=p.FuryRank,
-                    Precision=p.PrecisionRank,Keystone=p.KeystoneRank,TotalDamage=p.TotalDamage};
+                    Precision=p.PrecisionRank,Keystone=p.KeystoneRank,Vitality=p.VitalityRank,Cleave=p.CleaveRank,Haste=p.HasteRank,
+                    TotalDamage=p.TotalDamage,TotalHealth=p.TotalMaxHp};
             },id=>encounter.SpendTalent(id),()=>encounter.ResetTalents(),()=>encounter.ShowManagement(ManagementScreen.None));
             forgePanel=new ForgePanel(root,()=> {
                 var p=encounter.Progression;var item=p.EquippedWeapon;
@@ -232,15 +241,19 @@ namespace AffixZero.Presentation
             WeaponItem item=selectedItemIndex>=0?p.Inventory[selectedItemIndex]:null;
             var items=new EquipmentPanel.ItemView[p.Inventory.Count];
             for(int i=0;i<items.Length;i++)items[i]=ItemView(p.Inventory[i]);
-            int delta=p.CompareDamage(selectedItemIndex)??0;
+            WeaponItem current=item==null?null:p.GetEquipped(item.EquipmentSlot);
+            int damageDelta=item==null?0:item.DamageBonus-(current?.DamageBonus??0);
+            int defenseDelta=item==null?0:item.DefenseBonus-(current?.DefenseBonus??0);
+            int healthDelta=item==null?0:item.HealthBonus-(current?.HealthBonus??0);
+            float speedDelta=item==null?0:item.SpeedBonus-(current?.SpeedBonus??0);
             return new EquipmentPanel.View {
-                Items=items,Equipped=ItemView(p.EquippedWeapon),Selected=ItemView(item),
+                Items=items,EquippedSlots=new[]{ItemView(p.EquippedWeapon),ItemView(p.EquippedHelmet),ItemView(p.EquippedArmor),ItemView(p.EquippedGloves),ItemView(p.EquippedBoots),ItemView(p.EquippedRing),ItemView(p.EquippedAmulet),ItemView(p.EquippedRelic)},Selected=ItemView(item),
                 Health=encounter.Hero.Hp+" / "+encounter.Hero.MaxHp,
                 Damage=p.TotalDamage.ToString(),Defense=encounter.Hero.Defense.ToString(),
                 Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+" s",
-                Comparison=item==null?"가방에서 무기를 선택하세요.":"공격력  "+p.TotalDamage+" → "+(p.TotalDamage+delta),
-                Delta=item==null?"":delta==0?"공격력 변화 없음":"공격력 "+(delta>0?"+":"")+delta,
-                Affix=item==null?"":item.Rarity+"  ·  기본 피해 +"+item.FlatDamage+(item.AffixDamage>0?"\n"+item.AffixName+" +"+item.AffixDamage:"")+(item.EnhancementRank>0?"  ·  강화 +"+item.EnhancementRank+" (피해 +"+item.EnhancementDamage+")":""),
+                Comparison=item==null?"가방에서 장비를 선택하세요.":"현재 슬롯 비교 · 피해 "+Signed(damageDelta)+"  방어 "+Signed(defenseDelta)+"  체력 "+Signed(healthDelta),
+                Delta=item==null?"":"이동속도 "+(speedDelta>=0?"+":"")+(speedDelta*100f).ToString("0")+"% · "+item.EquipmentSlot,
+                Affix=item==null?"":DescribeItem(item),
                 Status=encounter.ProgressionNotice,Points=p.UnspentPoints,Fury=p.FuryRank,Precision=p.PrecisionRank,Keystone=p.KeystoneRank,
                 CanEquip=item!=null,CanSalvage=item!=null,CanReset=p.SpentPoints>0,
                 CanFury=p.UnspentPoints>0&&p.FuryRank<2,
@@ -251,7 +264,23 @@ namespace AffixZero.Presentation
         private static EquipmentPanel.ItemView ItemView(WeaponItem item)
         {
             return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=item.Name,Icon=item.IconResource,
-                Affix="무기 피해 +"+item.DamageBonus+(item.AffixDamage>0?"\n"+item.AffixName+" +"+item.AffixDamage:"")+(item.EnhancementRank>0?" · 강화 +"+item.EnhancementRank:""),Damage=item.DamageBonus};
+                SlotText=item.EquipmentSlot.ToString().ToUpperInvariant(),Summary=item.Rarity+" · "+PrimarySummary(item),
+                PrimaryValue=PrimaryValue(item),PrimaryLabel=PrimaryLabel(item),Rarity=item.Rarity,
+                Affix=DescribeItem(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus};
+        }
+        private static string Signed(int value)=>value>=0?"+"+value:value.ToString();
+        private static string PrimaryValue(WeaponItem item)=>item.DamageBonus>0?item.DamageBonus.ToString():item.DefenseBonus>0?item.DefenseBonus.ToString():item.HealthBonus.ToString();
+        private static string PrimaryLabel(WeaponItem item)=>item.DamageBonus>0?"피해":item.DefenseBonus>0?"방어":"체력";
+        private static string PrimarySummary(WeaponItem item)=>PrimaryLabel(item)+" +"+PrimaryValue(item);
+        private static string DescribeItem(WeaponItem item)
+        {
+            var lines=new List<string>{item.Rarity+" · "+item.EquipmentSlot};
+            if(item.DamageBonus!=0)lines.Add("공격 +"+item.DamageBonus);
+            if(item.DefenseBonus!=0)lines.Add("방어 +"+item.DefenseBonus);
+            if(item.HealthBonus!=0)lines.Add("체력 +"+item.HealthBonus);
+            foreach(ItemOption option in item.Options)lines.Add(option.Name+" +"+(option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#")));
+            if(item.EnhancementRank>0)lines.Add("강화 +"+item.EnhancementRank);
+            return string.Join("  ·  ",lines);
         }
         private void BuildResult()
         {
@@ -302,13 +331,13 @@ namespace AffixZero.Presentation
                 foreach(var actor in hunt.Enemies)ObserveActor(actor);
                 huntButton.SetEnabled(hunt.Initialized);
                 huntCaption.text=hunt.Running?"자동사냥 중지":"자동사냥 시작";
-                huntStatus.text=hunt.StateCaption+"\n구역 "+(hunt.SectionIndex+1)+" / 3  ·  클리어 "+hunt.CompletedRuns;
-                sectionCaption.text="구역 "+(hunt.SectionIndex+1)+" / 3     사원 순찰  ·  "+hunt.CompletedRuns+"회 클리어";
-                for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i].style.backgroundColor=i<=hunt.SectionIndex?Gold:Ink;
+                huntStatus.text=hunt.StateCaption+"\n연결형 사원 · 생존 적 "+hunt.AliveEnemies;
+                sectionCaption.text="CONNECTED TEMPLE     상시 배치 "+hunt.Enemies.Count+"체  ·  정화 "+hunt.CompletedRuns+"회";
+                for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i].style.display=DisplayStyle.None;
                 killCount.text=hunt.TotalKills+"  KILLS";
                 huntRewards.text="수거 "+hunt.CollectedItems+"개  ·  재도전 "+hunt.DeathRetries+"회";
                 int alive=0;foreach(var actor in hunt.Enemies)if(actor.isActiveAndEnabled&&!actor.IsDead)alive++;
-                mapCaption.text="현재 구역  "+(hunt.SectionIndex+1)+"  ·  적 "+alive;
+                mapCaption.text="전체 던전  ·  생존 적 "+alive;
             }
             enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
             enemyValue.text=enemy.Hp+" / "+enemy.MaxHp+" HP";
@@ -317,6 +346,12 @@ namespace AffixZero.Presentation
             if(!hasTarget){enemyFill.style.width=0;enemyValue.text="다음 목표 탐색 중";}
             healthFill.style.height=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+"\n/ "+hero.MaxHp;
+            manaValue.text=encounter.Progression.TotalMana+"\nMP";
+            if(hunt!=null)
+            {
+                areaCooldown.text=hunt.AreaCooldownRemaining<=0?"READY":hunt.AreaCooldownRemaining.ToString("0.0")+"s";
+                recoveryCooldown.text=hunt.RecoveryCooldownRemaining<=0?"READY":hunt.RecoveryCooldownRemaining.ToString("0.0")+"s";
+            }
             currency.text="GOLD  "+encounter.Progression.TotalGold+"     XP  "+encounter.Progression.TotalExperience;
             combatStats.text="공격력  "+encounter.Progression.TotalDamage+"   방어력  "+hero.Defense+"\n가방  "+encounter.Progression.Inventory.Count+" / 24   특성  "+encounter.Progression.UnspentPoints;
             xpValue.text="획득 경험치  "+encounter.Progression.TotalExperience+" XP";
@@ -328,7 +363,7 @@ namespace AffixZero.Presentation
             float progress=hero.IsAttacking && hero.AnimationSet!=null?(float)(hero.AttackElapsed/hero.AnimationSet.AttackDuration):0;
             attackFill.style.width=Length.Percent(100*Mathf.Clamp01(progress));
             PositionMarker(mapHero,hero.transform.position);
-            PositionMarker(mapEnemy,enemy.transform.position);mapEnemy.style.display=enemy.IsDead?DisplayStyle.None:DisplayStyle.Flex;
+            if(hunt!=null)RefreshEnemyMarkers(hunt.Enemies);
             equipmentPanel.Refresh(encounter.EquipmentVisible);
             talentPanel.Refresh(encounter.Screen==ManagementScreen.Talents);
             forgePanel.Refresh(encounter.Screen==ManagementScreen.Forge);
@@ -353,8 +388,21 @@ namespace AffixZero.Presentation
         }
         private static void PositionMarker(VisualElement marker,Vector3 world)
         {
-            marker.style.left=Mathf.Clamp01(world.x/RoomWidth+0.5f)*151;
-            marker.style.top=Mathf.Clamp01(0.5f-world.y/RoomHeight)*99;
+            marker.style.left=Mathf.InverseLerp(DungeonWorld.Bounds.xMin,DungeonWorld.Bounds.xMax,world.x)*151;
+            marker.style.top=(1-Mathf.InverseLerp(DungeonWorld.Bounds.yMin,DungeonWorld.Bounds.yMax,world.y))*99;
+        }
+        private void RefreshEnemyMarkers(IReadOnlyList<MeleeActor> enemies)
+        {
+            while(enemyMarkers.Count<enemies.Count)
+            {
+                var marker=Box(mapArea,"enemy-map-marker-"+enemyMarkers.Count,0,0,4,4,Crimson);Border(marker,Gold,1);enemyMarkers.Add(marker);
+            }
+            for(int i=0;i<enemyMarkers.Count;i++)
+            {
+                bool visible=i<enemies.Count&&enemies[i].isActiveAndEnabled&&!enemies[i].IsDead;
+                enemyMarkers[i].style.display=visible?DisplayStyle.Flex:DisplayStyle.None;
+                if(visible)PositionMarker(enemyMarkers[i],enemies[i].transform.position);
+            }
         }
         private void OnDamaged(MeleeActor actor,HitReceipt receipt)
         {

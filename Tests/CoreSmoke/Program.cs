@@ -64,6 +64,7 @@ internal static class Program
             CombatHealthChecks.Run(Check, Throws);
             EncounterRewardsChecks.Run(Check, Throws);
             ProgressionChecks.Run(Check, Throws);
+            LootGeneratorChecks.Run(Check);
             NavigationChecks.Run(Check, Throws);
             ProgressionSaveChecks.Run(Check);
             ProfileStoreChecks.Run(Check);

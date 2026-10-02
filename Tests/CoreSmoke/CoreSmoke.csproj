@@ -14,5 +14,6 @@
     <Compile Include="../../Assets/_Game/Core/DungeonNavigation.cs" Link="DungeonNavigation.cs" />
     <Compile Include="../../Assets/_Game/Core/AtomicProfileStore.cs" Link="AtomicProfileStore.cs" />
     <Compile Include="../../Assets/_Game/Core/ProgressionSnapshot.cs" Link="ProgressionSnapshot.cs" />
+    <Compile Include="../../Assets/_Game/Core/LootGenerator.cs" Link="LootGenerator.cs" />
   </ItemGroup>
 </Project>

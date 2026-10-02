@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using AffixZero.Core;
 
@@ -29,6 +30,14 @@ namespace AffixZero.Presentation
         private Func<Vector2, Vector2, bool> lineOfSight;
         private Vector2? destination;
         private bool invalidWaypointReported;
+        private IReadOnlyList<MeleeActor> cleaveTargets;
+        private float cleaveRadius=1.85f;
+        private long damageSequence;
+        private Vector2 swingDirection;
+        private bool attacksAllowed=true;
+        private float attackSpeedMultiplier=1,cleaveFraction=1;
+        private bool ranged;
+        private int criticalChance,vampirismPercent,penetration;
 
         public int Hp => health == null ? maximumHp : health.Current;
         public int MaxHp => maximumHp;
@@ -39,6 +48,7 @@ namespace AffixZero.Presentation
         public bool IsReady => health != null;
         public int ActorId => actorId;
         public int DeathCount => health == null ? 0 : health.DeathCount;
+        public int Heal(int amount) => health == null || amount <= 0 ? 0 : health.Heal(amount);
         public ActorClip CurrentClip => clip;
         public ActorFacing CurrentFacing => facing;
         public ActorAnimationSet AnimationSet => animationSet;
@@ -47,6 +57,38 @@ namespace AffixZero.Presentation
         public double AttackElapsed => timeline == null || !timeline.IsRunning ? 0 : timeline.Elapsed;
         public event Action<MeleeActor, HitReceipt> Damaged;
         public int LastAttackerId { get; private set; }
+        public long LastAttackId { get; private set; }
+        public int LastHitRawDamage { get; private set; }
+        public int LastHitHpBefore {get;private set;}
+        public Vector2 LastHitOrigin { get; private set; }
+        public Vector2 LastImpactPosition { get; private set; }
+        public float LastHitRadius { get; private set; }
+        public bool LastHitIsArea { get; private set; }
+        public float AttackSpeedMultiplier=>attackSpeedMultiplier;
+        public float AttackReach=>reach;
+        public bool IsRanged=>ranged;
+        public float CleaveRadius=>cleaveRadius;
+        public Vector2 LastStrikeDirection=>swingDirection;
+        public Vector2 LastStrikePoint {get;private set;}
+        public event Action<MeleeActor,int,int,bool> StrikeResolved;
+
+        public void ConfigureCleave(IReadOnlyList<MeleeActor> victims,float radius)
+        {if(!FinitePositive(radius))throw new ArgumentOutOfRangeException(nameof(radius));cleaveTargets=victims;cleaveRadius=Mathf.Max(cleaveRadius,radius);}
+        public void SetAttacksAllowed(bool value){attacksAllowed=value;}
+        public void ApplyCombatBuild(int maxHp,int armor,int power,float speedMultiplier,float attackReach,
+            float splashRadius,float splashFraction,bool isRanged,int critical=0,int vampirism=0,int armorPenetration=0)
+        {
+            if(maxHp<=0||armor<0||power<=0||!FinitePositive(speedMultiplier)||!FinitePositive(attackReach)||
+                float.IsNaN(splashRadius)||float.IsInfinity(splashRadius)||splashRadius<0||
+                float.IsNaN(splashFraction)||float.IsInfinity(splashFraction)||splashFraction<0||
+                critical<0||critical>100||vampirism<0||vampirism>100||armorPenetration<0)
+                throw new ArgumentOutOfRangeException(nameof(maxHp));
+            maximumHp=maxHp;defense=armor;damage=power;attackSpeedMultiplier=speedMultiplier;reach=attackReach;ranged=isRanged;
+            criticalChance=critical;vampirismPercent=vampirism;penetration=armorPenetration;
+            cleaveRadius=isRanged?0:Mathf.Max(attackReach>1.15f?2.5f:1.85f,splashRadius);
+            cleaveFraction=isRanged?0:Mathf.Max(.85f,Mathf.Min(1,splashFraction));
+            health?.Reconfigure(maxHp,armor);
+        }
 
         public void Configure(ActorAnimationSet set, int id, int hp, int attackDamage)
         { animationSet = set; actorId = id; maximumHp = hp; damage = attackDamage; }
@@ -80,6 +122,7 @@ namespace AffixZero.Presentation
             actorId = id; maximumHp = hp; damage = attackDamage;
             health = new CombatHealth(maximumHp, defense);
             LastAttackerId=0;
+            LastAttackId=0;attacksAllowed=true;
             // Preserve the attack sequence across reuse so surviving recipients cannot reject new hits as duplicates.
             if (timeline == null) timeline = animationSet.CreateTimeline();
             else timeline.Cancel();
@@ -92,6 +135,7 @@ namespace AffixZero.Presentation
             transform.position = new Vector3(position.x, position.y, transform.position.z);
             PrepareRenderer();
             view.flipX = false;
+            view.color=Color.white;
             view.sortingOrder = -(int)Math.Round(position.y * 100);
             RenderClip();
         }
@@ -148,12 +192,12 @@ namespace AffixZero.Presentation
                     && attackTarget.health != null && !attackTarget.IsDead && attackTarget.actorId == timeline.TargetId;
                 bool inRange = alive && Vector2.Distance(transform.position, attackTarget.transform.position) <= reach + 0.05f
                     && CanSee(attackTarget.transform.position);
-                Impact impact = timeline.Advance(delta, alive, inRange);
+                Impact impact = timeline.Advance(delta*attackSpeedMultiplier, alive, inRange);
                 SetClip(ActorClip.Attack);
                 // A skipped render frame still displays the impact pose when applying its hit.
                 view.sprite = impact.Occurred ? animationSet.ImpactSpriteFor(facing) : animationSet.AttackFrame(timeline, facing);
                 RenderWeapon(impact.Occurred);
-                if (impact.Occurred) attackTarget.Receive(actorId, impact.AttackId, swingDamage);
+                if (impact.Occurred) ResolveMeleeImpact();
                 if (!timeline.IsRunning) attackTarget = null;
                 return;
             }
@@ -178,10 +222,12 @@ namespace AffixZero.Presentation
             }
             else
             {
+                if(!attacksAllowed){SetClip(ActorClip.Idle);RenderClip();return;}
                 timeline.Begin(target.actorId);
                 // Gear changes apply to the next swing, never to an already prepared hit.
                 swingDamage = damage;
                 attackTarget = target;
+                swingDirection=toTarget.sqrMagnitude>.0001f?toTarget.normalized:Vector2.right;
                 SetClip(ActorClip.Attack);
                 view.sprite = animationSet.AttackFrame(timeline, facing);
                 RenderWeapon(false);
@@ -208,23 +254,89 @@ namespace AffixZero.Presentation
             SetClip(ActorClip.Walk); RenderClip();
         }
 
-        private void Receive(int attacker, long attack, int power)
+        private void ResolveMeleeImpact()
         {
-            if (health == null) return;
+            long receiptId=++damageSequence;
+            Vector2 origin=transform.position;
+            LastStrikePoint=attackTarget==null?origin:(Vector2)attackTarget.transform.position;
+            int hits=0,kills=0,totalApplied=0;
+            float radius=cleaveTargets==null||ranged?reach+.05f:Mathf.Max(reach+.05f,cleaveRadius);
+            if(attackTarget!=null)
+            {
+                HitReceipt receipt=attackTarget.Receive(actorId,receiptId,PowerAgainst(attackTarget,swingDamage),origin,radius,false);
+                if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
+            }
+            if(cleaveTargets!=null&&!ranged)
+                foreach(MeleeActor victim in cleaveTargets)
+                {
+                    if(victim==null||victim==attackTarget||victim==this||!victim.isActiveAndEnabled||victim.IsDead)continue;
+                    Vector2 offset=(Vector2)victim.transform.position-origin;
+                    if(offset.sqrMagnitude>radius*radius||Vector2.Dot(offset.normalized,swingDirection)<-.15f||!CanSee(victim.transform.position))continue;
+                    int splashPower=Math.Max(1,(int)Math.Min(int.MaxValue,(double)swingDamage*cleaveFraction));
+                    HitReceipt receipt=victim.Receive(actorId,receiptId,PowerAgainst(victim,splashPower),origin,radius,false);
+                    if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
+                }
+            if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
+            StrikeResolved?.Invoke(this,hits,kills,false);
+        }
+
+        public int CastAreaStrike(IReadOnlyList<MeleeActor> victims,float radius,int power)
+        {
+            if(victims==null)throw new ArgumentNullException(nameof(victims));
+            if(!FinitePositive(radius)||power<=0)throw new ArgumentOutOfRangeException(nameof(radius));
+            if(!isActiveAndEnabled||IsDead||health==null||Time.deltaTime<=0)return 0;
+            long receiptId=++damageSequence;
+            Vector2 origin=transform.position;
+            int hits=0,kills=0,totalApplied=0;
+            foreach(MeleeActor victim in victims)
+            {
+                if(victim==null||victim==this||!victim.isActiveAndEnabled||victim.IsDead||
+                    Vector2.Distance(origin,victim.transform.position)>radius||!CanSee(victim.transform.position))continue;
+                HitReceipt receipt=victim.Receive(actorId,receiptId,PowerAgainst(victim,power),origin,radius,true);
+                if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
+            }
+            if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
+            StrikeResolved?.Invoke(this,hits,kills,true);
+            return hits;
+        }
+
+        private int PowerAgainst(MeleeActor victim,int basePower)
+        {
+            bool critical=criticalChance>0&&Math.Abs((damageSequence*37+actorId*13)%100)<criticalChance;
+            long result=critical?(long)basePower*2:basePower;
+            result+=Math.Min(penetration,victim==null?0:victim.Defense);
+            return (int)Math.Min(int.MaxValue,result);
+        }
+
+        private HitReceipt Receive(int attacker, long attack, int power,Vector2 origin,float radius,bool area)
+        {
+            if (health == null) return default;
+            int before=health.Current;
             HitReceipt receipt = health.Receive(attacker, attack, power);
-            if (!receipt.Accepted) return;
+            if (!receipt.Accepted) return receipt;
             LastAttackerId=attacker;
             HitFxBurst.Spawn(transform.position + Vector3.up * .55f,
                 view == null ? 1 : view.sortingOrder + 2);
+            LastAttackId=attack;LastHitRawDamage=power;LastHitOrigin=origin;LastImpactPosition=transform.position;
+            LastHitHpBefore=before;
+            LastHitRadius=radius;LastHitIsArea=area;
             // Ordinary hits carry damage and feedback, not hard crowd control.
             // Keep the committed swing and movement alive under multiple attackers.
             hurtRemaining=receipt.Killed?0:.12;
+            // Enemy recoil is bounded by the same swept LOS used for navigation, never a stun.
+            if(cleaveTargets==null&&lineOfSight!=null)
+            {
+                Vector2 from=transform.position;
+                Vector2 recoil=(from-origin).normalized*(area?.16f:.09f);
+                if(lineOfSight(from,from+recoil))transform.position=new Vector3(from.x+recoil.x,from.y+recoil.y,transform.position.z);
+            }
             if(receipt.Killed)
             {
                 timeline.Cancel();attackTarget=null;clipTime=0;view.color=Color.white;
                 SetClip(ActorClip.Death);RenderClip();
             }
             Damaged?.Invoke(this, receipt);
+            return receipt;
         }
         private void SetClip(ActorClip next) { if (clip != next) { clip = next; clipTime = 0; } }
         private void RenderClip()
