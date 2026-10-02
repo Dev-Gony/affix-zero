@@ -27,6 +27,7 @@ namespace AffixZero.Presentation
         private readonly int[] captureCounts = new int[3];
         private readonly int[] eliteCaptureCounts = new int[3];
         private readonly int[] patternCaptureCounts = new int[3];
+        private int skillEvolutionCaptureCount;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -145,6 +146,13 @@ namespace AffixZero.Presentation
                 Require(report.talentInvestments > 0, "Natural XP produced no invested talent point.");
                 Require(owner.Progression.ActiveEvolutionCount > 0,
                     "Natural XP did not reach a visible combat evolution milestone.");
+                Require(owner.Progression.FuryEvolutionTier > 0 &&
+                    hunt.ChainAreaCasts+hunt.PierceAreaCasts+hunt.QuakeAreaCasts > 0 && hunt.BehavioralAreaHits > 0,
+                    "Natural progression did not unlock and resolve a behavioral area-skill trajectory.");
+                Require(hunt.QuakeAreaCasts==0||hunt.QuakeOuterHits>0,
+                    "Natural QUAKE casts never resolved their delayed outer explosion.");
+                Require(hunt.AreaDuplicateCandidates == 0,
+                    "Behavioral area skill submitted a duplicate target in one cast.");
                 Require(hunt.LayoutsVisitedMask == 7 && hunt.LayoutTransitions >= 2,
                     "Natural run did not traverse all three connected layout topologies.");
                 Require(hunt.DefeatedElitePatternMask == 7 && hunt.GuardianKills >= 3,
@@ -178,13 +186,19 @@ namespace AffixZero.Presentation
             EliteEncounterMarker marker=owner.Hero.CurrentTarget==null?null:owner.Hero.CurrentTarget.GetComponent<EliteEncounterMarker>();
             EliteAttackPattern pattern=owner.Hero.CurrentTarget==null?null:owner.Hero.CurrentTarget.GetComponent<EliteAttackPattern>();
             bool eliteTarget=marker!=null&&marker.Active;
+            bool needsSkill=hunt.AreaTrajectoryVisible&&skillEvolutionCaptureCount<3;
             bool needsPattern=pattern!=null&&pattern.IsTelegraphing&&patternCaptureCounts[layout]<2;
             bool needsElite=eliteTarget&&eliteCaptureCounts[layout]<2;
             bool needsGeneral=captureCounts[layout]<16;
-            if(!needsPattern&&!needsElite&&!needsGeneral)return;
+            if(!needsSkill&&!needsPattern&&!needsElite&&!needsGeneral)return;
             nextCaptureAt=Time.realtimeSinceStartup+.25f;
             string path;
-            if(needsPattern)
+            if(needsSkill)
+            {
+                path=Path.Combine(captureDirectory,"skill-evolution-"+skillEvolutionCaptureCount.ToString("00")+".bmp");
+                skillEvolutionCaptureCount++;
+            }
+            else if(needsPattern)
             {
                 path=Path.Combine(captureDirectory,"pattern-layout-"+layout+"-"+patternCaptureCounts[layout].ToString("00")+".bmp");
                 patternCaptureCounts[layout]++;
@@ -279,7 +293,7 @@ namespace AffixZero.Presentation
             }
             if (p.UnspentPoints > 0 && p.SpentPoints < HeroProgression.TotalTalentCapacity)
             {
-                TalentId next = p.VitalityRank < 20 ? TalentId.Vitality : p.FuryRank < 20 ? TalentId.Fury :
+                TalentId next = p.VitalityRank < 5 ? TalentId.Vitality : p.FuryRank < 5 ? TalentId.Fury : p.VitalityRank < 20 ? TalentId.Vitality : p.FuryRank < 20 ? TalentId.Fury :
                     p.PrecisionRank < 10 ? TalentId.Precision : p.KeystoneRank < 5 ? TalentId.Keystone :
                     p.CleaveRank < 10 ? TalentId.Cleave : TalentId.Haste;
                 StartCoroutine(TalentFlow(next)); return true;
@@ -376,6 +390,9 @@ namespace AffixZero.Presentation
             report.areaSkillRadius=p.AreaSkillRadius;report.areaSkillTargets=p.AreaSkillMinimumTargets;
             report.recoveryThreshold=p.RecoveryThresholdPercent;report.recoveryHeal=p.RecoveryHealPercent;
             report.areaCasts = hunt.AreaCasts; report.recoveryCasts = hunt.RecoveryCasts;
+            report.chainAreaCasts=hunt.ChainAreaCasts;report.pierceAreaCasts=hunt.PierceAreaCasts;report.quakeAreaCasts=hunt.QuakeAreaCasts;
+            report.quakeOuterHits=hunt.QuakeOuterHits;report.behavioralAreaHits=hunt.BehavioralAreaHits;report.areaDuplicateCandidates=hunt.AreaDuplicateCandidates;
+            report.areaLastUniqueTargets=hunt.AreaLastUniqueTargets;report.areaTrajectory=p.AreaTrajectory.ToString();
             report.layoutTransitions=hunt.LayoutTransitions;report.layoutsVisitedMask=hunt.LayoutsVisitedMask;
             report.eliteKills=hunt.EliteKills;report.guardianKills=hunt.GuardianKills;report.defeatedElitePatternMask=hunt.DefeatedElitePatternMask;
             report.observedEliteAttackPatternMask=hunt.ObservedEliteAttackPatternMask;report.emberPatternCasts=hunt.EmberPatternCasts;
@@ -420,12 +437,13 @@ namespace AffixZero.Presentation
             public float elapsedSeconds; public int initialDamage, initialHealth, kills, completedRuns, failedRuns, deathRetries, collectedItems,
                 naturalItemsSeen, experience, gold, damage, health, defense, inventoryCount, spentPoints, unspentPoints,
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
-                talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount;
+                talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount,
+                chainAreaCasts,pierceAreaCasts,quakeAreaCasts,quakeOuterHits,behavioralAreaHits,areaDuplicateCandidates,areaLastUniqueTargets;
             public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
                 maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal,
                 observedEliteAttackPatternMask,emberPatternCasts,galleryPatternCasts,ritualPatternCasts,elitePatternHits;
             public float areaSkillRadius;
-            public string areaSkillName,recoverySkillName;
+            public string areaSkillName,areaTrajectory,recoverySkillName;
             public string[] dropRecords;
             public string[] captureFrames;
         }

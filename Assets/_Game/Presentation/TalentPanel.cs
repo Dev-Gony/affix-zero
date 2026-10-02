@@ -13,7 +13,7 @@ namespace AffixZero.Presentation
             public int Points,Spent,Fury,Precision,Keystone,Vitality,Cleave,Haste,TotalDamage,TotalHealth;
             public int CriticalChance,Penetration,AreaTargets,RecoveryThreshold,RecoveryHeal,ActiveEvolutions;
             public float AreaRadius,AreaDamageMultiplier,AreaArming,RecoveryArming;
-            public string AreaName,RecoveryName;
+            public string AreaName,AreaTradeoff,RecoveryName;
         }
         public readonly VisualElement Root;
         public TalentId SelectedTalent { get; private set; }=TalentId.Fury;
@@ -68,8 +68,8 @@ namespace AffixZero.Presentation
             switch(id)
             {
                 case TalentId.Fury:
-                    return "Attack +"+(r*3)+"\n"+v.AreaName+" area strike: "+Mathf.RoundToInt(v.AreaDamageMultiplier*100)+"% ATK"+
-                        Milestone(r,5,15);
+                    return v.AreaName+" "+Mathf.RoundToInt(v.AreaDamageMultiplier*100)+"% / "+v.AreaTradeoff+" "+CompactMilestone(r,5,15)+"\n"+
+                        "SWORD ARC  /  AXE QUAKE  /  STAFF LANCE";
                 case TalentId.Precision:
                     return "Attack +"+(r*4)+"  /  Critical "+v.CriticalChance+"%"+Milestone(r,3,8);
                 case TalentId.Keystone:
@@ -91,6 +91,8 @@ namespace AffixZero.Presentation
             if(rank>=first)return "  [EVOLVE I / NEXT R"+second+"]";
             return "  [NEXT R"+first+"]";
         }
+        private static string CompactMilestone(int rank,int first,int second)
+        {return rank>=second?"[II]":rank>=first?"[I>N"+second+"]":"[N"+first+"]";}
         private void Select(TalentId id){SelectedTalent=id;Refresh(true);} private void Invest(){View v=read();var d=HeroProgression.GetTalentDefinition(SelectedTalent);if(v!=null&&v.Points>0&&Unlocked(v,SelectedTalent)&&Rank(v,SelectedTalent)<d.MaxRank)invest(SelectedTalent);Refresh(true);} private void Reset(){View v=read();if(v!=null&&v.Spent>0)reset();Refresh(true);}
         private static int Rank(View v,TalentId id){switch(id){case TalentId.Fury:return v.Fury;case TalentId.Precision:return v.Precision;case TalentId.Keystone:return v.Keystone;case TalentId.Vitality:return v.Vitality;case TalentId.Cleave:return v.Cleave;default:return v.Haste;}}
         private static bool Unlocked(View v,TalentId id){var d=HeroProgression.GetTalentDefinition(id);return !d.Prerequisite.HasValue||Rank(v,d.Prerequisite.Value)>=d.RequiredRank;}

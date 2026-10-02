@@ -19,7 +19,7 @@ internal static class ProgressionChecks
         check(hero.TotalDamage == 30 && hero.TotalMaxHp == 120 && hero.TotalDefense == 2 && hero.Level == 1 &&
             hero.Inventory.Count == 0 && hero.PendingLoot == null && hero.UnspentPoints == 0 && hero.LegacyPointCredit == 0,
             "new profile retains baseline combat and earns no free talent points");
-        check(hero.ActiveEvolutionCount == 0 && hero.AreaSkillName == "AREA" && hero.RecoverySkillName == "HEAL" &&
+        check(hero.ActiveEvolutionCount == 0 && hero.AreaSkillName == "AREA" && hero.AreaTrajectory==AreaSkillTrajectory.Radial && hero.RecoverySkillName == "HEAL" &&
             hero.AreaSkillRadius == 3.2f && hero.AreaSkillMinimumTargets == 2 && hero.AreaSkillDamageMultiplier == 1.5f &&
             hero.RecoveryThresholdPercent == 45 && hero.RecoveryHealPercent == 20,
             "fresh profile keeps the original area and recovery behavior before milestone investment");
@@ -152,11 +152,24 @@ internal static class ProgressionChecks
             talents.SplashDamageFraction == .25f && talents.AttackSpeedMultiplier == 1.25f,
             "full tree modifies damage, survivability, area and timing independently");
         check(talents.ActiveEvolutionCount == 12 && talents.CriticalChance == 15 && talents.Penetration == 12 &&
-            talents.AreaSkillName == "TEMPEST" && talents.AreaSkillRadius == 4.1f && talents.AreaSkillMinimumTargets == 1 &&
+            talents.AreaSkillName == "ARC II" && talents.AreaTrajectory == AreaSkillTrajectory.Chain && talents.AreaSkillMaxTargets == 4 &&
+            Math.Abs(talents.AreaSkillJumpRange-2.85f)<.0001f && talents.AreaSkillRadius == 4.1f && talents.AreaSkillMinimumTargets == 1 &&
             talents.AreaSkillDamageMultiplier == 1.8f && talents.AreaSkillArmingDelay == 1.8f &&
             talents.RecoverySkillName == "SURGE" && talents.RecoveryThresholdPercent == 55 &&
             talents.RecoveryHealPercent == 30 && talents.RecoveryArmingDelay == 6f,
             "all six talent branches unlock two real combat evolution milestones");
+        EquipNew(talents,new WeaponItem("route:axe","Route axe",12,0,"","AffixGenerated/GearAxe","Rare",0,
+            EquipmentSlot.Weapon,WeaponStyle.Axe));
+        check(talents.AreaTrajectory==AreaSkillTrajectory.Quake&&talents.AreaSkillName=="QUAKE II"&&talents.AreaSkillMaxTargets==24,
+            "equipping an axe selects the broad short-range QUAKE route without new save state");
+        EquipNew(talents,new WeaponItem("route:staff","Route staff",12,0,"","AffixGenerated/GearStaff","Rare",0,
+            EquipmentSlot.Weapon,WeaponStyle.Staff));
+        check(talents.AreaTrajectory==AreaSkillTrajectory.Pierce&&talents.AreaSkillName=="LANCE II"&&talents.AreaSkillMaxTargets==5&&
+            Math.Abs(talents.AreaSkillPierceReach-6.2f)<.0001f&&Math.Abs(talents.AreaSkillPierceWidth-.54f)<.0001f,
+            "equipping a staff selects the long narrow LANCE route with bounded targets");
+        EquipNew(talents,new WeaponItem("route:sword","Route sword",6,0,"","AffixGenerated/AttackIcon","Rare"));
+        check(talents.AreaTrajectory==AreaSkillTrajectory.Chain&&talents.AreaSkillName=="ARC II",
+            "equipping a sword returns to the focused ARC route immediately");
         talents.PickUp();
         EquipNew(talents, new WeaponItem("cooldown-relic", "유물", 0, 0, "", "AffixGenerated/GearRelic", "Rare", 0,
             EquipmentSlot.Relic, cooldownReductionPercent: 50));
@@ -164,7 +177,7 @@ internal static class ProgressionChecks
         talents.ResetTalents(); talents.ResetTalents();
         check(talents.UnspentPoints == 76 && talents.TotalMaxHp == 120 && talents.SplashRadius == 0 && talents.TotalDamage == 30 &&
             talents.ActiveEvolutionCount == 0 && talents.CriticalChance == 5 && talents.Penetration == 0 &&
-            talents.AreaSkillName == "AREA" && talents.RecoverySkillName == "HEAL",
+            talents.AreaSkillName == "AREA" && talents.AreaTrajectory==AreaSkillTrajectory.Radial && talents.RecoverySkillName == "HEAL",
             "reset clears all six rank effects while retaining equipped relic stats");
 
         var forge = new HeroProgression(); WeaponItem starter = forge.EquippedWeapon;

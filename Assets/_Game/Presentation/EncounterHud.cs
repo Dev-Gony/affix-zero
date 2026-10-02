@@ -252,7 +252,7 @@ namespace AffixZero.Presentation
                     AreaTargets=p.AreaSkillMinimumTargets,RecoveryThreshold=p.RecoveryThresholdPercent,RecoveryHeal=p.RecoveryHealPercent,
                     ActiveEvolutions=p.ActiveEvolutionCount,AreaRadius=p.AreaSkillRadius,AreaDamageMultiplier=p.AreaSkillDamageMultiplier,
                     AreaArming=p.AreaSkillArmingDelay,RecoveryArming=p.RecoveryArmingDelay,
-                    AreaName=p.AreaSkillName,RecoveryName=p.RecoverySkillName};
+                    AreaName=p.AreaSkillName,AreaTradeoff=encounter.Hunt.AreaEvolutionTradeoff,RecoveryName=p.RecoverySkillName};
             },id=>encounter.SpendTalent(id),()=>encounter.ResetTalents(),()=>encounter.ShowManagement(ManagementScreen.None));
             forgePanel=new ForgePanel(root,()=> {
                 var p=encounter.Progression;var item=p.EquippedWeapon;
@@ -407,8 +407,8 @@ namespace AffixZero.Presentation
                 recoveryCooldown.text=hunt.RecoveryCooldownRemaining<=0?"READY":hunt.RecoveryCooldownRemaining.ToString("0.0")+"s";
                 areaSkillLabel.text=hunt.AreaEvolutionName;
                 areaSkillLabel.style.fontSize=hunt.AreaEvolutionName.Length>7?5:hunt.AreaEvolutionName.Length>5?6:8;
-                areaSkillSlot.tooltip=hunt.AreaEvolutionName+"  "+Mathf.RoundToInt(hunt.AreaSkillDamageMultiplier*100)+"% ATK  /  "+
-                    hunt.AreaSkillRadius.ToString("0.0")+"m  /  "+hunt.AreaSkillMinimumTargets+" target";
+                areaSkillSlot.tooltip=hunt.AreaEvolutionName+"  "+Mathf.RoundToInt(hunt.AreaSkillDamageMultiplier*100)+"% ATK\n"+
+                    hunt.AreaEvolutionTradeoff+"\nWeapon changes route: Sword ARC / Axe QUAKE / Staff LANCE";
                 recoverySkillLabel.text=hunt.RecoveryEvolutionName;
                 recoverySkillLabel.style.fontSize=hunt.RecoveryEvolutionName.Length>7?5:8;
                 recoverySkillSlot.tooltip=hunt.RecoveryEvolutionName+"  below "+hunt.RecoveryThresholdPercent+

@@ -318,6 +318,32 @@ namespace AffixZero.Presentation
             return hits;
         }
 
+        public int CastSkillSequence(IReadOnlyList<MeleeActor> victims,IReadOnlyList<int> powers,
+            float effectRadius,out int duplicateCandidates)
+        {
+            if(victims==null||powers==null)throw new ArgumentNullException();
+            if(victims.Count!=powers.Count||!FinitePositive(effectRadius))throw new ArgumentOutOfRangeException(nameof(effectRadius));
+            duplicateCandidates=0;
+            if(!isActiveAndEnabled||IsDead||health==null||Time.deltaTime<=0)return 0;
+            long receiptId=++damageSequence;
+            Vector2 origin=transform.position;
+            LastHitRadius=effectRadius;LastHitIsArea=true;LastStrikePoint=origin;
+            int hits=0,kills=0,totalApplied=0;
+            var unique=new HashSet<MeleeActor>();
+            for(int i=0;i<victims.Count;i++)
+            {
+                MeleeActor victim=victims[i];
+                if(victim==null||victim==this||!unique.Add(victim)){duplicateCandidates++;continue;}
+                if(powers[i]<=0||!victim.isActiveAndEnabled||victim.IsDead)continue;
+                int resolvedPower=PowerAgainst(victim,powers[i],out bool critical);
+                HitReceipt receipt=victim.Receive(actorId,receiptId,resolvedPower,origin,effectRadius,true,critical);
+                if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;LastStrikePoint=victim.transform.position;if(receipt.Killed)kills++;}
+            }
+            if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
+            StrikeResolved?.Invoke(this,hits,kills,true);
+            return hits;
+        }
+
         public HitReceipt ResolvePatternHit(MeleeActor victim,int power,float radius,bool area)
         {
             if(victim==null)throw new ArgumentNullException(nameof(victim));

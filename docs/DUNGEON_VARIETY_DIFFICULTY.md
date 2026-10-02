@@ -12,6 +12,18 @@ All layouts share the 72x32 world boundary so the existing camera, HUD, and save
 
 Every `DungeonWorld` construction checks that all 24 spawn cells are walkable and reachable from the fixed entrance. Movement, line of sight, visible obstacles, and minimap obstacle markers use the same selected layout. A clear advances the persisted `dungeonClears` sequence and rotates to the next layout. Reopening the game reconstructs the layout from the saved clear count.
 
+### Honest visual-identity boundary
+
+These are three mechanically different temple arrangements, not three fully
+distinct biomes. They currently share the same temple floor/wall material,
+obstacle family, lighting treatment, enemy base atlas, and ambient presentation.
+Topology, floor inlays, procedural sigils, elite names, attack patterns, and
+minimap silhouettes distinguish play, but the next visual-identity slice still
+needs original per-layout prop silhouettes, palette/material accents, and
+environmental storytelling before Ember, Gallery, and Ritual can be described
+as separate biomes. No current screenshot should be labeled as proof of three
+complete biome art sets.
+
 ## Layout-specific elite encounters
 
 The topology now changes combat pressure as well as pathing. Ember Bastion

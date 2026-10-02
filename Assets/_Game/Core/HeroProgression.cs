@@ -8,6 +8,7 @@ namespace AffixZero.Core
     // Numeric values 0-2 retain compatibility with the first expanded Unity draft.
     public enum EquipmentSlot { Weapon = 0, Armor = 1, Relic = 2, Helmet = 3, Gloves = 4, Boots = 5, Ring = 6, Amulet = 7 }
     public enum WeaponStyle { Sword, Axe, Staff }
+    public enum AreaSkillTrajectory { Radial, Chain, Quake, Pierce }
     public enum AffixStat { Attack, Defense, Health, Mana, Speed, Critical, Vampirism, Experience, Gold, Penetration }
 
     public sealed class ItemOption
@@ -209,10 +210,21 @@ namespace AffixZero.Core
         public float AreaSkillRadius => 3.2f + (CleaveEvolutionTier == 0 ? 0 : CleaveEvolutionTier == 1 ? .4f : .9f);
         public int AreaSkillMinimumTargets => HasteEvolutionTier > 0 ? 1 : 2;
         public float AreaSkillArmingDelay => HasteEvolutionTier == 0 ? 2.6f : HasteEvolutionTier == 1 ? 2.2f : 1.8f;
+        public AreaSkillTrajectory AreaTrajectory => FuryEvolutionTier == 0 ? AreaSkillTrajectory.Radial :
+            EquippedWeapon.WeaponStyle == WeaponStyle.Staff ? AreaSkillTrajectory.Pierce :
+            EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? AreaSkillTrajectory.Quake : AreaSkillTrajectory.Chain;
+        public int AreaSkillMaxTargets => AreaTrajectory == AreaSkillTrajectory.Chain ? 2 + FuryEvolutionTier :
+            AreaTrajectory == AreaSkillTrajectory.Pierce ? 3 + FuryEvolutionTier : 24;
+        public float AreaSkillJumpRange => 2.15f + FuryEvolutionTier * .35f;
+        public float AreaSkillPierceReach => 4.8f + FuryEvolutionTier * .7f;
+        public float AreaSkillPierceWidth => .36f + FuryEvolutionTier * .09f;
         public int RecoveryThresholdPercent => 45 + VitalityEvolutionTier * 5;
         public int RecoveryHealPercent => 20 + VitalityEvolutionTier * 5;
         public float RecoveryArmingDelay => HasteEvolutionTier == 0 ? 8f : HasteEvolutionTier == 1 ? 7f : 6f;
-        public string AreaSkillName => CleaveEvolutionTier == 2 ? "TEMPEST" : CleaveEvolutionTier == 1 ? "WHIRL" :
+        public string AreaSkillName => AreaTrajectory == AreaSkillTrajectory.Chain ? (FuryEvolutionTier == 2 ? "ARC II" : "ARC") :
+            AreaTrajectory == AreaSkillTrajectory.Pierce ? (FuryEvolutionTier == 2 ? "LANCE II" : "LANCE") :
+            AreaTrajectory == AreaSkillTrajectory.Quake ? (FuryEvolutionTier == 2 ? "QUAKE II" : "QUAKE") :
+            CleaveEvolutionTier == 2 ? "TEMPEST" : CleaveEvolutionTier == 1 ? "WHIRL" :
             FuryEvolutionTier == 2 ? "DEVASTATE" : FuryEvolutionTier == 1 ? "REND" :
             HasteEvolutionTier > 0 ? "QUICKCAST" : "AREA";
         public string RecoverySkillName => VitalityEvolutionTier == 2 ? "SURGE" : VitalityEvolutionTier == 1 ? "WIND" : "HEAL";

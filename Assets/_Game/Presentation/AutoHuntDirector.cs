@@ -62,6 +62,14 @@ namespace AffixZero.Presentation
         public bool CanChangeDifficulty => Initialized && !Running && owner != null && owner.Progression.PendingLoot == null;
         public bool ReducedEffects => feedback != null && feedback.ReducedEffects;
         public int AreaCasts => areaSkill == null ? 0 : areaSkill.CastCount;
+        public int ChainAreaCasts => areaSkill == null ? 0 : areaSkill.ChainCasts;
+        public int PierceAreaCasts => areaSkill == null ? 0 : areaSkill.PierceCasts;
+        public int QuakeAreaCasts => areaSkill == null ? 0 : areaSkill.QuakeCasts;
+        public int QuakeOuterHits => areaSkill == null ? 0 : areaSkill.QuakeOuterHits;
+        public int BehavioralAreaHits => areaSkill == null ? 0 : areaSkill.TrajectoryHits;
+        public int AreaDuplicateCandidates => areaSkill == null ? 0 : areaSkill.DuplicateCandidatesRejected;
+        public int AreaLastUniqueTargets => areaSkill == null ? 0 : areaSkill.LastUniqueTargets;
+        public bool AreaTrajectoryVisible => areaSkill != null && areaSkill.IsTrajectoryVisible;
         public float AreaCooldownRemaining => areaSkill == null ? 0 : areaSkill.CooldownRemaining;
         public float AreaCooldownDuration => areaSkill == null ? 4.5f : areaSkill.CooldownDuration;
         public int RecoveryCasts => recoverySkill == null ? 0 : recoverySkill.CastCount;
@@ -71,10 +79,26 @@ namespace AffixZero.Presentation
         public float AreaSkillDamageMultiplier => owner == null ? 1.5f : owner.Progression.AreaSkillDamageMultiplier;
         public int AreaSkillMinimumTargets => owner == null ? 2 : owner.Progression.AreaSkillMinimumTargets;
         public float AreaSkillArmingDelay => owner == null ? 2.6f : owner.Progression.AreaSkillArmingDelay;
+        public AreaSkillTrajectory AreaTrajectory => owner == null ? AreaSkillTrajectory.Radial : owner.Progression.AreaTrajectory;
+        public int FuryEvolutionTier => owner == null ? 0 : owner.Progression.FuryEvolutionTier;
+        public int AreaSkillMaxTargets => owner == null ? 24 : owner.Progression.AreaSkillMaxTargets;
+        public float AreaSkillJumpRange => owner == null ? 2.5f : owner.Progression.AreaSkillJumpRange;
+        public float AreaSkillPierceReach => owner == null ? 5.5f : owner.Progression.AreaSkillPierceReach;
+        public float AreaSkillPierceWidth => owner == null ? .45f : owner.Progression.AreaSkillPierceWidth;
         public int RecoveryThresholdPercent => owner == null ? 45 : owner.Progression.RecoveryThresholdPercent;
         public int RecoveryHealPercent => owner == null ? 20 : owner.Progression.RecoveryHealPercent;
         public float RecoveryArmingDelay => owner == null ? 8f : owner.Progression.RecoveryArmingDelay;
         public string AreaEvolutionName => owner == null ? "AREA" : owner.Progression.AreaSkillName;
+        public string AreaEvolutionTradeoff
+        {
+            get
+            {
+                if(AreaTrajectory==AreaSkillTrajectory.Chain)return "CHAIN x"+AreaSkillMaxTargets+" / JUMP "+AreaSkillJumpRange.ToString("0.0")+"m";
+                if(AreaTrajectory==AreaSkillTrajectory.Pierce)return "PIERCE x"+AreaSkillMaxTargets+" / LANE "+AreaSkillPierceWidth.ToString("0.00")+"m";
+                if(AreaTrajectory==AreaSkillTrajectory.Quake)return "2-STAGE / OUTER 65% / "+AreaSkillRadius.ToString("0.0")+"m";
+                return "RADIAL ALL / "+AreaSkillRadius.ToString("0.0")+"m";
+            }
+        }
         public string RecoveryEvolutionName => owner == null ? "HEAL" : owner.Progression.RecoverySkillName;
         public string AreaSkillName => "회전 참격";
         public float TravelDistance { get; private set; }

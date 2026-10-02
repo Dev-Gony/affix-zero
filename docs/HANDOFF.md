@@ -1,3 +1,23 @@
+# 2026-10-02 - player skill trajectories
+
+Fury rank 5 now evolves the automatic area skill by saved weapon choice:
+Sword ARC chains through unique LOS-valid targets with falloff, Axe QUAKE keeps
+an immediate inner impact plus a 0.18-second 65% outer annulus, and Staff LANCE
+pierces a narrow long lane. HUD and
+Fury detail expose the route and tradeoff. No save field or external art was
+added. See `PLAYER_SKILL_TRAJECTORIES.md`.
+
+Final build GUID `7dff73dc3e884968beb5f7b3d1e063fd`: CoreSmoke 272, Unity
+build 0/0, 150.068s normal-drop natural unlock/use (95 kills, three QUAKE casts,
+six real trajectory hits including four delayed outer-wave hits), separate-process restore,
+720/1080 UI, and safely targeted OS-level automated input all PASS. Library
+gameplay evidence: QUAKE `libfile_b708eea1c8a88191954afcc9a7d76488` and ARC
+`libfile_c449ce9ae33481919fcb8f9aaf963c55`.
+
+The three dungeon layouts remain temple arrangements sharing one material and
+prop family; they are not yet three finished biomes. The remaining visual gap
+is recorded in `DUNGEON_VARIETY_DIFFICULTY.md`.
+
 # 2026-10-02 - layout-specific elite attack mechanics
 
 Branch `feature/open-dungeon-loot-skills` now gives each connected dungeon a
