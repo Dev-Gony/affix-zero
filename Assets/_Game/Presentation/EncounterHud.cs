@@ -375,7 +375,8 @@ namespace AffixZero.Presentation
                 killCount.text=hunt.TotalKills+"  KILLS";
                 huntRewards.text="수거 "+hunt.CollectedItems+"개  ·  재도전 "+hunt.DeathRetries+"회";
                 int alive=0;foreach(var actor in hunt.Enemies)if(actor.isActiveAndEnabled&&!actor.IsDead)alive++;
-                mapTitle.text="MAP  /  "+hunt.CurrentLayoutName;
+                mapTitle.text="MAP  /  "+hunt.CurrentVisualIdentityName;
+                mapTitle.tooltip=hunt.CurrentLayoutName+"\n"+hunt.CurrentVisualIdentitySignature;
                 mapCaption.text=hunt.Difficulty.Name.ToUpperInvariant()+"  ·  ALIVE "+alive;
                 DifficultyRule rule=hunt.Difficulty;
                 difficultyInfo.text="HPx"+rule.EnemyHealthMultiplier.ToString("0.00")+"  DMGx"+rule.EnemyDamageMultiplier.ToString("0.00")+

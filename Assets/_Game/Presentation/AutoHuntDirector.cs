@@ -59,6 +59,10 @@ namespace AffixZero.Presentation
         public DungeonDifficulty CurrentDifficulty => owner == null ? DungeonDifficulty.Scout : owner.Progression.SelectedDifficulty;
         public DifficultyRule Difficulty => DifficultyTuning.Get(CurrentDifficulty);
         public string CurrentLayoutName => World == null ? "LOADING" : World.LayoutName;
+        public string CurrentVisualIdentityName => World == null ? "LOADING" : World.VisualIdentityName;
+        public string CurrentVisualIdentitySignature => World == null ? "" : World.VisualIdentitySignature;
+        public int IdentityDecorationCount => World == null ? 0 : World.IdentityDecorationCount;
+        public int IdentityColliderCount => World == null ? 0 : World.IdentityColliderCount;
         public bool CanChangeDifficulty => Initialized && !Running && owner != null && owner.Progression.PendingLoot == null;
         public bool ReducedEffects => feedback != null && feedback.ReducedEffects;
         public int AreaCasts => areaSkill == null ? 0 : areaSkill.CastCount;

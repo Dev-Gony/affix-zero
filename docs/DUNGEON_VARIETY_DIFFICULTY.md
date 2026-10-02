@@ -14,15 +14,19 @@ Every `DungeonWorld` construction checks that all 24 spawn cells are walkable an
 
 ### Honest visual-identity boundary
 
-These are three mechanically different temple arrangements, not three fully
-distinct biomes. They currently share the same temple floor/wall material,
-obstacle family, lighting treatment, enemy base atlas, and ambient presentation.
-Topology, floor inlays, procedural sigils, elite names, attack patterns, and
-minimap silhouettes distinguish play, but the next visual-identity slice still
-needs original per-layout prop silhouettes, palette/material accents, and
-environmental storytelling before Ember, Gallery, and Ritual can be described
-as separate biomes. No current screenshot should be labeled as proof of three
-complete biome art sets.
+The three mechanically different temple arrangements now also have original
+procedural identity layers. Forge Citadel adds ember trenches, crenellated
+battlements, a hearth, and an entrance seal; Sunken Archive adds walkable azure
+canals, bridges, and archive plinths; Eclipse Sanctum adds ritual courts,
+spokes, a central well, and radial altars. Their palette accents, landmarks,
+terrain overlays, topology, encounters, attack mechanics, HUD names, and
+minimap silhouettes now differ. See `DUNGEON_VISUAL_IDENTITIES.md`.
+
+They remain identity-rich districts built over one shared temple floor/wall
+atlas and obstacle/enemy family, not three fully painted biomes. Unique authored
+tile atlases, wall silhouettes, prop sets, lighting, and environmental story
+sets remain future art scope. Current screenshots prove the distinct runtime
+compositions and readable combat layers, not three complete biome art sets.
 
 ## Layout-specific elite encounters
 

@@ -76,6 +76,8 @@ namespace AffixZero.Presentation
                 Require(owner.Progression.TotalDamage == 30 && owner.Progression.TotalGold == 0 &&
                     owner.Progression.TotalExperience == 0 && owner.Progression.Inventory.Count == 0,
                     "UI reference fixture requires a fresh temporary profile.");
+                Require(owner.Hunt.World.VisualIdentityName=="FORGE CITADEL"&&owner.Hunt.World.IdentityDecorationCount>=20&&
+                    owner.Hunt.World.IdentityColliderCount==0,"Reference world visual identity is missing or changed collision.");
                 Require(!owner.Hunt.Running && owner.IsPaused, "Reference startup must be stopped.");
                 foreach (var actor in owner.Hunt.Enemies)
                     if (observed.Add(actor)) actor.Damaged += OnEnemyDamaged;

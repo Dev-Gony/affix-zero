@@ -28,6 +28,7 @@ namespace AffixZero.Presentation
         private readonly int[] eliteCaptureCounts = new int[3];
         private readonly int[] patternCaptureCounts = new int[3];
         private int skillEvolutionCaptureCount;
+        private int visualIdentityMask,minimumIdentityDecorations=int.MaxValue,maximumIdentityColliders;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -115,6 +116,7 @@ namespace AffixZero.Presentation
 
             Require(owner != null && hunt != null && owner.Persistence.CanPlay, "Runtime progression owner disappeared or became unavailable.");
             Require(owner.IsPaused ? Time.timeScale == 0 : Time.timeScale == 1, "Natural run changed simulation speed.");
+            ObserveVisualIdentity();
             DiscoverDrops();
             CaptureVarietyFrame();
 
@@ -155,6 +157,8 @@ namespace AffixZero.Presentation
                     "Behavioral area skill submitted a duplicate target in one cast.");
                 Require(hunt.LayoutsVisitedMask == 7 && hunt.LayoutTransitions >= 2,
                     "Natural run did not traverse all three connected layout topologies.");
+                Require(visualIdentityMask==7&&minimumIdentityDecorations>=20&&maximumIdentityColliders==0,
+                    "Natural run did not observe three complete collider-free visual identities.");
                 Require(hunt.DefeatedElitePatternMask == 7 && hunt.GuardianKills >= 3,
                     "Natural run did not defeat all three layout-specific elite patterns and guardians.");
                 Require(hunt.ObservedEliteAttackPatternMask == 7 && hunt.EmberPatternCasts > 0 &&
@@ -175,6 +179,14 @@ namespace AffixZero.Presentation
                 report.continuedAfterRestart = true; report.diskRoundtripMatched = true;
                 Finish(true, null);
             }
+        }
+
+        private void ObserveVisualIdentity()
+        {
+            if(hunt==null||hunt.World==null)return;DungeonWorld world=hunt.World;
+            visualIdentityMask|=1<<(int)world.LayoutId;
+            minimumIdentityDecorations=Math.Min(minimumIdentityDecorations,world.IdentityDecorationCount);
+            maximumIdentityColliders=Math.Max(maximumIdentityColliders,world.IdentityColliderCount);
         }
 
         private void CaptureVarietyFrame()
@@ -399,6 +411,8 @@ namespace AffixZero.Presentation
             report.galleryPatternCasts=hunt.GalleryPatternCasts;report.ritualPatternCasts=hunt.RitualPatternCasts;
             report.elitePatternHits=hunt.ElitePatternHits;
             report.maxKillChain=hunt.MaxKillChain;report.selectedDifficulty=(int)p.SelectedDifficulty;report.dungeonClears=p.DungeonClears;
+            report.visualIdentityMask=visualIdentityMask;report.minimumIdentityDecorations=minimumIdentityDecorations==int.MaxValue?0:minimumIdentityDecorations;
+            report.maximumIdentityColliders=maximumIdentityColliders;report.currentVisualIdentity=hunt.CurrentVisualIdentityName;
             report.dropRecords = dropRecords.ToArray(); report.saveCount = owner.Persistence.SaveCount;
             report.captureFrames=captures.ToArray();
         }
@@ -441,9 +455,10 @@ namespace AffixZero.Presentation
                 chainAreaCasts,pierceAreaCasts,quakeAreaCasts,quakeOuterHits,behavioralAreaHits,areaDuplicateCandidates,areaLastUniqueTargets;
             public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
                 maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal,
-                observedEliteAttackPatternMask,emberPatternCasts,galleryPatternCasts,ritualPatternCasts,elitePatternHits;
+                observedEliteAttackPatternMask,emberPatternCasts,galleryPatternCasts,ritualPatternCasts,elitePatternHits,
+                visualIdentityMask,minimumIdentityDecorations,maximumIdentityColliders;
             public float areaSkillRadius;
-            public string areaSkillName,areaTrajectory,recoverySkillName;
+            public string areaSkillName,areaTrajectory,recoverySkillName,currentVisualIdentity;
             public string[] dropRecords;
             public string[] captureFrames;
         }

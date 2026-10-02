@@ -1,3 +1,26 @@
+# 2026-10-02 - procedural dungeon visual identities
+
+The current `feature/open-dungeon-loot-skills` branch now gives each connected
+layout an original readable runtime identity over the shared temple base:
+Forge Citadel ember trenches/battlements/hearth/entrance seal, Sunken Archive
+walkable canals/bridges/plinths, and Eclipse Sanctum ritual courts/spokes/well/
+altars. The HUD exposes the identity and signature. These layers add no collider,
+save field, external art, or commercial asset. See `DUNGEON_VISUAL_IDENTITIES.md`.
+
+Final Unity 6000.3.24f1 build GUID
+`d233c103846346e5bb032dcfd4f1c353` passes CoreSmoke 272, static compile and
+Windows build 0/0, final 150.062s 1080p normal-drop play (94 kills, three clears,
+identity/layout/pattern masks 7, minimum 20 decorations, zero identity colliders,
+zero deaths/failures/safety restarts), separate-process restore +2 kills,
+720/1080 framebuffer UI, and final-build OS-level automated input. Human play
+and user visual approval remain NOT RUN.
+
+Library evidence: Forge `libfile_6780674a96248191bfbc2df6a4c211b2`, Archive
+`libfile_7b6de6b254c88191851e94c5d22c7c99`, Eclipse
+`libfile_5cbbec0a729881918309580c34e6c6ad`. Exact titles were verified. The
+prepared upload interface was unavailable, so direct batch-create fallback was
+used; Windows `os.setxattr` remains unavailable for local metadata only.
+
 # 2026-10-02 - player skill trajectories
 
 Fury rank 5 now evolves the automatic area skill by saved weapon choice:
