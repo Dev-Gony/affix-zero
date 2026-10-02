@@ -1,3 +1,19 @@
+# 2026-10-02 layout-specific elite encounter handoff
+
+`feature/open-dungeon-loot-skills` now gives Ember Bastion, Split Galleries,
+and Ritual Crucible distinct elite/guardian combat profiles rather than only
+different obstacle arrays. Colored procedural floor sigils and timing-correct
+attack warnings identify the slow armored Bulwark, fast Stalker, and long-reach
+Reaver families; the compact target bar shows their real names. No external or
+commercial art was added. Read `ELITE_ENCOUNTER_IDENTITIES.md`.
+
+Build GUID `e4db1b39184e4381980d2a5dc70171c8` passes CoreSmoke 267,
+720p/1080p framebuffer and management regression, a 120.054-second normal-drop
+run with 72 kills / 13 elites / three guardians / all three pattern bits and no
+deaths, and separate-process restore. OS-level automated mouse/keyboard input
+also passed all ten recorded interactions against the validated native window;
+this is distinct from UI Toolkit callback coverage and is not human play.
+
 # 2026-10-02 compact combat HUD handoff
 
 The active `feature/open-dungeon-loot-skills` branch now replaces the previous

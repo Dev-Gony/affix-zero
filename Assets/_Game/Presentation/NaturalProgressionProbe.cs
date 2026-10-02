@@ -25,6 +25,7 @@ namespace AffixZero.Presentation
         private readonly List<string> dropRecords = new List<string>();
         private readonly List<string> captures = new List<string>();
         private readonly int[] captureCounts = new int[3];
+        private readonly int[] eliteCaptureCounts = new int[3];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -143,6 +144,8 @@ namespace AffixZero.Presentation
                 Require(report.talentInvestments > 0, "Natural XP produced no invested talent point.");
                 Require(hunt.LayoutsVisitedMask == 7 && hunt.LayoutTransitions >= 2,
                     "Natural run did not traverse all three connected layout topologies.");
+                Require(hunt.DefeatedElitePatternMask == 7 && hunt.GuardianKills >= 3,
+                    "Natural run did not defeat all three layout-specific elite patterns and guardians.");
                 Require(owner.Progression.SelectedDifficulty == DungeonDifficulty.Torment && report.difficultyTransitions == 2,
                     "Natural run did not safely select and retain all three difficulties.");
                 Require(owner.Progression.SpentPoints < HeroProgression.TotalTalentCapacity,
@@ -165,10 +168,25 @@ namespace AffixZero.Presentation
             if(string.IsNullOrEmpty(captureDirectory)||hunt==null||hunt.World==null||!hunt.Running||owner.ManagementVisible||
                 Time.realtimeSinceStartup<nextCaptureAt)return;
             int layout=(int)hunt.World.LayoutId;
-            if(layout<0||layout>=captureCounts.Length||captureCounts[layout]>=16)return;
+            if(layout<0||layout>=captureCounts.Length)return;
+            EliteEncounterMarker marker=owner.Hero.CurrentTarget==null?null:owner.Hero.CurrentTarget.GetComponent<EliteEncounterMarker>();
+            bool eliteTarget=marker!=null&&marker.Active;
+            bool needsElite=eliteTarget&&eliteCaptureCounts[layout]<2;
+            bool needsGeneral=captureCounts[layout]<16;
+            if(!needsElite&&!needsGeneral)return;
             nextCaptureAt=Time.realtimeSinceStartup+.25f;
-            string path=Path.Combine(captureDirectory,"layout-"+layout+"-"+captureCounts[layout].ToString("00")+".bmp");
-            captureCounts[layout]++;captures.Add(path);StartCoroutine(CaptureFrame(path));
+            string path;
+            if(needsElite)
+            {
+                path=Path.Combine(captureDirectory,"elite-layout-"+layout+"-"+eliteCaptureCounts[layout].ToString("00")+".bmp");
+                eliteCaptureCounts[layout]++;
+            }
+            else
+            {
+                path=Path.Combine(captureDirectory,"layout-"+layout+"-"+captureCounts[layout].ToString("00")+".bmp");
+                captureCounts[layout]++;
+            }
+            captures.Add(path);StartCoroutine(CaptureFrame(path));
         }
 
         private IEnumerator CaptureFrame(string path)
@@ -343,6 +361,7 @@ namespace AffixZero.Presentation
             report.vitality = p.VitalityRank; report.cleave = p.CleaveRank; report.haste = p.HasteRank;
             report.areaCasts = hunt.AreaCasts; report.recoveryCasts = hunt.RecoveryCasts;
             report.layoutTransitions=hunt.LayoutTransitions;report.layoutsVisitedMask=hunt.LayoutsVisitedMask;
+            report.eliteKills=hunt.EliteKills;report.guardianKills=hunt.GuardianKills;report.defeatedElitePatternMask=hunt.DefeatedElitePatternMask;
             report.maxKillChain=hunt.MaxKillChain;report.selectedDifficulty=(int)p.SelectedDifficulty;report.dungeonClears=p.DungeonClears;
             report.dropRecords = dropRecords.ToArray(); report.saveCount = owner.Persistence.SaveCount;
             report.captureFrames=captures.ToArray();
@@ -383,7 +402,8 @@ namespace AffixZero.Presentation
                 naturalItemsSeen, experience, gold, damage, health, defense, inventoryCount, spentPoints, unspentPoints,
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
                 talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount;
-            public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,maxKillChain,selectedDifficulty,dungeonClears;
+            public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
+                maxKillChain,selectedDifficulty,dungeonClears;
             public string[] dropRecords;
             public string[] captureFrames;
         }

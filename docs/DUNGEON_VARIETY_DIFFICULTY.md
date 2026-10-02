@@ -12,6 +12,16 @@ All layouts share the 72x32 world boundary so the existing camera, HUD, and save
 
 Every `DungeonWorld` construction checks that all 24 spawn cells are walkable and reachable from the fixed entrance. Movement, line of sight, visible obstacles, and minimap obstacle markers use the same selected layout. A clear advances the persisted `dungeonClears` sequence and rotates to the next layout. Reopening the game reconstructs the layout from the saved clear count.
 
+## Layout-specific elite encounters
+
+The topology now changes combat pressure as well as pathing. Ember Bastion
+fields slow armored Bulwarks, Split Galleries fields fast short-reach Stalkers,
+and Ritual Crucible fields long-reach Reavers. Enemy 24 is a named guardian
+variant of the same family. Each family has a distinct procedural floor sigil,
+and its attack warning uses the real reach and impact timing. Full tuning,
+provenance, and current evidence are recorded in
+`ELITE_ENCOUNTER_IDENTITIES.md`.
+
 ## Difficulty rules
 
 Difficulty may be changed only while hunting is explicitly stopped and no pending field item is blocking re-entry. The choice is saved in profile schema v3. The HUD lists the actual multipliers, not a vague difficulty label.

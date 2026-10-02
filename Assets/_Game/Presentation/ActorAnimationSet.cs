@@ -35,6 +35,7 @@ namespace AffixZero.Presentation
         public string SourceLicenseRecord => sourceLicenseRecord;
         public Sprite ImpactSprite => ImpactSpriteFor(ActorFacing.Down);
         public double HitDuration => FramesPerDirection(ActorClip.Hit) / (double)reactionFps;
+        public double AttackImpactTime => impactFrame / (double)attackFps;
         public double AttackDuration => FramesPerDirection(ActorClip.Attack) / (double)attackFps;
         public Sprite WeaponPreview => HasAttackWeapon ? attackWeapon[0] : null;
         public bool HasAttackWeapon => attackWeapon != null && attackWeapon.Length > 0;

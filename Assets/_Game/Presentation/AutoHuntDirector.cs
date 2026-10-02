@@ -46,6 +46,9 @@ namespace AffixZero.Presentation
         public int StallRecoveries { get; private set; }
         public int LayoutTransitions { get; private set; }
         public int LayoutsVisitedMask { get; private set; }
+        public int EliteKills { get; private set; }
+        public int GuardianKills { get; private set; }
+        public int DefeatedElitePatternMask { get; private set; }
         public int KillChain { get; private set; }
         public int MaxKillChain { get; private set; }
         public DungeonDifficulty CurrentDifficulty => owner == null ? DungeonDifficulty.Scout : owner.Progression.SelectedDifficulty;
@@ -220,11 +223,31 @@ namespace AffixZero.Presentation
             {
                 MeleeActor actor = enemies[i]; actor.gameObject.SetActive(true);
                 bool elite = (i + 1) % Difficulty.EliteStride == 0;
-                actor.name = (elite ? "Obsidian Elite " : "Obsidian Raider ") + (i + 1);
-                int baseHp = elite ? 78 : 46, baseDamage = elite ? 7 : 4;
+                bool guardian = elite && i == Population - 1;
+                EliteEncounterMarker marker = actor.GetComponent<EliteEncounterMarker>();
+                EliteEncounterProfile profile = default;
+                int baseHp = 46, baseDamage = 4, defense = 0;
+                float moveSpeed = 1.55f + (i % 4) * .08f, attackSpeed = 1, reach = 1;
+                if (elite)
+                {
+                    profile = EliteEncounterTuning.Get(World.LayoutId, guardian);
+                    actor.name = profile.Name + " " + (i + 1);
+                    baseHp = profile.BaseHp; baseDamage = profile.BaseDamage; defense = profile.Defense;
+                    moveSpeed = profile.MoveSpeed; attackSpeed = profile.AttackSpeed; reach = profile.Reach;
+                    if (marker == null) marker = actor.gameObject.AddComponent<EliteEncounterMarker>();
+                    marker.Configure(actor, profile, guardian);
+                }
+                else
+                {
+                    actor.name = "Obsidian Raider " + (i + 1);
+                    if (marker != null) marker.Clear();
+                }
+                int scaledHp = DifficultyTuning.ScaleEnemyHealth(baseHp, CurrentDifficulty);
+                int scaledDamage = DifficultyTuning.ScaleEnemyDamage(baseDamage, CurrentDifficulty);
                 actor.ResetForEncounter(World.SafePoint(World.SpawnPoints[i]), ++identity,
-                    DifficultyTuning.ScaleEnemyHealth(baseHp, CurrentDifficulty),
-                    DifficultyTuning.ScaleEnemyDamage(baseDamage, CurrentDifficulty));
+                    scaledHp, scaledDamage);
+                actor.ApplyCombatBuild(scaledHp, defense, scaledDamage, attackSpeed, reach, 0, 1, false);
+                actor.ConfigureMoveSpeed(moveSpeed);
                 actor.SetTarget(null); actor.SetDestination(World.PatrolPoint(i, ++roamSteps[i])); roamAt[i] = Time.time + 1 + (i % 5) * .3f;
             }
             MaxAliveEnemies = Math.Max(MaxAliveEnemies, AliveEnemies);
@@ -320,6 +343,12 @@ namespace AffixZero.Presentation
             if (owner.RegisterDefeat(actor))
             {
                 TotalKills++; stalledTime = 0; stallAttempts = 0;
+                EliteEncounterMarker marker=actor.GetComponent<EliteEncounterMarker>();
+                if(marker!=null&&marker.Active)
+                {
+                    EliteKills++;if(marker.IsGuardian)GuardianKills++;
+                    DefeatedElitePatternMask|=marker.StyleMaskBit;
+                }
                 KillChain = Time.time - lastKillAt <= 2.4f ? KillChain + 1 : 1;
                 MaxKillChain = Math.Max(MaxKillChain, KillChain); lastKillAt = Time.time;
             }

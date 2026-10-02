@@ -387,7 +387,7 @@ namespace AffixZero.Presentation
             enemyFrame.style.display=hasTarget?DisplayStyle.Flex:DisplayStyle.None;
             enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
             enemyValue.text=enemy.Hp+" / "+enemy.MaxHp;
-            enemyTitle.text=hasTarget?"CURRENT TARGET":"";
+            enemyTitle.text=hasTarget?enemy.name.ToUpperInvariant():"";
             healthFill.style.width=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+" / "+hero.MaxHp+" HP";
             int levelXp=encounter.Progression.TotalExperience%HeroProgression.ExperiencePerLevel;

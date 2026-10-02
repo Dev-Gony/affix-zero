@@ -52,7 +52,10 @@ namespace AffixZero.Presentation
             Vector2 origin=(Vector2)attacker.transform.position+Vector2.up*.32f;
             Vector2 direction=((Vector2)target.transform.position-(Vector2)attacker.transform.position).normalized;
             float angle=Mathf.Atan2(direction.y,direction.x);
-            Emit(origin,Vector2.zero,Mathf.Max(.8f,attacker.AttackReach),angle,false,false,new Color(1f,.18f,.12f,.85f),.24f);
+            EliteEncounterMarker marker=attacker.GetComponent<EliteEncounterMarker>();
+            Color color=marker!=null&&marker.Active?marker.TelegraphColor:new Color(1f,.18f,.12f,.85f);
+            float duration=attacker.AnimationSet==null?.24f:Mathf.Clamp((float)(attacker.AnimationSet.AttackImpactTime/attacker.AttackSpeedMultiplier),.10f,.55f);
+            Emit(origin,Vector2.zero,Mathf.Max(.8f,attacker.AttackReach),angle,false,false,color,duration);
         }
         private void OnDamaged(MeleeActor defender,AffixZero.Core.HitReceipt receipt)
         {
