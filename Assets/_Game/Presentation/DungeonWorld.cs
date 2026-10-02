@@ -130,10 +130,16 @@ namespace AffixZero.Presentation
             if (path.Count == 0) return from;
             DetourQueries++;
             Vector2 ownCenter = Center(Cell(from));
-            // Center the actor before taking the first cardinal BFS step. This avoids cutting an
-            // inflated landmark corner and makes the visible obstacle, LOS and traversed cells agree.
-            if(Vector2.Distance(from,ownCenter)>.12f)return ownCenter;
-            return Center(path[0]);
+            Vector2 nextCenter = Center(path[0]);
+            Vector2 step = nextCenter - ownCenter;
+            // Align only the axis perpendicular to the first cardinal step. Re-centering both axes
+            // after every partial step pulls the actor backward and can oscillate at center +/- 0.12.
+            if (Mathf.Abs(step.x) > Mathf.Abs(step.y))
+            {
+                if (Mathf.Abs(from.y - ownCenter.y) > .04f) return new Vector2(from.x, ownCenter.y);
+            }
+            else if (Mathf.Abs(from.x - ownCenter.x) > .04f) return new Vector2(ownCenter.x, from.y);
+            return nextCenter;
         }
         public void Dispose()
         {

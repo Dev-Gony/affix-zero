@@ -24,7 +24,9 @@ namespace AffixZero.Presentation
         private static void Bootstrap()
         {
             string[] args = Environment.GetCommandLineArgs();
-            if (Array.IndexOf(args, "-affixSaveTest") < 0) return;
+            if (Array.IndexOf(args, "-affixSaveTest") < 0 ||
+                Array.IndexOf(args, "-affixNaturalProgressionTest") >= 0 ||
+                Array.IndexOf(args, "-affixPhysicalInputTest") >= 0) return;
             var host = new GameObject("Affix Profile Save Probe");
             DontDestroyOnLoad(host);
             host.AddComponent<ProfileSaveProbe>().Begin(args);

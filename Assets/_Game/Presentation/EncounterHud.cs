@@ -229,7 +229,11 @@ namespace AffixZero.Presentation
                 return new ForgePanel.View {Name=item.Name,Icon=item.IconResource,Rank=item.EnhancementRank,
                     WeaponDamage=item.DamageBonus,TotalDamage=p.TotalDamage,Gold=p.TotalGold,Cost=p.EquippedEnhancementCost,
                     CanEnhance=p.CanEnhanceEquipped,Affix="기본 피해 +"+item.FlatDamage+"\n"+item.AffixName+"  어픽스 피해 +"+item.AffixDamage,
-                    Notice=encounter.ProgressionNotice};
+                    Notice=encounter.ProgressionNotice,HasItem=true,Slot=EquipmentSlot.Weapon,
+                    PrimaryLabel="WEAPON ATK",PrimaryValue=item.DamageBonus.ToString(),
+                    NextPrimaryValue=(item.DamageBonus+item.NextEnhancementDamage).ToString(),
+                    SecondaryLabel="TOTAL ATK",SecondaryValue=p.TotalDamage.ToString(),
+                    NextSecondaryValue=(p.TotalDamage+item.NextEnhancementDamage).ToString()};
             },()=>encounter.EnhanceWeapon(),()=>encounter.ShowManagement(ManagementScreen.Equipment),()=>encounter.ShowManagement(ManagementScreen.None));
         }
         private void SelectItem(int index) { selectedItemIndex=index; }

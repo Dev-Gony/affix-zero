@@ -1,37 +1,99 @@
-# 연결형 사원 던전·전리품·자동 스킬
+# Connected Temple Dungeon, Loot, and Automatic Skills
 
-기준일 2026-10-02. 작업 브랜치 `feature/open-dungeon-loot-skills`, Unity 6000.3.24f1 / Built-in 2D. 이 변경은 기존 3구역·2개체 반복 자동사냥을 하나의 탐험형 던전으로 확장한다. Draft PR #19와 `restart/unity-6`은 변경하지 않았다.
+Date: 2026-10-02. Branch: `feature/open-dungeon-loot-skills`. Engine: Unity 6000.3.24f1, Built-in 2D. Draft PR #19 and `restart/unity-6` were not modified or merged.
 
-## 실제 플레이 루프
+## Product loop
 
-- 72×32 월드 좌표의 연결된 사원 한 층이다. 카메라는 영웅을 추적하며 한 화면에 전체를 노출하지 않는다.
-- 일반 21체와 Elite 3체, 총 24체가 입장 때 이미 존재한다. 처치 뒤 즉시 생성하지 않는다. 영웅을 보기 전에는 각자 결정론적 경로를 순찰하고, 시야·경로가 열린 최대 3체가 추적한다.
-- 화면의 벽과 랜드마크가 BFS blocked cell, LOS와 같은 자료를 쓴다. 영웅은 현재 셀 중심으로 간 뒤 첫 cardinal BFS step을 따르므로 모서리를 가로질러 벽을 통과하거나 제자리 정체하지 않는다.
-- 정화 뒤 3초 후 같은 던전에 전부 재배치된다. 영웅은 입구에서 다시 시작한다. 사망 2회 뒤에는 안전 중지한다.
+- One connected 72x32 temple floor with a following, clamped camera.
+- Twenty-one normal monsters and three elites are present at entry. They patrol before aggro; at most three may attack at once.
+- The rendered landmark walls, BFS blocked cells, and line-of-sight data share the same source.
+- The BFS waypoint aligns only the axis perpendicular to the next cardinal step. The former both-axis recentering caused center +/- 0.12 oscillation and was removed.
+- Two consecutive deaths still enter a safety stop. Explicit Start after review creates a fresh entrance state. It does not make the hero invulnerable.
+- Inventory pressure is a real part of the loop: compare upgrades, equip them, and use the existing two-step discard action on inferior items.
 
-## 전리품과 성장
+## Loot and equipment
 
-- 과거 구현 `c95b7ba0` 계열에서 복구한 표: normal/magic/rare/unique/legend/epic, 기본 가중치 60/25/10/4/1/0.2, 옵션 상한 0/2/3/4/5/6, 배율 1/1.3/1.7/2.2/3/4.5.
-- 필드 드롭률 0.8%~2%, Elite 18%~30%. QA의 `-affixAutoHuntTest`만 매 4번째 처치에 드롭을 보장해 획득 동작을 결정론적으로 검사한다. 일반 플레이 확률은 바꾸지 않는다.
-- 29 base, 과거의 7슬롯(무기/방어구/투구/장갑/신발/반지/목걸이), ATK/DEF/HP/MP/SPD/CRIT/VAMP/XP/GOLD/PEN 10옵션. 현 Unity의 Relic 슬롯도 저장 호환을 지키며 유지한다.
-- 장비 화면은 8칸과 24칸 가방을 실제 상태로 표시하고 같은 슬롯의 착용품과 후보품의 공격/방어/체력/속도 차를 비교한다.
-- 250 XP마다 1PT. 격노20/정밀10/핵심5/생명력20/휩쓸기10/가속10, 총 75랭크. 공격·체력·치명타·범위·재사용 시간이 실제 전투에 반영된다.
-- 자동 범위기는 주변 적 2체 이상일 때, 자동 회복은 HP 45% 이하일 때 최대 HP 20%를 기본 14초 주기로 회복한다. 공속/가속이 주기에 반영된다. 네 칸은 후속 자동 스킬 확장 자리다.
+Recovered production data from the historical `c95b7ba0` line is retained:
 
-## 난이도와 QA fixture 구분
+- Rarities: normal, magic, rare, unique, legend, epic.
+- Base rarity weights: 60 / 25 / 10 / 4 / 1 / 0.2.
+- Affix caps: 0 / 2 / 3 / 4 / 5 / 6.
+- Rarity multipliers: 1 / 1.3 / 1.7 / 2.2 / 3 / 4.5.
+- Field drops: 0.8% to 2%; elites: 18% to 30%.
+- Twenty-nine bases and ten stats: ATK, DEF, HP, MP, SPD, CRIT, VAMP, XP, GOLD, PEN.
+- The 20-minute production-flow test did not pass `-affixAutoHuntTest`; no guaranteed fourth-kill drop or survival fixture was active.
 
-기본 빌드가 위험 구역을 반드시 완주하도록 수치를 무력화하지 않았다. 낮은 장비의 영웅은 반복 검사에서 13~15킬 뒤 사망하거나 안전 중지했다. 전 구역 통합 검사는 공개 장비 API만 사용해 만든 고등급 Epic 생존 fixture(방어구 DEF+40/HP+150, 반지 HP+250/VAMP+8)를 사용했다. 이는 메모리 전용 QA이며 일반 빌드의 확률·저장·플레이어 상태를 바꾸지 않는다.
+The historical data has seven generated equipment categories: weapon, armor, helmet, gloves, boots, ring, and amulet. The Unity save model exposes eight slots because Relic already existed in the Unity implementation and must remain for save compatibility. Thus seven historical random-drop categories plus the preserved Relic slot equals eight visible slots. Relic remains supported by saves and authored/test items; the recovered seven-slot loot pool is not silently rewritten.
 
-자동 회복 실험 중 85% 발동 완전회복/4초 및 0.25초 완전회복은 폐기했다. 최종값은 HP 45% 이하, HP 20%, 14초다. 동시 공격자를 1체로 제한한 실험도 폐기하고 기존 최대 3체를 복구했다.
+## Six-node, 75-rank tree
 
-## 검증
+- Fury 20: +3 attack per rank, +60 at cap.
+- Precision 10: +4 attack per rank, +40 at cap; requires Fury 2.
+- Keystone 5: +6 attack per rank, +30 at cap; requires Precision 1.
+- Vitality 20: +10 maximum HP per rank, +200 at cap.
+- Cleave 10: +0.08 radius and +2.5 percentage points splash damage per rank; requires Fury 2.
+- Haste 10: -2% automatic-skill cooldown per rank, -20% at cap; requires Precision 1.
 
-- CoreSmoke: 256 PASS. 저장 v1→v2, 8슬롯 장비, 75랭크, 강화, 확률 경계, 과거 7슬롯 도달성, 시드 결정론을 포함한다.
-- Unity import/compile: PASS. Windows build: PASS, 0 errors / 0 warnings.
-- 1280×720 Windows, 실제 1×: PASS. 74.31초, 24킬, 6획득, 사망 0, 이동 190.10, 적 최대 배회 24.72, walkability 109,675, LOS 52, 타격 포즈 42, 범위 hit 10/시전 5, 회복 1. 실제 framebuffer 6장.
-- 1920×1080 Windows, 실제 1×: PASS. 64.64초, 24킬, 8획득, 사망 0, 이동 154.32, 적 최대 배회 25.81, walkability 94,750, LOS 55, 타격 포즈 43, 범위 hit 12/시전 6. 실제 framebuffer 6장.
-- 장시간 방치, 물리 키보드/마우스 입력, 20분 내구성, 일반 빌드의 완전 정화는 이번 검증 범위 밖이다. 기본 빌드의 사망 가능성은 의도한 장비 성장 동기이며, 2연속 사망 시 안전 중지한다.
+The complete tree contains 75 ranks. Extra earned points remain unspent after the cap rather than being lost or repeatedly applied.
 
-## 생성 출처와 라이선스
+## Automatic skills and combat pressure
 
-전사/괴물/사원/타격 에셋은 앞선 built-in image_gen 원본 세트와 해당 매니페스트를 그대로 사용한다. 추가 장비 아이콘 4종도 built-in image_gen 독자 생성물이며 상용 Hero Siege 원본 이미지의 추출·트레이싱·복제는 없다. 해시·알파·가져오기 설정은 `docs/assets/generated-gear-v1.json`에 기록했다. 기타 링/빔 타격 피드백은 런타임 코드로 생성한다.
+- Area skill: fires only with at least two enemies in radius 3.2 and valid line of sight.
+- Recovery skill: triggers at or below 45% HP, heals max(12, 20% maximum HP), starts each run with an 8-second arming delay, then has a 14-second base cooldown divided by attack-speed multiplier.
+- The discarded experiments (85% full heal, 4-second/full heal, 0.25-second/full heal) are not present.
+- The maximum three simultaneous attackers remains. The discarded one-attacker experiment is not present.
+- A full-clear technical smoke test still uses an explicitly reported ephemeral Epic fixture; production-flow evidence below does not.
+
+## Stitch references actually reviewed
+
+The locally supplied Stitch archive intake was inspected through each archive's `screen.png`, `code.html`, and `DESIGN.md`, with hashes recorded under `docs/assets/stitch-reference-*.json`. The runtime work specifically follows:
+
+- Screen 08: dungeon HUD and bottom action dock.
+- Screen 10: equipment/talent management structure and comparison area.
+- Screen 11: forge layout.
+- Screen 12: full talent tree.
+
+The archive inventory includes duplicates identified by hashes. The Unity UI is a native UI Toolkit adaptation, not embedded HTML. No additional equipment reference outside the recorded Stitch archive set was available.
+
+## Validation
+
+### PASS
+
+- CoreSmoke: 256 checks.
+- Unity import/compile and Windows build: 0 errors, 0 warnings.
+- 720p fixture full clear: 24 kills, six collected items, zero deaths, six framebuffer captures.
+- 1080p fixture full clear: 24 kills, eight collected items, zero deaths, six framebuffer captures.
+- Fresh natural progression, actual 1x Windows player: 1200.056 seconds.
+  - 935 kills, 38 full clears, zero failed runs, zero deaths/retries, zero safety restarts.
+  - 43 naturally rolled collected items; 21 comparison/equip upgrades; 18 two-step discards; 19 bag items at finish.
+  - 75 invested ranks plus 27 retained surplus points.
+  - 124 area-skill casts.
+  - Combat build grew from attack 30 / HP 120 / defense 2 to attack 742 / HP 1685 / defense 826.
+  - 1096 successful profile saves during the observed flow.
+  - Isolated profile SHA-256 after observation: `50dbf2540e06a8752d0b8bfabdba780f672f01a3ae9de64be3ab0cee9e85d409`.
+- Separate-process reload: exact canonical restore matched before mutation, two additional kills completed, and the updated profile saved again.
+
+The final natural run's zero recovery casts are expected: naturally equipped defense/health made the 45% trigger unnecessary. The skill itself was exercised in the prior 720p combat run.
+
+### FAIL / discarded evidence
+
+- Pre-fix natural runs exposed the forge `HasItem` binding bug, both-axis path oscillation, 75-rank probe overflow, and a full-bag stop. Those runs are retained as failure reports and are not counted as the final 20-minute PASS.
+- The corrected final run completed with none of those stops.
+
+### NOT RUN
+
+Physical Windows mouse/keyboard verification remains NOT RUN. The managed execution environment launched the player process but exposed zero enumerable top-level windows and `MainWindowHandle == 0`. An attempted client capture therefore captured the Chrome window behind it, not Unity, and is excluded from evidence. No permission bypass was attempted. Native UI Toolkit callbacks for Start, equipment, talents, forge, pause, and resume were exercised; that is not claimed as physical input.
+
+## Generated assets and provenance
+
+Hero, monster, temple, obstacle, and impact atlases are original built-in `image_gen` outputs. GearArmor, GearAxe, GearRelic, and GearStaff are also original built-in `image_gen` outputs. Commercial Hero Siege files were not supplied, extracted, traced, or copied. Frame mapping, output hashes, alpha checks, and import settings are recorded in `docs/assets/original-temple-combat-set.md`, `docs/assets/generated-art-manifest.json`, and `docs/assets/generated-gear-v1.json`.
+
+## Storage note
+
+After the request to keep subsequent work on D:, no additional C: artifact was created. Three earlier Library-delivery artifacts remain on C: because deletion was not authorized:
+
+- Evidence ZIP: 12,412,836 bytes (11.84 MiB).
+- Expanded evidence folder: 12,543,270 bytes (11.96 MiB).
+- Library helper copy: 11,085 bytes (0.01 MiB).
+
+They were created solely to package and upload the first evidence bundle. All later reports, profiles, PNGs, builds, and helper refreshes are on D:.

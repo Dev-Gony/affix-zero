@@ -1,4 +1,41 @@
-# 인수인계 — 연결형 던전·전리품·자동 스킬
+# 2026-10-02 connected-dungeon handoff
+
+The active work is on `feature/open-dungeon-loot-skills`, based on
+`origin/restart/unity-6` at `1d98100`. Read `OPEN_DUNGEON_LOOT_SKILLS.md` and
+`STATUS.json` first. The existing Draft PR #19 and the dirty
+`D:\github\affix-unity` checkout were not modified.
+
+The current build contains a connected 72x32 temple dungeon, 24 persistent
+roaming enemies, production-weight loot (six rarities, 29 bases, seven
+generated slots plus the preserved Relic slot, ten affixes), an eight-slot
+Stitch-derived equipment/comparison surface, the complete 75-rank six-node
+tree, and automatic area/recovery skills. Original generated pixel atlases are
+documented in `docs/assets/original-temple-combat-set.md`; no Hero Siege files,
+tracing, or extracted commercial art are used.
+
+Final verification: CoreSmoke 256 PASS; Unity Windows build PASS with zero
+errors and zero warnings; 720p and 1080p technical full-clears PASS; and the
+production-drop natural-progression run PASS for 1200.056 seconds with 935
+kills, 38 clears, 43 collected items, 21 equipment upgrades/comparisons, all
+75 talent ranks spent, three forge upgrades, and a verified separate-process
+disk restore/continuation. The natural run used neither the survival fixture
+nor the auto-hunt smoke flag. See
+`Build/Reports/natural-20m-pass2/natural-progression-observe.json` and
+`natural-progression-read.json`.
+
+Physical OS input is explicitly NOT RUN: this managed desktop exposed no
+enumerable AffixZero top-level window and `MainWindowHandle` stayed zero, so
+user32 input could not be proven to target Unity. Native UI Toolkit callbacks
+were exercised 484 times in the natural run, but that is not claimed as
+physical-input coverage. Do not use the excluded stale-handle capture.
+
+Library delivery IDs: evidence ZIP
+`libfile_369b69b706d481919759563844993776`; exploration
+`libfile_b4d684f57690819188f0bed766f49cff`; combat
+`libfile_55fe0a0ba058819186dd5615008cbda0`; equipment
+`libfile_96e56359eb708191bd16d0878b3990df`.
+
+# Previous handoff — connected dungeon, loot, and auto skills
 
 2026-10-02 작업 브랜치 `feature/open-dungeon-loot-skills`. 최신 구현/검증 기준은 `OPEN_DUNGEON_LOOT_SKILLS.md`다. 이전의 3구간·2체 재사용·빈 스킬 슬롯 설명은 역사 기록일 뿐 현재 구현이 아니다. 현재는 한 연결형 사원, 시작부터 24체 상주/배회, 실제 6등급·29 base·7 역사 슬롯+Relic·10옵션, 8칸 장비 비교, 6노드/75랭크, 자동 범위/회복 스킬이다. 720p 실제 완주 PASS와 1080p 실제 완주/캡처가 있으며 사용자 시각 승인은 아직 없다. Draft PR #19를 병합하지 말고 기존 dirty `D:\github\affix-unity`도 건드리지 않는다.
 

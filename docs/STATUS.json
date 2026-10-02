@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User visual approval, physical controls, default-build safety-stop replay, 20-minute endurance and broader content progression",
+  "next": "User visual approval, physical controls, default-build safety-stop replay and broader content progression",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 256,
   "static_unity_api_compile": "PASS_NOT_UNITY_IMPORT_OR_PLAY",
@@ -93,14 +93,13 @@
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "mvp": {
     "status": "NOT_READY",
-    "current": "Playable automatic hunt and disk persistence with refreshed native UI verified; full acceptance remains open",
+    "current": "Playable automatic hunt, disk persistence, refreshed native UI and a 20-minute production-drop progression run verified; physical-input and user visual acceptance remain open",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
-      "20-minute unattended endurance",
-      "separate blocked-path and post-safety-stop recovery checks",
+      "separate default-build safety-stop replay after player intervention",
       "physical controls and user visual approval"
     ],
-    "release_date": "NOT_COMMITTED; endurance and remaining recovery/input acceptance still pending",
+    "release_date": "NOT_RELEASED; remaining safety/input/visual acceptance is still pending",
     "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
   },
   "autohunt": {
@@ -173,5 +172,53 @@
     "save_read": "34d654c481e74728be6181c370b2d8f1",
     "save_regression": "PASS exact process-restart state/HUD52/pending pickup/new kills; test directory isolated",
     "unimplemented": "Active skills, mana, extra classes/gear slots, socket/reforge, town/pets. Six dock cells are empty."
+  },
+  "natural_progression": {
+    "status": "PASS",
+    "build_guid": "5282f0124fe1452d9414ed292132e184",
+    "observation_report": "Build/Reports/natural-20m-pass2/natural-progression-observe.json",
+    "read_report": "Build/Reports/natural-20m-pass2/natural-progression-read.json",
+    "observation_run_id": "b4a650d049ea4e8ca3b66bc08d9b3467",
+    "elapsed_seconds": 1200.0560302734375,
+    "production_drop_rolls": true,
+    "survival_fixture": false,
+    "kills": 935,
+    "completed_runs": 38,
+    "failed_runs": 0,
+    "death_retries": 0,
+    "safety_restarts": 0,
+    "items_collected": 43,
+    "comparisons_and_upgrades": 21,
+    "two_step_discards": 18,
+    "final_bag_count": 19,
+    "experience": 25570,
+    "gold": 7968,
+    "start_stats": "attack30/maxHp120",
+    "final_stats": "attack742/maxHp1685/defense826",
+    "talent_ranks": "Fury20/Precision10/Keystone5/Vitality20/Cleave10/Haste10",
+    "talent_points": "75 spent/27 unspent",
+    "area_skill": "124 casts",
+    "recovery_skill": "0 casts in this naturally defensive run; separate 720 technical smoke observed 1 cast",
+    "enhancements": 3,
+    "ui_callbacks": 484,
+    "save_count": 1096,
+    "disk_roundtrip": true,
+    "observed_profile_sha256": "50dbf2540e06a8752d0b8bfabdba780f672f01a3ae9de64be3ab0cee9e85d409",
+    "separate_process_read_run_id": "23c0a81e290f47178249960001bb4d35",
+    "separate_process_restore_matched": true,
+    "continued_after_restart": true,
+    "continued_profile_sha256": "169814e0f6e0634b713c5d23f285962b8cf63d7976495bcad1f3af3deeba00b6"
+  },
+  "physical_input": {
+    "status": "NOT_RUN",
+    "reason": "The managed execution environment exposed no enumerable AffixZero top-level window and MainWindowHandle remained zero, so real user32 mouse/keyboard input had no verified Unity target.",
+    "excluded_evidence": "A stale-handle screen capture showed Chrome behind the game and was excluded.",
+    "native_ui_callback_coverage": "PASS in the natural progression run; this is not a substitute for physical input."
+  },
+  "library_delivery": {
+    "evidence_zip_library_file_id": "libfile_369b69b706d481919759563844993776",
+    "exploration_1080_library_file_id": "libfile_b4d684f57690819188f0bed766f49cff",
+    "combat_1080_library_file_id": "libfile_55fe0a0ba058819186dd5615008cbda0",
+    "equipment_1080_library_file_id": "libfile_96e56359eb708191bd16d0878b3990df"
   }
 }

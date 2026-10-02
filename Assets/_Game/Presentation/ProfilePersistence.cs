@@ -27,7 +27,9 @@ namespace AffixZero.Presentation
             try
             {
                 string[] args=Environment.GetCommandLineArgs();
-                bool saveTest=Array.IndexOf(args,"-affixSaveTest")>=0;
+                bool naturalTest=Array.IndexOf(args,"-affixNaturalProgressionTest")>=0;
+                bool physicalInputTest=Array.IndexOf(args,"-affixPhysicalInputTest")>=0;
+                bool saveTest=Array.IndexOf(args,"-affixSaveTest")>=0 || naturalTest || physicalInputTest;
                 // UI fixtures never open a save, even when incompatible test flags are supplied.
                 Ephemeral=Array.IndexOf(args,"-affixCombatExperienceTest")>=0 || Array.IndexOf(args,"-affixUiReferenceTest")>=0 || (!saveTest &&
                     (Array.IndexOf(args,"-affixAutoHuntTest")>=0 || Array.IndexOf(args,"-affixAutoHuntSafetyTest")>=0 ||

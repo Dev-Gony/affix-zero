@@ -169,7 +169,11 @@ namespace AffixZero.Presentation
             if (!Initialized || !owner.CanProgress) return;
             if (owner.Progression.PendingLoot != null && owner.Progression.Inventory.Count >= HeroProgression.InventoryCapacity)
             { LastFault = "가방 공간을 먼저 비우세요."; return; }
+            bool resumeAfterSafetyStop = Phase == HuntPhase.Blocked;
             LastFault = ""; Running = true; owner.SetPaused(false);
+            // Two consecutive deaths still stop unattended play. Once the player has reviewed
+            // gear/talents and explicitly starts again, create a fresh life at the entrance.
+            if (resumeAfterSafetyStop) { ConsecutiveFailures = 0; DeathRetries++; SpawnPopulation(true); }
             if (!runStarted) { runStarted = true; owner.BeginAutoRun(); areaSkill.ResetForRun(); recoverySkill.ResetForRun(); }
             if (Phase == HuntPhase.Blocked || Phase == HuntPhase.Waiting) Phase = HuntPhase.Exploring;
             progressPosition = hero.transform.position; stalledTime = 0; stallAttempts = 0;
@@ -209,6 +213,9 @@ namespace AffixZero.Presentation
                 else
                 {
                     actor.SetTarget(null); actor.SetAttacksAllowed(false);
+                    // The chosen prey must remain a stable navigation goal. Letting a distant
+                    // selected monster keep patrolling can make both endpoints orbit an obstacle.
+                    if (actor == hero.CurrentTarget) { actor.SetDestination(null); continue; }
                     if (Time.time >= roamAt[i])
                     {
                         actor.SetDestination(World.PatrolPoint(i, ++roamSteps[i]));
