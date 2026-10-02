@@ -26,6 +26,7 @@ namespace AffixZero.Presentation
         private readonly List<string> captures = new List<string>();
         private readonly int[] captureCounts = new int[3];
         private readonly int[] eliteCaptureCounts = new int[3];
+        private readonly int[] patternCaptureCounts = new int[3];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -148,6 +149,9 @@ namespace AffixZero.Presentation
                     "Natural run did not traverse all three connected layout topologies.");
                 Require(hunt.DefeatedElitePatternMask == 7 && hunt.GuardianKills >= 3,
                     "Natural run did not defeat all three layout-specific elite patterns and guardians.");
+                Require(hunt.ObservedEliteAttackPatternMask == 7 && hunt.EmberPatternCasts > 0 &&
+                    hunt.GalleryPatternCasts > 0 && hunt.RitualPatternCasts > 0,
+                    "Natural run did not observe all three mechanically distinct elite attacks.");
                 Require(owner.Progression.SelectedDifficulty == DungeonDifficulty.Torment && report.difficultyTransitions == 2,
                     "Natural run did not safely select and retain all three difficulties.");
                 Require(owner.Progression.SpentPoints < HeroProgression.TotalTalentCapacity,
@@ -172,13 +176,20 @@ namespace AffixZero.Presentation
             int layout=(int)hunt.World.LayoutId;
             if(layout<0||layout>=captureCounts.Length)return;
             EliteEncounterMarker marker=owner.Hero.CurrentTarget==null?null:owner.Hero.CurrentTarget.GetComponent<EliteEncounterMarker>();
+            EliteAttackPattern pattern=owner.Hero.CurrentTarget==null?null:owner.Hero.CurrentTarget.GetComponent<EliteAttackPattern>();
             bool eliteTarget=marker!=null&&marker.Active;
+            bool needsPattern=pattern!=null&&pattern.IsTelegraphing&&patternCaptureCounts[layout]<2;
             bool needsElite=eliteTarget&&eliteCaptureCounts[layout]<2;
             bool needsGeneral=captureCounts[layout]<16;
-            if(!needsElite&&!needsGeneral)return;
+            if(!needsPattern&&!needsElite&&!needsGeneral)return;
             nextCaptureAt=Time.realtimeSinceStartup+.25f;
             string path;
-            if(needsElite)
+            if(needsPattern)
+            {
+                path=Path.Combine(captureDirectory,"pattern-layout-"+layout+"-"+patternCaptureCounts[layout].ToString("00")+".bmp");
+                patternCaptureCounts[layout]++;
+            }
+            else if(needsElite)
             {
                 path=Path.Combine(captureDirectory,"elite-layout-"+layout+"-"+eliteCaptureCounts[layout].ToString("00")+".bmp");
                 eliteCaptureCounts[layout]++;
@@ -367,6 +378,9 @@ namespace AffixZero.Presentation
             report.areaCasts = hunt.AreaCasts; report.recoveryCasts = hunt.RecoveryCasts;
             report.layoutTransitions=hunt.LayoutTransitions;report.layoutsVisitedMask=hunt.LayoutsVisitedMask;
             report.eliteKills=hunt.EliteKills;report.guardianKills=hunt.GuardianKills;report.defeatedElitePatternMask=hunt.DefeatedElitePatternMask;
+            report.observedEliteAttackPatternMask=hunt.ObservedEliteAttackPatternMask;report.emberPatternCasts=hunt.EmberPatternCasts;
+            report.galleryPatternCasts=hunt.GalleryPatternCasts;report.ritualPatternCasts=hunt.RitualPatternCasts;
+            report.elitePatternHits=hunt.ElitePatternHits;
             report.maxKillChain=hunt.MaxKillChain;report.selectedDifficulty=(int)p.SelectedDifficulty;report.dungeonClears=p.DungeonClears;
             report.dropRecords = dropRecords.ToArray(); report.saveCount = owner.Persistence.SaveCount;
             report.captureFrames=captures.ToArray();
@@ -408,7 +422,8 @@ namespace AffixZero.Presentation
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
                 talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount;
             public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
-                maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal;
+                maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal,
+                observedEliteAttackPatternMask,emberPatternCasts,galleryPatternCasts,ritualPatternCasts,elitePatternHits;
             public float areaSkillRadius;
             public string areaSkillName,recoverySkillName;
             public string[] dropRecords;

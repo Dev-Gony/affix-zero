@@ -1,3 +1,15 @@
+# 2026-10-02 - layout-specific elite attack mechanics
+
+Branch `feature/open-dungeon-loot-skills` now gives each connected dungeon a
+different resolved attack, not only different stats or colors: Ember radial
+slam, Gallery dash, and Ritual piercing lane. See
+`ELITE_ATTACK_PATTERNS.md` for exact timings, hit rules, evidence, and Library
+IDs. The final validated Windows build GUID is
+`56b6cfe08be34bfabbf669796f5ffb5e`; CoreSmoke 269, build 0/0, 150.056s
+normal-drop run, separate-process restore, 720/1080 UI probes, and final-build
+OS-level automated input all PASS. No save schema changed and no external or
+commercial art was added.
+
 # 2026-10-02 visible build evolution handoff
 
 The active feature/open-dungeon-loot-skills branch now gives all six saved

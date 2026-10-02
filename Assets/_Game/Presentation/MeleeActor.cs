@@ -34,7 +34,7 @@ namespace AffixZero.Presentation
         private float cleaveRadius=1.85f;
         private long damageSequence;
         private Vector2 swingDirection;
-        private bool attacksAllowed=true;
+        private bool attacksAllowed=true,patternLocked;
         private float attackSpeedMultiplier=1,cleaveFraction=1;
         private bool ranged;
         private int criticalChance,vampirismPercent,penetration;
@@ -78,6 +78,16 @@ namespace AffixZero.Presentation
         public void ConfigureCleave(IReadOnlyList<MeleeActor> victims,float radius)
         {if(!FinitePositive(radius))throw new ArgumentOutOfRangeException(nameof(radius));cleaveTargets=victims;cleaveRadius=Mathf.Max(cleaveRadius,radius);}
         public void SetAttacksAllowed(bool value){attacksAllowed=value;}
+        public void SetPatternLocked(bool value){patternLocked=value;}
+        public bool HasLineOfSight(Vector2 point)=>CanSee(point);
+        public bool TryPatternMove(Vector2 point)
+        {
+            if(!FinitePoint(point)||IsDead||health==null||!CanSee(point))return false;
+            Vector2 motion=point-(Vector2)transform.position;
+            if(motion.sqrMagnitude>.000001f)Face(motion);
+            transform.position=new Vector3(point.x,point.y,transform.position.z);
+            return true;
+        }
         public void ApplyCombatBuild(int maxHp,int armor,int power,float speedMultiplier,float attackReach,
             float splashRadius,float splashFraction,bool isRanged,int critical=0,int vampirism=0,int armorPenetration=0)
         {
@@ -125,7 +135,7 @@ namespace AffixZero.Presentation
             actorId = id; maximumHp = hp; damage = attackDamage;
             health = new CombatHealth(maximumHp, defense);
             LastAttackerId=0;
-            LastAttackId=0;LastHitCritical=false;LastHitKilled=false;attacksAllowed=true;
+            LastAttackId=0;LastHitCritical=false;LastHitKilled=false;attacksAllowed=true;patternLocked=false;
             // Preserve the attack sequence across reuse so surviving recipients cannot reject new hits as duplicates.
             if (timeline == null) timeline = animationSet.CreateTimeline();
             else timeline.Cancel();
@@ -225,7 +235,7 @@ namespace AffixZero.Presentation
             }
             else
             {
-                if(!attacksAllowed){SetClip(ActorClip.Idle);RenderClip();return;}
+                if(!attacksAllowed||patternLocked){SetClip(ActorClip.Idle);RenderClip();return;}
                 timeline.Begin(target.actorId);
                 // Gear changes apply to the next swing, never to an already prepared hit.
                 swingDamage = damage;
@@ -306,6 +316,23 @@ namespace AffixZero.Presentation
             if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
             StrikeResolved?.Invoke(this,hits,kills,true);
             return hits;
+        }
+
+        public HitReceipt ResolvePatternHit(MeleeActor victim,int power,float radius,bool area)
+        {
+            if(victim==null)throw new ArgumentNullException(nameof(victim));
+            if(power<=0||!FinitePositive(radius))throw new ArgumentOutOfRangeException(nameof(power));
+            if(!isActiveAndEnabled||IsDead||health==null||Time.deltaTime<=0||!victim.isActiveAndEnabled||victim.IsDead)
+                return default;
+            long receiptId=++damageSequence;
+            Vector2 origin=transform.position;
+            Vector2 offset=(Vector2)victim.transform.position-origin;
+            swingDirection=offset.sqrMagnitude>.0001f?offset.normalized:Vector2.right;
+            LastStrikePoint=victim.transform.position;LastHitRadius=radius;LastHitIsArea=area;
+            int resolvedPower=PowerAgainst(victim,power,out bool critical);
+            HitReceipt receipt=victim.Receive(actorId,receiptId,resolvedPower,origin,radius,area,critical);
+            if(receipt.Accepted&&vampirismPercent>0)health.Heal(Math.Max(1,receipt.Damage*vampirismPercent/100));
+            return receipt;
         }
 
         private int PowerAgainst(MeleeActor victim,int basePower,out bool critical)

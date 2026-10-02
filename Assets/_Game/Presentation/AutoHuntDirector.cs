@@ -49,6 +49,11 @@ namespace AffixZero.Presentation
         public int EliteKills { get; private set; }
         public int GuardianKills { get; private set; }
         public int DefeatedElitePatternMask { get; private set; }
+        public int ObservedEliteAttackPatternMask { get; private set; }
+        public int EmberPatternCasts { get; private set; }
+        public int GalleryPatternCasts { get; private set; }
+        public int RitualPatternCasts { get; private set; }
+        public int ElitePatternHits { get; private set; }
         public int KillChain { get; private set; }
         public int MaxKillChain { get; private set; }
         public DungeonDifficulty CurrentDifficulty => owner == null ? DungeonDifficulty.Scout : owner.Progression.SelectedDifficulty;
@@ -250,12 +255,20 @@ namespace AffixZero.Presentation
                 {
                     actor.name = "Obsidian Raider " + (i + 1);
                     if (marker != null) marker.Clear();
+                    EliteAttackPattern priorPattern=actor.GetComponent<EliteAttackPattern>();
+                    if(priorPattern!=null)priorPattern.Clear();
                 }
                 int scaledHp = DifficultyTuning.ScaleEnemyHealth(baseHp, CurrentDifficulty);
                 int scaledDamage = DifficultyTuning.ScaleEnemyDamage(baseDamage, CurrentDifficulty);
                 actor.ResetForEncounter(World.SafePoint(World.SpawnPoints[i]), ++identity,
                     scaledHp, scaledDamage);
                 actor.ApplyCombatBuild(scaledHp, defense, scaledDamage, attackSpeed, reach, 0, 1, false);
+                if(elite)
+                {
+                    EliteAttackPattern pattern=actor.GetComponent<EliteAttackPattern>();
+                    if(pattern==null){pattern=actor.gameObject.AddComponent<EliteAttackPattern>();pattern.Resolved+=OnElitePatternResolved;}
+                    pattern.Configure(actor,hero,profile.Style,guardian);
+                }
                 actor.ConfigureMoveSpeed(moveSpeed);
                 actor.SetTarget(null); actor.SetDestination(World.PatrolPoint(i, ++roamSteps[i])); roamAt[i] = Time.time + 1 + (i % 5) * .3f;
             }
@@ -362,10 +375,23 @@ namespace AffixZero.Presentation
                 MaxKillChain = Math.Max(MaxKillChain, KillChain); lastKillAt = Time.time;
             }
         }
+        private void OnElitePatternResolved(EliteEncounterStyle style,bool guardian,bool hit)
+        {
+            int bit=1<<((int)style-1);ObservedEliteAttackPatternMask|=bit;
+            if(style==EliteEncounterStyle.EmberBulwark)EmberPatternCasts++;
+            else if(style==EliteEncounterStyle.GalleryStalker)GalleryPatternCasts++;
+            else if(style==EliteEncounterStyle.RitualReaver)RitualPatternCasts++;
+            if(hit)ElitePatternHits++;
+        }
         private void OnDestroy()
         {
             if (hero != null) hero.StrikeResolved -= OnStrike;
-            foreach (MeleeActor actor in enemies) if (actor != null) actor.Damaged -= OnEnemyDamaged;
+            foreach (MeleeActor actor in enemies) if (actor != null)
+            {
+                actor.Damaged -= OnEnemyDamaged;
+                EliteAttackPattern pattern=actor.GetComponent<EliteAttackPattern>();
+                if(pattern!=null)pattern.Resolved-=OnElitePatternResolved;
+            }
             World?.Dispose();
         }
     }
