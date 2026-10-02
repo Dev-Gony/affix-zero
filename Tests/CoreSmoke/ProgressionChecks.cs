@@ -19,6 +19,10 @@ internal static class ProgressionChecks
         check(hero.TotalDamage == 30 && hero.TotalMaxHp == 120 && hero.TotalDefense == 2 && hero.Level == 1 &&
             hero.Inventory.Count == 0 && hero.PendingLoot == null && hero.UnspentPoints == 0 && hero.LegacyPointCredit == 0,
             "new profile retains baseline combat and earns no free talent points");
+        check(hero.ActiveEvolutionCount == 0 && hero.AreaSkillName == "AREA" && hero.RecoverySkillName == "HEAL" &&
+            hero.AreaSkillRadius == 3.2f && hero.AreaSkillMinimumTargets == 2 && hero.AreaSkillDamageMultiplier == 1.5f &&
+            hero.RecoveryThresholdPercent == 45 && hero.RecoveryHealPercent == 20,
+            "fresh profile keeps the original area and recovery behavior before milestone investment");
         check(hero.SelectedDifficulty==DungeonDifficulty.Scout&&hero.DungeonClears==0&&
             !hero.TrySetDifficulty((DungeonDifficulty)99)&&hero.TrySetDifficulty(DungeonDifficulty.Veteran),
             "new profile starts Scout and rejects invalid difficulty selections");
@@ -147,12 +151,20 @@ internal static class ProgressionChecks
         check(talents.TotalDamage == 160 && talents.TotalMaxHp == 320 && Math.Abs(talents.SplashRadius - .8f) < .0001f &&
             talents.SplashDamageFraction == .25f && talents.AttackSpeedMultiplier == 1.25f,
             "full tree modifies damage, survivability, area and timing independently");
+        check(talents.ActiveEvolutionCount == 12 && talents.CriticalChance == 15 && talents.Penetration == 12 &&
+            talents.AreaSkillName == "TEMPEST" && talents.AreaSkillRadius == 4.1f && talents.AreaSkillMinimumTargets == 1 &&
+            talents.AreaSkillDamageMultiplier == 1.8f && talents.AreaSkillArmingDelay == 1.8f &&
+            talents.RecoverySkillName == "SURGE" && talents.RecoveryThresholdPercent == 55 &&
+            talents.RecoveryHealPercent == 30 && talents.RecoveryArmingDelay == 6f,
+            "all six talent branches unlock two real combat evolution milestones");
         talents.PickUp();
         EquipNew(talents, new WeaponItem("cooldown-relic", "유물", 0, 0, "", "AffixGenerated/GearRelic", "Rare", 0,
             EquipmentSlot.Relic, cooldownReductionPercent: 50));
         check(talents.CooldownReductionPercent == 50 && talents.AttackSpeedMultiplier == 2f, "combined cooldown reduction is capped safely at fifty percent");
         talents.ResetTalents(); talents.ResetTalents();
-        check(talents.UnspentPoints == 76 && talents.TotalMaxHp == 120 && talents.SplashRadius == 0 && talents.TotalDamage == 30,
+        check(talents.UnspentPoints == 76 && talents.TotalMaxHp == 120 && talents.SplashRadius == 0 && talents.TotalDamage == 30 &&
+            talents.ActiveEvolutionCount == 0 && talents.CriticalChance == 5 && talents.Penetration == 0 &&
+            talents.AreaSkillName == "AREA" && talents.RecoverySkillName == "HEAL",
             "reset clears all six rank effects while retaining equipped relic stats");
 
         var forge = new HeroProgression(); WeaponItem starter = forge.EquippedWeapon;

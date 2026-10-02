@@ -166,6 +166,14 @@ namespace AffixZero.Core
         public int Level => 1 + TotalExperience / ExperiencePerLevel;
         public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank + VitalityRank + CleaveRank + HasteRank;
         public int TalentDamage => FuryRank * 3 + PrecisionRank * 4 + KeystoneRank * 6;
+        public int FuryEvolutionTier => EvolutionTier(FuryRank, 5, 15);
+        public int PrecisionEvolutionTier => EvolutionTier(PrecisionRank, 3, 8);
+        public int KeystoneEvolutionTier => EvolutionTier(KeystoneRank, 2, 5);
+        public int VitalityEvolutionTier => EvolutionTier(VitalityRank, 5, 15);
+        public int CleaveEvolutionTier => EvolutionTier(CleaveRank, 3, 8);
+        public int HasteEvolutionTier => EvolutionTier(HasteRank, 3, 8);
+        public int ActiveEvolutionCount => FuryEvolutionTier + PrecisionEvolutionTier + KeystoneEvolutionTier +
+            VitalityEvolutionTier + CleaveEvolutionTier + HasteEvolutionTier;
         private IEnumerable<WeaponItem> EquippedItems
         {
             get
@@ -185,11 +193,11 @@ namespace AffixZero.Core
         public int TotalMaxHp => Saturate(120L + VitalityRank * 10 + Sum(item => item.HealthBonus));
         public int TotalDefense => Saturate(2L + Sum(item => item.DefenseBonus));
         public int TotalMana => Saturate(30L + Sum(item => item.ManaBonus));
-        public int CriticalChance => Math.Min(75, 5 + Sum(item => item.CriticalChance));
+        public int CriticalChance => Math.Min(75, 5 + PrecisionEvolutionTier * 5 + Sum(item => item.CriticalChance));
         public int VampirismPercent => Math.Min(40, Sum(item => item.VampirismPercent));
         public int ExperienceBonusPercent => Math.Min(20, Sum(item => item.ExperienceBonusPercent));
         public int GoldBonusPercent => Math.Min(30, Sum(item => item.GoldBonusPercent));
-        public int Penetration => Math.Min(50, Sum(item => item.Penetration));
+        public int Penetration => Math.Min(50, (KeystoneEvolutionTier == 0 ? 0 : KeystoneEvolutionTier == 1 ? 5 : 12) + Sum(item => item.Penetration));
         public int CooldownReductionPercent => Math.Min(50, HasteRank * 2 + Sum(item => item.CooldownReductionPercent));
         public float AttackSpeedMultiplier => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? .8f :
             EquippedWeapon.WeaponStyle == WeaponStyle.Staff ? .9f : 1f) / (1f - CooldownReductionPercent / 100f);
@@ -197,12 +205,24 @@ namespace AffixZero.Core
             EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? 1.3f : 1.05f;
         public float SplashRadius => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? 1.1f : 0f) + CleaveRank * .08f;
         public float SplashDamageFraction => (EquippedWeapon.WeaponStyle == WeaponStyle.Axe ? .5f : 0f) + CleaveRank * .025f;
+        public float AreaSkillDamageMultiplier => 1.5f + FuryEvolutionTier * .15f;
+        public float AreaSkillRadius => 3.2f + (CleaveEvolutionTier == 0 ? 0 : CleaveEvolutionTier == 1 ? .4f : .9f);
+        public int AreaSkillMinimumTargets => HasteEvolutionTier > 0 ? 1 : 2;
+        public float AreaSkillArmingDelay => HasteEvolutionTier == 0 ? 2.6f : HasteEvolutionTier == 1 ? 2.2f : 1.8f;
+        public int RecoveryThresholdPercent => 45 + VitalityEvolutionTier * 5;
+        public int RecoveryHealPercent => 20 + VitalityEvolutionTier * 5;
+        public float RecoveryArmingDelay => HasteEvolutionTier == 0 ? 8f : HasteEvolutionTier == 1 ? 7f : 6f;
+        public string AreaSkillName => CleaveEvolutionTier == 2 ? "TEMPEST" : CleaveEvolutionTier == 1 ? "WHIRL" :
+            FuryEvolutionTier == 2 ? "DEVASTATE" : FuryEvolutionTier == 1 ? "REND" :
+            HasteEvolutionTier > 0 ? "QUICKCAST" : "AREA";
+        public string RecoverySkillName => VitalityEvolutionTier == 2 ? "SURGE" : VitalityEvolutionTier == 1 ? "WIND" : "HEAL";
         public bool IsRanged => EquippedWeapon.WeaponStyle == WeaponStyle.Staff;
         public int LastExperienceReward { get; private set; }
         public int LastGoldReward { get; private set; }
         public int EquippedEnhancementCost => GetEnhancementCost(EquipmentSlot.Weapon);
         public bool CanEnhanceEquipped => CanEnhance(EquipmentSlot.Weapon);
         private static int Saturate(long value) => (int)Math.Min(int.MaxValue, value);
+        private static int EvolutionTier(int rank, int first, int second) => rank >= second ? 2 : rank >= first ? 1 : 0;
 
         public static TalentDefinition GetTalentDefinition(TalentId talent) =>
             (int)talent >= 0 && (int)talent < talentDefinitions.Count ? talentDefinitions[(int)talent] : null;

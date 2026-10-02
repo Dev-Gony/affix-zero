@@ -71,9 +71,10 @@ namespace AffixZero.Presentation
             float angle=Mathf.Atan2(hero.LastStrikeDirection.y,hero.LastStrikeDirection.x);
             if(area)
             {
-                Emit(origin,Vector2.zero,AutoAreaSkill.Radius,0,true,false,new Color(1,.8f,.3f),.34f);
-                Emit(origin,Vector2.zero,AutoAreaSkill.Radius*.78f,0,true,false,new Color(1,.35f,.18f),.24f);
-                Emit(origin,Vector2.zero,AutoAreaSkill.Radius*.45f,0,true,false,Color.white,.16f);
+                float radius=Mathf.Max(.1f,hero.LastHitRadius);
+                Emit(origin,Vector2.zero,radius,0,true,false,new Color(1,.8f,.3f),.34f);
+                Emit(origin,Vector2.zero,radius*.78f,0,true,false,new Color(1,.35f,.18f),.24f);
+                Emit(origin,Vector2.zero,radius*.45f,0,true,false,Color.white,.16f);
             }
             else if(hero.IsRanged)
             {

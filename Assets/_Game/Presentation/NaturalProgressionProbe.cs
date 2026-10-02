@@ -142,6 +142,8 @@ namespace AffixZero.Presentation
                 Require(hunt.TotalKills >= 10, "Twenty-minute observation did not reach ten kills.");
                 Require(hunt.CollectedItems > 0, "Normal drop rolls produced no collectible progression in twenty minutes.");
                 Require(report.talentInvestments > 0, "Natural XP produced no invested talent point.");
+                Require(owner.Progression.ActiveEvolutionCount > 0,
+                    "Natural XP did not reach a visible combat evolution milestone.");
                 Require(hunt.LayoutsVisitedMask == 7 && hunt.LayoutTransitions >= 2,
                     "Natural run did not traverse all three connected layout topologies.");
                 Require(hunt.DefeatedElitePatternMask == 7 && hunt.GuardianKills >= 3,
@@ -359,6 +361,9 @@ namespace AffixZero.Presentation
             report.inventoryCount = p.Inventory.Count; report.spentPoints = p.SpentPoints; report.unspentPoints = p.UnspentPoints;
             report.fury = p.FuryRank; report.precision = p.PrecisionRank; report.keystone = p.KeystoneRank;
             report.vitality = p.VitalityRank; report.cleave = p.CleaveRank; report.haste = p.HasteRank;
+            report.activeEvolutions=p.ActiveEvolutionCount;report.areaSkillName=p.AreaSkillName;report.recoverySkillName=p.RecoverySkillName;
+            report.areaSkillRadius=p.AreaSkillRadius;report.areaSkillTargets=p.AreaSkillMinimumTargets;
+            report.recoveryThreshold=p.RecoveryThresholdPercent;report.recoveryHeal=p.RecoveryHealPercent;
             report.areaCasts = hunt.AreaCasts; report.recoveryCasts = hunt.RecoveryCasts;
             report.layoutTransitions=hunt.LayoutTransitions;report.layoutsVisitedMask=hunt.LayoutsVisitedMask;
             report.eliteKills=hunt.EliteKills;report.guardianKills=hunt.GuardianKills;report.defeatedElitePatternMask=hunt.DefeatedElitePatternMask;
@@ -403,7 +408,9 @@ namespace AffixZero.Presentation
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
                 talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount;
             public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
-                maxKillChain,selectedDifficulty,dungeonClears;
+                maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal;
+            public float areaSkillRadius;
+            public string areaSkillName,recoverySkillName;
             public string[] dropRecords;
             public string[] captureFrames;
         }

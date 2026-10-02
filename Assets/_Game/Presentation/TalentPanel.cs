@@ -8,7 +8,13 @@ namespace AffixZero.Presentation
     // Six real, persistent progression nodes. Selection never spends a point by itself.
     public sealed class TalentPanel
     {
-        public sealed class View { public int Points,Spent,Fury,Precision,Keystone,Vitality,Cleave,Haste,TotalDamage,TotalHealth; }
+        public sealed class View
+        {
+            public int Points,Spent,Fury,Precision,Keystone,Vitality,Cleave,Haste,TotalDamage,TotalHealth;
+            public int CriticalChance,Penetration,AreaTargets,RecoveryThreshold,RecoveryHeal,ActiveEvolutions;
+            public float AreaRadius,AreaDamageMultiplier,AreaArming,RecoveryArming;
+            public string AreaName,RecoveryName;
+        }
         public readonly VisualElement Root;
         public TalentId SelectedTalent { get; private set; }=TalentId.Fury;
         private readonly Func<View> read; private readonly Action<TalentId> invest; private readonly Action reset;
@@ -50,12 +56,41 @@ namespace AffixZero.Presentation
             points.text="잔여 포인트  "+v.Points;spent.text="투자 "+v.Spent+" / "+HeroProgression.TotalTalentCapacity;
             for(int i=0;i<Ids.Length;i++){var d=HeroProgression.GetTalentDefinition(Ids[i]);int r=Rank(v,Ids[i]);ranks[i].text=r+" / "+d.MaxRank;ShowNode(nodes[i],Ids[i],r>0,Unlocked(v,Ids[i]));}
             var definition=HeroProgression.GetTalentDefinition(SelectedTalent);int rank=Rank(v,SelectedTalent);bool unlocked=Unlocked(v,SelectedTalent);
-            detailName.text=definition.Name;detailIcon.image=icons[Array.IndexOf(Ids,SelectedTalent)];detailRank.text="현재 단계  "+rank+" / "+definition.MaxRank;detailEffect.text=definition.Description+"\n"+CurrentEffect(v,SelectedTalent);
+            detailName.text=definition.Name;detailIcon.image=icons[Array.IndexOf(Ids,SelectedTalent)];detailRank.text="현재 단계  "+rank+" / "+definition.MaxRank;detailEffect.text=definition.Description+"\n"+EvolutionEffect(v,SelectedTalent);
             prerequisite.text=definition.Prerequisite.HasValue?"선행 조건: "+HeroProgression.GetTalentDefinition(definition.Prerequisite.Value).Name+" "+definition.RequiredRank+"단계":"선행 조건 없음";
             SetEnabled(investButton,v.Points>0&&unlocked&&rank<definition.MaxRank);investCaption.text=rank>=definition.MaxRank?"최대 단계":!unlocked?"선행 조건 필요":v.Points<1?"포인트 부족":"특성 포인트 투자 · 1 PT";SetEnabled(resetButton,v.Spent>0);
             summary.text="총 공격 "+v.TotalDamage+" · 최대 체력 "+v.TotalHealth+" · 누적 투자 "+v.Spent;
         }
         private static string CurrentEffect(View v,TalentId id){int r=Rank(v,id);switch(id){case TalentId.Fury:return "현재 공격 +"+(r*3);case TalentId.Precision:return "현재 공격 +"+(r*4);case TalentId.Keystone:return "현재 공격 +"+(r*6);case TalentId.Vitality:return "현재 체력 +"+(r*10);case TalentId.Cleave:return "현재 범위 +"+(r*.08f).ToString("0.00");default:return "현재 재사용 시간 -"+(r*2)+"%";}}
+        private static string EvolutionEffect(View v,TalentId id)
+        {
+            int r=Rank(v,id);
+            switch(id)
+            {
+                case TalentId.Fury:
+                    return "Attack +"+(r*3)+"\n"+v.AreaName+" area strike: "+Mathf.RoundToInt(v.AreaDamageMultiplier*100)+"% ATK"+
+                        Milestone(r,5,15);
+                case TalentId.Precision:
+                    return "Attack +"+(r*4)+"  /  Critical "+v.CriticalChance+"%"+Milestone(r,3,8);
+                case TalentId.Keystone:
+                    return "Attack +"+(r*6)+"  /  Armor penetration "+v.Penetration+Milestone(r,2,5);
+                case TalentId.Vitality:
+                    return "Maximum health +"+(r*10)+"\n"+v.RecoveryName+": below "+v.RecoveryThreshold+"%, heal "+v.RecoveryHeal+"%"+
+                        Milestone(r,5,15);
+                case TalentId.Cleave:
+                    return "Melee splash +"+(r*.08f).ToString("0.00")+"m\n"+v.AreaName+" radius "+v.AreaRadius.ToString("0.0")+"m"+
+                        Milestone(r,3,8);
+                default:
+                    return "Cooldown -"+(r*2)+"%  /  Area needs "+v.AreaTargets+" target(s)\nArming "+
+                        v.AreaArming.ToString("0.0")+"s / recovery "+v.RecoveryArming.ToString("0.0")+"s"+Milestone(r,3,8);
+            }
+        }
+        private static string Milestone(int rank,int first,int second)
+        {
+            if(rank>=second)return "  [EVOLVE II]";
+            if(rank>=first)return "  [EVOLVE I / NEXT R"+second+"]";
+            return "  [NEXT R"+first+"]";
+        }
         private void Select(TalentId id){SelectedTalent=id;Refresh(true);} private void Invest(){View v=read();var d=HeroProgression.GetTalentDefinition(SelectedTalent);if(v!=null&&v.Points>0&&Unlocked(v,SelectedTalent)&&Rank(v,SelectedTalent)<d.MaxRank)invest(SelectedTalent);Refresh(true);} private void Reset(){View v=read();if(v!=null&&v.Spent>0)reset();Refresh(true);}
         private static int Rank(View v,TalentId id){switch(id){case TalentId.Fury:return v.Fury;case TalentId.Precision:return v.Precision;case TalentId.Keystone:return v.Keystone;case TalentId.Vitality:return v.Vitality;case TalentId.Cleave:return v.Cleave;default:return v.Haste;}}
         private static bool Unlocked(View v,TalentId id){var d=HeroProgression.GetTalentDefinition(id);return !d.Prerequisite.HasValue||Rank(v,d.Prerequisite.Value)>=d.RequiredRank;}

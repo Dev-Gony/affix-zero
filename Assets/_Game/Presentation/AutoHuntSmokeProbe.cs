@@ -226,7 +226,8 @@ namespace AffixZero.Presentation
                 report.lineOfSightChecks++;
                 if(defender.LastHitIsArea)
                 {
-                    Require(attacker==hero&&defender.LastHitRadius==AutoAreaSkill.Radius,"Area hit metadata did not match the automatic area skill.");
+                    Require(attacker==hero&&Mathf.Abs(defender.LastHitRadius-hunt.AreaSkillRadius)<.001f,
+                        "Area hit metadata did not match the evolved automatic area skill.");
                     report.areaHitChecks++;
                 }
                 else

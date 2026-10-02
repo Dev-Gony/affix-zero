@@ -293,6 +293,7 @@ namespace AffixZero.Presentation
             if(!isActiveAndEnabled||IsDead||health==null||Time.deltaTime<=0)return 0;
             long receiptId=++damageSequence;
             Vector2 origin=transform.position;
+            LastHitRadius=radius;LastHitIsArea=true;LastStrikePoint=origin;
             int hits=0,kills=0,totalApplied=0;
             foreach(MeleeActor victim in victims)
             {

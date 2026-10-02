@@ -27,6 +27,8 @@ namespace AffixZero.Presentation
         private PanelSettings panelSettings;
         private VisualElement root, enemyFrame, enemyFill, healthFill, xpFill, dockXpFill, attackFill, mapArea, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
         private Label enemyValue, healthValue, levelValue, areaCooldown, recoveryCooldown, difficultyStatus, currency, clock, attackState, xpValue, resultText, paused, lootText;
+        private Label areaSkillLabel, recoverySkillLabel;
+        private VisualElement areaSkillSlot, recoverySkillSlot;
         private VisualElement pauseButton;
         private Label pauseCaption;
         private Texture2D room, attackIcon;
@@ -182,12 +184,12 @@ namespace AffixZero.Presentation
                 Place(icon,5,7,24,24);slot.Add(icon);actionIcon=icon;
             }
             attackState=Text(slot,"AUTO",2,38,30,12,7,Gold);attackState.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var area=Box(bottom,"auto-area-skill",46,8,34,52,Surface);Border(area,Gold,1);
-            Text(area,"AREA",0,7,34,18,8,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            var area=Box(bottom,"auto-area-skill",46,8,34,52,Surface);areaSkillSlot=area;Border(area,Gold,1);
+            areaSkillLabel=Text(area,"AREA",0,7,34,18,8,Gold);areaSkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(area,"AUTO",0,27,34,15,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
             area.tooltip="적 2명 이상 접근 시 자동 범위 공격";
-            var recovery=Box(bottom,"auto-recovery-skill",84,8,34,52,Surface);Border(recovery,Sky,1);
-            Text(recovery,"HEAL",0,7,34,18,8,Sky).style.unityTextAlign=TextAnchor.MiddleCenter;
+            var recovery=Box(bottom,"auto-recovery-skill",84,8,34,52,Surface);recoverySkillSlot=recovery;Border(recovery,Sky,1);
+            recoverySkillLabel=Text(recovery,"HEAL",0,7,34,18,8,Sky);recoverySkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(recovery,"AUTO",0,27,34,15,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
             recovery.tooltip="체력 45% 이하에서 자동 회복";
             for(int i=0;i<4;i++)
@@ -246,7 +248,11 @@ namespace AffixZero.Presentation
                 var p=encounter.Progression;
                 return new TalentPanel.View {Points=p.UnspentPoints,Spent=p.SpentPoints,Fury=p.FuryRank,
                     Precision=p.PrecisionRank,Keystone=p.KeystoneRank,Vitality=p.VitalityRank,Cleave=p.CleaveRank,Haste=p.HasteRank,
-                    TotalDamage=p.TotalDamage,TotalHealth=p.TotalMaxHp};
+                    TotalDamage=p.TotalDamage,TotalHealth=p.TotalMaxHp,CriticalChance=p.CriticalChance,Penetration=p.Penetration,
+                    AreaTargets=p.AreaSkillMinimumTargets,RecoveryThreshold=p.RecoveryThresholdPercent,RecoveryHeal=p.RecoveryHealPercent,
+                    ActiveEvolutions=p.ActiveEvolutionCount,AreaRadius=p.AreaSkillRadius,AreaDamageMultiplier=p.AreaSkillDamageMultiplier,
+                    AreaArming=p.AreaSkillArmingDelay,RecoveryArming=p.RecoveryArmingDelay,
+                    AreaName=p.AreaSkillName,RecoveryName=p.RecoverySkillName};
             },id=>encounter.SpendTalent(id),()=>encounter.ResetTalents(),()=>encounter.ShowManagement(ManagementScreen.None));
             forgePanel=new ForgePanel(root,()=> {
                 var p=encounter.Progression;var item=p.EquippedWeapon;
@@ -399,6 +405,14 @@ namespace AffixZero.Presentation
             {
                 areaCooldown.text=hunt.AreaCooldownRemaining<=0?"READY":hunt.AreaCooldownRemaining.ToString("0.0")+"s";
                 recoveryCooldown.text=hunt.RecoveryCooldownRemaining<=0?"READY":hunt.RecoveryCooldownRemaining.ToString("0.0")+"s";
+                areaSkillLabel.text=hunt.AreaEvolutionName;
+                areaSkillLabel.style.fontSize=hunt.AreaEvolutionName.Length>7?5:hunt.AreaEvolutionName.Length>5?6:8;
+                areaSkillSlot.tooltip=hunt.AreaEvolutionName+"  "+Mathf.RoundToInt(hunt.AreaSkillDamageMultiplier*100)+"% ATK  /  "+
+                    hunt.AreaSkillRadius.ToString("0.0")+"m  /  "+hunt.AreaSkillMinimumTargets+" target";
+                recoverySkillLabel.text=hunt.RecoveryEvolutionName;
+                recoverySkillLabel.style.fontSize=hunt.RecoveryEvolutionName.Length>7?5:8;
+                recoverySkillSlot.tooltip=hunt.RecoveryEvolutionName+"  below "+hunt.RecoveryThresholdPercent+
+                    "% HP  /  heal "+hunt.RecoveryHealPercent+"%";
             }
             currency.text="GOLD  "+encounter.Progression.TotalGold;
             combatStats.text="ATK "+encounter.Progression.TotalDamage+"   DEF "+hero.Defense+

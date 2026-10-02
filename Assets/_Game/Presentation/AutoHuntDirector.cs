@@ -62,6 +62,15 @@ namespace AffixZero.Presentation
         public int RecoveryCasts => recoverySkill == null ? 0 : recoverySkill.CastCount;
         public float RecoveryCooldownRemaining => recoverySkill == null ? 0 : recoverySkill.CooldownRemaining;
         public float RecoveryCooldownDuration => recoverySkill == null ? 14f : recoverySkill.CooldownDuration;
+        public float AreaSkillRadius => owner == null ? AutoAreaSkill.BaseRadius : owner.Progression.AreaSkillRadius;
+        public float AreaSkillDamageMultiplier => owner == null ? 1.5f : owner.Progression.AreaSkillDamageMultiplier;
+        public int AreaSkillMinimumTargets => owner == null ? 2 : owner.Progression.AreaSkillMinimumTargets;
+        public float AreaSkillArmingDelay => owner == null ? 2.6f : owner.Progression.AreaSkillArmingDelay;
+        public int RecoveryThresholdPercent => owner == null ? 45 : owner.Progression.RecoveryThresholdPercent;
+        public int RecoveryHealPercent => owner == null ? 20 : owner.Progression.RecoveryHealPercent;
+        public float RecoveryArmingDelay => owner == null ? 8f : owner.Progression.RecoveryArmingDelay;
+        public string AreaEvolutionName => owner == null ? "AREA" : owner.Progression.AreaSkillName;
+        public string RecoveryEvolutionName => owner == null ? "HEAL" : owner.Progression.RecoverySkillName;
         public string AreaSkillName => "회전 참격";
         public float TravelDistance { get; private set; }
         public string LastFault { get; private set; } = "";

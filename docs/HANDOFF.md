@@ -1,3 +1,27 @@
+# 2026-10-02 visible build evolution handoff
+
+The active feature/open-dungeon-loot-skills branch now gives all six saved
+talent branches two mechanically real evolution milestones without changing
+the save schema. Critical chance, penetration, automatic area damage/radius/
+target requirement/arming, and recovery trigger/heal/arming now evolve from
+persisted ranks. The compact combat dock names the active skill form and the
+talent detail shows current and next milestones. Read
+BUILD_EVOLUTION_MILESTONES.md.
+
+Final verification is CoreSmoke 269 PASS; Unity 6000.3.24f1 Windows build
+GUID 2d211235839a4a348d357bae63677f07 with 0 errors / 0 warnings; final
+720p/1080p framebuffer UI probes with four screens and 16 callbacks each; and
+a 150.042-second normal-drop 1080p run with 83 kills, three clears, all three
+layouts/patterns/guardians, active WIND recovery at 50%/25%, three recovery
+casts, 106 saves, and zero deaths/failures. Separate-process restore plus two
+continued kills also passed.
+
+Library evidence: evolved combat
+libfile_c3bd75f8af788191aeec9fa64e21ef79 and talent tree
+libfile_8d50ff8e9f508191926dfe9eca4fa439. Both creates succeeded;
+Windows local xattr attachment remains unavailable and does not affect Library
+storage.
+
 # 2026-10-02 layout-specific elite encounter handoff
 
 `feature/open-dungeon-loot-skills` now gives Ember Bastion, Split Galleries,
