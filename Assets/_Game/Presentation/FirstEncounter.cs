@@ -207,18 +207,18 @@ namespace AffixZero.Presentation
             if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
             {
-                int level=Progression.Level;
+                int talentPoints=Progression.UnspentPoints+Progression.SpentPoints;
                 string token=rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount;
                 if(!Progression.TryRegisterKill(token))return false;
                 bool elite=actor.name.IndexOf("Elite",StringComparison.OrdinalIgnoreCase)>=0;
-                int floor=Math.Max(1,Progression.Level);
+                int floor=Math.Max(1,Progression.Level+Progression.DungeonClears);
                 int seed=StableSeed(token);
                 bool fixture=Array.IndexOf(Environment.GetCommandLineArgs(),"-affixAutoHuntTest")>=0;
                 WeaponItem drop=fixture && rewards.CollectionCount%4==0
-                    ?LootGenerator.GenerateGuaranteed("loot:"+token,floor,seed)
-                    :LootGenerator.TryGenerate("loot:"+token,floor,elite,seed);
+                    ?LootGenerator.GenerateGuaranteed("loot:"+token,floor,seed,Progression.SelectedDifficulty)
+                    :LootGenerator.TryGenerate("loot:"+token,floor,elite,seed,Progression.SelectedDifficulty);
                 bool offered=drop!=null&&Progression.TryCreatePendingLoot(drop);
-                ProgressionNotice=Progression.Level>level?"레벨 상승 · 특성 포인트 +1":
+                ProgressionNotice=Progression.UnspentPoints+Progression.SpentPoints>talentPoints?"특성 포인트 +1":
                     "처치 보상 +"+Progression.LastExperienceReward+" XP · +"+Progression.LastGoldReward+" GOLD";
                 if(offered){LootPosition=actor.transform.position;ProgressionNotice="["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
                 SaveProgress();

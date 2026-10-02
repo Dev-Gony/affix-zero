@@ -7,9 +7,10 @@ namespace AffixZero.Core
     [Serializable]
     public sealed class ProgressionSnapshot
     {
-        public int schemaVersion = 2;
+        public int schemaVersion = 3;
         public int totalExperience, totalGold, unspentPoints, furyRank, precisionRank, keystoneRank;
         public int vitalityRank, cleaveRank, hasteRank, legacyPointCredit;
+        public int selectedDifficulty, dungeonClears;
         public bool hasArmor, hasRelic, hasHelmet, hasGloves, hasBoots, hasRing, hasAmulet;
         public WeaponSnapshot equippedArmor, equippedRelic, equippedHelmet, equippedGloves, equippedBoots, equippedRing, equippedAmulet;
         public bool firstDropWaiting;

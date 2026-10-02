@@ -12,6 +12,13 @@ internal static class ProgressionSaveChecks
         var fresh = HeroProgression.RestoreSnapshot(new HeroProgression().CaptureSnapshot());
         check(fresh.TotalDamage == 30 && fresh.TotalGold == 0 && fresh.TotalExperience == 0 && fresh.PendingLoot == null,
             "fresh snapshot restores without inventing a first drop or rewards");
+        var difficult = new HeroProgression(); difficult.TrySetDifficulty(DungeonDifficulty.Torment);
+        for (int i = 0; i < 24; i++) difficult.TryRegisterKill("torment:" + i);
+        difficult.RegisterDungeonClear();
+        var difficultReloaded = HeroProgression.RestoreSnapshot(difficult.CaptureSnapshot());
+        check(difficultReloaded.SelectedDifficulty == DungeonDifficulty.Torment && difficultReloaded.DungeonClears == 1 &&
+            difficultReloaded.TotalExperience == 912 && difficultReloaded.TotalGold == 288 && difficultReloaded.UnspentPoints == 3,
+            "difficulty, clear sequence and scaled rewards persist across save reload");
         var source = new HeroProgression();
         for (int i = 0; i < 6; i++) source.TryRegisterKill("save-kill:" + i);
         // Recreate a valid legacy one-point-per-kill balance, then migrate before spending.
@@ -70,11 +77,13 @@ internal static class ProgressionSaveChecks
             loadedWaiting.PendingLoot == null && loadedWaiting.TotalExperience == 25,
             "current saves retain explicit pending loot without inventing a deferred drop");
 
-        Reject(check, source, s => s.schemaVersion = 3, "unknown snapshot schema rejected", true);
+        Reject(check, source, s => s.schemaVersion = 4, "unknown snapshot schema rejected", true);
         Reject(check, source, s => s.totalGold = -1, "negative save balance rejected");
         Reject(check, source, s => s.unspentPoints = int.MaxValue, "overflowing or unearned point balance rejected");
-        Reject(check, source, s => s.totalExperience = s.killTokens.Length * 30 + 1, "XP beyond option-bonus reward range rejected");
-        Reject(check, source, s => s.totalGold = s.killTokens.Length * 11 + 1, "gold beyond option-bonus reward range rejected");
+        Reject(check, source, s => s.selectedDifficulty = 99, "unknown saved difficulty rejected");
+        Reject(check, source, s => s.dungeonClears = -1, "negative saved dungeon clears rejected");
+        Reject(check, source, s => s.totalExperience = s.killTokens.Length * 45 + 1, "XP beyond option-bonus and difficulty reward range rejected");
+        Reject(check, source, s => s.totalGold = s.killTokens.Length * 17 + 1, "gold beyond option-bonus and difficulty reward range rejected");
         Reject(check, source, s => s.furyRank = 1, "broken Precision prerequisite rejected");
         Reject(check, source, s => s.keystoneRank = 6, "talent rank above cap rejected");
         Reject(check, source, s => s.inventory = new WeaponSnapshot[25], "oversized saved bag rejected");
@@ -137,8 +146,8 @@ internal static class ProgressionSaveChecks
             migrated.TotalGold == 408 && migrated.TotalExperience == 1425 && migrated.TotalDamage == 62 &&
             migrated.EquippedWeapon.EnhancementRank == 3 && migrated.EquippedArmor == null && migrated.EquippedRelic == null,
             "actual v1 wire fields migrate all 57 earned points, spent ranks, enhanced gear and balances without invented secondary equipment");
-        check(migrated.CaptureSnapshot().schemaVersion == 2 && !migrated.TryRegisterKill("legacy:0"),
-            "migration normalizes payload to v2 and retains reward idempotency");
+        check(migrated.CaptureSnapshot().schemaVersion == 3 && !migrated.TryRegisterKill("legacy:0"),
+            "migration normalizes payload to v3 and retains reward idempotency");
         var pendingLegacy = new HeroProgression(); pendingLegacy.TryRegisterKill("legacy-pending:first");
         var pendingWire = AsLegacy(pendingLegacy.CaptureSnapshot()); pendingWire.unspentPoints = 1;
         var migratedPending = HeroProgression.RestoreSnapshot(pendingWire);
@@ -169,11 +178,11 @@ internal static class ProgressionSaveChecks
         check(loaded.EquippedArmor.Id == armor.Id && loaded.EquippedArmor.EnhancementRank == 4 && loaded.TotalDefense == 9 &&
             loaded.TotalMaxHp == 180 && loaded.EquippedRelic.Id == relic.Id && loaded.EquippedRelic.EnhancementRank == 5 &&
             loaded.EquippedWeapon.WeaponStyle == WeaponStyle.Staff && loaded.IsRanged && loaded.AttackReach == 4.5f,
-            "v2 roundtrip preserves all slots, armor enhancement and ranged style parameters");
+            "v3 roundtrip preserves all slots, armor enhancement and ranged style parameters");
         check(loaded.VitalityRank == 1 && loaded.CleaveRank == 1 && loaded.HasteRank == 1 && loaded.LegacyPointCredit == 52 &&
             loaded.TotalDamage == migrated.TotalDamage && loaded.CooldownReductionPercent == 14 &&
             loaded.SplashRadius == migrated.SplashRadius && loaded.AttackSpeedMultiplier == migrated.AttackSpeedMultiplier,
-            "v2 roundtrip preserves new build stats and legacy point credit exactly");
+            "v3 roundtrip preserves new build stats and legacy point credit exactly");
         loaded.ResetTalents(); loaded.ResetTalents();
         check(loaded.UnspentPoints == 58 && loaded.SpentPoints == 0 && loaded.TotalGold == migrated.TotalGold,
             "reset after migration refunds all old and new ranks without minting or deleting points");

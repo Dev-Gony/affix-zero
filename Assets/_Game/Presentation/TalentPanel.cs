@@ -31,7 +31,7 @@ namespace AffixZero.Presentation
             var tree=Box(Root,"talent-tree",8,76,780,432,Surface);Text(tree,"전투 성장 · 최대 75단계",18,10,400,28,18,Cream);Text(tree,"모든 노드는 실제 전투 수치에 적용됩니다.",370,14,390,22,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
             string[] names={"분노","정밀","숙련자의 일격","생명력","휩쓸기","가속"};
             for(int i=0;i<Ids.Length;i++){float x=22+(i%3)*250,y=56+(i/3)*166;nodes[i]=Node(tree,"talent-node-"+Ids[i].ToString().ToLowerInvariant(),Ids[i],names[i],icons[i],x,y,out ranks[i]);}
-            Text(tree,"공격 · 생존 · 범위 · 자동 스킬 재사용",22,377,470,24,12,Sky);Text(tree,"250 XP = 1 PT · 저장 호환",520,377,238,24,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
+            Text(tree,"공격 · 생존 · 범위 · 자동 스킬 재사용",22,377,470,24,12,Sky);Text(tree,"초반 250 XP / PT · 심화 비용 증가",500,377,258,24,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
             var detail=Box(Root,"talent-detail",800,76,440,432,Surface);Box(detail,"talent-detail-accent",0,0,3,432,new Color32(255,179,180,255));
             var iconFrame=Box(detail,"talent-detail-icon",20,20,76,76,Crimson);detailIcon=Icon(iconFrame,null,14,14,48,48);
             Text(detail,"선택한 특성 / PASSIVE",112,17,307,19,11,Gold);detailName=Text(detail,"",112,41,307,34,23,Cream);detailRank=Text(detail,"",112,78,307,21,13,Muted);

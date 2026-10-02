@@ -64,6 +64,8 @@ namespace AffixZero.Presentation
         public Vector2 LastImpactPosition { get; private set; }
         public float LastHitRadius { get; private set; }
         public bool LastHitIsArea { get; private set; }
+        public bool LastHitCritical { get; private set; }
+        public bool LastHitKilled { get; private set; }
         public float AttackSpeedMultiplier=>attackSpeedMultiplier;
         public float AttackReach=>reach;
         public bool IsRanged=>ranged;
@@ -71,6 +73,7 @@ namespace AffixZero.Presentation
         public Vector2 LastStrikeDirection=>swingDirection;
         public Vector2 LastStrikePoint {get;private set;}
         public event Action<MeleeActor,int,int,bool> StrikeResolved;
+        public event Action<MeleeActor,MeleeActor> AttackStarted;
 
         public void ConfigureCleave(IReadOnlyList<MeleeActor> victims,float radius)
         {if(!FinitePositive(radius))throw new ArgumentOutOfRangeException(nameof(radius));cleaveTargets=victims;cleaveRadius=Mathf.Max(cleaveRadius,radius);}
@@ -122,7 +125,7 @@ namespace AffixZero.Presentation
             actorId = id; maximumHp = hp; damage = attackDamage;
             health = new CombatHealth(maximumHp, defense);
             LastAttackerId=0;
-            LastAttackId=0;attacksAllowed=true;
+            LastAttackId=0;LastHitCritical=false;LastHitKilled=false;attacksAllowed=true;
             // Preserve the attack sequence across reuse so surviving recipients cannot reject new hits as duplicates.
             if (timeline == null) timeline = animationSet.CreateTimeline();
             else timeline.Cancel();
@@ -228,6 +231,7 @@ namespace AffixZero.Presentation
                 swingDamage = damage;
                 attackTarget = target;
                 swingDirection=toTarget.sqrMagnitude>.0001f?toTarget.normalized:Vector2.right;
+                AttackStarted?.Invoke(this,target);
                 SetClip(ActorClip.Attack);
                 view.sprite = animationSet.AttackFrame(timeline, facing);
                 RenderWeapon(false);
@@ -263,7 +267,8 @@ namespace AffixZero.Presentation
             float radius=cleaveTargets==null||ranged?reach+.05f:Mathf.Max(reach+.05f,cleaveRadius);
             if(attackTarget!=null)
             {
-                HitReceipt receipt=attackTarget.Receive(actorId,receiptId,PowerAgainst(attackTarget,swingDamage),origin,radius,false);
+                int power=PowerAgainst(attackTarget,swingDamage,out bool critical);
+                HitReceipt receipt=attackTarget.Receive(actorId,receiptId,power,origin,radius,false,critical);
                 if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
             }
             if(cleaveTargets!=null&&!ranged)
@@ -273,7 +278,8 @@ namespace AffixZero.Presentation
                     Vector2 offset=(Vector2)victim.transform.position-origin;
                     if(offset.sqrMagnitude>radius*radius||Vector2.Dot(offset.normalized,swingDirection)<-.15f||!CanSee(victim.transform.position))continue;
                     int splashPower=Math.Max(1,(int)Math.Min(int.MaxValue,(double)swingDamage*cleaveFraction));
-                    HitReceipt receipt=victim.Receive(actorId,receiptId,PowerAgainst(victim,splashPower),origin,radius,false);
+                    int power=PowerAgainst(victim,splashPower,out bool critical);
+                    HitReceipt receipt=victim.Receive(actorId,receiptId,power,origin,radius,false,critical);
                     if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
                 }
             if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
@@ -292,7 +298,8 @@ namespace AffixZero.Presentation
             {
                 if(victim==null||victim==this||!victim.isActiveAndEnabled||victim.IsDead||
                     Vector2.Distance(origin,victim.transform.position)>radius||!CanSee(victim.transform.position))continue;
-                HitReceipt receipt=victim.Receive(actorId,receiptId,PowerAgainst(victim,power),origin,radius,true);
+                int resolvedPower=PowerAgainst(victim,power,out bool critical);
+                HitReceipt receipt=victim.Receive(actorId,receiptId,resolvedPower,origin,radius,true,critical);
                 if(receipt.Accepted){hits++;totalApplied+=receipt.Damage;if(receipt.Killed)kills++;}
             }
             if(vampirismPercent>0&&totalApplied>0)health.Heal(Math.Max(1,totalApplied*vampirismPercent/100));
@@ -300,15 +307,15 @@ namespace AffixZero.Presentation
             return hits;
         }
 
-        private int PowerAgainst(MeleeActor victim,int basePower)
+        private int PowerAgainst(MeleeActor victim,int basePower,out bool critical)
         {
-            bool critical=criticalChance>0&&Math.Abs((damageSequence*37+actorId*13)%100)<criticalChance;
+            critical=criticalChance>0&&Math.Abs((damageSequence*37+actorId*13)%100)<criticalChance;
             long result=critical?(long)basePower*2:basePower;
             result+=Math.Min(penetration,victim==null?0:victim.Defense);
             return (int)Math.Min(int.MaxValue,result);
         }
 
-        private HitReceipt Receive(int attacker, long attack, int power,Vector2 origin,float radius,bool area)
+        private HitReceipt Receive(int attacker, long attack, int power,Vector2 origin,float radius,bool area,bool critical)
         {
             if (health == null) return default;
             int before=health.Current;
@@ -316,18 +323,19 @@ namespace AffixZero.Presentation
             if (!receipt.Accepted) return receipt;
             LastAttackerId=attacker;
             HitFxBurst.Spawn(transform.position + Vector3.up * .55f,
-                view == null ? 1 : view.sortingOrder + 2);
+                view == null ? 1 : view.sortingOrder + 2,critical,receipt.Killed,area);
             LastAttackId=attack;LastHitRawDamage=power;LastHitOrigin=origin;LastImpactPosition=transform.position;
             LastHitHpBefore=before;
             LastHitRadius=radius;LastHitIsArea=area;
+            LastHitCritical=critical;LastHitKilled=receipt.Killed;
             // Ordinary hits carry damage and feedback, not hard crowd control.
             // Keep the committed swing and movement alive under multiple attackers.
-            hurtRemaining=receipt.Killed?0:.12;
+            hurtRemaining=receipt.Killed?0:critical?.18:.12;
             // Enemy recoil is bounded by the same swept LOS used for navigation, never a stun.
             if(cleaveTargets==null&&lineOfSight!=null)
             {
                 Vector2 from=transform.position;
-                Vector2 recoil=(from-origin).normalized*(area?.16f:.09f);
+                Vector2 recoil=(from-origin).normalized*(area?.22f:critical?.17f:.11f);
                 if(lineOfSight(from,from+recoil))transform.position=new Vector3(from.x+recoil.x,from.y+recoil.y,transform.position.z);
             }
             if(receipt.Killed)

@@ -8,11 +8,13 @@ namespace AffixZero.Presentation
     {
         private const float FramesPerSecond = 20f;
         private static Sprite[] cachedFrames;
+        private static int liveCount;
         private SpriteRenderer view;
         private float elapsed;
 
-        public static void Spawn(Vector3 position, int sortingOrder)
+        public static void Spawn(Vector3 position, int sortingOrder,bool critical=false,bool killed=false,bool area=false)
         {
+            if(liveCount>=32)return;
             Sprite[] frames = Frames();
             if (frames.Length != 8)
             {
@@ -24,6 +26,10 @@ namespace AffixZero.Presentation
             var renderer = effect.GetComponent<SpriteRenderer>();
             renderer.sprite = frames[0];
             renderer.sortingOrder = sortingOrder;
+            float scale=killed?1.5f:critical?1.28f:area?1.12f:1f;
+            effect.transform.localScale=Vector3.one*scale;
+            renderer.color=killed?new Color(1f,.48f,.22f,1):critical?new Color(1f,.96f,.55f,1):Color.white;
+            liveCount++;
         }
 
         private static Sprite[] Frames()
@@ -35,6 +41,8 @@ namespace AffixZero.Presentation
         }
 
         private void Awake() => view = GetComponent<SpriteRenderer>();
+
+        private void OnDestroy(){liveCount=Mathf.Max(0,liveCount-1);}
 
         private void Update()
         {

@@ -116,7 +116,7 @@ namespace AffixZero.Presentation
             Text(talents,"피해 +3 / 단계",18,123,132,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(talents,"격노 2 필요 · +4",175,123,146,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(talents,"정밀 1 필요 · +6",343,123,151,19,11,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(talents,"250 XP = 포인트 1 · 초기화 시 전액 반환",20,151,338,20,11,Muted);
+            Text(talents,"초반 250 XP / PT · 심화 구간 점진 증가",20,151,338,20,11,Muted);
             if(openTalents!=null)Button(talents,"open-full-talents","전체 특성 →",369,150,117,23,openTalents,Edge);
             var inspect=Box(Root,"item-comparison",730,244,506,260,Surface);
             Header(inspect,"comparison-heading","아이템 비교  /  EQUIPPED → LOOT",12,8,482);

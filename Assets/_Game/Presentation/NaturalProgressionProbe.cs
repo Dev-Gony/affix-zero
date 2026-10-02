@@ -13,16 +13,18 @@ namespace AffixZero.Presentation
     // Long-running product-flow observation. It uses normal drop rolls and an isolated disk profile.
     public sealed class NaturalProgressionProbe : MonoBehaviour
     {
-        private const float ObservationSeconds = 1200f;
+        private float observationSeconds = 1200f;
         private FirstEncounter owner;
         private AutoHuntDirector hunt;
         private Report report;
-        private string mode, reportDirectory, saveDirectory, expectedPath, phase = "initializing";
-        private float started, nextCheckpoint;
+        private string mode, reportDirectory, saveDirectory, expectedPath, captureDirectory, phase = "initializing";
+        private float started, nextCheckpoint, nextCaptureAt;
         private bool finishing, busy;
         private int readStartKills;
         private readonly HashSet<string> processedItems = new HashSet<string>(StringComparer.Ordinal);
         private readonly List<string> dropRecords = new List<string>();
+        private readonly List<string> captures = new List<string>();
+        private readonly int[] captureCounts = new int[3];
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -44,6 +46,13 @@ namespace AffixZero.Presentation
                 Require(mode == "observe" || mode == "read", "Natural mode must be observe or read.");
                 reportDirectory = AbsoluteArgument(args, "-affixReportDir");
                 saveDirectory = AbsoluteArgument(args, "-affixSaveDir");
+                string seconds=OptionalArgument(args,"-affixObservationSeconds");
+                if(!string.IsNullOrEmpty(seconds))
+                    Require(float.TryParse(seconds,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out observationSeconds)&&observationSeconds>=120,
+                        "Observation seconds must be at least 120.");
+                string capture=OptionalArgument(args,"-affixCaptureDir");
+                if(!string.IsNullOrEmpty(capture))
+                {Require(Path.IsPathRooted(capture),"-affixCaptureDir requires an absolute path.");captureDirectory=Path.GetFullPath(capture);Directory.CreateDirectory(captureDirectory);}
                 expectedPath = Path.Combine(saveDirectory, "expected-natural-profile.json");
                 Require(Array.IndexOf(args, "-affixAutoHuntTest") < 0,
                     "Natural progression must not enable guaranteed QA drops.");
@@ -58,7 +67,7 @@ namespace AffixZero.Presentation
             if (finishing || report == null) return;
             try
             {
-                if (Time.realtimeSinceStartup - started > (mode == "observe" ? 1320 : 150))
+                if (Time.realtimeSinceStartup - started > (mode == "observe" ? observationSeconds+120 : 150))
                     throw new TimeoutException("Natural progression timed out in " + phase);
                 Tick();
                 if (Time.realtimeSinceStartup - started >= nextCheckpoint)
@@ -104,8 +113,10 @@ namespace AffixZero.Presentation
             Require(owner != null && hunt != null && owner.Persistence.CanPlay, "Runtime progression owner disappeared or became unavailable.");
             Require(owner.IsPaused ? Time.timeScale == 0 : Time.timeScale == 1, "Natural run changed simulation speed.");
             DiscoverDrops();
+            CaptureVarietyFrame();
 
             if (busy) return;
+            if (mode == "observe" && TryDifficultyTransition()) return;
             if (TryBeginGrowthAction()) return;
 
             if (!hunt.Running)
@@ -118,7 +129,7 @@ namespace AffixZero.Presentation
             }
 
             float elapsed = Time.realtimeSinceStartup - started;
-            if (mode == "observe" && elapsed >= ObservationSeconds)
+            if (mode == "observe" && elapsed >= observationSeconds)
             {
                 hunt.StopHunt();
                 Require(owner.SaveProgress(), "Final natural-profile save failed: " + owner.Persistence.Problem);
@@ -130,6 +141,12 @@ namespace AffixZero.Presentation
                 Require(hunt.TotalKills >= 10, "Twenty-minute observation did not reach ten kills.");
                 Require(hunt.CollectedItems > 0, "Normal drop rolls produced no collectible progression in twenty minutes.");
                 Require(report.talentInvestments > 0, "Natural XP produced no invested talent point.");
+                Require(hunt.LayoutsVisitedMask == 7 && hunt.LayoutTransitions >= 2,
+                    "Natural run did not traverse all three connected layout topologies.");
+                Require(owner.Progression.SelectedDifficulty == DungeonDifficulty.Torment && report.difficultyTransitions == 2,
+                    "Natural run did not safely select and retain all three difficulties.");
+                Require(owner.Progression.SpentPoints < HeroProgression.TotalTalentCapacity,
+                    "Twenty-minute progression still exhausted the complete talent tree.");
                 Require(owner.Progression.TotalDamage > report.initialDamage || owner.Progression.TotalMaxHp > report.initialHealth || owner.Progression.TotalDefense > 2,
                     "Natural progression did not improve any combat stat.");
                 Finish(true, null);
@@ -141,6 +158,65 @@ namespace AffixZero.Presentation
                 report.continuedAfterRestart = true; report.diskRoundtripMatched = true;
                 Finish(true, null);
             }
+        }
+
+        private void CaptureVarietyFrame()
+        {
+            if(string.IsNullOrEmpty(captureDirectory)||hunt==null||hunt.World==null||!hunt.Running||owner.ManagementVisible||
+                Time.realtimeSinceStartup<nextCaptureAt)return;
+            int layout=(int)hunt.World.LayoutId;
+            if(layout<0||layout>=captureCounts.Length||captureCounts[layout]>=16)return;
+            nextCaptureAt=Time.realtimeSinceStartup+.25f;
+            string path=Path.Combine(captureDirectory,"layout-"+layout+"-"+captureCounts[layout].ToString("00")+".bmp");
+            captureCounts[layout]++;captures.Add(path);StartCoroutine(CaptureFrame(path));
+        }
+
+        private IEnumerator CaptureFrame(string path)
+        {
+            yield return new WaitForEndOfFrame();Texture2D pixels=null;
+            try
+            {
+                pixels=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);
+                pixels.ReadPixels(new Rect(0,0,Screen.width,Screen.height),0,0);pixels.Apply();WriteBitmap(path,pixels);
+            }
+            finally{if(pixels!=null)Destroy(pixels);}
+        }
+        private static void WriteBitmap(string path,Texture2D texture)
+        {
+            int width=texture.width,height=texture.height,rowBytes=checked(width*3),stride=checked(rowBytes+3)&~3,imageBytes=checked(stride*height);
+            Color32[] colors=texture.GetPixels32();
+            using(var writer=new BinaryWriter(File.Create(path)))
+            {
+                writer.Write((ushort)0x4D42);writer.Write(checked(54+imageBytes));writer.Write(0);writer.Write(54);writer.Write(40);
+                writer.Write(width);writer.Write(height);writer.Write((ushort)1);writer.Write((ushort)24);writer.Write(0);writer.Write(imageBytes);
+                writer.Write(2835);writer.Write(2835);writer.Write(0);writer.Write(0);
+                for(int y=0;y<height;y++)
+                {
+                    for(int x=0;x<width;x++){Color32 c=colors[y*width+x];writer.Write(c.b);writer.Write(c.g);writer.Write(c.r);}
+                    for(int pad=rowBytes;pad<stride;pad++)writer.Write((byte)0);
+                }
+            }
+        }
+
+        private bool TryDifficultyTransition()
+        {
+            DungeonDifficulty current=owner.Progression.SelectedDifficulty;
+            DungeonDifficulty next=current==DungeonDifficulty.Scout&&hunt.CompletedRuns>=1?DungeonDifficulty.Veteran:
+                current==DungeonDifficulty.Veteran&&hunt.CompletedRuns>=2?DungeonDifficulty.Torment:current;
+            if(next==current||owner.Progression.PendingLoot!=null)return false;
+            StartCoroutine(DifficultyFlow(next));return true;
+        }
+
+        private IEnumerator DifficultyFlow(DungeonDifficulty next)
+        {
+            busy=true;hunt.StopHunt();Require(hunt.CanChangeDifficulty,"Difficulty selection was not safe after stopping the hunt.");
+            string control="difficulty-"+next.ToString().ToLowerInvariant();yield return WaitUntilReady(control);
+            Dispatch(control);yield return null;
+            Require(owner.Progression.SelectedDifficulty==next&&!hunt.Running,
+                "Native difficulty callback did not apply a stopped-state selection.");
+            report.difficultyTransitions++;Dispatch("autohunt-toggle");report.startClicks++;
+            Require(hunt.Running&&Time.timeScale==1,"Difficulty re-entry did not resume 1x automatic hunting.");
+            busy=false;
         }
 
         private void DiscoverDrops()
@@ -266,7 +342,10 @@ namespace AffixZero.Presentation
             report.fury = p.FuryRank; report.precision = p.PrecisionRank; report.keystone = p.KeystoneRank;
             report.vitality = p.VitalityRank; report.cleave = p.CleaveRank; report.haste = p.HasteRank;
             report.areaCasts = hunt.AreaCasts; report.recoveryCasts = hunt.RecoveryCasts;
+            report.layoutTransitions=hunt.LayoutTransitions;report.layoutsVisitedMask=hunt.LayoutsVisitedMask;
+            report.maxKillChain=hunt.MaxKillChain;report.selectedDifficulty=(int)p.SelectedDifficulty;report.dungeonClears=p.DungeonClears;
             report.dropRecords = dropRecords.ToArray(); report.saveCount = owner.Persistence.SaveCount;
+            report.captureFrames=captures.ToArray();
         }
 
         private void OnLog(string message, string trace, LogType type)
@@ -286,6 +365,8 @@ namespace AffixZero.Presentation
         private void WriteReport() => File.WriteAllText(Path.Combine(reportDirectory, "natural-progression-" + mode + ".json"), JsonUtility.ToJson(report, true));
         private static string Argument(string[] args, string key)
         { int i = Array.IndexOf(args, key); if (i < 0 || i + 1 >= args.Length) throw new ArgumentException("Missing " + key); return args[i + 1]; }
+        private static string OptionalArgument(string[] args,string key)
+        {int i=Array.IndexOf(args,key);return i<0||i+1>=args.Length?null:args[i+1];}
         private static string AbsoluteArgument(string[] args, string key)
         { string value = Argument(args, key); if (!Path.IsPathRooted(value)) throw new ArgumentException(key + " requires an absolute path."); return Path.GetFullPath(value); }
         private static void Require(bool value, string problem) { if (!value) throw new InvalidOperationException(problem); }
@@ -296,13 +377,15 @@ namespace AffixZero.Presentation
                 problem = "", phase = "initializing", startedUtc = DateTime.UtcNow.ToString("O"), finishedUtc = "", unityVersion = Application.unityVersion,
                 buildGuid = Application.buildGUID, profileSha256 = "";
             public string scope = "Fresh isolated profile, normal production drop rolls, 1x twenty-minute observation, native UI Toolkit equipment/talent/forge actions, safety-stop review/restart, disk save and separate-process continuation.";
-            public string actualPhysicalInput = "NOT_RUN_IN_THIS_PROBE; verified separately by the physical-input probe.";
+            public string actualPhysicalInput = "NOT_RUN; this probe uses native UI Toolkit callbacks, not OS mouse or keyboard input.";
             public bool normalDropRolls, restoreMatched, diskRoundtripMatched, continuedAfterRestart;
             public float elapsedSeconds; public int initialDamage, initialHealth, kills, completedRuns, failedRuns, deathRetries, collectedItems,
                 naturalItemsSeen, experience, gold, damage, health, defense, inventoryCount, spentPoints, unspentPoints,
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
                 talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount;
+            public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,maxKillChain,selectedDifficulty,dungeonClears;
             public string[] dropRecords;
+            public string[] captureFrames;
         }
     }
 }

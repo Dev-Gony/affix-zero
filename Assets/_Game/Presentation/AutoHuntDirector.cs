@@ -21,7 +21,8 @@ namespace AffixZero.Presentation
         private AutoAreaSkill areaSkill;
         private AutoRecoverySkill recoverySkill;
         private CombatFeedback feedback;
-        private float delay, stalledTime, decisionTime, enemyDecisionTime;
+        private float delay, stalledTime, decisionTime, enemyDecisionTime, recoveryUntil;
+        private float lastKillAt = -100;
         private Vector2 lastPosition, progressPosition;
         private int identity = 10, stallAttempts;
         private bool runStarted;
@@ -43,6 +44,15 @@ namespace AffixZero.Presentation
         public int MultiHitAttacks { get; private set; }
         public int MaxKillsPerStrike { get; private set; }
         public int StallRecoveries { get; private set; }
+        public int LayoutTransitions { get; private set; }
+        public int LayoutsVisitedMask { get; private set; }
+        public int KillChain { get; private set; }
+        public int MaxKillChain { get; private set; }
+        public DungeonDifficulty CurrentDifficulty => owner == null ? DungeonDifficulty.Scout : owner.Progression.SelectedDifficulty;
+        public DifficultyRule Difficulty => DifficultyTuning.Get(CurrentDifficulty);
+        public string CurrentLayoutName => World == null ? "LOADING" : World.LayoutName;
+        public bool CanChangeDifficulty => Initialized && !Running && owner != null && owner.Progression.PendingLoot == null;
+        public bool ReducedEffects => feedback != null && feedback.ReducedEffects;
         public int AreaCasts => areaSkill == null ? 0 : areaSkill.CastCount;
         public float AreaCooldownRemaining => areaSkill == null ? 0 : areaSkill.CooldownRemaining;
         public float AreaCooldownDuration => areaSkill == null ? 4.5f : areaSkill.CooldownDuration;
@@ -75,12 +85,13 @@ namespace AffixZero.Presentation
 
         private void Start()
         {
-            owner = GetComponent<FirstEncounter>(); hero = owner.Hero; World = new DungeonWorld();
+            owner = GetComponent<FirstEncounter>(); hero = owner.Hero; World = new DungeonWorld(LayoutForClear(owner.Progression.DungeonClears));
+            LayoutsVisitedMask |= 1 << (int)World.LayoutId;
             enemies.Add(owner.Enemy);
             for (int i = 1; i < Population; i++)
             {
                 GameObject clone = Instantiate(owner.Enemy.gameObject);
-                clone.name = (i % 8 == 7 ? "Obsidian Elite " : "Obsidian Raider ") + (i + 1);
+                clone.name = "Obsidian Raider " + (i + 1);
                 enemies.Add(clone.GetComponent<MeleeActor>());
             }
             for (int i = 0; i < enemies.Count; i++)
@@ -91,7 +102,7 @@ namespace AffixZero.Presentation
             }
             hero.SetTarget(null); hero.SetNavigation(World.NextWaypoint, World.LineOfSight); hero.ConfigureMoveSpeed(3.35f);
             hero.ConfigureCleave(enemies, 1.85f); hero.StrikeResolved += OnStrike;
-            feedback = gameObject.AddComponent<CombatFeedback>(); feedback.Configure(hero);
+            feedback = gameObject.AddComponent<CombatFeedback>(); feedback.Configure(hero, enemies);
             areaSkill = gameObject.AddComponent<AutoAreaSkill>(); areaSkill.Configure(hero, enemies, this);
             recoverySkill = gameObject.AddComponent<AutoRecoverySkill>(); recoverySkill.Configure(hero, this);
             Camera camera = Camera.main;
@@ -116,6 +127,7 @@ namespace AffixZero.Presentation
             Vector2 position = hero.transform.position;
             TravelDistance += Vector2.Distance(lastPosition, position); lastPosition = position;
             if (!Running || owner.IsPaused) return;
+            if (Time.time - lastKillAt > 2.4f) KillChain = 0;
             SectionIndex = Mathf.Clamp(Mathf.FloorToInt((position.x - DungeonWorld.Origin.x) / 24f), 0, 2);
             UpdateEnemyRoaming(position);
             if (hero.IsDead)
@@ -149,9 +161,13 @@ namespace AffixZero.Presentation
             }
             if (AliveEnemies == 0)
             {
-                CompletedRuns++; ConsecutiveFailures = 0; Phase = HuntPhase.Resting; delay = 3;
+                CompletedRuns++; owner.Progression.RegisterDungeonClear(); owner.SaveProgress();
+                ConsecutiveFailures = 0; Phase = HuntPhase.Resting; delay = 3;
                 hero.SetTarget(null); hero.SetDestination(null); return;
             }
+            // A stall escape destination needs a short exclusive movement window. Without this,
+            // the null target immediately triggered ChooseTarget and erased the recovery step.
+            if(Time.time<recoveryUntil){Phase=HuntPhase.Exploring;return;}
             decisionTime -= Time.deltaTime;
             if (decisionTime <= 0 || hero.CurrentTarget == null || hero.CurrentTarget.IsDead)
             {
@@ -179,9 +195,23 @@ namespace AffixZero.Presentation
             progressPosition = hero.transform.position; stalledTime = 0; stallAttempts = 0;
         }
         public void StopHunt() { Running = false; owner.SetPaused(true); }
+        public void ToggleReducedEffects(){if(feedback!=null)feedback.SetReducedEffects(!feedback.ReducedEffects);}
+
+        public bool SetDifficulty(DungeonDifficulty difficulty)
+        {
+            if (!CanChangeDifficulty || difficulty == CurrentDifficulty || !owner.Progression.TrySetDifficulty(difficulty)) return false;
+            DungeonLayoutId before=World.LayoutId;owner.SaveProgress(); RebuildWorld(LayoutForClear(owner.Progression.DungeonClears));
+            if(World.LayoutId!=before)LayoutTransitions++;SpawnPopulation(true);
+            LastFault = ""; return true;
+        }
 
         private void SpawnPopulation(bool atEntrance)
         {
+            if (!atEntrance)
+            {
+                DungeonLayoutId next = LayoutForClear(owner.Progression.DungeonClears);
+                if (World == null || World.LayoutId != next) { RebuildWorld(next); LayoutTransitions++; }
+            }
             owner.BeginAutoRun();
             Vector2 heroPosition = atEntrance ? DungeonWorld.Entrance : World.SafePoint(hero.transform.position);
             hero.ResetForEncounter(heroPosition, ++identity, owner.Progression.TotalMaxHp, owner.Progression.TotalDamage);
@@ -189,14 +219,27 @@ namespace AffixZero.Presentation
             for (int i = 0; i < enemies.Count; i++)
             {
                 MeleeActor actor = enemies[i]; actor.gameObject.SetActive(true);
-                bool elite = i % 8 == 7;
-                actor.ResetForEncounter(World.SafePoint(DungeonWorld.SpawnPoints[i]), ++identity, elite ? 78 : 46, elite ? 7 : 4);
+                bool elite = (i + 1) % Difficulty.EliteStride == 0;
+                actor.name = (elite ? "Obsidian Elite " : "Obsidian Raider ") + (i + 1);
+                int baseHp = elite ? 78 : 46, baseDamage = elite ? 7 : 4;
+                actor.ResetForEncounter(World.SafePoint(World.SpawnPoints[i]), ++identity,
+                    DifficultyTuning.ScaleEnemyHealth(baseHp, CurrentDifficulty),
+                    DifficultyTuning.ScaleEnemyDamage(baseDamage, CurrentDifficulty));
                 actor.SetTarget(null); actor.SetDestination(World.PatrolPoint(i, ++roamSteps[i])); roamAt[i] = Time.time + 1 + (i % 5) * .3f;
             }
             MaxAliveEnemies = Math.Max(MaxAliveEnemies, AliveEnemies);
             areaSkill.ResetForRun(); recoverySkill.ResetForRun(); Phase = Running ? HuntPhase.Exploring : HuntPhase.Waiting;
-            lastPosition = progressPosition = heroPosition; stalledTime = decisionTime = enemyDecisionTime = 0; stallAttempts = 0;
+            lastPosition = progressPosition = heroPosition; stalledTime = decisionTime = enemyDecisionTime = recoveryUntil = 0; stallAttempts = 0;
         }
+
+        private void RebuildWorld(DungeonLayoutId layout)
+        {
+            World?.Dispose(); World = new DungeonWorld(layout); LayoutsVisitedMask |= 1 << (int)layout;
+            if (hero != null) hero.SetNavigation(World.NextWaypoint, World.LineOfSight);
+            foreach (MeleeActor actor in enemies) if (actor != null) actor.SetNavigation(World.NextWaypoint, World.LineOfSight);
+        }
+
+        private static DungeonLayoutId LayoutForClear(int clears) => (DungeonLayoutId)(Math.Abs(clears) % 3);
 
         private void UpdateEnemyRoaming(Vector2 heroPosition)
         {
@@ -254,7 +297,7 @@ namespace AffixZero.Presentation
             stalledTime = 0; stallAttempts++; StallRecoveries++;
             hero.SetTarget(null);
             hero.SetDestination(World.SafePoint(position + new Vector2(stallAttempts % 2 == 0 ? 2 : -2, stallAttempts % 3 - 1)));
-            decisionTime = 1f;
+            decisionTime = 1.5f;recoveryUntil=Time.time+1.5f;
             if (stallAttempts >= 3) Block("세 차례 경로 복구에 실패해 안전 중지했습니다.");
         }
         private void Block(string reason)
@@ -274,7 +317,12 @@ namespace AffixZero.Presentation
         private void OnEnemyDamaged(MeleeActor actor, HitReceipt receipt)
         {
             if (!receipt.Killed || hero.IsDead) return;
-            if (owner.RegisterDefeat(actor)) { TotalKills++; stalledTime = 0; stallAttempts = 0; }
+            if (owner.RegisterDefeat(actor))
+            {
+                TotalKills++; stalledTime = 0; stallAttempts = 0;
+                KillChain = Time.time - lastKillAt <= 2.4f ? KillChain + 1 : 1;
+                MaxKillChain = Math.Max(MaxKillChain, KillChain); lastKillAt = Time.time;
+            }
         }
         private void OnDestroy()
         {

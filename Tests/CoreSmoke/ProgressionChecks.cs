@@ -19,6 +19,10 @@ internal static class ProgressionChecks
         check(hero.TotalDamage == 30 && hero.TotalMaxHp == 120 && hero.TotalDefense == 2 && hero.Level == 1 &&
             hero.Inventory.Count == 0 && hero.PendingLoot == null && hero.UnspentPoints == 0 && hero.LegacyPointCredit == 0,
             "new profile retains baseline combat and earns no free talent points");
+        check(hero.SelectedDifficulty==DungeonDifficulty.Scout&&hero.DungeonClears==0&&
+            !hero.TrySetDifficulty((DungeonDifficulty)99)&&hero.TrySetDifficulty(DungeonDifficulty.Veteran),
+            "new profile starts Scout and rejects invalid difficulty selections");
+        hero.TrySetDifficulty(DungeonDifficulty.Scout);
         check(hero.EquippedArmor == null && hero.EquippedRelic == null && hero.AttackReach == 1.05f &&
             hero.AttackSpeedMultiplier == 1f && !hero.IsRanged && hero.SplashRadius == 0,
             "starter sword has actual melee parameters and secondary slots start empty");
@@ -121,7 +125,13 @@ internal static class ProgressionChecks
         check(gear.GetEquipped((EquipmentSlot)99) == null && !gear.CanEnhance((EquipmentSlot)99) &&
             !gear.TryEnhance(EquipmentSlot.Relic), "invalid or unaffordable enhancement cannot mutate equipment");
 
-        var talents = new HeroProgression(); Kills(talents, 760, "talent:");
+        check(HeroProgression.EarnedTalentPointsForExperience(2500)==10&&
+            HeroProgression.EarnedTalentPointsForExperience(10500)==30&&
+            HeroProgression.EarnedTalentPointsForExperience(23500)==50&&
+            HeroProgression.EarnedTalentPointsForExperience(25570)==52&&
+            HeroProgression.EarnedTalentPointsForExperience(48500)==75,
+            "talent curve keeps early choices quick and stretches late specialization across sessions");
+        var talents = new HeroProgression(); Kills(talents, 2000, "talent:");
         int capSum = 0;
         foreach (var definition in HeroProgression.TalentDefinitions)
         {

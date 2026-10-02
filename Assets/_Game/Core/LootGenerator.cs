@@ -67,12 +67,25 @@ namespace AffixZero.Core
         };
 
         public static float FieldDropChancePercent(int floor, int rebirths = 0) =>
-            Clamp(.8f + Math.Max(0, floor - 1) * .012f + Math.Max(0, rebirths) * .08f, .8f, 2f);
-        public static float EliteDropChancePercent(int floor, int rebirths = 0) =>
-            Clamp(18f + Math.Max(0, floor - 6) * .10f + Math.Max(0, rebirths) * .8f, 18f, 30f);
-        public static float[] RarityProbabilities(int floor, int rebirths = 0)
+            FieldDropChancePercent(floor, DungeonDifficulty.Scout, rebirths);
+        public static float FieldDropChancePercent(int floor, DungeonDifficulty difficulty, int rebirths = 0)
         {
-            float progression = Clamp(Math.Max(0, floor - 1) * .004f + Math.Max(0, rebirths) * .02f, 0, .6f);
+            float baseline = Clamp(.8f + Math.Max(0, floor - 1) * .012f + Math.Max(0, rebirths) * .08f, .8f, 2f);
+            return Clamp(baseline * DifficultyTuning.Get(difficulty).DropMultiplier, .8f, 3.2f);
+        }
+        public static float EliteDropChancePercent(int floor, int rebirths = 0) =>
+            EliteDropChancePercent(floor, DungeonDifficulty.Scout, rebirths);
+        public static float EliteDropChancePercent(int floor, DungeonDifficulty difficulty, int rebirths = 0)
+        {
+            float baseline = Clamp(18f + Math.Max(0, floor - 6) * .10f + Math.Max(0, rebirths) * .8f, 18f, 30f);
+            return Clamp(baseline * DifficultyTuning.Get(difficulty).DropMultiplier, 18f, 48f);
+        }
+        public static float[] RarityProbabilities(int floor, int rebirths = 0) =>
+            RarityProbabilities(floor, DungeonDifficulty.Scout, rebirths);
+        public static float[] RarityProbabilities(int floor, DungeonDifficulty difficulty, int rebirths = 0)
+        {
+            float progression = Clamp(Math.Max(0, floor - 1) * .004f + Math.Max(0, rebirths) * .02f +
+                DifficultyTuning.Get(difficulty).RarityProgressionBonus, 0, .6f);
             var values = new float[Rarities.Count]; float total = 0;
             for (int i = 0; i < values.Length; i++)
             {
@@ -85,21 +98,37 @@ namespace AffixZero.Core
             return values;
         }
         public static WeaponItem TryGenerate(string identity, int floor, bool elite, int seed, int rebirths = 0)
+            => TryGenerate(identity, floor, elite, seed, DungeonDifficulty.Scout, rebirths);
+        public static WeaponItem TryGenerate(string identity, int floor, bool elite, int seed,
+            DungeonDifficulty difficulty, int rebirths = 0)
         {
             var random = new Random(seed);
-            float chance = elite ? EliteDropChancePercent(floor, rebirths) : FieldDropChancePercent(floor, rebirths);
+            float chance = elite ? EliteDropChancePercent(floor, difficulty, rebirths) : FieldDropChancePercent(floor, difficulty, rebirths);
             if (random.NextDouble() * 100 >= chance) return null;
-            return Generate(identity, floor, rebirths, random);
+            return Generate(identity, floor, rebirths, difficulty, random, null, null);
         }
         public static WeaponItem GenerateGuaranteed(string identity, int floor, int seed, int rebirths = 0) =>
-            Generate(identity, floor, rebirths, new Random(seed));
-        private static WeaponItem Generate(string identity, int floor, int rebirths, Random random)
+            Generate(identity, floor, rebirths, DungeonDifficulty.Scout, new Random(seed), null, null);
+        public static WeaponItem GenerateGuaranteed(string identity, int floor, int seed, DungeonDifficulty difficulty, int rebirths = 0) =>
+            Generate(identity, floor, rebirths, difficulty, new Random(seed), null, null);
+        // Audit hook for seeded distribution tests and comparison UI fixtures. Runtime drops still
+        // choose from the full eligible pool; this only fixes base and rarity, never option values.
+        public static WeaponItem GenerateGuaranteedBase(string identity, string baseId, string rarityId, int floor, int seed)
+        {
+            ItemBase basis = Array.Find(Bases, item => item.Id == baseId);
+            RarityRule rarity = null;
+            foreach (RarityRule candidate in Rarities) if (candidate.Id == rarityId) rarity = candidate;
+            if (basis == null || rarity == null || basis.Tier > floor) throw new ArgumentOutOfRangeException(nameof(baseId));
+            return Generate(identity, floor, 0, DungeonDifficulty.Scout, new Random(seed), basis, rarity);
+        }
+        private static WeaponItem Generate(string identity, int floor, int rebirths, DungeonDifficulty difficulty,
+            Random random, ItemBase forcedBase, RarityRule forcedRarity)
         {
             if (string.IsNullOrWhiteSpace(identity) || floor < 1 || rebirths < 0) throw new ArgumentOutOfRangeException(nameof(floor));
-            RarityRule rarity = RollRarity(floor, rebirths, random);
+            RarityRule rarity = forcedRarity ?? RollRarity(floor, rebirths, difficulty, random);
             var eligible = new List<ItemBase>();
             foreach (ItemBase item in Bases) if (item.Tier <= floor) eligible.Add(item);
-            ItemBase basis = eligible[random.Next(eligible.Count)];
+            ItemBase basis = forcedBase ?? eligible[random.Next(eligible.Count)];
             float floorScale = 1f + (floor - 1) * .15f;
             int attack = Round(basis.Attack * floorScale * rarity.StatMultiplier);
             int defense = Round(basis.Defense * floorScale * rarity.StatMultiplier);
@@ -123,9 +152,9 @@ namespace AffixZero.Core
             return new WeaponItem(identity, prefix + basis.Name, attack, 0, affixText, icon,
                 rarity.Id, 0, basis.Slot, basis.Style, defense, health, 0, options);
         }
-        private static RarityRule RollRarity(int floor, int rebirths, Random random)
+        private static RarityRule RollRarity(int floor, int rebirths, DungeonDifficulty difficulty, Random random)
         {
-            float[] probabilities = RarityProbabilities(floor, rebirths);
+            float[] probabilities = RarityProbabilities(floor, difficulty, rebirths);
             double roll = random.NextDouble(), cursor = 0;
             for (int i = 0; i < probabilities.Length; i++)
             { cursor += probabilities[i]; if (roll <= cursor) return Rarities[i]; }

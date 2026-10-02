@@ -97,3 +97,20 @@ After the request to keep subsequent work on D:, no additional C: artifact was c
 - Library helper copy: 11,085 bytes (0.01 MiB).
 
 They were created solely to package and upload the first evidence bundle. All later reports, profiles, PNGs, builds, and helper refreshes are on D:.
+
+## Dungeon variety and difficulty follow-up
+
+The next verified layer is documented in DUNGEON_VARIETY_DIFFICULTY.md. It
+replaces the single repeated topology with three reachable 24-enemy layouts,
+adds saved difficulty with explicit pressure and reward multipliers, tests
+same-base option/value variation, extends the talent curve across sessions,
+and adds bounded combat feedback without changing the existing save-safe core
+loop.
+
+CoreSmoke is now 267 PASS. The 1080p twenty-minute production-flow run passed
+with 868 kills, 36 clears, zero deaths/failures/safety restarts, 102 natural
+drops seen, 37 upgrades, and 60/75 ranks invested. Final build GUID
+8fded397ea654f1db965eb326ff9c911 has 0 errors / 0 warnings and passed a fresh
+720p 120-second three-layout/three-difficulty regression plus a separate-process
+restore and continuation. OS mouse/keyboard input remains NOT RUN; UI callback
+coverage is not presented as physical input.

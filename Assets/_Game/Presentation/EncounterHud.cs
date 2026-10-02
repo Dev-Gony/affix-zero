@@ -33,8 +33,10 @@ namespace AffixZero.Presentation
         private VisualElement huntButton;
         private Label huntCaption, huntStatus;
         private Label enemyTitle;
-        private Label sectionCaption, killCount, huntRewards, combatStats, mapCaption;
+        private Label sectionCaption, killCount, huntRewards, combatStats, mapCaption, mapTitle, difficultyInfo;
         private readonly VisualElement[] sectionTicks=new VisualElement[3];
+        private readonly VisualElement[] difficultyButtons=new VisualElement[3];
+        private VisualElement effectsButton;
         private Label saveStatus;
         private VisualElement saveRetry;
         private readonly HashSet<MeleeActor> observedActors=new HashSet<MeleeActor>();
@@ -43,6 +45,7 @@ namespace AffixZero.Presentation
         private string actionIconResource;
         private readonly List<DamageLabel> damageLabels = new List<DamageLabel>();
         private readonly List<VisualElement> enemyMarkers = new List<VisualElement>();
+        private readonly List<VisualElement> obstacleMarkers = new List<VisualElement>();
         public void Configure(FirstEncounter owner) { encounter = owner; }
 
         private void Start()
@@ -125,6 +128,11 @@ namespace AffixZero.Presentation
             clock = Text(stats, "", 14,71,208,18,10,Muted);
             Box(stats,"hunt-summary-rule",0,99,236,3,Gold);
             huntStatus=Text(root,"",18,298,236,55,12,Gold);huntStatus.name="autohunt-status";huntStatus.style.whiteSpace=WhiteSpace.Normal;
+            difficultyButtons[0]=Click(root,"difficulty-scout","SCOUT",18,356,72,26,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Scout),Surface);
+            difficultyButtons[1]=Click(root,"difficulty-veteran","VETERAN",96,356,72,26,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Veteran),Surface);
+            difficultyButtons[2]=Click(root,"difficulty-torment","TORMENT",174,356,78,26,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Torment),Surface);
+            difficultyInfo=Text(root,"",18,387,236,42,10,Muted);difficultyInfo.style.whiteSpace=WhiteSpace.Normal;
+            effectsButton=Click(root,"effects-toggle","FX FULL · AUDIO",18,434,142,24,()=>encounter.Hunt.ToggleReducedEffects(),Ink);
             paused = Text(root, "일시정지  /  PAUSED", 0, 172, 210, 24, 12, Gold);
             paused.style.left = Length.Percent(50); paused.style.marginLeft = -105;
             paused.style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -133,7 +141,7 @@ namespace AffixZero.Presentation
         {
             var frame = Box(root, "minimap", 0, 186, 172, 168, Surface);
             frame.style.left = StyleKeyword.Auto; frame.style.right = 16;
-            Text(frame, "MAP  /  사원 마당", 8, 7, 157, 18, 10, Cream);
+            mapTitle=Text(frame, "MAP", 8, 7, 157, 18, 10, Cream);
             var map = Box(frame, "minimap-image", 8, 31, 156, 104, Ink);mapArea=map;
             if (room != null) map.style.backgroundImage = new StyleBackground(room);
             else Text(map,"ROOM ART MISSING",4,40,150,20,10,Crimson);
@@ -335,13 +343,24 @@ namespace AffixZero.Presentation
                 foreach(var actor in hunt.Enemies)ObserveActor(actor);
                 huntButton.SetEnabled(hunt.Initialized);
                 huntCaption.text=hunt.Running?"자동사냥 중지":"자동사냥 시작";
-                huntStatus.text=hunt.StateCaption+"\n연결형 사원 · 생존 적 "+hunt.AliveEnemies;
-                sectionCaption.text="CONNECTED TEMPLE     상시 배치 "+hunt.Enemies.Count+"체  ·  정화 "+hunt.CompletedRuns+"회";
+                huntStatus.text=hunt.StateCaption+"\nALIVE "+hunt.AliveEnemies+(hunt.KillChain>1?"   CHAIN x"+hunt.KillChain:"");
+                sectionCaption.text=hunt.CurrentLayoutName+"     "+hunt.Difficulty.Name.ToUpperInvariant()+"  ·  CLEARS "+encounter.Progression.DungeonClears;
                 for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i].style.display=DisplayStyle.None;
                 killCount.text=hunt.TotalKills+"  KILLS";
                 huntRewards.text="수거 "+hunt.CollectedItems+"개  ·  재도전 "+hunt.DeathRetries+"회";
                 int alive=0;foreach(var actor in hunt.Enemies)if(actor.isActiveAndEnabled&&!actor.IsDead)alive++;
-                mapCaption.text="전체 던전  ·  생존 적 "+alive;
+                mapTitle.text="MAP  /  "+hunt.CurrentLayoutName;
+                mapCaption.text=hunt.Difficulty.Name.ToUpperInvariant()+"  ·  ALIVE "+alive;
+                DifficultyRule rule=hunt.Difficulty;
+                difficultyInfo.text="ENEMY HP x"+rule.EnemyHealthMultiplier.ToString("0.00")+"  DMG x"+rule.EnemyDamageMultiplier.ToString("0.00")+
+                    "\nREWARD x"+rule.RewardMultiplier.ToString("0.00")+"  DROP x"+rule.DropMultiplier.ToString("0.00");
+                for(int i=0;i<difficultyButtons.Length;i++)
+                {
+                    difficultyButtons[i].SetEnabled(hunt.CanChangeDifficulty&&(int)hunt.CurrentDifficulty!=i);
+                    difficultyButtons[i].style.backgroundColor=(int)hunt.CurrentDifficulty==i?Crimson:Surface;
+                }
+                effectsButton.Q<Label>().text=hunt.ReducedEffects?"FX LOW · AUDIO LOW":"FX FULL · AUDIO";
+                RefreshObstacleMarkers(hunt.World);
             }
             enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
             enemyValue.text=enemy.Hp+" / "+enemy.MaxHp+" HP";
@@ -408,13 +427,31 @@ namespace AffixZero.Presentation
                 if(visible)PositionMarker(enemyMarkers[i],enemies[i].transform.position);
             }
         }
+        private void RefreshObstacleMarkers(DungeonWorld world)
+        {
+            if(world==null)return;
+            while(obstacleMarkers.Count<world.ObstacleCenters.Count)
+            {
+                var marker=Box(mapArea,"obstacle-map-marker-"+obstacleMarkers.Count,0,0,5,5,world.AccentColor);
+                marker.style.opacity=.8f;obstacleMarkers.Add(marker);
+            }
+            for(int i=0;i<obstacleMarkers.Count;i++)
+            {
+                bool visible=i<world.ObstacleCenters.Count;
+                obstacleMarkers[i].style.display=visible?DisplayStyle.Flex:DisplayStyle.None;
+                if(visible)PositionMarker(obstacleMarkers[i],world.ObstacleCenters[i]);
+            }
+        }
         private void OnDamaged(MeleeActor actor,HitReceipt receipt)
         {
             if(!receipt.Accepted || root==null || encounter.ManagementVisible) return;
-            if(damageLabels.Count==16) {damageLabels[0].label.RemoveFromHierarchy();damageLabels.RemoveAt(0);}
-            var label=Text(root,receipt.Damage.ToString(),0,0,90,32,22,actor==encounter.Hero?new Color(1,0.48f,0.36f):Gold);
+            if(damageLabels.Count==20) {damageLabels[0].label.RemoveFromHierarchy();damageLabels.RemoveAt(0);}
+            string prefix=actor.LastHitKilled?"KO  ":actor.LastHitCritical?"CRIT  ":"";
+            int size=actor.LastHitKilled?28:actor.LastHitCritical?25:22;
+            Color color=actor==encounter.Hero?new Color(1,0.48f,0.36f):actor.LastHitKilled?new Color(1,.38f,.16f):actor.LastHitCritical?Color.white:Gold;
+            var label=Text(root,prefix+receipt.Damage,0,0,110,36,size,color);
             label.style.unityFontStyleAndWeight=FontStyle.Bold;label.style.unityTextAlign=TextAnchor.MiddleCenter;
-            damageLabels.Add(new DamageLabel {label=label,position=actor.transform.position+Vector3.up*0.8f,time=Time.time});
+            damageLabels.Add(new DamageLabel {label=label,position=actor.transform.position+Vector3.up*(actor.LastHitKilled?1f:.8f),time=Time.time});
         }
         private void UpdateDamage()
         {
@@ -426,7 +463,7 @@ namespace AffixZero.Presentation
                 if(camera==null || root.panel==null) continue;
                 Vector3 screen=camera.WorldToScreenPoint(item.position+Vector3.up*(age*0.65f));
                 Vector2 point=RuntimePanelUtils.ScreenToPanel(root.panel,new Vector2(screen.x,Screen.height-screen.y));
-                item.label.style.left=point.x-45;item.label.style.top=point.y-16;item.label.style.opacity=Mathf.Clamp01((0.7f-age)/0.25f);
+                item.label.style.left=point.x-55;item.label.style.top=point.y-18;item.label.style.opacity=Mathf.Clamp01((0.7f-age)/0.25f);
             }
         }
         private void OnDestroy()

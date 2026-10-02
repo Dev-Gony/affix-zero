@@ -1,3 +1,33 @@
+# 2026-10-02 dungeon-variety and difficulty handoff
+
+The same feature/open-dungeon-loot-skills branch now adds three materially
+different connected layouts (EMBER BASTION, SPLIT GALLERIES, and
+RITUAL CRUCIBLE), saved Scout/Veteran/Torment difficulty, explicit enemy /
+reward / drop multipliers, same-base affix/value variance tests, a staged
+75-rank XP curve, critical/kill/anticipation feedback, weapon-specific strike
+rendering, generated runtime hit audio, kill chains, and an FX FULL / FX LOW
+budget control. Classes remain deliberately deferred until they can have
+separate animation, resource, and skill behavior instead of labels only.
+
+Current verification is CoreSmoke 267 PASS; final Unity Windows build GUID
+8fded397ea654f1db965eb326ff9c911 with 0 errors / 0 warnings; 720p final-build
+regression PASS (120 seconds, 75 kills, three layouts and difficulties);
+separate-process restore/continuation PASS; and the immediately preceding
+1080p twenty-minute production-flow run PASS (868 kills, 36 clears, 102 natural
+drops seen, 37 upgrades, 60/75 ranks, zero deaths/failures/safety restarts).
+The only delta after that long run was correcting the displayed talent-point
+notice; the final build and 720p regression include it. Read
+DUNGEON_VARIETY_DIFFICULTY.md and the reports under
+Build/Reports/variety-natural-final*.
+
+Library delivery: evidence ZIP libfile_0dafb6e55b1c8191a6263b3b47c97761,
+1080p AVI libfile_f3588b7d7fc08191928f3e5af293156a, Ember screenshot
+libfile_283e7ab0b5188191b8cd409eb0d4b91d, Galleries screenshot
+libfile_d6c2e12898388191813ba76d696d3c9e, and Crucible screenshot
+libfile_25f167d61ff08191ad33fcf156ec144a. Library creation succeeded for all
+five files. Local extended-attribute writeback is unavailable on this Windows
+Python because os.setxattr is absent; this does not affect the uploaded files.
+
 # 2026-10-02 connected-dungeon handoff
 
 The active work is on `feature/open-dungeon-loot-skills`, based on

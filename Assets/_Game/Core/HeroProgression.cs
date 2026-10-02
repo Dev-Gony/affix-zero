@@ -160,6 +160,8 @@ namespace AffixZero.Core
         public int VitalityRank { get; private set; }
         public int CleaveRank { get; private set; }
         public int HasteRank { get; private set; }
+        public DungeonDifficulty SelectedDifficulty { get; private set; }
+        public int DungeonClears { get; private set; }
         public int LegacyPointCredit => legacyPointCredit;
         public int Level => 1 + TotalExperience / ExperiencePerLevel;
         public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank + VitalityRank + CleaveRank + HasteRank;
@@ -232,17 +234,43 @@ namespace AffixZero.Core
             issuedItemIds.Add(EquippedWeapon.Id);
         }
 
+        // Early points arrive quickly so a fresh run makes choices immediately. Later bands slow
+        // down to preserve build decisions across sessions instead of completing all 75 ranks in
+        // one twenty-minute farm. Level display remains the historical 250-XP cadence.
+        public static int EarnedTalentPointsForExperience(int experience)
+        {
+            if (experience < 0) throw new ArgumentOutOfRangeException(nameof(experience));
+            if (experience < 2500) return experience / 250;
+            if (experience < 10500) return 10 + (experience - 2500) / 400;
+            if (experience < 23500) return 30 + (experience - 10500) / 650;
+            if (experience < 48500) return 50 + (experience - 23500) / 1000;
+            return 75 + (experience - 48500) / 1500;
+        }
+
+        public bool TrySetDifficulty(DungeonDifficulty difficulty)
+        {
+            if (!Enum.IsDefined(typeof(DungeonDifficulty), difficulty)) return false;
+            SelectedDifficulty = difficulty;
+            return true;
+        }
+
+        public void RegisterDungeonClear()
+        {
+            if (DungeonClears == int.MaxValue) throw new InvalidOperationException("Dungeon clear count overflow.");
+            DungeonClears++;
+        }
+
         public bool TryRegisterKill(string uniqueToken)
         {
             if (string.IsNullOrWhiteSpace(uniqueToken) || killTokens.Contains(uniqueToken) ||
                 (long)UnspentPoints + SpentPoints >= int.MaxValue ||
-                TotalExperience > int.MaxValue - 30 || TotalGold > int.MaxValue - 11) return false;
+                TotalExperience > int.MaxValue - 45 || TotalGold > int.MaxValue - 17) return false;
             killTokens.Add(uniqueToken);
-            int previousLevel = Level;
-            LastExperienceReward = 25 + 25 * ExperienceBonusPercent / 100;
-            LastGoldReward = 8 + 8 * GoldBonusPercent / 100;
+            int previousTalentPoints = EarnedTalentPointsForExperience(TotalExperience);
+            LastExperienceReward = DifficultyTuning.ScaleReward(25 + 25 * ExperienceBonusPercent / 100, SelectedDifficulty);
+            LastGoldReward = DifficultyTuning.ScaleReward(8 + 8 * GoldBonusPercent / 100, SelectedDifficulty);
             TotalExperience += LastExperienceReward;
-            UnspentPoints += Level - previousLevel;
+            UnspentPoints += EarnedTalentPointsForExperience(TotalExperience) - previousTalentPoints;
             TotalGold += LastGoldReward;
             return true;
         }
@@ -386,6 +414,7 @@ namespace AffixZero.Core
                 totalExperience = TotalExperience, totalGold = TotalGold, unspentPoints = UnspentPoints,
                 furyRank = FuryRank, precisionRank = PrecisionRank, keystoneRank = KeystoneRank,
                 vitalityRank = VitalityRank, cleaveRank = CleaveRank, hasteRank = HasteRank, legacyPointCredit = legacyPointCredit,
+                selectedDifficulty = (int)SelectedDifficulty, dungeonClears = DungeonClears,
                 hasArmor = EquippedArmor != null, hasRelic = EquippedRelic != null,
                 equippedArmor = CaptureWeapon(EquippedArmor), equippedRelic = CaptureWeapon(EquippedRelic),
                 hasHelmet = EquippedHelmet != null, hasGloves = EquippedGloves != null, hasBoots = EquippedBoots != null,
@@ -402,13 +431,16 @@ namespace AffixZero.Core
         public static HeroProgression RestoreSnapshot(ProgressionSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
-            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2)
+            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2 && snapshot.schemaVersion != 3)
                 throw new NotSupportedException("Unsupported progression snapshot version.");
             bool legacy = snapshot.schemaVersion == 1;
+            bool current = snapshot.schemaVersion == 3;
             int[] ranks = { snapshot.furyRank, snapshot.precisionRank, snapshot.keystoneRank,
                 snapshot.vitalityRank, snapshot.cleaveRank, snapshot.hasteRank };
             int[] legacyCaps = { 2, 1, 1, 0, 0, 0 };
-            if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.unspentPoints < 0 ||
+            if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.unspentPoints < 0 || snapshot.dungeonClears < 0 ||
+                (current && !Enum.IsDefined(typeof(DungeonDifficulty), snapshot.selectedDifficulty)) ||
+                (!current && (snapshot.selectedDifficulty != 0 || snapshot.dungeonClears != 0)) ||
                 snapshot.legacyPointCredit < 0 || (legacy && (snapshot.hasArmor || snapshot.hasRelic || snapshot.hasHelmet ||
                 snapshot.hasGloves || snapshot.hasBoots || snapshot.hasRing || snapshot.hasAmulet || snapshot.legacyPointCredit != 0)))
                 throw new ArgumentException("Invalid balances or legacy fields.", nameof(snapshot));
@@ -427,15 +459,15 @@ namespace AffixZero.Core
             HashSet<string> tokens = RestoreIdentifiers(snapshot.killTokens);
             HashSet<string> ids = RestoreIdentifiers(snapshot.issuedItemIds);
             long earnedPoints = snapshot.unspentPoints + spent;
-            long normalPoints = snapshot.totalExperience / ExperiencePerLevel;
-            long credit = legacy ? earnedPoints - normalPoints : snapshot.legacyPointCredit;
+            long normalPoints = EarnedTalentPointsForExperience(snapshot.totalExperience);
+            long credit = current ? snapshot.legacyPointCredit : earnedPoints - normalPoints;
             long minimumExperience = (long)tokens.Count * 25;
-            long maximumExperience = (long)tokens.Count * 30;
-            long maximumGold = (long)tokens.Count * 11;
+            long maximumExperience = (long)tokens.Count * (current ? 45 : legacy ? 25 : 30);
+            long maximumGold = (long)tokens.Count * (current ? 17 : legacy ? 8 : 11);
             if (credit < 0 || credit > tokens.Count - normalPoints ||
-                earnedPoints != (legacy ? tokens.Count : normalPoints + credit) ||
+                earnedPoints != normalPoints + credit || snapshot.dungeonClears > tokens.Count ||
                 (legacy ? snapshot.totalExperience != minimumExperience : snapshot.totalExperience < minimumExperience || snapshot.totalExperience > maximumExperience) ||
-                snapshot.totalGold > (legacy ? (long)tokens.Count * 8 : maximumGold) || (legacy && snapshot.totalGold % 8 != 0))
+                snapshot.totalGold > maximumGold || (legacy && snapshot.totalGold % 8 != 0))
                 throw new ArgumentException("Reward balances disagree with the kill ledger.", nameof(snapshot));
             bool invalidLegacyFirstDrop = legacy && ((tokens.Count == 0 && (snapshot.firstDropWaiting || ids.Contains(FirstDropId))) ||
                 (tokens.Count > 0 && snapshot.firstDropWaiting == ids.Contains(FirstDropId)) ||
@@ -473,6 +505,8 @@ namespace AffixZero.Core
                 PrecisionRank = snapshot.precisionRank, KeystoneRank = snapshot.keystoneRank,
                 VitalityRank = snapshot.vitalityRank, CleaveRank = snapshot.cleaveRank, HasteRank = snapshot.hasteRank,
                 legacyPointCredit = (int)credit, EquippedArmor = armor, EquippedRelic = relic,
+                SelectedDifficulty = current ? (DungeonDifficulty)snapshot.selectedDifficulty : DungeonDifficulty.Scout,
+                DungeonClears = current ? snapshot.dungeonClears : 0,
                 EquippedHelmet = helmet, EquippedGloves = gloves, EquippedBoots = boots,
                 EquippedRing = ring, EquippedAmulet = amulet,
                 firstDropWaiting = snapshot.firstDropWaiting, EquippedWeapon = equipped, PendingLoot = pending
