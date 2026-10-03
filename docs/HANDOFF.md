@@ -1,3 +1,18 @@
+# 2026-10-03 - passive icon art readiness and socket proposal
+
+The exact remaining pixel-style TalentPanel assets are `PowerRune.png` for
+Fury/격노, `PrecisionRune.png` for Precision/정밀, and `VeteranRune.png` for
+Keystone/숙련. All three are 16 x 16 and are displayed at 48 x 48; their exact
+runtime semantics, paths and separate painted transparent-art prompts are in
+`PASSIVE_ICON_ART_BRIEF.md`. No PNG or runtime code was changed in this
+documentation-only pass.
+
+`ITEM_SOCKET_REQUIREMENT.md` now contains a bounded recommended v1 contract for
+eligibility, proposed capacity ranges, insertion/removal/salvage behavior and a
+fail-closed v5 migration shape. Every new count and rule is explicitly marked
+as proposed rather than user-agreed. No socket field, fake pip, rune, currency,
+drop rule or gameplay behavior was implemented.
+
 # 2026-10-03 - complete illustrated equipment set and verified talent framing
 
 All 26 remaining flat placeholders were replaced with original illustrated
