@@ -182,7 +182,7 @@ namespace AffixZero.Presentation
                 string id = "reference-ui:" + report.runId + ":weapon:" + i;
                 var weapon = new WeaponItem(id, new[] { "날카로운 강철검", "묵직한 장검", "잿불 수호검", "훈련용 단검" }[i % 4],
                     10 + i, 2 + i % 3, new[] { "날카로움", "묵직함", "잿불" }[i % 3],
-                    new[] { "AffixUIVisual/Items/dagger", "AffixUIVisual/Items/longsword", "AffixUIVisual/Items/dragon_helm", "AffixUIVisual/Items/dragonscale", "AffixUIVisual/Items/dragon_gloves", "AffixUIVisual/Items/gale_boots", "AffixUIVisual/Items/diamond_ring", "AffixUIVisual/Items/dragon_tear" }[i],
+                    new[] { "AffixUIVisual/Items/dagger", "AffixUIVisual/Items/longsword", "AffixUIVisual/Items/plate_armor", "AffixUIVisual/Items/battle_gloves", "AffixUIVisual/Items/dragon_gloves", "AffixUIVisual/Items/gale_boots", "AffixUIVisual/Items/diamond_ring", "AffixUIVisual/Items/dragon_tear" }[i],
                     new[] { "normal", "magic", "rare", "unique", "legend", "epic", "rare", "unique" }[i]);
                 Require(p.TryCreatePendingLoot(weapon) && owner.CollectLoot(), "Fixture weapon intake failed."); fixtureItems.Add(id);
             }

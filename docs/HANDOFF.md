@@ -1,3 +1,34 @@
+# 2026-10-03 - illustrated equipment v2 representative pass
+
+The user rejected the first 29-icon contact sheet despite its technical
+one-to-one mapping. Its flat polygons, repeated/color-swapped forms and weak
+material rendering did not meet the supplied Hero Siege references. Do not
+reuse that local visual-quality PASS.
+
+Only `longsword`, `plate_armor`, and `battle_gloves` now use the new
+original illustrated direction. Their exact cloud-generated transparent
+masters were transferred through Git commit
+`5b4933ccb2b2bfad1158a26aa7917d561bdc60cf` without merging, cherry-picking,
+or checking out its isolated branch. Originals and blob provenance are in
+`docs/art-source/illustrated-equipment-v2/`; the existing generator only
+downsamples these three to 128 px. At actual 37 px bag size, steel/brass/leather
+separation and gauntlet finger anatomy remain readable, while fine engraving
+necessarily reduces.
+
+Inspected actual-UI evidence is tracked at
+`docs/media/illustrated-equipment-v2/equipment-before-after-1080p.png`; the
+128/64/37 px comparison is
+`docs/media/illustrated-equipment-v2/actual-scale-preview.png`.
+
+Final representative build GUID `642c56a9fd5e477e90d819f25a98c8ac`
+passes static compile 0/0 and fresh D-isolated 720p/1080p UI probes with 19
+callbacks, all 29 paths loaded, player HP present and non-player HP absent.
+The first hidden-window 720 capture failed only at framebuffer `ReadPixels`
+and remains preserved/excluded; normal-window reruns pass. The remaining 26
+icons are rejected placeholders pending replacement after the three-item art
+direction receives user approval. The paused TalentPanel/ReferenceUiProbe
+visual WIP remains local and is not part of this art-direction conclusion.
+
 # 2026-10-03 - 29 base icons and Hero Siege equipment dock
 
 The current `feature/open-dungeon-loot-skills` branch now maps all 29 existing

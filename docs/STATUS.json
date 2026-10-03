@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "HERO_SIEGE_UI_ICON_POLISH_VALIDATED",
+  "stage": "THREE_ILLUSTRATED_EQUIPMENT_PROTOTYPES_VALIDATED_REMAINING_26_PENDING",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -16,12 +16,12 @@
     "latest_user_report": "INSTALLATION_COMPLETE",
     "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "ORIGINAL_29_BASE_ITEM_ICONS_AND_BURGUNDY_METAL_UI_FRAMES_PLUS_EXISTING_APPROVED_RESOURCES",
+  "new_art": "THREE_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_PROTOTYPES; 26 EARLIER FLAT ICONS REJECTED_PLACEHOLDERS",
   "unity_editor_import": "PASS",
   "unity_play": "PASS_720_AND_1080_CONNECTED_DUNGEON_FULL_CLEAR_WITH_EPHEMERAL_SURVIVAL_FIXTURE",
-  "visual_approval": "NOT_APPROVED; NEW_HERO_SIEGE_INSPIRED_UI_INSPECTED_LOCALLY, USER REVIEW PENDING",
+  "visual_approval": "NOT_APPROVED; USER_REJECTED_V1_29_ICON_CONTACT_SHEET; THREE_V2_PROTOTYPES_INSPECTED_LOCALLY_AND_AWAIT_USER_REVIEW",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_2026-10-03T03:00:53Z_ZERO_ERRORS_WARNINGS_BUILD_a536a92cb1194263bfed35ec1344020b",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_642c56a9fd5e477e90d819f25a98c8ac",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User visual approval, deeper authored biome materials, real boss/boss-only HP treatment, and default-build safety-stop replay",
+  "next": "User decision on the three illustrated-v2 prototypes, then replace the remaining 26 rejected placeholders; broader systems remain deferred",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
@@ -174,7 +174,7 @@
     "unimplemented": "Active skills, mana, extra classes/gear slots, socket/reforge, town/pets. Six dock cells are empty."
   },
   "natural_progression": {
-    "status": "PASS",
+    "status": "PARTIAL_ART_REPLACEMENT_TECHNICAL_PASS_USER_APPROVAL_PENDING",
     "build_guid": "5282f0124fe1452d9414ed292132e184",
     "observation_report": "Build/Reports/natural-20m-pass2/natural-progression-observe.json",
     "read_report": "Build/Reports/natural-20m-pass2/natural-progression-read.json",
@@ -232,16 +232,16 @@
   "ui_icon_polish_20261003": {
     "status": "PASS",
     "design": "docs/UI_ICON_POLISH.md",
-    "build_guid": "a536a92cb1194263bfed35ec1344020b",
+    "build_guid": "642c56a9fd5e477e90d819f25a98c8ac",
     "core_smoke": "321 PASS",
     "unity_build": "Succeeded; 0 errors; 0 warnings",
-    "base_item_icons": "29 unique base IDs -> 29 unique original 128x128 resource paths",
+    "base_item_icons": "29 unique resource paths; longsword/plate_armor/battle_gloves are illustrated-v2 prototypes; 26 flat icons are rejected placeholders",
     "equipment_layout": "Full-height right dock, 500/1280 = 39.0625%, paper doll over dense 6x4 bag, floating left comparison",
     "hp_policy": "Player HP visible; ordinary, elite and guardian HP absent; real boss not implemented",
     "speed_observe": "PASS, 28 kills, 34 callbacks, live equip/salvage, salvage selection fallback, schema3->4 disk roundtrip",
     "separate_process_read": "PASS, exact schema4 restore, session speed reset, continued kills",
-    "ui_720": "PASS, 19 callbacks, 29 icons loaded, inspected",
-    "ui_1080": "PASS, 19 callbacks, 29 icons loaded, inspected",
+    "ui_720": "PASS on normal-window rerun, 19 callbacks, 29 paths loaded, three illustrated prototypes inspected at actual slot size",
+    "ui_1080": "PASS, 19 callbacks, 29 paths loaded, three illustrated prototypes inspected at actual slot size",
     "production_save_isolation": "Primary, backup and lock SHA256 unchanged before/after all probes"
   },
   "physical_input": {

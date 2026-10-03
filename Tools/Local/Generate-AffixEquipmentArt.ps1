@@ -75,6 +75,24 @@ function Save-ItemIcon([string]$id) {
     try{$large.Save((Join-Path $output ($id+'.png')),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$large.Dispose()}
 }
 
+function Save-IllustratedItemIcon([string]$sourceName,[string]$id) {
+    $sourcePath=Join-Path $RepoRoot ('docs\art-source\illustrated-equipment-v2\'+$sourceName)
+    if(-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)){throw "Missing illustrated source: $sourcePath"}
+    $source=[System.Drawing.Bitmap]::new($sourcePath)
+    $icon=[System.Drawing.Bitmap]::new(128,128,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+    $g=[System.Drawing.Graphics]::FromImage($icon)
+    try{
+        $g.Clear([System.Drawing.Color]::Transparent)
+        $g.CompositingMode=[System.Drawing.Drawing2D.CompositingMode]::SourceCopy
+        $g.CompositingQuality=[System.Drawing.Drawing2D.CompositingQuality]::HighQuality
+        $g.SmoothingMode=[System.Drawing.Drawing2D.SmoothingMode]::HighQuality
+        $g.InterpolationMode=[System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
+        $g.PixelOffsetMode=[System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
+        $g.DrawImage($source,[System.Drawing.Rectangle]::new(0,0,128,128),0,0,$source.Width,$source.Height,[System.Drawing.GraphicsUnit]::Pixel)
+    }finally{$g.Dispose();$source.Dispose()}
+    try{$icon.Save((Join-Path $output ($id+'.png')),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$icon.Dispose()}
+}
+
 function Save-WeatheredFrame([string]$name,[int]$width,[int]$height,[bool]$leatherCenter) {
     $bitmap=[System.Drawing.Bitmap]::new($width,$height,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb);$random=[System.Random]::new($width*7919+$height)
     for($y=0;$y -lt $height;$y++){for($x=0;$x -lt $width;$x++){
@@ -100,7 +118,8 @@ function Save-BagCellWide {
 }
 
 $ids=@('dagger','longsword','axe','magic_sword','divine_sword','leather_hat','iron_helm','mithril_helm','dragon_helm','cloth','leather_armor','plate_armor','dragonscale','cloth_gloves','leather_gloves','battle_gloves','dragon_gloves','sandals','leather_boots','swift_boots','gale_boots','copper_ring','silver_ring','gold_ring','diamond_ring','bone_necklace','crystal_necklace','ruby_necklace','dragon_tear')
-foreach($id in $ids){Save-ItemIcon $id}
+$illustrated=@{longsword='sword.png';plate_armor='armor.png';battle_gloves='gloves.png'}
+foreach($id in $ids){if($illustrated.ContainsKey($id)){Save-IllustratedItemIcon $illustrated[$id] $id}else{Save-ItemIcon $id}}
 Save-WeatheredFrame 'FramePanelTall.png' 500 712 $true
 Save-WeatheredFrame 'FrameTooltip.png' 300 424 $false
 Save-BagCellWide

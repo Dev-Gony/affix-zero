@@ -2,6 +2,38 @@
 
 Date: 2026-10-03
 
+## 2026-10-03 art-quality correction
+
+The user rejected the first 29-icon contact sheet. Although its resource
+mapping and technical uniqueness checks passed, the icons were crude flat
+polygon placeholders: weak material rendering, repeated silhouettes,
+color-swapped rings, and unreadable glove anatomy. That visual-quality
+judgment supersedes the earlier local PASS wording below.
+
+Only three representative items now use the illustrated v2 direction:
+
+- `longsword`: layered steel blade, brass guard, leather grip, red gems
+- `plate_armor`: shaded plate volumes, gold trim, leather straps and wear
+- `battle_gloves`: a readable pair of articulated gauntlets with leather
+  cuffs and individual fingers
+
+Their transparent 1254 x 1254 masters are preserved in
+`docs/art-source/illustrated-equipment-v2/`; Unity consumes reproducible
+128 x 128 downscales. Direct review at 128, 64 and 37 pixels and actual
+720p/1080p inventory captures confirms that silhouette and primary materials
+survive at slot size. Fine engraving and scratches naturally collapse at
+37 pixels.
+
+The remaining 26 icons are still rejected placeholders. They are retained only
+to keep the current 29-item runtime mapping complete while the representative
+direction is reviewed. Do not extrapolate or report the set as visually
+complete before user approval.
+
+Inspected evidence:
+
+- `docs/media/illustrated-equipment-v2/equipment-before-after-1080p.png`
+- `docs/media/illustrated-equipment-v2/actual-scale-preview.png`
+
 ## Bounded scope
 
 This pass changes presentation only:
@@ -61,7 +93,7 @@ Final Windows build GUID:
 | 1280 x 720 framebuffer UI | PASS, 19 callbacks, 29 icons loaded, 39.0625% dock, player HP present, non-player HP absent |
 | 1920 x 1080 framebuffer UI | PASS, same assertions and 19 callbacks |
 | OS-level native input | PASS, exact final-build window, ten mouse/keyboard actions in 17.231 s |
-| Visual inspection | PASS for delivered frames and contact sheet; user approval remains pending |
+| Visual inspection | Historical first-pass judgment withdrawn; user rejected the flat 29-icon sheet. Illustrated v2 is only a three-item prototype awaiting user approval |
 
 The nine save-writing probes used explicit D-only test directories. Production
 `profile-v1.json`, backup, and lock hashes match before and after:
@@ -98,6 +130,7 @@ marker failed, not upload or Library persistence.
 | Equipment visibility assertion raced panel resume | Probe dispatched and asserted in the same frame as panel resume/speed restoration | Added one frame before the assertion | UI Toolkit visibility should be sampled after the layout/update frame |
 | Telegraph phase stopped before its assertion | The long fixture filled the bag and correctly stopped auto-hunt | Salvaged enough probe items to reserve four slots before the later phase | Stress fixtures must preserve capacity for the behavior they intend to observe |
 | Library local identity writeback | Windows Python has no `os.setxattr` | Kept successful Library records as authoritative and reported the metadata-only limitation | Optional local metadata is not the Library upload result |
+| First illustrated-v2 720p capture | A hidden player window called framebuffer `ReadPixels` outside the drawing frame | Preserved the failed report and reran with a normal render window in a new D-only report/save directory | Framebuffer evidence requires a real drawing window; hidden-window failures are not product failures or PASS evidence |
 
 Failed/intermediate report folders are retained on D for audit; none is counted
 as a final PASS.
@@ -109,6 +142,7 @@ as a final PASS.
 - Typography remains the current project font treatment rather than a fully
   custom gothic display family.
 - Existing starter and legacy-save generic icon paths remain only for backward
-  compatibility; current 29 base definitions use the new one-to-one set.
+  compatibility; current 29 base definitions use one-to-one paths, but only
+  three currently meet the illustrated-v2 prototype bar.
 - Town/hub, five difficulty tiers, gacha, pets, and new gameplay systems remain
   deferred by scope.
