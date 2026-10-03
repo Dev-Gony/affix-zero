@@ -108,6 +108,7 @@
     "build_guid": "66363a4ba5fa4fd1a991d9617ccaf2d4",
     "ui_720": "Build/Reports/illustrated-v2-full-ui-720/ui-reference-probe.json",
     "ui_1080": "Build/Reports/illustrated-v2-full-ui-1080/ui-reference-probe.json",
+    "speed_equipment_salvage": "PASS_29_KILLS_37_CALLBACKS_EQUIP_TWO_STEP_SALVAGE_SELECTION_FALLBACK_720_BOUNDS_SCHEMA3_TO4",
     "physical_input": "PASS_10_ACTIONS_17.189S_D_ISOLATED",
     "library_contact_sheet": "libfile_af59bff5da448191ba99186f6b65708a",
     "library_equipment_1080": "libfile_8b7dc6abc6808191b2de6ec8b5c31f8e",

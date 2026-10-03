@@ -296,6 +296,7 @@
     "build_guid": "66363a4ba5fa4fd1a991d9617ccaf2d4",
     "ui_720": "PASS 19 callbacks 29 resources player HP present non-player HP absent",
     "ui_1080": "PASS 19 callbacks 29 resources player HP present non-player HP absent",
+    "speed_equipment_salvage": "PASS 29 kills, 37 callbacks, live equip, two-step salvage, adjacent selection fallback, 720p bounds, schema 3 to 4",
     "physical_input": "PASS exact 1280x720 window, ten actions, 17.189 seconds",
     "production_save_hashes_unchanged": true,
     "library": {

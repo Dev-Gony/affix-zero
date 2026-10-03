@@ -95,6 +95,7 @@ Final Windows build GUID:
 | Static Unity API compile | PASS, 0 errors / 0 warnings |
 | Unity 6000.3.24f1 Windows build/import | PASS, 0 errors / 0 warnings |
 | Runtime icon audit | PASS, 29 x 128 px, 29 unique SHA-256 values, zero alpha pixels on every canvas border |
+| Final speed/equipment/salvage observe | PASS, final build GUID; 29 kills, 37 callbacks, live equip, two-step salvage, adjacent selection fallback, 720p bounds, schema 3 -> 4 |
 | 1280 x 720 framebuffer UI | PASS, 19 callbacks, 29 icons loaded, 39.0625% dock, player HP present, non-player HP absent |
 | 1920 x 1080 framebuffer UI | PASS, same assertions and 19 callbacks |
 | OS-level native input | PASS, exact final-build 1280 x 720 window, ten mouse/keyboard actions in 17.189 s |

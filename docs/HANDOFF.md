@@ -17,7 +17,10 @@ rules are painted into the art.
 Build `66363a4ba5fa4fd1a991d9617ccaf2d4` passes CoreSmoke 321, static compile
 0/0, Unity build/import 0/0, 720p/1080p native UI probes with 19 callbacks and
 all 29 resources, player HP present/non-player HP absent, and exact-window OS
-input for ten actions in 17.189 seconds. The pre-existing TalentPanel WIP is now
+input for ten actions in 17.189 seconds. A final D-isolated speed/equipment
+observe also passes with 29 kills, 37 callbacks, live equip, two-step salvage,
+adjacent selection fallback, 720p bounds and schema 3 -> 4 migration. The
+pre-existing TalentPanel WIP is now
 included: it has authored frames and six distinct icons and was inspected at
 both resolutions. The first empty-profile OS-input attempt failed closed before
 input and remains preserved; pass2 used only a hash-verified copied D profile.
