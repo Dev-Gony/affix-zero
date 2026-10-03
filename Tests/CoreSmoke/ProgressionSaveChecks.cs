@@ -77,6 +77,14 @@ internal static class ProgressionSaveChecks
             loadedWaiting.PendingLoot == null && loadedWaiting.TotalExperience == 25,
             "current saves retain explicit pending loot without inventing a deferred drop");
 
+        var previousV3 = source.CaptureSnapshot(); previousV3.schemaVersion = 3; previousV3.totalSalvageGold = 0;
+        var migratedV3 = HeroProgression.RestoreSnapshot(previousV3); var normalizedV4 = migratedV3.CaptureSnapshot();
+        check(normalizedV4.schemaVersion == 4 && migratedV3.TotalSalvageGold == 0 &&
+            migratedV3.TotalGold == source.TotalGold && migratedV3.TotalExperience == source.TotalExperience &&
+            migratedV3.EquippedWeapon.Id == source.EquippedWeapon.Id && migratedV3.Inventory.Count == source.Inventory.Count &&
+            normalizedV4.killTokens.Length == previousV3.killTokens.Length && normalizedV4.issuedItemIds.Length == previousV3.issuedItemIds.Length,
+            "schema-v3 save migrates to v4 with zero salvage provenance and unchanged progression ledgers");
+
         Reject(check, source, s => s.schemaVersion = 5, "unknown snapshot schema rejected", true);
         Reject(check, source, s => s.totalGold = -1, "negative save balance rejected");
         Reject(check, source, s => s.totalSalvageGold = -1, "negative salvage provenance rejected");

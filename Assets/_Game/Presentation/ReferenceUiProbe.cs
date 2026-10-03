@@ -281,10 +281,11 @@ namespace AffixZero.Presentation
                 var management = Element(active); Record(management, panel, bounds); NoOverlap(management, bottom);
                 if (screen == "equipment")
                 {
-                    var controls = new List<string> { "equip-button", "close-character" };
+                    var controls = new List<string> { "close-character" };
                     for (int i = 0; i < 24; i++) controls.Add("inventory-slot-" + i);
                     CheckGroup(controls.ToArray(), management.worldBound, bounds, true);
-                    CheckGroup(new[] { "selected-item-name", "comparison-delta" }, management.worldBound, bounds, false);
+                    // The comparison card intentionally floats to the left of the docked panel.
+                    CheckGroup(new[] { "item-comparison", "selected-item-name", "comparison-delta", "equip-button", "salvage-button" }, panel, bounds, false);
                     frame.selectedItem = Text("selected-item-name"); frame.comparison = Text("comparison-delta");
                     frame.comparisonDamage = p.CompareDamage(1).Value;
                 }
@@ -301,7 +302,7 @@ namespace AffixZero.Presentation
                     frame.forgePreview = Text("forge-attack-damage"); frame.forgeCost = Text("forge-cost");
                 }
             }
-            else CheckGroup(new[] { "enemy-health", "minimap" }, panel, bounds, true);
+            else CheckGroup(new[] { "minimap" }, panel, bounds, true);
             frame.bounds = bounds.ToArray(); frame.layoutVerified = true; return frame;
         }
         private void CheckGroup(string[] names, Rect container, List<BoundReport> records, bool nonOverlapping)

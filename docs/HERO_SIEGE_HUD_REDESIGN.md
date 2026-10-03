@@ -2,6 +2,70 @@
 
 Date: 2026-10-02
 
+## 2026-10-03 superseding visual pass
+
+The current implementation goes beyond the earlier compact-layout pass below.
+It uses the reference only for hierarchy, density, proportions, and interaction
+placement; no Hero Siege bitmap, extraction, trace, logo, or commercial asset
+is present.
+
+- `EquipmentPanel` is now a 520-by-704 right-edge dock on the 1280-by-720
+  reference canvas. Its upper burgundy leather field contains eight spatial
+  weapon/armor/relic slots around the hero, while the lower field is a dense
+  six-by-four bag grid. Selecting loot opens a separate black, metal-framed
+  comparison card to the left; it is not a permanent third column.
+- `EncounterHud` now uses a 106-pixel sculpted crest, two thin truthful HP/XP
+  bars, a 364-by-132 lower-left skill dock, illustrated area/recovery icons,
+  and the existing approximately 235-pixel physical minimap at 1080p.
+- The former general target-health strip is removed. Ordinary monsters never
+  receive a boss-style health bar, and the current game does not invent a boss
+  classification.
+- Sixteen new UI raster files live under
+  `Assets/Art/Interface/Resources/AffixUIVisual/`. The metal frames are crops
+  from the project's existing authored `HudFrames-v1` atlas. Burgundy leather,
+  bag cells, five missing equipment icons, and two ability icons are original
+  deterministic pixel constructions from
+  `Tools/Local/Generate-AffixInterfaceAssets.ps1`. None is derived from a
+  commercial game.
+- New loot now routes helmet, gloves, boots, ring, and amulet to their distinct
+  authored icon resources. Save-path validation accepts those reviewed paths;
+  existing saved items and all progression schemas remain compatible.
+
+The combat art remains the built-in `image_gen` Original Temple Combat Set
+documented in `docs/assets/original-temple-combat-set.md`: two 64-cell directional
+atlases, eight-frame impact atlas, temple room, and obstacle. Runtime mapping is
+128-by-128 cells, four row-pair directions, idle 0-1, walk 2-5, hit 6-7,
+attack 0-4 with impact index 2 at 12 FPS, death 5-7, pivot `(0.5, 0.14)`.
+
+Final verification for this pass:
+
+- CoreSmoke: PASS, 303 checks.
+- Unity API static compile: PASS, 0 warnings / 0 errors.
+- Unity 6000.3.24f1 Windows build: PASS, 0 warnings / 0 errors, player build
+  GUID `0b48241cb36746ba8a7c95d87247fd59`.
+- 1280-by-720 player UI probe: PASS, four actual framebuffers and all native
+  equipment/talent/forge callbacks.
+- 1920-by-1080 player UI probe: PASS, four actual framebuffers and all native
+  equipment/talent/forge callbacks.
+- Direct visual inspection: battle center remains open; right dock, floating
+  comparison, 24 bag cells, crest, thin bars, skill icons, and minimap are
+  visible without clipping at both sizes.
+- Physical OS input: NOT RERUN for this pass. User visual approval remains
+  pending.
+
+Final local evidence is under `Build/Reports/hero-siege-ui-720-final-20261003/`
+and `Build/Reports/hero-siege-ui-1080-release-20261003/`; it is intentionally
+excluded from Git.
+
+Final Library evidence:
+
+- 1080p battle: `libfile_68d5e77f784481919ea7349f91984609`
+- 1080p equipment and floating comparison: `libfile_bcaf0907c99c8191a09473943cb14af8`
+
+Both Library creates succeeded. Windows does not expose `os.setxattr`, so the
+optional local version marker could not be attached; this does not affect the
+stored Library files.
+
 This change replaces the full-width dashboard HUD with a compact combat layout
 derived from five user-supplied 1920x1080 Hero Siege reference screenshots. The
 references were pixel-reviewed for hierarchy and density only. No Hero Siege
@@ -13,8 +77,8 @@ project.
 - The top-left unit frame now combines the existing original hero sprite,
   name, level ribbon, real HP, current-level XP, selected difficulty, and the
   two real automatic-skill cooldowns.
-- The current target is a narrow, centered bar and is hidden when no live
-  target exists.
+- The earlier current-target strip described in this historical section was
+  removed by the superseding pass above; ordinary enemies have no health bar.
 - Region, clear, kill, difficulty, and multiplier information is grouped beside
   the compact upper-right minimap.
 - The lower-left dock contains the real attack, area, and recovery states, four

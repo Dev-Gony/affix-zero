@@ -25,8 +25,8 @@ namespace AffixZero.Presentation
         private FirstEncounter encounter;
         private UIDocument document;
         private PanelSettings panelSettings;
-        private VisualElement root, enemyFrame, enemyFill, healthFill, xpFill, dockXpFill, attackFill, mapArea, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
-        private Label enemyValue, healthValue, levelValue, areaCooldown, recoveryCooldown, difficultyStatus, currency, clock, attackState, xpValue, resultText, paused, lootText;
+        private VisualElement root, healthFill, xpFill, dockXpFill, attackFill, mapArea, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
+        private Label healthValue, levelValue, areaCooldown, recoveryCooldown, difficultyStatus, currency, clock, attackState, xpValue, resultText, paused, lootText;
         private Label areaSkillLabel, recoverySkillLabel;
         private VisualElement areaSkillSlot, recoverySkillSlot;
         private VisualElement pauseButton;
@@ -40,7 +40,6 @@ namespace AffixZero.Presentation
         private VisualElement dungeonTab, equipmentTab, talentTab, forgeTab;
         private VisualElement huntButton;
         private Label huntCaption, huntStatus;
-        private Label enemyTitle;
         private Label sectionCaption, killCount, huntRewards, combatStats, mapCaption, mapTitle, difficultyInfo;
         private readonly VisualElement[] sectionTicks=new VisualElement[3];
         private readonly VisualElement[] difficultyButtons=new VisualElement[3];
@@ -91,57 +90,43 @@ namespace AffixZero.Presentation
 
         private void BuildTop()
         {
-            // Compact corner unit frame: real HP and XP only, with no invented mana.
-            var body=Box(root,"hero-unit-frame",30,12,190,78,FrameDark);Border(body,FrameEdge,2);
-            Box(body,"hero-frame-toplight",3,3,184,2,new Color(1f,.78f,.38f,.22f));
-            Box(body,"hero-frame-red-corner",180,6,6,16,Crimson);
-            Box(body,"hero-frame-red-foot",175,70,11,4,Burgundy);
-            var portraitShell=Box(root,"hero-portrait-medallion",10,8,72,72,Ink);
-            portraitShell.style.borderTopLeftRadius=portraitShell.style.borderTopRightRadius=
-                portraitShell.style.borderBottomLeftRadius=portraitShell.style.borderBottomRightRadius=36;
-            portraitShell.style.overflow=Overflow.Hidden;Border(portraitShell,FrameEdge,3);
-            Box(root,"portrait-horn-left",6,20,7,43,FrameEdge);
-            Box(root,"portrait-horn-right",78,20,7,43,FrameEdge);
+            var body=Box(root,"hero-unit-frame",86,14,218,78,FrameDark);
+            Skin(body,"AffixUIVisual/FrameBar");
+            var crest=Box(root,"hero-crest",6,5,106,106,Color.clear);
+            Skin(crest,"AffixUIVisual/FrameCrest");
+            var portraitShell=Box(crest,"hero-portrait-medallion",18,21,70,66,Ink);
+            portraitShell.style.overflow=Overflow.Hidden;
             Sprite portrait=encounter.Hero==null||encounter.Hero.AnimationSet==null?null:encounter.Hero.AnimationSet.Frame(ActorClip.Idle,0);
             if(portrait!=null)
             {
                 var image=new Image {image=portrait.texture,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};
-                Place(image,6,6,60,60);portraitShell.Add(image);
+                Place(image,4,2,62,62);portraitShell.Add(image);
                 Rect source=portrait.textureRect;
                 image.sourceRect=new Rect(source.x,portrait.texture.height-source.yMax,source.width,source.height);
             }
-            var levelRibbon=Box(root,"hero-level-ribbon",19,71,55,25,FrameDark);Border(levelRibbon,FrameEdge,2);
+            var levelRibbon=Box(root,"hero-level-ribbon",24,88,64,22,new Color32(26,18,18,255));Border(levelRibbon,FrameEdge,1);
             Text(levelRibbon,"LV",4,2,17,20,8,Muted);
-            levelValue=Text(levelRibbon,"",20,1,31,22,12,Gold);levelValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(body,"AFFIX HUNTER",56,4,126,17,11,Gold);
-            var healthTrack=Box(body,"hero-health-track",56,23,126,15,Ink);Border(healthTrack,new Color32(91,42,45,255),1);
-            healthFill=Box(healthTrack,"hero-health-fill",1,1,124,13,Crimson);
-            healthValue=Text(healthTrack,"",2,0,122,15,9,Color.white);healthValue.name="hero-hp-value";healthValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var progressTrack=Box(body,"hero-xp-track",56,42,126,11,Ink);Border(progressTrack,new Color32(61,45,82,255),1);
-            xpFill=Box(progressTrack,"hero-xp-fill",1,1,124,9,Purple);
-            xpValue=Text(progressTrack,"",2,-1,122,11,8,Cream);xpValue.name="xp-value";xpValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var difficultyPlate=Box(body,"difficulty-status",56,58,36,16,Burgundy);Border(difficultyPlate,FrameEdge,1);
-            difficultyStatus=Text(difficultyPlate,"",1,0,34,16,7,Gold);difficultyStatus.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var areaPlate=Box(body,"area-status",96,58,38,16,Surface);Border(areaPlate,Edge,1);
+            levelValue=Text(levelRibbon,"",22,1,36,20,12,Gold);levelValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(body,"AFFIX HUNTER",28,7,174,17,11,Gold);
+            var healthTrack=Box(body,"hero-health-track",18,28,184,12,Ink);Border(healthTrack,new Color32(91,42,45,255),1);
+            healthFill=Box(healthTrack,"hero-health-fill",1,1,182,10,Crimson);
+            healthValue=Text(healthTrack,"",2,-1,180,12,8,Color.white);healthValue.name="hero-hp-value";healthValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var progressTrack=Box(body,"hero-xp-track",18,44,184,7,Ink);Border(progressTrack,new Color32(61,45,82,255),1);
+            xpFill=Box(progressTrack,"hero-xp-fill",1,1,182,5,Purple);
+            xpValue=Text(progressTrack,"",2,-3,180,10,7,Cream);xpValue.name="xp-value";xpValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var difficultyPlate=Box(body,"difficulty-status",18,57,46,15,Burgundy);Border(difficultyPlate,FrameEdge,1);
+            difficultyStatus=Text(difficultyPlate,"",1,0,44,15,7,Gold);difficultyStatus.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var areaPlate=Box(body,"area-status",70,57,58,15,Surface);Border(areaPlate,Edge,1);
             Text(areaPlate,"A",2,0,8,16,7,Muted);
-            areaCooldown=Text(areaPlate,"",10,0,27,16,7,Cream);areaCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var recoveryPlate=Box(body,"recovery-status",138,58,44,16,Surface);Border(recoveryPlate,Edge,1);
+            areaCooldown=Text(areaPlate,"",10,0,46,15,7,Cream);areaCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var recoveryPlate=Box(body,"recovery-status",134,57,68,15,Surface);Border(recoveryPlate,Edge,1);
             Text(recoveryPlate,"H",2,0,8,16,7,Muted);
-            recoveryCooldown=Text(recoveryPlate,"",10,0,33,16,7,Sky);recoveryCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
+            recoveryCooldown=Text(recoveryPlate,"",10,0,56,15,7,Sky);recoveryCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
         }
         private void BuildEnemy()
         {
-            enemyFrame=Box(root,"enemy-health",0,12,300,40,FrameDark);
-            enemyFrame.style.left=Length.Percent(50);enemyFrame.style.marginLeft=-150;Border(enemyFrame,FrameEdge,1);
-            Box(enemyFrame,"target-accent",0,0,3,40,Crimson);
-            enemyTitle=Text(enemyFrame,"TARGET",9,2,182,16,10,Cream);
-            enemyValue=Text(enemyFrame,"",191,2,100,16,9,new Color32(255,179,180,255));
-            enemyValue.name = "enemy-hp-value";
-            enemyValue.style.unityTextAlign = TextAnchor.MiddleRight;
-            var track=Box(enemyFrame,"enemy-track",9,21,282,10,Ink);
-            enemyFill=Box(track,"enemy-fill",1,1,280,8,Crimson);
             var region=Box(root,"region-panel",0,12,150,130,FrameDark);
-            region.style.left=StyleKeyword.Auto;region.style.right=172;Border(region,FrameEdge,1);
+            region.style.left=StyleKeyword.Auto;region.style.right=172;Skin(region,"AffixUIVisual/FramePanel");Border(region,FrameEdge,1);
             Box(region,"region-accent",0,0,3,130,Burgundy);
             sectionCaption=Text(region,"",8,5,132,28,9,Gold);sectionCaption.style.whiteSpace=WhiteSpace.Normal;
             for(int i=0;i<sectionTicks.Length;i++)sectionTicks[i]=Box(region,"section-tick-"+i,137+i*4,7,3,11,i==0?Crimson:Edge);
@@ -161,7 +146,7 @@ namespace AffixZero.Presentation
         private void BuildMap()
         {
             var frame=Box(root,"minimap",0,12,156,130,FrameDark);
-            frame.style.left=StyleKeyword.Auto;frame.style.right=10;Border(frame,FrameEdge,2);
+            frame.style.left=StyleKeyword.Auto;frame.style.right=10;Skin(frame,"AffixUIVisual/FramePanel");Border(frame,FrameEdge,2);
             Box(frame,"minimap-red-corner",143,4,7,16,Burgundy);
             mapTitle=Text(frame,"MAP",7,4,142,16,9,Gold);
             var map=Box(frame,"minimap-image",7,24,142,93,Ink);mapArea=map;Border(map,Edge,1);
@@ -175,59 +160,57 @@ namespace AffixZero.Presentation
         }
         private void BuildBottom()
         {
-            var bottom=Box(root,"bottom-hud",10,0,438,122,FrameDark);
-            bottom.style.top=StyleKeyword.Auto;bottom.style.bottom=10;Border(bottom,FrameEdge,2);
-            Box(bottom,"dock-toplight",4,3,430,2,new Color(1f,.78f,.38f,.18f));
-            Box(bottom,"dock-red-corner",4,8,5,22,Burgundy);
-            var slot=Box(bottom,"attack-slot",8,8,34,52,Surface);
-            Border(slot,Crimson,2);
+            var bottom=Box(root,"bottom-hud",8,0,364,132,Color.clear);
+            bottom.style.top=StyleKeyword.Auto;bottom.style.bottom=8;Skin(bottom,"AffixUIVisual/FrameDock");
+            var slot=Box(bottom,"attack-slot",18,16,42,52,Surface);
+            Skin(slot,"AffixUIVisual/FrameSlotGold");Border(slot,Crimson,1);
             if(attackIcon!=null) {
                 var icon=new Image {image=attackIcon,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};
-                Place(icon,5,7,24,24);slot.Add(icon);actionIcon=icon;
+                Place(icon,6,5,30,30);slot.Add(icon);actionIcon=icon;
             }
-            attackState=Text(slot,"AUTO",2,38,30,12,7,Gold);attackState.style.unityTextAlign=TextAnchor.MiddleCenter;
-            var area=Box(bottom,"auto-area-skill",46,8,34,52,Surface);areaSkillSlot=area;Border(area,Gold,1);
-            areaSkillLabel=Text(area,"AREA",0,7,34,18,8,Gold);areaSkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(area,"AUTO",0,27,34,15,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            attackState=Text(slot,"AUTO",2,37,38,11,7,Gold);attackState.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var area=Box(bottom,"auto-area-skill",64,16,42,52,Surface);areaSkillSlot=area;Skin(area,"AffixUIVisual/FrameSlotGold");Border(area,Gold,1);
+            var areaIcon=new Image {image=Resources.Load<Texture2D>("AffixUIVisual/SkillArea"),scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(areaIcon,6,5,30,30);area.Add(areaIcon);
+            areaSkillLabel=Text(area,"AREA",1,37,40,11,7,Gold);areaSkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             area.tooltip="적 2명 이상 접근 시 자동 범위 공격";
-            var recovery=Box(bottom,"auto-recovery-skill",84,8,34,52,Surface);recoverySkillSlot=recovery;Border(recovery,Sky,1);
-            recoverySkillLabel=Text(recovery,"HEAL",0,7,34,18,8,Sky);recoverySkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(recovery,"AUTO",0,27,34,15,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            var recovery=Box(bottom,"auto-recovery-skill",110,16,42,52,Surface);recoverySkillSlot=recovery;Skin(recovery,"AffixUIVisual/FrameSlotSilver");Border(recovery,Sky,1);
+            var healIcon=new Image {image=Resources.Load<Texture2D>("AffixUIVisual/SkillHeal"),scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(healIcon,6,5,30,30);recovery.Add(healIcon);
+            recoverySkillLabel=Text(recovery,"HEAL",1,37,40,11,7,Sky);recoverySkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             recovery.tooltip="체력 45% 이하에서 자동 회복";
             for(int i=0;i<4;i++)
             {
-                var empty=Box(bottom,"unassigned-skill-"+i,122+i*38,8,34,52,Surface);
+                var empty=Box(bottom,"unassigned-skill-"+i,156+i*40,16,36,52,Surface);
+                Skin(empty,"AffixUIVisual/FrameSlotSilver");empty.style.opacity=.46f;
                 Border(empty,Edge,1);Text(empty,"—",0,10,34,27,13,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
-                Text(empty,(i+4).ToString(),2,38,30,11,7,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
+                Text(empty,(i+4).ToString(),3,37,29,11,7,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
                 empty.tooltip="확장 가능한 자동 스킬 슬롯";
             }
-            var attackTrack=Box(slot,"attack-elapsed",0,49,32,3,Edge);
-            attackFill=Box(attackTrack,"attack-elapsed-fill",0,0,0,4,Gold);
-            var xpTrack=Box(bottom,"dock-experience-line",8,65,236,6,Ink);Border(xpTrack,Edge,1);
-            dockXpFill=Box(xpTrack,"dock-experience-fill",1,1,0,4,Purple);
-            combatStats=Text(bottom,"",252,7,100,37,8,Cream);combatStats.style.whiteSpace=WhiteSpace.Normal;
-            currency=Text(bottom,"",252,45,100,18,8,Gold);currency.name="gold-value";currency.style.unityTextAlign=TextAnchor.MiddleRight;
-            saveStatus=Text(bottom,"",252,64,100,14,7,Muted);saveStatus.name="save-status";
+            var attackTrack=Box(slot,"attack-elapsed",3,48,36,3,Edge);
+            attackFill=Box(attackTrack,"attack-elapsed-fill",0,0,0,3,Gold);
+            var xpTrack=Box(bottom,"dock-experience-line",18,74,294,5,Ink);Border(xpTrack,Edge,1);
+            dockXpFill=Box(xpTrack,"dock-experience-fill",1,1,0,3,Purple);
+            combatStats=Text(bottom,"",316,16,34,40,7,Cream);combatStats.style.whiteSpace=WhiteSpace.Normal;
+            currency=Text(bottom,"",252,56,58,16,8,Gold);currency.name="gold-value";currency.style.unityTextAlign=TextAnchor.MiddleRight;
+            saveStatus=Text(bottom,"",252,98,98,12,6,Muted);saveStatus.name="save-status";
             saveStatus.style.overflow=Overflow.Hidden;saveStatus.style.textOverflow=TextOverflow.Ellipsis;
-            saveRetry=Click(bottom,"save-retry","RETRY",252,35,100,28,()=>encounter.RetrySave(),Crimson);
-            dungeonTab=Click(bottom,"dungeon-tab","HUNT",8,83,36,28,()=>encounter.ShowManagement(ManagementScreen.None),Burgundy);
-            equipmentTab=Click(bottom,"character-tab","BAG",48,83,42,28,()=>ToggleManagement(ManagementScreen.Equipment),Surface);
-            talentTab=Click(bottom,"talents-tab","TREE",94,83,42,28,()=>ToggleManagement(ManagementScreen.Talents),Surface);
-            forgeTab=Click(bottom,"forge-tab","FORGE",140,83,44,28,()=>ToggleManagement(ManagementScreen.Forge),Surface);
-            effectsButton=Click(bottom,"effects-toggle","FX FULL",188,83,40,28,()=>encounter.Hunt.ToggleReducedEffects(),Surface);
-            huntButton=Click(bottom,"autohunt-toggle","START",232,83,64,28,()=> {
+            saveRetry=Click(bottom,"save-retry","RETRY",252,78,98,30,()=>encounter.RetrySave(),Crimson);
+            dungeonTab=Click(bottom,"dungeon-tab","HUNT",18,88,40,26,()=>encounter.ShowManagement(ManagementScreen.None),Burgundy);
+            equipmentTab=Click(bottom,"character-tab","BAG",61,88,38,26,()=>ToggleManagement(ManagementScreen.Equipment),Surface);
+            talentTab=Click(bottom,"talents-tab","TREE",102,88,38,26,()=>ToggleManagement(ManagementScreen.Talents),Surface);
+            forgeTab=Click(bottom,"forge-tab","FORGE",143,88,42,26,()=>ToggleManagement(ManagementScreen.Forge),Surface);
+            effectsButton=Click(bottom,"effects-toggle","FX",188,88,28,26,()=>encounter.Hunt.ToggleReducedEffects(),Surface);
+            huntButton=Click(bottom,"autohunt-toggle","START",219,88,48,26,()=> {
                 if(encounter.Hunt.Running)encounter.Hunt.StopHunt();else encounter.Hunt.StartHunt();
             },Crimson);
             huntCaption=huntButton.Q<Label>();
-            pauseButton=Click(bottom,"pause-button","PAUSE",300,83,52,28,TogglePause,Surface);
+            pauseButton=Click(bottom,"pause-button","PAUSE",270,88,45,26,ToggleExplicitPause,Surface);
             pauseCaption=pauseButton.Q<Label>();
-            Text(bottom,"SPEED",360,7,68,16,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
-            speedValue=Text(bottom,"1x",360,29,68,24,15,Gold);speedValue.name="simulation-speed-value";speedValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            speedButtons[0]=Click(bottom,"speed-1x","1x",356,83,24,28,()=>encounter.SetSimulationSpeed(1),Surface);
-            speedButtons[1]=Click(bottom,"speed-2x","2x",382,83,24,28,()=>encounter.SetSimulationSpeed(2),Surface);
-            speedButtons[2]=Click(bottom,"speed-4x","4x",408,83,24,28,()=>encounter.SetSimulationSpeed(4),Surface);
+            speedValue=Text(bottom,"1x",317,58,33,16,10,Gold);speedValue.name="simulation-speed-value";speedValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            speedButtons[0]=Click(bottom,"speed-1x","1x",318,88,10,26,()=>encounter.SetSimulationSpeed(1),Surface);
+            speedButtons[1]=Click(bottom,"speed-2x","2x",329,88,10,26,()=>encounter.SetSimulationSpeed(2),Surface);
+            speedButtons[2]=Click(bottom,"speed-4x","4x",340,88,10,26,()=>encounter.SetSimulationSpeed(4),Surface);
             foreach(var button in new[]{dungeonTab,equipmentTab,talentTab,forgeTab,effectsButton,huntButton,pauseButton,speedButtons[0],speedButtons[1],speedButtons[2]})
-                button.Q<Label>().style.fontSize=8;
+                button.Q<Label>().style.fontSize=button.name.StartsWith("speed-")?6:7;
         }
         private VisualElement Orb(VisualElement parent,string name,float x,float y,float size,Color color,out Label value)
         {
@@ -353,6 +336,7 @@ namespace AffixZero.Presentation
             if(encounter.ManagementVisible) encounter.ShowManagement(ManagementScreen.None);
             else encounter.SetPaused(!encounter.IsPaused);
         }
+        private void ToggleExplicitPause()=>encounter.SetPaused(!encounter.IsPaused);
         private void ToggleManagement(ManagementScreen target)
         {
             encounter.ShowManagement(encounter.Screen==target?ManagementScreen.None:target);
@@ -378,7 +362,7 @@ namespace AffixZero.Presentation
         private void Refresh()
         {
             if(encounter==null || encounter.Hero==null || encounter.Enemy==null) return;
-            var hero=encounter.Hero;var enemy=hero.CurrentTarget??encounter.Enemy;
+            var hero=encounter.Hero;
             var hunt=encounter.Hunt;
             if(hunt!=null)
             {
@@ -410,11 +394,6 @@ namespace AffixZero.Presentation
                 effectsButton.Q<Label>().text=hunt.ReducedEffects?"FX LOW":"FX FULL";
                 RefreshObstacleMarkers(hunt.World);
             }
-            bool hasTarget=hero.CurrentTarget!=null&&hero.CurrentTarget.isActiveAndEnabled&&!hero.CurrentTarget.IsDead;
-            enemyFrame.style.display=hasTarget?DisplayStyle.Flex:DisplayStyle.None;
-            enemyFill.style.width=Length.Percent(100f*enemy.Hp/Mathf.Max(1,enemy.MaxHp));
-            enemyValue.text=enemy.Hp+" / "+enemy.MaxHp;
-            enemyTitle.text=hasTarget?enemy.name.ToUpperInvariant():"";
             healthFill.style.width=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+" / "+hero.MaxHp+" HP";
             int levelXp=encounter.Progression.TotalExperience%HeroProgression.ExperiencePerLevel;
@@ -546,6 +525,11 @@ namespace AffixZero.Presentation
         private static VisualElement Box(VisualElement parent,string name,float x,float y,float width,float height,Color color)
         {
             var element=new VisualElement {name=name,pickingMode=PickingMode.Ignore};Place(element,x,y,width,height);element.style.backgroundColor=color;parent.Add(element);return element;
+        }
+        private static void Skin(VisualElement element,string resource)
+        {
+            Texture2D texture=Resources.Load<Texture2D>(resource);
+            if(texture!=null)element.style.backgroundImage=new StyleBackground(texture);
         }
         private static Label Text(VisualElement parent,string text,float x,float y,float width,float height,int size,Color color)
         {

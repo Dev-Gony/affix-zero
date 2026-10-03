@@ -611,7 +611,10 @@ namespace AffixZero.Core
                 case "AffixGenerated/AttackIcon": case "AffixGenerated/EmberSword":
                 case "AffixGenerated/PowerRune": case "AffixGenerated/PrecisionRune": case "AffixGenerated/VeteranRune":
                 case "AffixGenerated/GearAxe": case "AffixGenerated/GearStaff":
-                case "AffixGenerated/GearArmor": case "AffixGenerated/GearRelic": break;
+                case "AffixGenerated/GearArmor": case "AffixGenerated/GearRelic":
+                case "AffixUIVisual/GearHelmet": case "AffixUIVisual/GearGloves":
+                case "AffixUIVisual/GearBoots": case "AffixUIVisual/GearRing":
+                case "AffixUIVisual/GearAmulet": break;
                 default: throw new ArgumentException("Item icon is not an authored resource.");
             }
             var options = new List<ItemOption>();

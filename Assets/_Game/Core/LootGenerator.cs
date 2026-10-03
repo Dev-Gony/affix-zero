@@ -182,9 +182,17 @@ namespace AffixZero.Core
             if (item.Slot == EquipmentSlot.Weapon)
                 return item.Style == WeaponStyle.Axe ? "AffixGenerated/GearAxe" :
                     item.Style == WeaponStyle.Staff ? "AffixGenerated/GearStaff" : "AffixGenerated/EmberSword";
-            if (item.Slot == EquipmentSlot.Ring || item.Slot == EquipmentSlot.Amulet || item.Slot == EquipmentSlot.Relic)
-                return "AffixGenerated/GearRelic";
-            return "AffixGenerated/GearArmor";
+            switch (item.Slot)
+            {
+                case EquipmentSlot.Helmet: return "AffixUIVisual/GearHelmet";
+                case EquipmentSlot.Armor: return "AffixGenerated/GearArmor";
+                case EquipmentSlot.Gloves: return "AffixUIVisual/GearGloves";
+                case EquipmentSlot.Boots: return "AffixUIVisual/GearBoots";
+                case EquipmentSlot.Ring: return "AffixUIVisual/GearRing";
+                case EquipmentSlot.Amulet: return "AffixUIVisual/GearAmulet";
+                case EquipmentSlot.Relic: return "AffixGenerated/GearRelic";
+                default: return "AffixGenerated/GearArmor";
+            }
         }
         private static ItemBase Base(string id, string name, EquipmentSlot slot, int tier, int attack = 0,
             int defense = 0, int health = 0, int mana = 0, float speed = 0, WeaponStyle style = WeaponStyle.Sword) =>

@@ -501,7 +501,6 @@ namespace AffixZero.Presentation
             Require(root != null && root.name == "stitch-hud" && root.panel != null, "Stitch HUD is not attached to a panel.");
             Require(root.worldBound.width > 0 && root.worldBound.height > 0, "Stitch HUD has no layout area.");
             Require(root.Q<Label>("hero-hp-value")?.text == hero.Hp + "\n/ " + hero.MaxHp, "Hero HP label differs from combat state.");
-            Require(root.Q<Label>("enemy-hp-value")?.text == enemy.Hp + " / " + enemy.MaxHp + " HP", "Enemy HP label differs from combat state.");
             Require(root.Q<Label>("xp-value")?.text == "획득 경험치  " + encounter.Progression.TotalExperience + " XP", "XP label differs from awarded XP.");
             Require(root.Q<Label>("gold-value")?.text == "GOLD  " + encounter.Progression.TotalGold + "     XP  " + encounter.Progression.TotalExperience, "Gold label differs from awarded gold.");
             var panel = root.Q("character-panel");

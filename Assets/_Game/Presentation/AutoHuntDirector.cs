@@ -66,6 +66,9 @@ namespace AffixZero.Presentation
         public int IdentityColliderCount => World == null ? 0 : World.IdentityColliderCount;
         public bool CanChangeDifficulty => Initialized && !Running && owner != null && owner.Progression.PendingLoot == null;
         public bool ReducedEffects => feedback != null && feedback.ReducedEffects;
+        public int AcceptedFeedbackCount => feedback == null ? 0 : feedback.AcceptedFeedbackCount;
+        public int CriticalFeedbackCount => feedback == null ? 0 : feedback.CriticalFeedbackCount;
+        public int KillFeedbackCount => feedback == null ? 0 : feedback.KillFeedbackCount;
         public int AreaCasts => areaSkill == null ? 0 : areaSkill.CastCount;
         public int ChainAreaCasts => areaSkill == null ? 0 : areaSkill.ChainCasts;
         public int PierceAreaCasts => areaSkill == null ? 0 : areaSkill.PierceCasts;

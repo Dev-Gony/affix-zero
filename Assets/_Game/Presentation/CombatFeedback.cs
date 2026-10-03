@@ -28,6 +28,9 @@ namespace AffixZero.Presentation
         private int cursor;
         private float effectsScale=1f;
         public bool ReducedEffects=>effectsScale<1f;
+        public int AcceptedFeedbackCount{get;private set;}
+        public int CriticalFeedbackCount{get;private set;}
+        public int KillFeedbackCount{get;private set;}
 
         public void Configure(MeleeActor actor,IReadOnlyList<MeleeActor> combatants)
         {
@@ -61,6 +64,7 @@ namespace AffixZero.Presentation
         private void OnDamaged(MeleeActor defender,AffixZero.Core.HitReceipt receipt)
         {
             if(!receipt.Accepted||audioSource==null)return;
+            AcceptedFeedbackCount++;if(defender.LastHitCritical)CriticalFeedbackCount++;if(receipt.Killed)KillFeedbackCount++;
             float now=Time.unscaledTime;
             if(!receipt.Killed&&!defender.LastHitCritical&&now-lastSoundAt<.035f)return;
             lastSoundAt=now;AudioClip clip=receipt.Killed?killClip:defender.LastHitCritical?criticalClip:hitClip;
