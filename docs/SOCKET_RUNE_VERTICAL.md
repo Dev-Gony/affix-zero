@@ -46,6 +46,9 @@ one open socket, an enabled return action, and `SALVAGE +4G · R1`:
 - `docs/media/socket-runes/socket-rune-workbench-1280x720.png`
 - `docs/media/socket-runes/socket-rune-workbench-1920x1080.png`
 
+Library delivery: 720p `libfile_a9f819f9b3288191a8daef26790ce77f`
+and 1080p `libfile_6b050e0af9e88191923894dfa7070ee9`.
+
 The rune cell uses a compact colored gem mark rather than a separate painted
 icon for every rune. This is readable and functional, but a future dedicated
 rune-art pass could improve material identity. It is not required for this

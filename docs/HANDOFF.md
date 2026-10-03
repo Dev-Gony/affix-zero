@@ -24,6 +24,9 @@ all ten exact-PID OS input actions in 17.223 seconds. Human play and final user
 visual approval remain pending. Town, five-tier expansion, gacha and pets stay
 deferred; boss sprite art remains on the road map rather than this slice.
 
+Library evidence: 720p `libfile_a9f819f9b3288191a8daef26790ce77f`
+and 1080p `libfile_6b050e0af9e88191923894dfa7070ee9`.
+
 # 2026-10-03 - genuine route-end boss loop completed
 
 Each connected layout now contains a named genuine boss in slot 24. It remains
