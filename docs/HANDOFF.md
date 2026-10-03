@@ -1,3 +1,18 @@
+# 2026-10-03 - remaining illustrated-item brief and socket requirement
+
+The user approved the painted material-rendered direction of `longsword`,
+`plate_armor`, and `battle_gloves`. The exact remaining 26 base IDs, tier
+identity, material/silhouette distinctions, cloud source names and Unity target
+paths are fixed in `ILLUSTRATED_EQUIPMENT_BATCH_V2.md`. Do not generate more
+flat polygon icons or report the remaining placeholders as acceptable.
+
+The user also requires item sockets in the product direction. Repository audit
+found no data/save/drop/forge contract: existing documents explicitly mark
+sockets/runes as unimplemented, and the old forge reference is layout-only.
+`ITEM_SOCKET_REQUIREMENT.md` records required future decisions. Until that
+contract is approved, do not invent counts, probabilities, effects, currencies
+or fake socket pips, and do not bake sockets into base paintings.
+
 # 2026-10-03 - illustrated equipment v2 representative pass
 
 The user rejected the first 29-icon contact sheet despite its technical

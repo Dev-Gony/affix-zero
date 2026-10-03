@@ -91,6 +91,15 @@
     "pet_scope": "Reference intake only, no pet runtime"
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
+  "socket_requirement": {
+    "status": "USER_REQUIRED_CONTRACT_NOT_DEFINED",
+    "recorded_date": "2026-10-03",
+    "spec": "docs/ITEM_SOCKET_REQUIREMENT.md",
+    "current_implementation": "NONE",
+    "art_rule": "Do not bake sockets/counts/runes into base paintings; reserve composition for a future runtime overlay",
+    "blocked_decisions": "eligible slots, count bounds, tier/rarity relationship, acquisition, rune effects/removal, forge/salvage interaction, save migration",
+    "monetization": "No paid gacha or new currency implied"
+  },
   "mvp": {
     "status": "NOT_READY",
     "current": "Playable automatic hunt, disk persistence, 29 distinct base icons, Hero Siege-inspired equipment dock, 20-minute production-drop progression, and physical input are verified; user visual acceptance remains open",
