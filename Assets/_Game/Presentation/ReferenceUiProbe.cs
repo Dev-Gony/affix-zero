@@ -76,6 +76,7 @@ namespace AffixZero.Presentation
                     "UI reference fixture requires a fresh temporary profile.");
                 Require(owner.Hunt.World.VisualIdentityName=="FORGE CITADEL"&&owner.Hunt.World.IdentityDecorationCount>=20&&
                     owner.Hunt.World.IdentityColliderCount==0,"Reference world visual identity is missing or changed collision.");
+                AssertBaseItemIcons();
                 AssertPlayerOnlyHealthUi();
                 Require(!owner.Hunt.Running && owner.IsPaused, "Reference startup must be stopped.");
                 foreach (var actor in owner.Hunt.Enemies)
@@ -181,7 +182,8 @@ namespace AffixZero.Presentation
                 string id = "reference-ui:" + report.runId + ":weapon:" + i;
                 var weapon = new WeaponItem(id, new[] { "날카로운 강철검", "묵직한 장검", "잿불 수호검", "훈련용 단검" }[i % 4],
                     10 + i, 2 + i % 3, new[] { "날카로움", "묵직함", "잿불" }[i % 3],
-                    i % 2 == 0 ? "AffixGenerated/EmberSword" : "AffixGenerated/AttackIcon", i % 2 == 0 ? "Rare" : "Common");
+                    new[] { "AffixUIVisual/Items/dagger", "AffixUIVisual/Items/longsword", "AffixUIVisual/Items/dragon_helm", "AffixUIVisual/Items/dragonscale", "AffixUIVisual/Items/dragon_gloves", "AffixUIVisual/Items/gale_boots", "AffixUIVisual/Items/diamond_ring", "AffixUIVisual/Items/dragon_tear" }[i],
+                    new[] { "normal", "magic", "rare", "unique", "legend", "epic", "rare", "unique" }[i]);
                 Require(p.TryCreatePendingLoot(weapon) && owner.CollectLoot(), "Fixture weapon intake failed."); fixtureItems.Add(id);
             }
             Require(p.TotalExperience == report.experienceBeforeFixture + 1000 && p.TotalGold == report.goldBeforeFixture + 320 &&
@@ -314,11 +316,21 @@ namespace AffixZero.Presentation
                 var management = Element(active); Record(management, panel, bounds); NoOverlap(management, bottom);
                 if (screen == "equipment")
                 {
+                    Require(Mathf.Abs(management.worldBound.width / panel.width - .390625f) < .012f,
+                        "Equipment dock is not approximately 39 percent of the screen width.");
                     var controls = new List<string> { "close-character" };
                     for (int i = 0; i < 24; i++) controls.Add("inventory-slot-" + i);
                     CheckGroup(controls.ToArray(), management.worldBound, bounds, true);
                     // The comparison card intentionally floats to the left of the docked panel.
                     CheckGroup(new[] { "item-comparison", "selected-item-name", "comparison-delta", "equip-button", "salvage-button" }, panel, bounds, false);
+                    Require(Element("item-comparison").worldBound.xMax <= management.worldBound.xMin - 1,
+                        "Comparison card is not floating to the left of the equipment dock.");
+                    for (int i = 0; i < p.Inventory.Count; i++)
+                    {
+                        var inventorySlot = Element("inventory-slot-" + i);
+                        Require(inventorySlot.Q<Image>().image != null && Element("rarity-mark-" + i).resolvedStyle.backgroundColor.a > .9f,
+                            "Inventory item is missing its readable icon or rarity overlay: " + i);
+                    }
                     frame.selectedItem = Text("selected-item-name"); frame.comparison = Text("comparison-delta");
                     frame.comparisonDamage = p.CompareDamage(1).Value;
                 }
@@ -360,6 +372,20 @@ namespace AffixZero.Presentation
             float width = Mathf.Min(x.xMax, y.xMax) - Mathf.Max(x.xMin, y.xMin);
             float height = Mathf.Min(x.yMax, y.yMax) - Mathf.Max(x.yMin, y.yMin);
             Require(width <= 1 || height <= 1, "Important controls overlap: " + a.name + " / " + b.name);
+        }
+
+        private void AssertBaseItemIcons()
+        {
+            var loaded = new HashSet<Texture2D>();
+            foreach (string resource in LootGenerator.BaseIconResources)
+            {
+                Texture2D icon = Resources.Load<Texture2D>(resource);
+                Require(icon != null && icon.width == 128 && icon.height == 128,
+                    "Authored base item icon is missing or has the wrong dimensions: " + resource);
+                Require(loaded.Add(icon), "Two base item mappings resolved to the same texture: " + resource);
+            }
+            Require(loaded.Count == 29, "Reference build did not load all 29 distinct base item icons.");
+            report.baseIconsLoaded = loaded.Count;
         }
 
         private static void WriteBitmap(string path, Texture2D texture)
@@ -405,11 +431,11 @@ namespace AffixZero.Presentation
             public string schema = "affix-ui-reference-v1", runId = Guid.NewGuid().ToString("N"), startedUtc = DateTime.UtcNow.ToString("O"), finishedUtc = "";
             public string buildGuid = Application.buildGUID, unityVersion = Application.unityVersion, result = "RUNNING", status = "RUNNING", problem = "", phase;
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
-            public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
+            public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight deterministic authored items exercise distinct base-icon and rarity presentation through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
             public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified,
                 playerHpVisible, nonPlayerHpAbsent;
-            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit;
+            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit, baseIconsLoaded;
             public float elapsedSeconds;
             public string[] fixtureItemIds, nativeCallbacks;
             public FrameReport[] frames;

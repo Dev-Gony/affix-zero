@@ -31,12 +31,20 @@ internal static class LootGeneratorChecks
         for(int seed=0;seed<1000;seed++)
         {
             WeaponItem item=LootGenerator.GenerateGuaranteed("generated:"+seed,20,seed);slots.Add(item.EquipmentSlot);
-            if(item.EquipmentSlot==EquipmentSlot.Weapon){weaponStyles.Add(item.WeaponStyle);staffIconCorrect|=item.WeaponStyle==WeaponStyle.Staff&&item.IconResource=="AffixGenerated/GearStaff";}
+            if(item.EquipmentSlot==EquipmentSlot.Weapon){weaponStyles.Add(item.WeaponStyle);staffIconCorrect|=item.WeaponStyle==WeaponStyle.Staff&&item.IconResource=="AffixUIVisual/Items/magic_sword";}
             bounded&=item.Options.Count<=8;hasOptions|=item.Options.Count>0;
         }
         check(slots.SetEquals(new[]{EquipmentSlot.Weapon,EquipmentSlot.Helmet,EquipmentSlot.Armor,EquipmentSlot.Gloves,EquipmentSlot.Boots,EquipmentSlot.Ring,EquipmentSlot.Amulet}),"generated pool reaches all seven historical equipment slots");
         check(weaponStyles.SetEquals(new[]{WeaponStyle.Sword,WeaponStyle.Axe,WeaponStyle.Staff})&&staffIconCorrect,
             "the unchanged natural weapon pool now reaches ARC, QUAKE and LANCE with matching icons");
+        string[] baseIds={"dagger","longsword","axe","magic_sword","divine_sword","leather_hat","iron_helm","mithril_helm","dragon_helm","cloth","leather_armor","plate_armor","dragonscale","cloth_gloves","leather_gloves","battle_gloves","dragon_gloves","sandals","leather_boots","swift_boots","gale_boots","copper_ring","silver_ring","gold_ring","diamond_ring","bone_necklace","crystal_necklace","ruby_necklace","dragon_tear"};
+        var baseIcons=new HashSet<string>(StringComparer.Ordinal);bool exactBaseMapping=LootGenerator.BaseIconResources.Count==baseIds.Length;
+        for(int i=0;i<baseIds.Length;i++)
+        {
+            WeaponItem mapped=LootGenerator.GenerateGuaranteedBase("icon:"+baseIds[i],baseIds[i],"normal",20,1701+i);
+            exactBaseMapping&=mapped.IconResource=="AffixUIVisual/Items/"+baseIds[i]&&baseIcons.Add(mapped.IconResource);
+        }
+        check(exactBaseMapping&&baseIcons.Count==29,"all 29 loot bases map one-to-one to distinct authored item icons");
         check(bounded&&hasOptions,"generated items keep base stats plus affixes within the serialized option ceiling");
         WeaponItem a=LootGenerator.GenerateGuaranteed("same",18,4242),b=LootGenerator.GenerateGuaranteed("same",18,4242);
         check(a.Name==b.Name&&a.Rarity==b.Rarity&&a.EquipmentSlot==b.EquipmentSlot&&a.DamageBonus==b.DamageBonus&&a.Options.Count==b.Options.Count,"seeded loot generation is deterministic for save and QA replay");

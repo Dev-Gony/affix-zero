@@ -76,8 +76,9 @@ namespace AffixZero.Presentation
             report.criticalFeedbackAt1x=true;report.criticalFeedbackCount=hunt.CriticalFeedbackCount;
             yield return Capture("critical-1x");
 
-            phase="attack-speed-switch";yield return WaitFor(()=>owner.Hero.IsAttacking,12,"an active hero attack");
-            Require(owner.Hero.IsAttacking,"Attack ended before the first speed switch.");
+            phase="attack-speed-switch";float attackDeadline=Time.realtimeSinceStartup+12;
+            while(!owner.Hero.IsAttacking&&Time.realtimeSinceStartup<attackDeadline)yield return null;
+            Require(owner.Hero.IsAttacking,"Timed out waiting for an active hero attack.");
             Dispatch("speed-4x");Dispatch("speed-2x");Dispatch("speed-1x");
             Require(owner.SimulationSpeed==1&&Time.timeScale==1,"Repeated attack-time speed switches did not restore 1x.");
             report.attackSpeedSwitch=true;report.speedSwitches+=3;
@@ -91,7 +92,7 @@ namespace AffixZero.Presentation
                 "Paused speed selection resumed simulation or closed the panel.");
             Dispatch("pause-button");Require(owner.Screen==ManagementScreen.Equipment&&!owner.IsPaused&&Time.timeScale==2,
                 "Panel-open resume did not restore the selected 2x speed.");
-            Dispatch("speed-1x");report.panelPauseResume=true;report.speedSwitches+=3;
+            Dispatch("speed-1x");report.panelPauseResume=true;report.speedSwitches+=3;yield return null;
 
             phase="equipment-layout";int weaponIndex=BestWeaponIndex();Require(weaponIndex>=0,"Stress profile has no inventory weapon for swap coverage.");
             Dispatch("inventory-slot-"+weaponIndex);yield return null;Validate720Equipment(weaponIndex);yield return Capture("equipment-live");
@@ -105,15 +106,19 @@ namespace AffixZero.Presentation
             phase="salvage-live";Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Transaction pause stopped the hunt or simulation kept advancing.");
             int salvageIndex=WorstSalvageIndex();Require(salvageIndex>=0,"Stress profile has no salvage candidate.");
             string salvageId=owner.Progression.Inventory[salvageIndex].Id,salvageName=owner.Progression.Inventory[salvageIndex].Name;
+            string fallbackName=owner.Progression.Inventory.Count<=1?"":owner.Progression.Inventory[
+                salvageIndex==owner.Progression.Inventory.Count-1?salvageIndex-1:salvageIndex+1].Name;
             int salvageValue=owner.Progression.GetSalvageValue(salvageIndex);
             Dispatch("inventory-slot-"+salvageIndex);yield return WaitFor(()=>Text("selected-item-name").Contains(salvageName),2,"stable salvage selection");
             Dispatch("salvage-button");yield return WaitFor(()=>Text("salvage-button").Contains("CONFIRM"),2,"salvage confirmation state");
             int goldBefore=owner.Progression.TotalGold,salvageBefore=owner.Progression.TotalSalvageGold;
             inventoryBefore=owner.Progression.Inventory.Count;tokensBefore=owner.Progression.CaptureSnapshot().killTokens.Length;
-            Dispatch("salvage-button");
+            Dispatch("salvage-button");yield return null;
             Require(IndexOf(salvageId)<0&&owner.Progression.Inventory.Count==inventoryBefore-1&&owner.Progression.TotalGold==goldBefore+salvageValue&&
                 owner.Progression.TotalSalvageGold==salvageBefore+salvageValue&&owner.Progression.CaptureSnapshot().killTokens.Length==tokensBefore,
                 "Live salvage did not remove exactly one item and credit exact provenance.");
+            Require(owner.Progression.Inventory.Count==0?!Visible(Element("item-comparison")):Text("selected-item-name").Contains(fallbackName),
+                "Salvage did not move selection to the remaining adjacent item.");report.salvageSelectionFallback=true;
             Dispatch("pause-button");Require(hunt.Running&&!owner.IsPaused&&Time.timeScale==1,"Transaction resume did not restore the active 1x hunt.");
             report.salvageWhileRunning=true;report.salvageValue=salvageValue;
 
@@ -133,7 +138,7 @@ namespace AffixZero.Presentation
             Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Post-drop UI audit did not pause the active hunt.");
             int postDropInventory=owner.Progression.Inventory.Count;
             yield return WaitFor(()=>Text("bag-count").Contains(postDropInventory.ToString()),2,"post-drop inventory label refresh");
-            if(owner.Progression.Inventory.Count>=HeroProgression.InventoryCapacity)
+            while(owner.Progression.Inventory.Count>HeroProgression.InventoryCapacity-4)
             {
                 salvageIndex=WorstSalvageIndex();string id=owner.Progression.Inventory[salvageIndex].Id;Dispatch("inventory-slot-"+salvageIndex);yield return null;
                 Dispatch("salvage-button");yield return null;Dispatch("salvage-button");yield return null;Require(IndexOf(id)<0,"Post-drop salvage did not reopen bag space.");
@@ -279,7 +284,7 @@ namespace AffixZero.Presentation
             public int loadedSchema,savedSchema,initialKillTokens,initialIssuedItems,initialInventory,finalInventory,finalIssuedItems,kills,killTokensAdded,
                 speedSwitches,criticalFeedbackCount,salvageValue,collectedDuringPanel,uiCallbacks;
             public float elapsedWallSeconds,simulatedGameplaySeconds,wallClockGameplaySeconds,finalSimulationSpeed;
-            public bool criticalFeedbackAt1x,attackSpeedSwitch,panelPauseResume,layout720Verified,equipmentSwap,salvageWhileRunning,forgeWhileRunning,
+            public bool criticalFeedbackAt1x,attackSpeedSwitch,panelPauseResume,layout720Verified,equipmentSwap,salvageWhileRunning,salvageSelectionFallback,forgeWhileRunning,
                 dropCollectedWithPanel,clearTransitionSpeedSwitch,telegraphSpeedSwitch,ledgerRoundtrip,migrationVerified,diskRoundtrip,sessionSpeedReset,continuedAfterRestart;
             public List<string> captureFrames=new List<string>();
         }

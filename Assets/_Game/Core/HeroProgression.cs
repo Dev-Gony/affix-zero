@@ -615,7 +615,10 @@ namespace AffixZero.Core
                 case "AffixUIVisual/GearHelmet": case "AffixUIVisual/GearGloves":
                 case "AffixUIVisual/GearBoots": case "AffixUIVisual/GearRing":
                 case "AffixUIVisual/GearAmulet": break;
-                default: throw new ArgumentException("Item icon is not an authored resource.");
+                default:
+                    if (!LootGenerator.IsBaseIconResource(item.iconResource))
+                        throw new ArgumentException("Item icon is not an authored resource.");
+                    break;
             }
             var options = new List<ItemOption>();
             if (item.options != null)

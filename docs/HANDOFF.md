@@ -1,3 +1,24 @@
+# 2026-10-03 - 29 base icons and Hero Siege equipment dock
+
+The current `feature/open-dungeon-loot-skills` branch now maps all 29 existing
+base items to distinct original 128 x 128 illustrated icons and replaces the
+earlier flat equipment layout with a full-height 39.0625%-wide right dock:
+burgundy paper doll, dense 6 x 4 bag, weathered metal/red-corner frames, rarity
+edge markers, and a floating black comparison card on the left. The compact
+player HUD/skill dock remains; player HP remains; normal, elite, and guardian HP
+bars remain absent. No item/stat/gameplay system was added. Read
+`UI_ICON_POLISH.md`.
+
+Final build GUID `a536a92cb1194263bfed35ec1344020b`: CoreSmoke 321,
+static compile 0/0, Windows build/import 0/0, isolated speed/equipment/salvage
+observe and separate-process restore PASS, 720/1080 UI probes PASS with all 29
+icons and 19 callbacks each, and final-build OS input PASS for all ten actions.
+Production primary/backup/lock hashes are unchanged. Four inspected PNGs were
+saved to Library, including 720p/1080p equipment, 1080p battle, and the full
+icon contact sheet. User visual approval, a deeper biome material pass, and a
+real boss/boss-only HP treatment remain open; town, five tiers, gacha, and pets
+remain deferred.
+
 # 2026-10-03 - speed controls and equipment/skill UX
 
 The current `feature/open-dungeon-loot-skills` branch adds visible session-only

@@ -29,6 +29,7 @@ namespace AffixZero.Presentation
 
         public readonly VisualElement Root;
         private readonly VisualElement[] slots = new VisualElement[24];
+        private readonly VisualElement[] slotRarity = new VisualElement[24];
         private readonly Image[] slotImages = new Image[24];
         private readonly Label[] slotNames = new Label[24];
         private readonly Label[] slotBadges = new Label[24];
@@ -58,24 +59,24 @@ namespace AffixZero.Presentation
             this.select = select;
             discard = salvage;
 
-            Root = Box(parent, "character-panel", 748, 8, 520, 704, Color.clear);
+            Root = Box(parent, "character-panel", 772, 4, 500, 712, Color.clear);
             Root.pickingMode = PickingMode.Position;
             Root.style.overflow = Overflow.Visible;
-            Skin(Root, "AffixUIVisual/FramePanel");
+            Skin(Root, "AffixUIVisual/FramePanelTall");
 
-            var header = Box(Root, "management-header", 18, 16, 484, 34, new Color32(19, 16, 17, 238));
+            var header = Box(Root, "management-header", 16, 14, 468, 34, new Color32(19, 16, 17, 238));
             Border(header, new Color32(110, 74, 47, 255), 1);
-            var title = Text(header, "HUNTER'S RELIQUARY", 46, 3, 390, 27, 17, Cream);
+            var title = Text(header, "HUNTER'S RELIQUARY", 40, 3, 388, 27, 17, Cream);
             title.style.unityTextAlign = TextAnchor.MiddleCenter;
             Box(header, "title-ornament-left", 10, 14, 52, 2, Crimson);
-            Box(header, "title-ornament-right", 422, 14, 52, 2, Crimson);
-            Button(header, "close-character", "X", 448, 4, 28, 26, close, new Color32(72, 24, 30, 255));
+            Box(header, "title-ornament-right", 406, 14, 52, 2, Crimson);
+            Button(header, "close-character", "X", 432, 4, 28, 26, close, new Color32(72, 24, 30, 255));
 
-            var equipment = Box(Root, "equipment-section", 18, 56, 484, 352, new Color32(54, 14, 25, 255));
+            var equipment = Box(Root, "equipment-section", 16, 54, 468, 350, new Color32(54, 14, 25, 255));
             Skin(equipment, "AffixUIVisual/LeatherBurgundy");
             Border(equipment, new Color32(116, 68, 53, 255), 1);
-            Text(equipment, "EQUIPPED RELICS", 14, 8, 456, 22, 12, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
-            var paperDoll = Box(equipment, "equipped-paper-doll", 108, 34, 268, 254, new Color(0.04f, 0.04f, 0.05f, 0.32f));
+            Text(equipment, "EQUIPPED RELICS", 14, 8, 440, 22, 12, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
+            var paperDoll = Box(equipment, "equipped-paper-doll", 100, 34, 268, 252, new Color(0.04f, 0.04f, 0.05f, 0.32f));
             Border(paperDoll, new Color(0.58f, 0.35f, 0.26f, 0.42f), 1);
             if (heroPortrait != null)
             {
@@ -87,7 +88,7 @@ namespace AffixZero.Presentation
             }
 
             string[] equippedIds = { "equipped-weapon", "equipped-helmet", "equipped-armor", "equipped-gloves", "equipped-boots", "equipped-ring", "equipped-amulet", "equipped-relic" };
-            float[] equippedX = { 22, 207, 207, 129, 207, 376, 376, 376 };
+            float[] equippedX = { 14, 199, 199, 121, 199, 368, 368, 368 };
             float[] equippedY = { 124, 42, 124, 212, 212, 212, 42, 124 };
             float[] equippedSize = { 74, 66, 74, 66, 66, 58, 58, 74 };
             for (int i = 0; i < 8; i++)
@@ -105,44 +106,45 @@ namespace AffixZero.Presentation
                 equippedSummaries[i].style.display = DisplayStyle.None;
             }
 
-            var stats = Box(equipment, "hero-stat-table", 14, 294, 456, 44, new Color32(11, 12, 15, 218));
+            var stats = Box(equipment, "hero-stat-table", 14, 292, 440, 44, new Color32(11, 12, 15, 218));
             health = CompactStat(stats, 5, "HP");
             damage = CompactStat(stats, 117, "DMG"); damage.name = "equipment-damage-value";
             defense = CompactStat(stats, 229, "DEF");
             duration = CompactStat(stats, 341, "ATK");
 
-            var bag = Box(Root, "inventory-grid", 18, 414, 484, 232, new Color32(12, 13, 16, 252));
+            var bag = Box(Root, "inventory-grid", 16, 410, 468, 234, new Color32(12, 13, 16, 252));
             Border(bag, new Color32(91, 64, 48, 255), 1);
             bagCount = Text(bag, "", 14, 5, 250, 20, 11, Cream);
             bagCount.name = "bag-count";
-            Text(bag, "INVENTORY", 332, 5, 138, 20, 10, Gold).style.unityTextAlign = TextAnchor.MiddleRight;
+            Text(bag, "INVENTORY", 316, 5, 138, 20, 10, Gold).style.unityTextAlign = TextAnchor.MiddleRight;
             for (int i = 0; i < 24; i++)
             {
                 int index = i;
-                float x = 10 + (i % 6) * 78;
-                float y = 28 + (i / 6) * 49;
-                var slot = Box(bag, "inventory-slot-" + i, x, y, 72, 44, Ink);
-                Skin(slot, "AffixUIVisual/BagCell");
+                float x = 10 + (i % 6) * 76;
+                float y = 29 + (i / 6) * 50;
+                var slot = Box(bag, "inventory-slot-" + i, x, y, 70, 45, Ink);
+                Skin(slot, "AffixUIVisual/BagCellWide");
                 Border(slot, Edge, 1);
                 slot.pickingMode = PickingMode.Position;
                 slot.focusable = true;
-                slotImages[i] = Icon(slot, 4, 4, 36, 36);
-                slotNames[i] = Text(slot, "", 41, 4, 27, 20, 7, Cream);
+                slotImages[i] = Icon(slot, 4, 4, 37, 37);
+                slotNames[i] = Text(slot, "", 42, 4, 23, 20, 7, Cream);
                 slotNames[i].style.overflow = Overflow.Hidden;
                 slotNames[i].style.textOverflow = TextOverflow.Ellipsis;
-                slotBadges[i] = Text(slot, "", 41, 24, 27, 14, 6, Gold);
+                slotBadges[i] = Text(slot, "", 42, 24, 23, 14, 6, Gold);
                 slotBadges[i].style.overflow = Overflow.Hidden;
+                slotRarity[i] = Box(slot, "rarity-mark-" + i, 65, 5, 3, 35, Color.clear);
                 slots[i] = slot;
                 slot.RegisterCallback<ClickEvent>(_ => { discardConfirm = false; this.select(index); });
                 slot.RegisterCallback<NavigationSubmitEvent>(evt => { discardConfirm = false; this.select(index); evt.StopPropagation(); });
             }
 
-            var footer = Box(Root, "inventory-footer", 18, 652, 484, 34, new Color32(17, 17, 19, 248));
+            var footer = Box(Root, "inventory-footer", 16, 650, 468, 36, new Color32(17, 17, 19, 248));
             Border(footer, new Color32(91, 64, 48, 255), 1);
             Button(footer, "equipment-tab-active", "EQUIPMENT", 7, 5, 96, 24, () => { }, new Color32(86, 23, 34, 255));
             if (openTalents != null) Button(footer, "open-full-talents", "MASTERY", 109, 5, 82, 24, openTalents, Surface);
             points = Text(footer, "", 200, 6, 100, 22, 10, Gold); points.name = "talent-points";
-            Text(footer, "I / TAB", 393, 6, 78, 22, 9, Muted).style.unityTextAlign = TextAnchor.MiddleRight;
+            Text(footer, "I / TAB", 377, 6, 78, 22, 9, Muted).style.unityTextAlign = TextAnchor.MiddleRight;
 
             var talents = Box(Root, "talent-section", 0, 0, 1, 1, Color.clear); talents.style.display = DisplayStyle.None;
             furyButton = HiddenButton(talents, "talent-fury", fury, out furyCaption);
@@ -150,8 +152,8 @@ namespace AffixZero.Presentation
             keystoneButton = HiddenButton(talents, "talent-keystone", keystone, out keystoneCaption);
             resetButton = HiddenButton(talents, "talent-reset", reset, out _);
 
-            inspect = Box(Root, "item-comparison", -302, 60, 292, 424, new Color32(10, 10, 13, 252));
-            Skin(inspect, "AffixUIVisual/FramePanel");
+            inspect = Box(Root, "item-comparison", -306, 60, 300, 424, new Color32(10, 10, 13, 252));
+            Skin(inspect, "AffixUIVisual/FrameTooltip");
             inspect.style.overflow = Overflow.Hidden;
             Text(inspect, "LOOT INSPECTION", 24, 18, 244, 24, 13, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
             var selectedSlot = Box(inspect, "selected-weapon-icon", 22, 54, 66, 66, Ink);
@@ -194,6 +196,7 @@ namespace AffixZero.Presentation
                 slotImages[i].style.opacity = item == null ? 0 : 1;
                 slotNames[i].text = item == null ? "" : ShortName(item.Name);
                 slotBadges[i].text = item == null ? "" : item.Equipped ? "ON" : (item.SlotText ?? "");
+                slotRarity[i].style.backgroundColor = item == null ? Color.clear : RarityColor(item.Rarity);
                 bool selected = item != null && v.Selected != null && item.Id == v.Selected.Id;
                 Border(slots[i], selected ? Rose : item != null ? RarityColor(item.Rarity) : Edge, selected ? 2 : 1);
                 slots[i].tooltip = item == null ? "Empty inventory slot" : item.Name + "\n" + item.Affix;
