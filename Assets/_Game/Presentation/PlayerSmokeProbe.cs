@@ -500,9 +500,9 @@ namespace AffixZero.Presentation
             var root = document.rootVisualElement;
             Require(root != null && root.name == "stitch-hud" && root.panel != null, "Stitch HUD is not attached to a panel.");
             Require(root.worldBound.width > 0 && root.worldBound.height > 0, "Stitch HUD has no layout area.");
-            Require(root.Q<Label>("hero-hp-value")?.text == hero.Hp + "\n/ " + hero.MaxHp, "Hero HP label differs from combat state.");
+            Require(root.Q<Label>("hero-hp-value")?.text == hero.Hp + " / " + hero.MaxHp, "Hero HP label differs from combat state.");
             Require(root.Q<Label>("xp-value")?.text == "획득 경험치  " + encounter.Progression.TotalExperience + " XP", "XP label differs from awarded XP.");
-            Require(root.Q<Label>("gold-value")?.text == "GOLD  " + encounter.Progression.TotalGold + "     XP  " + encounter.Progression.TotalExperience, "Gold label differs from awarded gold.");
+            Require(root.Q<Label>("gold-value")?.text == "골드  " + encounter.Progression.TotalGold, "Gold label differs from awarded gold.");
             var panel = root.Q("character-panel");
             Require(panel != null && (panel.resolvedStyle.display != DisplayStyle.None) == encounter.EquipmentVisible,
                 "Character panel visibility differs from encounter state.");

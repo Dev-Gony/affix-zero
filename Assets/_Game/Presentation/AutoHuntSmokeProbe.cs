@@ -307,7 +307,7 @@ namespace AffixZero.Presentation
             {
                 var document=owner.GetComponent<UIDocument>();var root=document==null?null:document.rootVisualElement;
                 Require(root!=null&&root.name=="stitch-hud"&&root.panel!=null&&root.worldBound.width>0,"HUD absent from actual frame.");
-                Require(root.Q<Label>("hero-hp-value")?.text==hero.Hp+" / "+hero.MaxHp+" HP","HUD health binding is stale.");
+            Require(root.Q<Label>("hero-hp-value")?.text==hero.Hp+" / "+hero.MaxHp,"HUD health binding is stale.");
                 Require(Screen.width>0&&Screen.height>0,"Player framebuffer has no size.");
                 pixels=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);
                 pixels.ReadPixels(new Rect(0,0,Screen.width,Screen.height),0,0);pixels.Apply();

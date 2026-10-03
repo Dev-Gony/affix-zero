@@ -105,12 +105,12 @@ namespace AffixZero.Presentation
 
             phase="salvage-live";Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Transaction pause stopped the hunt or simulation kept advancing.");
             int salvageIndex=WorstSalvageIndex();Require(salvageIndex>=0,"Stress profile has no salvage candidate.");
-            string salvageId=owner.Progression.Inventory[salvageIndex].Id,salvageName=owner.Progression.Inventory[salvageIndex].Name;
-            string fallbackName=owner.Progression.Inventory.Count<=1?"":owner.Progression.Inventory[
-                salvageIndex==owner.Progression.Inventory.Count-1?salvageIndex-1:salvageIndex+1].Name;
+            string salvageId=owner.Progression.Inventory[salvageIndex].Id,salvageName=KoreanDisplay.ItemName(owner.Progression.Inventory[salvageIndex]);
+            string fallbackName=owner.Progression.Inventory.Count<=1?"":KoreanDisplay.ItemName(owner.Progression.Inventory[
+                salvageIndex==owner.Progression.Inventory.Count-1?salvageIndex-1:salvageIndex+1]);
             int salvageValue=owner.Progression.GetSalvageValue(salvageIndex);
             Dispatch("inventory-slot-"+salvageIndex);yield return WaitFor(()=>Text("selected-item-name").Contains(salvageName),2,"stable salvage selection");
-            Dispatch("salvage-button");yield return WaitFor(()=>Text("salvage-button").Contains("CONFIRM"),2,"salvage confirmation state");
+            Dispatch("salvage-button");yield return WaitFor(()=>Text("salvage-button").Contains("확인"),2,"salvage confirmation state");
             int goldBefore=owner.Progression.TotalGold,salvageBefore=owner.Progression.TotalSalvageGold;
             inventoryBefore=owner.Progression.Inventory.Count;tokensBefore=owner.Progression.CaptureSnapshot().killTokens.Length;
             Dispatch("salvage-button");yield return null;
@@ -217,7 +217,7 @@ namespace AffixZero.Presentation
             VisualElement root=Root,panel=Element("character-panel");Require(root!=null&&panel!=null&&Visible(panel),"Equipment panel is not visible.");
             foreach(string name in new[]{"equipped-paper-doll","inventory-grid","item-comparison","inventory-slot-23","selected-item-name","equip-button","salvage-button","speed-1x","speed-2x","speed-4x"})
             {VisualElement element=Element(name);Require(element!=null&&Within(element.worldBound,root.worldBound),"720p control is clipped: "+name);}
-            VisualElement slot=Element("inventory-slot-"+selectedIndex);Require(!string.IsNullOrWhiteSpace(slot.tooltip)&&slot.tooltip.Contains("BASE"),
+            VisualElement slot=Element("inventory-slot-"+selectedIndex);Require(!string.IsNullOrWhiteSpace(slot.tooltip)&&slot.tooltip.Contains("기본"),
                 "Selected 720p equipment tooltip does not expose base/rolled detail.");
             Require(!string.IsNullOrWhiteSpace(Text("selected-item-name")),"720p comparison name is empty.");report.layout720Verified=true;
         }

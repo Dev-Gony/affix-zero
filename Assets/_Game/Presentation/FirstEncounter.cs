@@ -87,13 +87,13 @@ namespace AffixZero.Presentation
         public bool CollectLoot()
         {
             if(!CanProgress)return false;
-            string name = Progression.PendingLoot?.Name;
+            WeaponItem loot = Progression.PendingLoot;
             if (!Progression.PickUp())
             {
                 ProgressionNotice = Progression.PendingLoot == null ? "회수할 전리품이 없습니다." : "가방이 가득 찼습니다. 먼저 공간을 비우세요.";
                 return false;
             }
-            ProgressionNotice = name + " 획득 · 가방에서 비교할 수 있습니다.";
+            ProgressionNotice = KoreanDisplay.ItemName(loot) + " 획득 · 가방에서 비교할 수 있습니다.";
             ClearLootView();
             if (Progression.PendingLoot != null) ShowLoot();
             SaveProgress();
@@ -106,7 +106,7 @@ namespace AffixZero.Presentation
             EquipmentSlot slot=index>=0&&index<Progression.Inventory.Count?Progression.Inventory[index].EquipmentSlot:EquipmentSlot.Weapon;
             if (!Progression.Equip(index)) { ProgressionNotice = "장착할 아이템을 선택하세요."; return false; }
             ApplyBuild();
-            ProgressionNotice = Progression.GetEquipped(slot).Name + " 장착 · 다음 행동부터 적용";
+            ProgressionNotice = KoreanDisplay.ItemName(Progression.GetEquipped(slot)) + " 장착 · 다음 행동부터 적용";
             SaveProgress();
             return true;
         }
@@ -124,9 +124,9 @@ namespace AffixZero.Presentation
         {
             if(!CanProgress)return false;
             int value=Progression.GetSalvageValue(index);
-            if (!Progression.Salvage(index)) { ProgressionNotice = "Select an item to salvage."; return false; }
-            ProgressionNotice = "SALVAGED  +"+value+" GOLD"+
-                (Progression.LastReturnedRuneCount>0?"  ·  RETURNED "+Progression.LastReturnedRuneCount+" RUNES":"");
+            if (!Progression.Salvage(index)) { ProgressionNotice = "분해할 장비를 선택하세요."; return false; }
+            ProgressionNotice = "분해 완료  골드 +"+value+
+                (Progression.LastReturnedRuneCount>0?"  ·  룬 "+Progression.LastReturnedRuneCount+"개 회수":"");
             SaveProgress();
             return true;
         }
@@ -137,10 +137,10 @@ namespace AffixZero.Presentation
             bool changed=equippedSlot.HasValue
                 ?Progression.SocketEquippedItem(equippedSlot.Value,socketIndex,runeId)
                 :Progression.SocketInventoryItem(inventoryIndex,socketIndex,runeId);
-            if(!changed){ProgressionNotice="RUNE INSERT BLOCKED · CHECK SLOT AND COMPATIBILITY";return false;}
+            if(!changed){ProgressionNotice="룬을 장착할 수 없습니다 · 소켓과 호환 부위를 확인하세요.";return false;}
             ApplyBuild();
             RuneDefinition rune=SocketCatalog.GetRune(runeId);
-            ProgressionNotice="SOCKETED  "+(rune==null?runeId:rune.Name)+"  ·  "+SocketCatalog.DescribeValue(rune);
+            ProgressionNotice="룬 장착  "+(rune==null?runeId:KoreanDisplay.RuneName(rune.Id))+"  ·  "+KoreanDisplay.RuneEffect(rune);
             SaveProgress();
             return true;
         }
@@ -151,9 +151,9 @@ namespace AffixZero.Presentation
             bool changed=equippedSlot.HasValue
                 ?Progression.UnsocketEquippedItem(equippedSlot.Value,socketIndex)
                 :Progression.UnsocketInventoryItem(inventoryIndex,socketIndex);
-            if(!changed){ProgressionNotice="RUNE REMOVAL BLOCKED · CHECK SOCKET AND STACK SPACE";return false;}
+            if(!changed){ProgressionNotice="룬을 회수할 수 없습니다 · 소켓과 룬 보관 한도를 확인하세요.";return false;}
             ApplyBuild();
-            ProgressionNotice="RUNE RETURNED INTACT";
+            ProgressionNotice="룬을 온전하게 회수했습니다.";
             SaveProgress();
             return true;
         }
@@ -188,7 +188,7 @@ namespace AffixZero.Presentation
                 return false;
             }
             ApplyBuild();
-            ProgressionNotice = Progression.GetEquipped(slot).Name+" +" + Progression.GetEquipped(slot).EnhancementRank + " 강화 완료";
+            ProgressionNotice = KoreanDisplay.ItemName(Progression.GetEquipped(slot))+" +" + Progression.GetEquipped(slot).EnhancementRank + " 강화 완료";
             SaveProgress();
             return true;
         }
@@ -283,9 +283,9 @@ namespace AffixZero.Presentation
                 bool offered=drop!=null&&Progression.TryCreatePendingLoot(drop);
                 LastDefeatOfferedLoot=offered;
                 ProgressionNotice=Progression.UnspentPoints+Progression.SpentPoints>talentPoints?"특성 포인트 +1":
-                    "처치 보상 +"+Progression.LastExperienceReward+" XP · +"+Progression.LastGoldReward+" GOLD";
-                if(offered){LootPosition=actor.transform.position;ProgressionNotice=(boss?"BOSS LOOT  ":"")+"["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
-                if(runeGranted)ProgressionNotice+="  ·  RUNE "+bossRune.Name;
+                    "처치 보상 경험치 +"+Progression.LastExperienceReward+" · 골드 +"+Progression.LastGoldReward;
+                if(offered){LootPosition=actor.transform.position;ProgressionNotice=(boss?"우두머리 전리품  ":"")+"["+KoreanDisplay.Rarity(drop.Rarity)+"] "+KoreanDisplay.ItemName(drop)+" 발견 · 회수 중";ShowLoot();}
+                if(runeGranted)ProgressionNotice+="  ·  "+KoreanDisplay.RuneName(bossRune.Id);
                 SaveProgress();
                 return true;
             }

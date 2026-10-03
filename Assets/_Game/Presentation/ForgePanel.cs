@@ -37,9 +37,9 @@ namespace AffixZero.Presentation
             var header=Box(Root,"forge-header",8,8,1232,56,Surface);
             Box(header,"forge-header-accent",0,0,4,56,Crimson);
             Text(header,"대장간 강화",18,5,355,29,23,Cream);
-            Text(header,"FORGE  /  장착 장비 확정 강화",19,35,355,15,10,Muted);
+            Text(header,"장착 장비 확정 강화",19,35,355,15,10,Muted);
             var activeTab=Box(header,"forge-active-tab",427,9,226,38,Crimson);
-            Text(activeTab,"장비 강화  + ENHANCE",10,8,206,22,13,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
+            Text(activeTab,"장비 강화",10,8,206,22,13,Cream).style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(header,"실패 · 장비 파괴 없음",750,18,306,24,12,Gold).style.unityTextAlign=TextAnchor.MiddleRight;
             Button(header,"forge-close","닫기  [ESC]",1084,8,136,40,close,Highest);
 
@@ -47,7 +47,7 @@ namespace AffixZero.Presentation
             Text(list,"강화 대상 장비",16,13,212,28,18,Cream);
             Box(list,"forge-list-divider",16,49,212,1,Edge);
             string[] slotIds={"forge-slot-weapon","forge-slot-armor","forge-slot-relic"};
-            string[] slotNames={"무기  /  WEAPON","방어구  /  ARMOR","유물  /  RELIC"};
+            string[] slotNames={"무기","방어구","유물"};
             for(int i=0;i<3;i++)
             {
                 EquipmentSlot slot=(EquipmentSlot)i;
@@ -107,21 +107,21 @@ namespace AffixZero.Presentation
             bool max=v.HasItem&&v.Rank>=WeaponItem.MaxEnhancementRank;
             name.text=v.HasItem?v.Name+"  +"+v.Rank:"이 부위에 장착한 장비가 없습니다";
             selected.text=v.HasItem?v.Name+"\n+"+v.Rank+"  ·  장착 중":"미장착\n가방에서 장비 선택";
-            rank.text=!v.HasItem?"—":max?"+"+WeaponItem.MaxEnhancementRank+"  MAX":"+"+v.Rank+" → +"+(v.Rank+1);
+            rank.text=!v.HasItem?"—":max?"+"+WeaponItem.MaxEnhancementRank+"  최대":"+"+v.Rank+" → +"+(v.Rank+1);
             primaryLabel.text=v.PrimaryLabel??"장비 능력치";
             secondaryLabel.text=v.SecondaryLabel??"영웅 능력치";
-            weapon.text=!v.HasItem?"—":(v.PrimaryValue??"—")+(max?"  MAX":" → "+(v.NextPrimaryValue??"—"));
-            attack.text=!v.HasItem?"—":(v.SecondaryValue??"—")+(max?"  MAX":" → "+(v.NextSecondaryValue??"—"));
-            cost.text=!v.HasItem?"장비를 먼저 장착하세요.":max?"최대 강화 단계에 도달했습니다.":"소모 골드  "+v.Cost+" G";
+            weapon.text=!v.HasItem?"—":(v.PrimaryValue??"—")+(max?"  최대":" → "+(v.NextPrimaryValue??"—"));
+            attack.text=!v.HasItem?"—":(v.SecondaryValue??"—")+(max?"  최대":" → "+(v.NextSecondaryValue??"—"));
+            cost.text=!v.HasItem?"장비를 먼저 장착하세요.":max?"최대 강화 단계에 도달했습니다.":"소모 골드  "+v.Cost;
             outcome.text=!v.HasItem?"강화 대상 없음":max?"최대 강화 완료":"확정 강화  /  100%";
             details.text=v.HasItem?v.Affix??"":"장비 화면에서 해당 부위의 장비를 장착하면\n실제 속성과 강화 결과를 확인할 수 있습니다.";
             rules.text=(v.Slot==EquipmentSlot.Armor?"단계마다 방어력 +1 · 최대 체력 +5":"단계마다 피해 +2")+
                 "\n최대 강화 +"+WeaponItem.MaxEnhancementRank+"\n단계가 높을수록 골드 비용 증가\n실패와 장비 파괴 없음";
-            wallet.text="보유 골드  "+v.Gold+" G";
+            wallet.text="보유 골드  "+v.Gold;
             notice.text=v.HasItem?v.Notice??"":"미장착 부위는 강화할 수 없습니다.";
             bool available=v.HasItem&&!max&&v.CanEnhance;
             enhance.SetEnabled(available); enhance.style.opacity=available?1:0.45f;
-            enhance.Q<Label>().text=!v.HasItem?"장비를 먼저 장착하세요":max?"최대 강화 완료":available?"강화 실행  ·  "+v.Cost+" G":"골드 부족  ·  "+v.Cost+" G 필요";
+            enhance.Q<Label>().text=!v.HasItem?"장비를 먼저 장착하세요":max?"최대 강화 완료":available?"강화 실행  ·  "+v.Cost+" 골드":"골드 부족  ·  "+v.Cost+" 골드 필요";
             string nextResource=v.HasItem?v.Icon:null;
             if(resource!=nextResource) { resource=nextResource; preview.image=selectedIcon.image=string.IsNullOrEmpty(resource)?null:Resources.Load<Texture2D>(resource); }
             for(int i=0;i<slotButtons.Length;i++)

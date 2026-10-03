@@ -109,9 +109,9 @@ namespace AffixZero.Presentation
                 image.sourceRect=new Rect(source.x,portrait.texture.height-source.yMax,source.width,source.height);
             }
             var levelRibbon=Box(root,"hero-level-ribbon",24,88,64,22,new Color32(26,18,18,255));Border(levelRibbon,FrameEdge,1);
-            Text(levelRibbon,"LV",4,2,17,20,8,Muted);
+            Text(levelRibbon,"레벨",3,2,21,20,7,Muted);
             levelValue=Text(levelRibbon,"",22,1,36,20,12,Gold);levelValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            Text(body,"AFFIX HUNTER",28,7,174,17,11,Gold);
+            Text(body,"AFFIX: ZERO",28,7,174,17,11,Gold);
             var healthTrack=Box(body,"hero-health-track",18,28,184,12,Ink);Border(healthTrack,new Color32(91,42,45,255),1);
             healthFill=Box(healthTrack,"hero-health-fill",1,1,182,10,Crimson);
             healthValue=Text(healthTrack,"",2,-1,180,12,8,Color.white);healthValue.name="hero-hp-value";healthValue.style.unityTextAlign=TextAnchor.MiddleCenter;
@@ -139,7 +139,7 @@ namespace AffixZero.Presentation
             var track=Box(bossFrame,"boss-health-track",22,23,338,13,Ink);Border(track,new Color32(126,48,54,255),1);
             bossHealthFill=Box(track,"boss-health-fill",1,1,336,11,new Color32(174,24,46,255));
             bossHealthValue=Text(track,"",2,-1,334,13,8,Color.white);bossHealthValue.name="boss-hp-value";bossHealthValue.style.unityTextAlign=TextAnchor.MiddleCenter;
-            bossPattern=Text(bossFrame,"ROUTE BOSS",18,39,346,13,7,Muted);bossPattern.name="boss-pattern-state";bossPattern.style.unityTextAlign=TextAnchor.MiddleCenter;
+            bossPattern=Text(bossFrame,"구역 우두머리",18,39,346,13,7,Muted);bossPattern.name="boss-pattern-state";bossPattern.style.unityTextAlign=TextAnchor.MiddleCenter;
         }
         private void BuildEnemy()
         {
@@ -152,12 +152,12 @@ namespace AffixZero.Presentation
             killCount=Text(region,"",8,60,64,20,14,Gold);killCount.name="hunt-kills";
             clock=Text(region,"",72,61,70,18,8,Muted);clock.style.unityTextAlign=TextAnchor.MiddleRight;
             huntRewards=Text(region,"",8,80,134,16,8,Cream);
-            difficultyButtons[0]=Click(region,"difficulty-scout","SCOUT",8,98,41,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Scout),Surface);
-            difficultyButtons[1]=Click(region,"difficulty-veteran","VET",54,98,41,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Veteran),Surface);
-            difficultyButtons[2]=Click(region,"difficulty-torment","TORM",100,98,42,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Torment),Surface);
+            difficultyButtons[0]=Click(region,"difficulty-scout","정찰",8,98,41,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Scout),Surface);
+            difficultyButtons[1]=Click(region,"difficulty-veteran","숙련",54,98,41,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Veteran),Surface);
+            difficultyButtons[2]=Click(region,"difficulty-torment","고행",100,98,42,20,()=>encounter.Hunt.SetDifficulty(DungeonDifficulty.Torment),Surface);
             for(int i=0;i<difficultyButtons.Length;i++)difficultyButtons[i].Q<Label>().style.fontSize=8;
             difficultyInfo=Text(region,"",8,119,134,10,7,Muted);
-            paused = Text(root, "일시정지  /  PAUSED", 0, 59, 180, 22, 10, Gold);
+            paused = Text(root, "일시정지", 0, 59, 180, 22, 10, Gold);
             paused.style.left = Length.Percent(50); paused.style.marginLeft = -90;
             paused.style.unityTextAlign = TextAnchor.MiddleCenter;
         }
@@ -166,10 +166,10 @@ namespace AffixZero.Presentation
             var frame=Box(root,"minimap",0,12,156,130,FrameDark);
             frame.style.left=StyleKeyword.Auto;frame.style.right=10;Skin(frame,"AffixUIVisual/FramePanel");Border(frame,FrameEdge,2);
             Box(frame,"minimap-red-corner",143,4,7,16,Burgundy);
-            mapTitle=Text(frame,"MAP",7,4,142,16,9,Gold);
+            mapTitle=Text(frame,"지도",7,4,142,16,9,Gold);
             var map=Box(frame,"minimap-image",7,24,142,93,Ink);mapArea=map;Border(map,Edge,1);
             if (room != null) map.style.backgroundImage = new StyleBackground(room);
-            else Text(map,"ROOM ART MISSING",3,36,136,18,8,Crimson);
+            else Text(map,"지도 이미지를 찾을 수 없음",3,36,136,18,7,Crimson);
             mapHero = Box(map,"hero-map-marker",0,0,5,5,Sky);
             mapEnemy = Box(map,"enemy-map-marker",0,0,5,5,Crimson);
             enemyMarkers.Add(mapEnemy);
@@ -186,14 +186,14 @@ namespace AffixZero.Presentation
                 var icon=new Image {image=attackIcon,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};
                 Place(icon,6,5,30,30);slot.Add(icon);actionIcon=icon;
             }
-            attackState=Text(slot,"AUTO",2,37,38,11,7,Gold);attackState.style.unityTextAlign=TextAnchor.MiddleCenter;
+            attackState=Text(slot,"자동",2,37,38,11,7,Gold);attackState.style.unityTextAlign=TextAnchor.MiddleCenter;
             var area=Box(bottom,"auto-area-skill",64,16,42,52,Surface);areaSkillSlot=area;Skin(area,"AffixUIVisual/FrameSlotGold");Border(area,Gold,1);
             var areaIcon=new Image {image=Resources.Load<Texture2D>("AffixUIVisual/SkillArea"),scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(areaIcon,6,5,30,30);area.Add(areaIcon);
-            areaSkillLabel=Text(area,"AREA",1,37,40,11,7,Gold);areaSkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
+            areaSkillLabel=Text(area,"범위",1,37,40,11,7,Gold);areaSkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             area.tooltip="적 2명 이상 접근 시 자동 범위 공격";
             var recovery=Box(bottom,"auto-recovery-skill",110,16,42,52,Surface);recoverySkillSlot=recovery;Skin(recovery,"AffixUIVisual/FrameSlotSilver");Border(recovery,Sky,1);
             var healIcon=new Image {image=Resources.Load<Texture2D>("AffixUIVisual/SkillHeal"),scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(healIcon,6,5,30,30);recovery.Add(healIcon);
-            recoverySkillLabel=Text(recovery,"HEAL",1,37,40,11,7,Sky);recoverySkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
+            recoverySkillLabel=Text(recovery,"회복",1,37,40,11,7,Sky);recoverySkillLabel.style.unityTextAlign=TextAnchor.MiddleCenter;
             recovery.tooltip="체력 45% 이하에서 자동 회복";
             for(int i=0;i<4;i++)
             {
@@ -211,17 +211,17 @@ namespace AffixZero.Presentation
             currency=Text(bottom,"",252,56,58,16,8,Gold);currency.name="gold-value";currency.style.unityTextAlign=TextAnchor.MiddleRight;
             saveStatus=Text(bottom,"",252,98,98,12,6,Muted);saveStatus.name="save-status";
             saveStatus.style.overflow=Overflow.Hidden;saveStatus.style.textOverflow=TextOverflow.Ellipsis;
-            saveRetry=Click(bottom,"save-retry","RETRY",252,78,98,30,()=>encounter.RetrySave(),Crimson);
-            dungeonTab=Click(bottom,"dungeon-tab","HUNT",18,88,40,26,()=>encounter.ShowManagement(ManagementScreen.None),Burgundy);
-            equipmentTab=Click(bottom,"character-tab","BAG",61,88,38,26,()=>ToggleManagement(ManagementScreen.Equipment),Surface);
-            talentTab=Click(bottom,"talents-tab","TREE",102,88,38,26,()=>ToggleManagement(ManagementScreen.Talents),Surface);
-            forgeTab=Click(bottom,"forge-tab","FORGE",143,88,42,26,()=>ToggleManagement(ManagementScreen.Forge),Surface);
-            effectsButton=Click(bottom,"effects-toggle","FX",188,88,28,26,()=>encounter.Hunt.ToggleReducedEffects(),Surface);
-            huntButton=Click(bottom,"autohunt-toggle","START",219,88,48,26,()=> {
+            saveRetry=Click(bottom,"save-retry","저장 재시도",252,78,98,30,()=>encounter.RetrySave(),Crimson);
+            dungeonTab=Click(bottom,"dungeon-tab","사냥",18,88,40,26,()=>encounter.ShowManagement(ManagementScreen.None),Burgundy);
+            equipmentTab=Click(bottom,"character-tab","가방",61,88,38,26,()=>ToggleManagement(ManagementScreen.Equipment),Surface);
+            talentTab=Click(bottom,"talents-tab","특성",102,88,38,26,()=>ToggleManagement(ManagementScreen.Talents),Surface);
+            forgeTab=Click(bottom,"forge-tab","강화",143,88,42,26,()=>ToggleManagement(ManagementScreen.Forge),Surface);
+            effectsButton=Click(bottom,"effects-toggle","효과",188,88,28,26,()=>encounter.Hunt.ToggleReducedEffects(),Surface);
+            huntButton=Click(bottom,"autohunt-toggle","시작",219,88,48,26,()=> {
                 if(encounter.Hunt.Running)encounter.Hunt.StopHunt();else encounter.Hunt.StartHunt();
             },Crimson);
             huntCaption=huntButton.Q<Label>();
-            pauseButton=Click(bottom,"pause-button","PAUSE",270,88,45,26,ToggleExplicitPause,Surface);
+            pauseButton=Click(bottom,"pause-button","정지",270,88,45,26,ToggleExplicitPause,Surface);
             pauseCaption=pauseButton.Q<Label>();
             speedValue=Text(bottom,"1x",317,58,33,16,10,Gold);speedValue.name="simulation-speed-value";speedValue.style.unityTextAlign=TextAnchor.MiddleCenter;
             speedButtons[0]=Click(bottom,"speed-1x","1x",318,88,10,26,()=>encounter.SetSimulationSpeed(1),Surface);
@@ -261,17 +261,18 @@ namespace AffixZero.Presentation
                     AreaTargets=p.AreaSkillMinimumTargets,RecoveryThreshold=p.RecoveryThresholdPercent,RecoveryHeal=p.RecoveryHealPercent,
                     ActiveEvolutions=p.ActiveEvolutionCount,AreaRadius=p.AreaSkillRadius,AreaDamageMultiplier=p.AreaSkillDamageMultiplier,
                     AreaArming=p.AreaSkillArmingDelay,RecoveryArming=p.RecoveryArmingDelay,
-                    AreaName=p.AreaSkillName,AreaTradeoff=encounter.Hunt.AreaEvolutionTradeoff,RecoveryName=p.RecoverySkillName};
+                     AreaName=KoreanDisplay.Skill(p.AreaSkillName),AreaTradeoff=AreaTradeoff(p),RecoveryName=KoreanDisplay.Skill(p.RecoverySkillName)};
             },id=>encounter.SpendTalent(id),()=>encounter.ResetTalents(),()=>encounter.ShowManagement(ManagementScreen.None));
             forgePanel=new ForgePanel(root,()=> {
                 var p=encounter.Progression;var item=p.EquippedWeapon;
-                return new ForgePanel.View {Name=item.Name,Icon=item.IconResource,Rank=item.EnhancementRank,
+                return new ForgePanel.View {Name=KoreanDisplay.ItemName(item),Icon=item.IconResource,Rank=item.EnhancementRank,
                     WeaponDamage=item.DamageBonus,TotalDamage=p.TotalDamage,Gold=p.TotalGold,Cost=p.EquippedEnhancementCost,
-                    CanEnhance=p.CanEnhanceEquipped,Affix="기본 피해 +"+item.FlatDamage+"\n"+item.AffixName+"  어픽스 피해 +"+item.AffixDamage,
+                    CanEnhance=p.CanEnhanceEquipped,Affix=KoreanDisplay.Rarity(item.Rarity)+" · "+KoreanDisplay.Slot(item.EquipmentSlot)+
+                        "\n"+PrimarySummary(item)+" · 옵션 "+item.Options.Count+"개",
                     Notice=encounter.ProgressionNotice,HasItem=true,Slot=EquipmentSlot.Weapon,
-                    PrimaryLabel="WEAPON ATK",PrimaryValue=item.DamageBonus.ToString(),
+                    PrimaryLabel="무기 공격력",PrimaryValue=item.DamageBonus.ToString(),
                     NextPrimaryValue=(item.DamageBonus+item.NextEnhancementDamage).ToString(),
-                    SecondaryLabel="TOTAL ATK",SecondaryValue=p.TotalDamage.ToString(),
+                    SecondaryLabel="총 공격력",SecondaryValue=p.TotalDamage.ToString(),
                     NextSecondaryValue=(p.TotalDamage+item.NextEnhancementDamage).ToString()};
             },()=>encounter.EnhanceWeapon(),()=>encounter.ShowManagement(ManagementScreen.Equipment),()=>encounter.ShowManagement(ManagementScreen.None));
         }
@@ -343,9 +344,9 @@ namespace AffixZero.Presentation
                 CompatibleRunes=runeViews,SelectedRune=chosen==null?null:RuneView(chosen,p.RuneCount(chosen.Id)),SelectedSocketIndex=selectedSocketIndex,
                 Health=encounter.Hero.Hp+" / "+encounter.Hero.MaxHp,
                 Damage=p.TotalDamage.ToString(),Defense=encounter.Hero.Defense.ToString(),
-                Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+" s",
+                Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+"초",
                 Comparison=item==null?"가방에서 장비를 선택하세요.":"현재 슬롯 비교 · 피해 "+Signed(damageDelta)+"  방어 "+Signed(defenseDelta)+"  체력 "+Signed(healthDelta),
-                Delta=item==null?"":"이동속도 "+(speedDelta>=0?"+":"")+(speedDelta*100f).ToString("0")+"% · "+item.EquipmentSlot,
+                Delta=item==null?"":"공격 속도 "+(speedDelta>=0?"+":"")+(speedDelta*100f).ToString("0")+"% · "+KoreanDisplay.Slot(item.EquipmentSlot),
                 Affix=item==null?"":DescribeItemDetailed(item),
                 Status=encounter.ProgressionNotice,Points=p.UnspentPoints,Fury=p.FuryRank,Precision=p.PrecisionRank,Keystone=p.KeystoneRank,
                 SalvageValue=equippedSelection?0:p.GetSalvageValue(selectedItemIndex),
@@ -360,11 +361,11 @@ namespace AffixZero.Presentation
             };
         }
         private static EquipmentPanel.RuneView RuneView(RuneDefinition rune,int count)=>rune==null?null:new EquipmentPanel.RuneView
-        {Id=rune.Id,Name=rune.Name,Mark=rune.Mark,Effect=SocketCatalog.DescribeValue(rune),Count=count};
+        {Id=rune.Id,Name=KoreanDisplay.RuneName(rune.Id),Mark=rune.Mark,Effect=KoreanDisplay.RuneEffect(rune),Count=count};
         private static EquipmentPanel.ItemView ItemView(WeaponItem item,bool equipped)
         {
-            return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=item.Name,Icon=item.IconResource,
-                SlotText=item.EquipmentSlot.ToString().ToUpperInvariant(),Summary=item.Rarity+" · "+PrimarySummary(item),
+            return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=KoreanDisplay.ItemName(item),Icon=item.IconResource,
+                SlotText=KoreanDisplay.Slot(item.EquipmentSlot),Summary=KoreanDisplay.Rarity(item.Rarity)+" · "+PrimarySummary(item),
                 PrimaryValue=PrimaryValue(item),PrimaryLabel=PrimaryLabel(item),Rarity=item.Rarity,
                 Affix=DescribeItemDetailed(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus,
                 SocketCapacity=item.SocketCapacity,OpenedSocketCount=item.OpenedSocketCount,
@@ -374,34 +375,58 @@ namespace AffixZero.Presentation
         private static string PrimaryValue(WeaponItem item)=>item.DamageBonus>0?item.DamageBonus.ToString():item.DefenseBonus>0?item.DefenseBonus.ToString():item.HealthBonus.ToString();
         private static string PrimaryLabel(WeaponItem item)=>item.DamageBonus>0?"피해":item.DefenseBonus>0?"방어":"체력";
         private static string PrimarySummary(WeaponItem item)=>PrimaryLabel(item)+" +"+PrimaryValue(item);
+        private static string AreaTradeoff(HeroProgression progression)
+        {
+            if(progression.AreaTrajectory==AreaSkillTrajectory.Chain)return "연쇄 "+progression.AreaSkillMaxTargets+"명 · 도약 "+progression.AreaSkillJumpRange.ToString("0.0")+"m";
+            if(progression.AreaTrajectory==AreaSkillTrajectory.Pierce)return "관통 "+progression.AreaSkillMaxTargets+"명 · 폭 "+progression.AreaSkillPierceWidth.ToString("0.00")+"m";
+            if(progression.AreaTrajectory==AreaSkillTrajectory.Quake)return "2단계 · 외곽 65% · 반경 "+progression.AreaSkillRadius.ToString("0.0")+"m";
+            return "전방위 · 반경 "+progression.AreaSkillRadius.ToString("0.0")+"m";
+        }
+        private static string RollRange(AffixStat stat)
+        {
+            switch(stat)
+            {
+                case AffixStat.Attack:return "층당 1~15";
+                case AffixStat.Defense:return "층당 1~10";
+                case AffixStat.Health:return "층당 5~60";
+                case AffixStat.Mana:return "층당 5~40";
+                case AffixStat.Speed:return "층당 5~30%";
+                case AffixStat.Critical:return "층당 1~15";
+                case AffixStat.Vampirism:return "층당 1~8";
+                case AffixStat.Experience:return "층당 3~20";
+                case AffixStat.Gold:return "층당 5~30";
+                case AffixStat.Penetration:return "층당 1~10";
+                default:return "설정 범위";
+            }
+        }
         private static string DescribeItem(WeaponItem item)
         {
-            var lines=new List<string>{item.Rarity+" · "+item.EquipmentSlot};
+            var lines=new List<string>{KoreanDisplay.Rarity(item.Rarity)+" · "+KoreanDisplay.Slot(item.EquipmentSlot)};
             if(item.DamageBonus!=0)lines.Add("공격 +"+item.DamageBonus);
             if(item.DefenseBonus!=0)lines.Add("방어 +"+item.DefenseBonus);
             if(item.HealthBonus!=0)lines.Add("체력 +"+item.HealthBonus);
-            foreach(ItemOption option in item.Options)lines.Add(option.Name+" +"+(option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#")));
-            if(item.SocketCapacity>0)lines.Add("SOCKETS "+item.FilledSocketCount+"/"+item.OpenedSocketCount+" · CAP "+item.SocketCapacity);
+            foreach(ItemOption option in item.Options)lines.Add(KoreanDisplay.Stat(option.Stat)+" +"+(option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#")));
+            if(item.SocketCapacity>0)lines.Add("소켓 "+item.FilledSocketCount+"/"+item.OpenedSocketCount+" · 최대 "+item.SocketCapacity);
             if(item.EnhancementRank>0)lines.Add("강화 +"+item.EnhancementRank);
             return string.Join("  ·  ",lines);
         }
         private static string DescribeItemDetailed(WeaponItem item)
         {
-            var lines=new List<string>{item.Rarity.ToUpperInvariant()+"  /  "+item.EquipmentSlot};
-            if(item.FlatDamage!=0)lines.Add("BASE ATTACK  +"+item.FlatDamage);
-            if(item.AffixDamage!=0)lines.Add("ROLLED ATTACK  +"+item.AffixDamage);
-            if(item.FlatDefense!=0)lines.Add("BASE DEFENSE  +"+item.FlatDefense);
-            if(item.FlatHealth!=0)lines.Add("BASE HEALTH  +"+item.FlatHealth);
-            foreach(ItemOption option in item.Options)lines.Add("ROLLED "+option.Name+"  +"+
-                (option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#"))+"  ["+LootGenerator.ConfiguredRollRange(option.Stat)+"]");
-            lines.Add("SOCKETS  "+item.FilledSocketCount+" / "+item.OpenedSocketCount+"  ·  CAPACITY "+item.SocketCapacity);
+            var lines=new List<string>{KoreanDisplay.Rarity(item.Rarity)+"  /  "+KoreanDisplay.Slot(item.EquipmentSlot)};
+            if(item.FlatDamage!=0)lines.Add("기본 공격력  +"+item.FlatDamage);
+            if(item.AffixDamage!=0)lines.Add("추가 공격력  +"+item.AffixDamage);
+            if(item.FlatDefense!=0)lines.Add("기본 방어력  +"+item.FlatDefense);
+            if(item.FlatHealth!=0)lines.Add("기본 체력  +"+item.FlatHealth);
+            foreach(ItemOption option in item.Options)lines.Add(KoreanDisplay.Stat(option.Stat)+"  +"+
+                (option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#"))+"  ["+RollRange(option.Stat)+"]");
+            lines.Add("소켓  "+item.FilledSocketCount+" / "+item.OpenedSocketCount+"  ·  최대 "+item.SocketCapacity);
             for(int i=0;i<item.OpenedSocketCount;i++)
             {
                 RuneDefinition rune=SocketCatalog.GetRune(item.SocketedRunes[i]);
-                lines.Add(rune==null?"RUNE "+(i+1)+"  ·  OPEN / EMPTY":
-                    "RUNE "+(i+1)+"  ·  "+rune.Name+"  "+SocketCatalog.DescribeValue(rune));
+                lines.Add(rune==null?"룬 "+(i+1)+"  ·  열림 / 비어 있음":
+                    "룬 "+(i+1)+"  ·  "+KoreanDisplay.RuneName(rune.Id)+"  "+KoreanDisplay.RuneEffect(rune));
             }
-            if(item.EnhancementRank>0)lines.Add("ENHANCEMENT  +"+item.EnhancementRank);
+            if(item.EnhancementRank>0)lines.Add("강화  +"+item.EnhancementRank);
             return string.Join("\n",lines);
         }
         private void BuildResult()
@@ -453,40 +478,40 @@ namespace AffixZero.Presentation
             {
                 foreach(var actor in hunt.Enemies)ObserveActor(actor);
                 huntButton.SetEnabled(hunt.Initialized);
-                huntCaption.text=hunt.Running?"STOP":"START";
-                huntStatus.text=hunt.StateCaption+"\nALIVE "+hunt.AliveEnemies+(hunt.KillChain>1?"   CHAIN x"+hunt.KillChain:"");
-                sectionCaption.text=hunt.CurrentLayoutName+"\n"+hunt.Difficulty.Name.ToUpperInvariant()+"  ·  CLEAR "+encounter.Progression.DungeonClears;
+                huntCaption.text=hunt.Running?"중지":"시작";
+                huntStatus.text=hunt.StateCaption+"\n생존 "+hunt.AliveEnemies+(hunt.KillChain>1?"   연속 처치 ×"+hunt.KillChain:"");
+                sectionCaption.text=KoreanDisplay.Layout(hunt.World.LayoutId)+"\n"+KoreanDisplay.Difficulty(hunt.CurrentDifficulty)+"  ·  정화 "+encounter.Progression.DungeonClears;
                 for(int i=0;i<sectionTicks.Length;i++)
                 {
                     sectionTicks[i].style.display=DisplayStyle.Flex;
                     sectionTicks[i].style.backgroundColor=(int)hunt.World.LayoutId==i?Crimson:Edge;
                 }
-                killCount.text=hunt.TotalKills+"  KILLS";
+                killCount.text=hunt.TotalKills+"  처치";
                 huntRewards.text="수거 "+hunt.CollectedItems+"개  ·  재도전 "+hunt.DeathRetries+"회";
                 int alive=0;foreach(var actor in hunt.Enemies)if(actor.isActiveAndEnabled&&!actor.IsDead)alive++;
-                mapTitle.text="MAP  /  "+hunt.CurrentVisualIdentityName;
-                mapTitle.tooltip=hunt.CurrentLayoutName+"\n"+hunt.CurrentVisualIdentitySignature;
-                mapCaption.text=hunt.Difficulty.Name.ToUpperInvariant()+"  ·  ALIVE "+alive;
+                mapTitle.text="지도  /  "+KoreanDisplay.VisualIdentity(hunt.World.LayoutId);
+                mapTitle.tooltip=KoreanDisplay.Layout(hunt.World.LayoutId)+"\n고유 지형 장식";
+                mapCaption.text=KoreanDisplay.Difficulty(hunt.CurrentDifficulty)+"  ·  생존 "+alive;
                 DifficultyRule rule=hunt.Difficulty;
-                difficultyInfo.text="HPx"+rule.EnemyHealthMultiplier.ToString("0.00")+"  DMGx"+rule.EnemyDamageMultiplier.ToString("0.00")+
-                    "  DROPx"+rule.DropMultiplier.ToString("0.00");
-                difficultyStatus.text=hunt.Difficulty.Name.ToUpperInvariant();
+                difficultyInfo.text="체력×"+rule.EnemyHealthMultiplier.ToString("0.00")+" 피해×"+rule.EnemyDamageMultiplier.ToString("0.00")+
+                    " 획득×"+rule.DropMultiplier.ToString("0.00");
+                difficultyStatus.text=KoreanDisplay.Difficulty(hunt.CurrentDifficulty);
                 for(int i=0;i<difficultyButtons.Length;i++)
                 {
                     difficultyButtons[i].SetEnabled(hunt.CanChangeDifficulty&&(int)hunt.CurrentDifficulty!=i);
                     difficultyButtons[i].style.backgroundColor=(int)hunt.CurrentDifficulty==i?Crimson:Surface;
                 }
-                effectsButton.Q<Label>().text=hunt.ReducedEffects?"FX LOW":"FX FULL";
+                effectsButton.Q<Label>().text=hunt.ReducedEffects?"효과↓":"효과";
                 RefreshObstacleMarkers(hunt.World);
                 bool showBoss=hunt.BossAlive;
                 bossFrame.style.display=showBoss?DisplayStyle.Flex:DisplayStyle.None;
                 if(showBoss)
                 {
                     MeleeActor boss=hunt.Boss;
-                    bossName.text=hunt.BossName;
+                    bossName.text=KoreanDisplay.Boss(hunt.World.LayoutId);
                     bossHealthFill.style.width=Length.Percent(100f*boss.Hp/Mathf.Max(1,boss.MaxHp));
-                    bossHealthValue.text=boss.Hp+" / "+boss.MaxHp+" HP";
-                    bossPattern.text=hunt.BossTelegraphing?"RUIN PULSE  ·  EVADE":hunt.BossEngaged?"ROUTE BOSS  ·  AUTO ENGAGE":"SEALED  ·  CLEAR 23 GUARDS";
+                    bossHealthValue.text=boss.Hp+" / "+boss.MaxHp;
+                    bossPattern.text=hunt.BossTelegraphing?"파멸의 파동  ·  회피 중":hunt.BossEngaged?"구역 우두머리  ·  자동 교전":"봉인됨  ·  수호자 23명 처치";
                     bossPattern.style.color=hunt.BossTelegraphing?Color.white:Muted;
                     Color bossEdge=hunt.BossTelegraphing?Crimson:new Color32(116,64,55,255);
                     bossFrame.style.borderTopColor=bossEdge;bossFrame.style.borderRightColor=bossEdge;
@@ -494,39 +519,41 @@ namespace AffixZero.Presentation
                 }
             }
             healthFill.style.width=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
-            healthValue.text=hero.Hp+" / "+hero.MaxHp+" HP";
+            healthValue.text=hero.Hp+" / "+hero.MaxHp;
             int levelXp=encounter.Progression.TotalExperience%HeroProgression.ExperiencePerLevel;
             float xpPercent=100f*levelXp/HeroProgression.ExperiencePerLevel;
             xpFill.style.width=Length.Percent(xpPercent);dockXpFill.style.width=Length.Percent(xpPercent);
-            xpValue.text="XP  "+levelXp+" / "+HeroProgression.ExperiencePerLevel;
+            xpValue.text="경험치  "+levelXp+" / "+HeroProgression.ExperiencePerLevel;
             levelValue.text=encounter.Progression.Level.ToString();
             if(hunt!=null)
             {
-                areaCooldown.text=hunt.AreaCooldownRemaining<=0?"READY":hunt.AreaCooldownRemaining.ToString("0.0")+"s";
-                recoveryCooldown.text=hunt.RecoveryCooldownRemaining<=0?"READY":hunt.RecoveryCooldownRemaining.ToString("0.0")+"s";
-                areaSkillLabel.text=hunt.AreaEvolutionName;
-                areaSkillLabel.style.fontSize=hunt.AreaEvolutionName.Length>7?5:hunt.AreaEvolutionName.Length>5?6:8;
-                areaSkillSlot.tooltip=hunt.AreaEvolutionName+"  "+Mathf.RoundToInt(hunt.AreaSkillDamageMultiplier*100)+"% ATK\n"+
-                    hunt.AreaEvolutionTradeoff+"\nWeapon changes route: Sword ARC / Axe QUAKE / Staff LANCE";
-                recoverySkillLabel.text=hunt.RecoveryEvolutionName;
-                recoverySkillLabel.style.fontSize=hunt.RecoveryEvolutionName.Length>7?5:8;
-                recoverySkillSlot.tooltip=hunt.RecoveryEvolutionName+"  below "+hunt.RecoveryThresholdPercent+
-                    "% HP  /  heal "+hunt.RecoveryHealPercent+"%";
+                areaCooldown.text=hunt.AreaCooldownRemaining<=0?"준비":hunt.AreaCooldownRemaining.ToString("0.0")+"초";
+                recoveryCooldown.text=hunt.RecoveryCooldownRemaining<=0?"준비":hunt.RecoveryCooldownRemaining.ToString("0.0")+"초";
+                string areaName=KoreanDisplay.Skill(hunt.AreaEvolutionName);
+                areaSkillLabel.text=areaName;
+                areaSkillLabel.style.fontSize=areaName.Length>7?5:areaName.Length>5?6:8;
+                areaSkillSlot.tooltip=areaName+"  공격력의 "+Mathf.RoundToInt(hunt.AreaSkillDamageMultiplier*100)+"%\n"+
+                    AreaTradeoff(encounter.Progression)+"\n무기별 경로: 검 연쇄 참격 / 도끼 충격파 / 지팡이 관통 창";
+                string recoveryName=KoreanDisplay.Skill(hunt.RecoveryEvolutionName);
+                recoverySkillLabel.text=recoveryName;
+                recoverySkillLabel.style.fontSize=recoveryName.Length>7?5:8;
+                recoverySkillSlot.tooltip=recoveryName+"  체력 "+hunt.RecoveryThresholdPercent+
+                    "% 이하 / "+hunt.RecoveryHealPercent+"% 회복";
             }
-            currency.text="GOLD  "+encounter.Progression.TotalGold;
-            combatStats.text="ATK "+encounter.Progression.TotalDamage+"   DEF "+hero.Defense+
-                "\nBAG "+encounter.Progression.Inventory.Count+"/24   PT "+encounter.Progression.UnspentPoints;
+            currency.text="골드  "+encounter.Progression.TotalGold;
+            combatStats.text="공"+encounter.Progression.TotalDamage+"\n방"+hero.Defense+
+                "\n가"+encounter.Progression.Inventory.Count+"/24\n특"+encounter.Progression.UnspentPoints;
             int seconds=Mathf.FloorToInt(encounter.ElapsedSeconds);
-            clock.text="GAME "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
+            clock.text="사냥 "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
             int wallSeconds=Mathf.FloorToInt(encounter.WallClockSeconds);
-            clock.tooltip="Simulated "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00")+
-                " / real "+(wallSeconds/60).ToString("00")+":"+(wallSeconds%60).ToString("00");
+            clock.tooltip="게임 시간 "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00")+
+                " / 실제 시간 "+(wallSeconds/60).ToString("00")+":"+(wallSeconds%60).ToString("00");
             speedValue.text=encounter.SimulationSpeed.ToString("0")+"x";
             for(int i=0;i<speedButtons.Length;i++)
                 speedButtons[i].style.backgroundColor=Mathf.Approximately(encounter.SimulationSpeed,1<<i)?Crimson:Surface;
-            pauseCaption.text=encounter.IsPaused?"RESUME":"PAUSE";
+            pauseCaption.text=encounter.IsPaused?"계속":"정지";
             paused.style.display=encounter.IsPaused&&!encounter.ManagementVisible&&!encounter.HasEnded?DisplayStyle.Flex:DisplayStyle.None;
-            attackState.text=encounter.HasEnded?"END":encounter.IsPaused?"PAUSE":hero.IsAttacking?"STRIKE":hero.CurrentClip==ActorClip.Hit?"HIT":hero.CurrentClip==ActorClip.Walk?"MOVE":"AUTO";
+            attackState.text=encounter.HasEnded?"종료":encounter.IsPaused?"정지":hero.IsAttacking?"공격":hero.CurrentClip==ActorClip.Hit?"피격":hero.CurrentClip==ActorClip.Walk?"이동":"자동";
             float progress=hero.IsAttacking && hero.AnimationSet!=null?(float)(hero.AttackElapsed/hero.AnimationSet.AttackDuration):0;
             attackFill.style.width=Length.Percent(100*Mathf.Clamp01(progress));
             PositionMarker(mapHero,hero.transform.position);
@@ -547,11 +574,11 @@ namespace AffixZero.Presentation
             // Auto hunting owns recovery, loot and reruns; no per-kill Continue prompt.
             result.style.display=DisplayStyle.None;
             var loot=encounter.Progression==null?null:encounter.Progression.PendingLoot;
-            lootText.text=loot==null?encounter.ProgressionNotice:"전리품  ·  "+loot.Name;
+            lootText.text=loot==null?encounter.ProgressionNotice:"전리품  ·  "+KoreanDisplay.ItemName(loot);
             pickupLoot.SetEnabled(loot!=null && !hero.IsDead);pickupLoot.style.opacity=loot==null?0.4f:1;
             nextEncounter.SetEnabled(hero.IsDead || loot==null);nextEncounter.style.opacity=hero.IsDead||loot==null?1:0.4f;
             nextEncounter.Q<Label>().text=hero.IsDead?"다시 시작 [R]":"다음 전투";
-            resultText.text=hero.IsDead?"영웅 쓰러짐":"전투 완료  +"+encounter.Experience+" XP  +"+encounter.Gold+" GOLD";
+            resultText.text=hero.IsDead?"영웅 쓰러짐":"전투 완료  경험치 +"+encounter.Experience+"  골드 +"+encounter.Gold;
         }
         private static void PositionMarker(VisualElement marker,Vector3 world)
         {
@@ -590,7 +617,7 @@ namespace AffixZero.Presentation
         {
             if(!receipt.Accepted || root==null || encounter.ManagementVisible) return;
             if(damageLabels.Count==20) {damageLabels[0].label.RemoveFromHierarchy();damageLabels.RemoveAt(0);}
-            string prefix=actor.LastHitKilled?"KO  ":actor.LastHitCritical?"CRIT  ":"";
+            string prefix=actor.LastHitKilled?"처치  ":actor.LastHitCritical?"치명  ":"";
             int size=actor.LastHitKilled?28:actor.LastHitCritical?25:22;
             Color color=actor==encounter.Hero?new Color(1,0.48f,0.36f):actor.LastHitKilled?new Color(1,.38f,.16f):actor.LastHitCritical?Color.white:Gold;
             var label=Text(root,prefix+receipt.Damage,0,0,110,36,size,color);

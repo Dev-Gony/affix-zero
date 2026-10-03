@@ -77,7 +77,8 @@ namespace AffixZero.Presentation
                     "UI reference fixture requires a fresh temporary profile.");
                 Require(owner.Hunt.World.VisualIdentityName=="FORGE CITADEL"&&owner.Hunt.World.IdentityDecorationCount>=20&&
                     owner.Hunt.World.IdentityColliderCount==0,"Reference world visual identity is missing or changed collision.");
-                AssertBaseItemIcons();
+            AssertBaseItemIcons();
+            AssertKoreanDisplay();
                 AssertPlayerOnlyHealthUi();
                 Require(!owner.Hunt.Running && owner.IsPaused, "Reference startup must be stopped.");
                 foreach (var actor in owner.Hunt.Enemies)
@@ -112,7 +113,7 @@ namespace AffixZero.Presentation
                     Require(owner.Screen == ManagementScreen.Equipment, "Equipment tab did not open.");
                     damageBeforeEquip = p.TotalDamage; Dispatch("inventory-slot-0"); Phase("equipment-selected"); break;
                 case "equipment-selected":
-                    Require(Text("selected-item-name").Contains(p.Inventory[0].Name), "Selected item name is stale.");
+                Require(Text("selected-item-name").Contains(KoreanDisplay.ItemName(p.Inventory[0])), "Selected item name is stale.");
                     Require(p.TotalDamage == damageBeforeEquip, "Selecting an inventory slot changed combat damage.");
                     socketItemId=p.Inventory[0].Id;runeBefore=p.RuneCount("ember");
                     Dispatch("socket-cell-0");Dispatch("socket-insert");Phase("socket-inserted");break;
@@ -120,7 +121,7 @@ namespace AffixZero.Presentation
                     Require(p.Inventory[0].Id==socketItemId&&p.Inventory[0].SocketedRunes[0]=="ember"&&
                         p.RuneCount("ember")==runeBefore-1&&p.TotalDamage==damageBeforeEquip,
                         "Native rune insertion did not consume one stack without equipping the item.");
-                    Require(Element("inventory-slot-0").tooltip.Contains("SOCKETS 1 / 2"),
+                Require(Element("inventory-slot-0").tooltip.Contains("소켓 1 / 2"),
                         "Inventory tooltip did not expose authoritative socket state.");
                     report.socketInsertVerified=true;Dispatch("socket-remove");Phase("socket-removed");break;
                 case "socket-removed":
@@ -138,7 +139,7 @@ namespace AffixZero.Presentation
                         "Native equip callback did not apply the real selected item.");
                     report.equipVerified = true; Dispatch("inventory-slot-1"); Phase("equipment-compare"); break;
                 case "equipment-compare":
-                    Require(Text("selected-item-name").Contains(p.Inventory[1].Name) && !string.IsNullOrWhiteSpace(Text("comparison-delta")),
+                Require(Text("selected-item-name").Contains(KoreanDisplay.ItemName(p.Inventory[1])) && !string.IsNullOrWhiteSpace(Text("comparison-delta")),
                         "Comparison selection is absent from equipment UI.");
                     Capture("equipment"); Phase("equipment-capture"); break;
                 case "equipment-capture":
@@ -180,7 +181,7 @@ namespace AffixZero.Presentation
                         "Native enhancement did not charge exact gold and apply real damage.");
                     report.forgeVerified = true; Phase("forge-enhanced"); break;
                 case "forge-enhanced":
-                    Require(Text("forge-item-name").Contains(p.EquippedWeapon.Name) && Text("forge-wallet").Contains(p.TotalGold.ToString()),
+                Require(Text("forge-item-name").Contains(KoreanDisplay.ItemName(p.EquippedWeapon)) && Text("forge-wallet").Contains(p.TotalGold.ToString()),
                         "Forge result labels are stale.");
                     Capture("forge"); Phase("forge-capture"); break;
                 case "forge-capture":
@@ -274,7 +275,9 @@ namespace AffixZero.Presentation
         }
         private string Text(string name)
         {
-            var label = Element(name) as Label; Require(label != null, "Named value is not a Label: " + name); return label.text ?? "";
+            VisualElement element=Element(name);
+            var label=element as Label??element.Q<Label>();
+            Require(label != null, "Named value has no Label: " + name); return label.text ?? "";
         }
         private bool Ready(string name)
         {
@@ -432,6 +435,26 @@ namespace AffixZero.Presentation
             report.baseIconsLoaded = loaded.Count;
         }
 
+        private void AssertKoreanDisplay()
+        {
+            Font font=Resources.Load<Font>("AffixUI/Korean");
+            Require(font!=null,"Bundled Korean UI font is missing.");
+            const string representative="가나다라마바사아자차카타파하분노정밀숙련강인함휩쓸기가속룬장착회수우두머리파멸정찰고행";
+            foreach(char value in representative)
+                Require(font.HasCharacter(value),"Korean UI font lacks required glyph U+"+((int)value).ToString("X4"));
+            Require(Text("autohunt-toggle")=="시작"&&Text("character-tab")=="가방"&&Text("talents-tab")=="특성"&&
+                Text("forge-tab")=="강화"&&Text("difficulty-status")=="정찰",
+                "Primary HUD controls are not using the Korean display catalog.");
+            int visibleKoreanLabels=0;
+            Root.Query<Label>().ForEach(label=>
+            {
+                if(!Visible(label)||string.IsNullOrEmpty(label.text))return;
+                foreach(char value in label.text)if(value>=0xAC00&&value<=0xD7A3){visibleKoreanLabels++;break;}
+            });
+            Require(visibleKoreanLabels>=8,"Too few visible Korean labels were rendered in the real HUD.");
+            report.koreanGlyphsVerified=true;report.koreanLabelsVerified=visibleKoreanLabels;
+        }
+
         private static void WriteBitmap(string path, Texture2D texture)
         {
             int width = texture.width, height = texture.height, rowBytes = checked(width * 3), stride = checked(rowBytes + 3) & ~3, imageBytes = checked(stride * height);
@@ -477,10 +500,10 @@ namespace AffixZero.Presentation
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
             public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight deterministic authored items exercise distinct base-icon and rarity presentation through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
-            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, socketInsertVerified, socketRemoveVerified,
+            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, socketInsertVerified, socketRemoveVerified,koreanGlyphsVerified,
                 lockedSelectionVerified, talentVerified, forgeVerified,
                 playerHpVisible, bossHpVisible, nonBossHpAbsent;
-            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit, baseIconsLoaded;
+            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit, baseIconsLoaded,koreanLabelsVerified;
             public float elapsedSeconds;
             public string[] fixtureItemIds, nativeCallbacks;
             public FrameReport[] frames;

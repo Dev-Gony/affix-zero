@@ -1,3 +1,26 @@
+# 2026-10-03 - Korean-first player UI completed
+
+The latest user priority is Korean-first presentation. The unverified town and
+five-difficulty experiment was removed from the worktree and preserved locally
+as named `stash@{0}`; it is not part of this result. Read
+`docs/KOREAN_LOCALIZATION.md` before changing player-facing text.
+
+HUD, equipment/bag/comparison, rarity/options, sockets and all ten runes,
+talents, forge, dungeon/difficulty, boss names and telegraphs, save state and
+player notices now use one Korean presentation catalog. Stable enums, save
+keys, resource paths and service name `AFFIX: ZERO` remain unchanged. This is
+future-language-ready separation, not a language selector or full English
+catalog.
+
+Build `4228d559f7c94a7289e52e66a69f2fb0` passes CoreSmoke 348, static compile
+0/0, Unity import/build 0/0, and D-isolated native 720p/1080p Reference UI with
+six frames, 23 callbacks, 32 visible Korean labels, verified representative
+font glyphs, 29 icons, 1x/2x/4x, socket insert/remove and player/boss-only HP.
+The 720p autonomous regression also passes boss ordinal 24, two patterns, one
+avoidance, one guaranteed boss item, one rune and the next segment. Inspected
+evidence is under `docs/media/korean-localization/`. Production save hashes are
+unchanged. Human play and final user visual approval remain pending.
+
 # 2026-10-03 - playable per-base sockets and runes completed
 
 The documented 29-base socket table is now the implemented v1 runtime contract.

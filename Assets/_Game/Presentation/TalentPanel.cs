@@ -33,7 +33,7 @@ namespace AffixZero.Presentation
             icons[3]=Resources.Load<Texture2D>("AffixGenerated/VitalityRune");icons[4]=Resources.Load<Texture2D>("AffixGenerated/CleaveRune");icons[5]=Resources.Load<Texture2D>("AffixGenerated/HasteRune");
             Root=Box(parent,"talent-screen",16,64,1248,516,new Color32(10,10,13,250));Root.pickingMode=PickingMode.Position;Border(Root,new Color32(116,68,53,255),2);
             var header=Box(Root,"talent-header",8,8,1232,56,Surface);Skin(header,"AffixUIVisual/LeatherBurgundy");Border(header,new Color32(116,68,53,255),1);Box(header,"talent-header-accent",0,0,4,56,Crimson);
-            Text(header,"특성 스킬트리",18,5,355,29,23,Cream);Text(header,"OFFENSE · SURVIVAL · AUTO SKILL",19,35,355,15,10,Muted);
+            Text(header,"특성 계통도",18,5,355,29,23,Cream);Text(header,"공격 · 생존 · 자동 기술",19,35,355,15,10,Muted);
             points=Text(header,"",493,16,180,30,16,Gold);points.name="talent-screen-points";
             spent=Text(header,"",681,18,183,26,13,Cream);
             resetButton=Button(header,"talent-screen-reset","특성 초기화",878,8,194,40,Reset,Highest);Skin(resetButton,"AffixUIVisual/FrameButton");
@@ -41,12 +41,12 @@ namespace AffixZero.Presentation
             var tree=Box(Root,"talent-tree",8,76,780,432,Surface);Skin(tree,"AffixUIVisual/FramePanel");
             var treeLeather=Box(tree,"talent-tree-leather",14,14,752,404,new Color32(54,14,25,255));Skin(treeLeather,"AffixUIVisual/LeatherBurgundy");
             Text(tree,"전투 성장 · 최대 75단계",22,16,400,28,18,Cream);Text(tree,"모든 노드는 실제 전투 수치에 적용됩니다.",370,20,386,22,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
-            string[] names={"분노","정밀","숙련자의 일격","생명력","휩쓸기","가속"};
+            string[] names={"분노","정밀","숙련","강인함","휩쓸기","가속"};
             for(int i=0;i<Ids.Length;i++){float x=22+(i%3)*250,y=60+(i/3)*164;nodes[i]=Node(tree,"talent-node-"+Ids[i].ToString().ToLowerInvariant(),Ids[i],names[i],icons[i],x,y,out ranks[i],out nodeEffects[i]);}
-            Text(tree,"공격 · 생존 · 범위 · 자동 스킬 재사용",22,377,470,24,12,Sky);Text(tree,"초반 250 XP / PT · 심화 비용 증가",500,377,258,24,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
+            Text(tree,"공격 · 생존 · 범위 · 자동 기술 재사용",22,377,470,24,12,Sky);Text(tree,"초반 경험치 250 / 포인트 · 심화 비용 증가",470,377,288,24,10,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
             var detail=Box(Root,"talent-detail",800,76,440,432,Surface);Skin(detail,"AffixUIVisual/FramePanel");Box(detail,"talent-detail-accent",11,14,3,404,Crimson);
             var iconFrame=Box(detail,"talent-detail-icon",20,20,76,76,Color.clear);Skin(iconFrame,"AffixUIVisual/FrameSlotGold");detailIcon=Icon(iconFrame,null,14,14,48,48);
-            Text(detail,"선택한 특성 / PASSIVE",112,17,307,19,11,Gold);detailName=Text(detail,"",112,41,307,34,23,Cream);detailName.name="talent-detail-name";
+            Text(detail,"선택한 특성 / 지속 효과",112,17,307,19,11,Gold);detailName=Text(detail,"",112,41,307,34,23,Cream);detailName.name="talent-detail-name";
             detailRank=Text(detail,"",112,78,307,21,13,Muted);
             var effect=Box(detail,"talent-effect-panel",20,120,400,112,Ink);Border(effect,new Color32(91,64,48,255),1);Text(effect,"실제 적용 효과",16,12,368,22,12,Gold);
             detailEffect=Text(effect,"",16,43,368,57,15,Cream);detailEffect.name="talent-detail-effect";detailEffect.style.whiteSpace=WhiteSpace.Normal;
@@ -62,12 +62,12 @@ namespace AffixZero.Presentation
         public void Refresh(bool visible)
         {
             Root.style.display=visible?DisplayStyle.Flex:DisplayStyle.None;if(!visible)return;View v=read();if(v==null){Root.style.display=DisplayStyle.None;return;}
-            points.text="잔여 포인트  "+v.Points;spent.text="투자 "+v.Spent+" / "+HeroProgression.TotalTalentCapacity;
+            points.text="남은 포인트  "+v.Points;spent.text="투자 "+v.Spent+" / "+HeroProgression.TotalTalentCapacity;
             for(int i=0;i<Ids.Length;i++){var d=HeroProgression.GetTalentDefinition(Ids[i]);int r=Rank(v,Ids[i]);ranks[i].text=r+" / "+d.MaxRank;nodeEffects[i].text=CurrentEffect(v,Ids[i]);ShowNode(nodes[i],Ids[i],r>0,Unlocked(v,Ids[i]));}
             var definition=HeroProgression.GetTalentDefinition(SelectedTalent);int rank=Rank(v,SelectedTalent);bool unlocked=Unlocked(v,SelectedTalent);
             detailName.text=definition.Name;detailIcon.image=icons[Array.IndexOf(Ids,SelectedTalent)];detailRank.text="현재 단계  "+rank+" / "+definition.MaxRank;detailEffect.text=definition.Description+"\n"+EvolutionEffect(v,SelectedTalent);
             prerequisite.text=definition.Prerequisite.HasValue?"선행 조건: "+HeroProgression.GetTalentDefinition(definition.Prerequisite.Value).Name+" "+definition.RequiredRank+"단계":"선행 조건 없음";
-            SetEnabled(investButton,v.Points>0&&unlocked&&rank<definition.MaxRank);investCaption.text=rank>=definition.MaxRank?"최대 단계":!unlocked?"선행 조건 필요":v.Points<1?"포인트 부족":"특성 포인트 투자 · 1 PT";SetEnabled(resetButton,v.Spent>0);
+            SetEnabled(investButton,v.Points>0&&unlocked&&rank<definition.MaxRank);investCaption.text=rank>=definition.MaxRank?"최대 단계":!unlocked?"선행 조건 필요":v.Points<1?"포인트 부족":"특성 포인트 투자 · 1 포인트";SetEnabled(resetButton,v.Spent>0);
             summary.text="총 공격 "+v.TotalDamage+" · 최대 체력 "+v.TotalHealth+" · 누적 투자 "+v.Spent;
         }
         private static string CurrentEffect(View v,TalentId id){int r=Rank(v,id);switch(id){case TalentId.Fury:return "현재 공격 +"+(r*3);case TalentId.Precision:return "현재 공격 +"+(r*4);case TalentId.Keystone:return "현재 공격 +"+(r*6);case TalentId.Vitality:return "현재 체력 +"+(r*10);case TalentId.Cleave:return "현재 범위 +"+(r*.08f).ToString("0.00");default:return "현재 재사용 시간 -"+(r*2)+"%";}}
@@ -77,31 +77,31 @@ namespace AffixZero.Presentation
             switch(id)
             {
                 case TalentId.Fury:
-                    return v.AreaName+" "+Mathf.RoundToInt(v.AreaDamageMultiplier*100)+"% / "+v.AreaTradeoff+" "+CompactMilestone(r,5,15)+"\n"+
-                        "SWORD ARC  /  AXE QUAKE  /  STAFF LANCE";
+                    return v.AreaName+" 공격력의 "+Mathf.RoundToInt(v.AreaDamageMultiplier*100)+"% / "+v.AreaTradeoff+" "+CompactMilestone(r,5,15)+"\n"+
+                        "검 연쇄 참격 / 도끼 충격파 / 지팡이 관통 창";
                 case TalentId.Precision:
-                    return "Attack +"+(r*4)+"  /  Critical "+v.CriticalChance+"%"+Milestone(r,3,8);
+                    return "공격력 +"+(r*4)+" / 치명타 확률 "+v.CriticalChance+"%"+Milestone(r,3,8);
                 case TalentId.Keystone:
-                    return "Attack +"+(r*6)+"  /  Armor penetration "+v.Penetration+Milestone(r,2,5);
+                    return "공격력 +"+(r*6)+" / 방어 관통 "+v.Penetration+Milestone(r,2,5);
                 case TalentId.Vitality:
-                    return "Maximum health +"+(r*10)+"\n"+v.RecoveryName+": below "+v.RecoveryThreshold+"%, heal "+v.RecoveryHeal+"%"+
+                    return "최대 체력 +"+(r*10)+"\n"+v.RecoveryName+": 체력 "+v.RecoveryThreshold+"% 이하에서 "+v.RecoveryHeal+"% 회복"+
                         Milestone(r,5,15);
                 case TalentId.Cleave:
-                    return "Melee splash +"+(r*.08f).ToString("0.00")+"m\n"+v.AreaName+" radius "+v.AreaRadius.ToString("0.0")+"m"+
+                    return "근접 범위 +"+(r*.08f).ToString("0.00")+"m\n"+v.AreaName+" 반경 "+v.AreaRadius.ToString("0.0")+"m"+
                         Milestone(r,3,8);
                 default:
-                    return "Cooldown -"+(r*2)+"%  /  Area needs "+v.AreaTargets+" target(s)\nArming "+
-                        v.AreaArming.ToString("0.0")+"s / recovery "+v.RecoveryArming.ToString("0.0")+"s"+Milestone(r,3,8);
+                    return "재사용 시간 -"+(r*2)+"% / 범위 공격 조건 적 "+v.AreaTargets+"명\n공격 대기 "+
+                        v.AreaArming.ToString("0.0")+"초 / 회복 대기 "+v.RecoveryArming.ToString("0.0")+"초"+Milestone(r,3,8);
             }
         }
         private static string Milestone(int rank,int first,int second)
         {
-            if(rank>=second)return "  [EVOLVE II]";
-            if(rank>=first)return "  [EVOLVE I / NEXT R"+second+"]";
-            return "  [NEXT R"+first+"]";
+            if(rank>=second)return "  [진화 II]";
+            if(rank>=first)return "  [진화 I / 다음 "+second+"단계]";
+            return "  [다음 "+first+"단계]";
         }
         private static string CompactMilestone(int rank,int first,int second)
-        {return rank>=second?"[II]":rank>=first?"[I>N"+second+"]":"[N"+first+"]";}
+        {return rank>=second?"[II]":rank>=first?"[I→"+second+"]":"[→"+first+"]";}
         private void Select(TalentId id){SelectedTalent=id;Refresh(true);} private void Invest(){View v=read();var d=HeroProgression.GetTalentDefinition(SelectedTalent);if(v!=null&&v.Points>0&&Unlocked(v,SelectedTalent)&&Rank(v,SelectedTalent)<d.MaxRank)invest(SelectedTalent);Refresh(true);} private void Reset(){View v=read();if(v!=null&&v.Spent>0)reset();Refresh(true);}
         private static int Rank(View v,TalentId id){switch(id){case TalentId.Fury:return v.Fury;case TalentId.Precision:return v.Precision;case TalentId.Keystone:return v.Keystone;case TalentId.Vitality:return v.Vitality;case TalentId.Cleave:return v.Cleave;default:return v.Haste;}}
         private static bool Unlocked(View v,TalentId id){var d=HeroProgression.GetTalentDefinition(id);return !d.Prerequisite.HasValue||Rank(v,d.Prerequisite.Value)>=d.RequiredRank;}

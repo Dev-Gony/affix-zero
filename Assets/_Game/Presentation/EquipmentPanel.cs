@@ -95,7 +95,7 @@ namespace AffixZero.Presentation
 
             var header = Box(Root, "management-header", 16, 14, 468, 34, new Color32(19, 16, 17, 238));
             Border(header, new Color32(110, 74, 47, 255), 1);
-            var title = Text(header, "HUNTER'S RELIQUARY", 40, 3, 388, 27, 17, Cream);
+            var title = Text(header, "사냥꾼의 유물함", 40, 3, 388, 27, 17, Cream);
             title.style.unityTextAlign = TextAnchor.MiddleCenter;
             Box(header, "title-ornament-left", 10, 14, 52, 2, Crimson);
             Box(header, "title-ornament-right", 406, 14, 52, 2, Crimson);
@@ -104,7 +104,7 @@ namespace AffixZero.Presentation
             var equipment = Box(Root, "equipment-section", 16, 54, 468, 350, new Color32(54, 14, 25, 255));
             Skin(equipment, "AffixUIVisual/LeatherBurgundy");
             Border(equipment, new Color32(116, 68, 53, 255), 1);
-            Text(equipment, "EQUIPPED RELICS", 14, 8, 440, 22, 12, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
+            Text(equipment, "장착 장비", 14, 8, 440, 22, 12, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
             var paperDoll = Box(equipment, "equipped-paper-doll", 100, 34, 268, 252, new Color(0.04f, 0.04f, 0.05f, 0.32f));
             Border(paperDoll, new Color(0.58f, 0.35f, 0.26f, 0.42f), 1);
             if (heroPortrait != null)
@@ -142,16 +142,16 @@ namespace AffixZero.Presentation
             }
 
             var stats = Box(equipment, "hero-stat-table", 14, 292, 440, 44, new Color32(11, 12, 15, 218));
-            health = CompactStat(stats, 5, "HP");
-            damage = CompactStat(stats, 117, "DMG"); damage.name = "equipment-damage-value";
-            defense = CompactStat(stats, 229, "DEF");
-            duration = CompactStat(stats, 341, "ATK");
+            health = CompactStat(stats, 5, "생명");
+            damage = CompactStat(stats, 117, "공격"); damage.name = "equipment-damage-value";
+            defense = CompactStat(stats, 229, "방어");
+            duration = CompactStat(stats, 341, "공격 주기");
 
             var bag = Box(Root, "inventory-grid", 16, 410, 468, 234, new Color32(12, 13, 16, 252));
             Border(bag, new Color32(91, 64, 48, 255), 1);
             bagCount = Text(bag, "", 14, 5, 250, 20, 11, Cream);
             bagCount.name = "bag-count";
-            Text(bag, "INVENTORY", 316, 5, 138, 20, 10, Gold).style.unityTextAlign = TextAnchor.MiddleRight;
+            Text(bag, "가방", 316, 5, 138, 20, 10, Gold).style.unityTextAlign = TextAnchor.MiddleRight;
             for (int i = 0; i < 24; i++)
             {
                 int index = i;
@@ -176,8 +176,8 @@ namespace AffixZero.Presentation
 
             var footer = Box(Root, "inventory-footer", 16, 650, 468, 36, new Color32(17, 17, 19, 248));
             Border(footer, new Color32(91, 64, 48, 255), 1);
-            Button(footer, "equipment-tab-active", "EQUIPMENT", 7, 5, 96, 24, () => { }, new Color32(86, 23, 34, 255));
-            if (openTalents != null) Button(footer, "open-full-talents", "MASTERY", 109, 5, 82, 24, openTalents, Surface);
+            Button(footer, "equipment-tab-active", "장비", 7, 5, 96, 24, () => { }, new Color32(86, 23, 34, 255));
+            if (openTalents != null) Button(footer, "open-full-talents", "특성", 109, 5, 82, 24, openTalents, Surface);
             points = Text(footer, "", 200, 6, 100, 22, 10, Gold); points.name = "talent-points";
             Text(footer, "I / TAB", 377, 6, 78, 22, 9, Muted).style.unityTextAlign = TextAnchor.MiddleRight;
 
@@ -190,7 +190,7 @@ namespace AffixZero.Presentation
             inspect = Box(Root, "item-comparison", -306, 60, 300, 650, new Color32(10, 10, 13, 252));
             Skin(inspect, "AffixUIVisual/FrameTooltip");
             inspect.style.overflow = Overflow.Hidden;
-            Text(inspect, "LOOT INSPECTION", 24, 18, 244, 24, 13, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
+            Text(inspect, "전리품 비교", 24, 18, 244, 24, 13, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
             var selectedSlot = Box(inspect, "selected-weapon-icon", 22, 54, 66, 66, Ink);
             Skin(selectedSlot, "AffixUIVisual/FrameSlotGold");
             selectedIcon = Icon(selectedSlot, 10, 9, 46, 46);
@@ -199,14 +199,14 @@ namespace AffixZero.Presentation
             delta = Text(inspect, "", 98, 90, 170, 35, 10, Sky); delta.name = "comparison-delta"; delta.style.whiteSpace = WhiteSpace.Normal;
             var primary = Box(inspect, "selected-damage-strip", 22, 132, 246, 62, new Color32(17, 15, 18, 245));
             selectedDamage = Text(primary, "", 10, 4, 68, 30, 25, Cream);
-            selectedPrimaryLabel = Text(primary, "POWER", 10, 35, 68, 16, 8, Muted);
+            selectedPrimaryLabel = Text(primary, "주 능력", 10, 35, 68, 16, 8, Muted);
             comparison = Text(primary, "", 84, 7, 152, 48, 9, Rose); comparison.style.whiteSpace = WhiteSpace.Normal;
-            Text(inspect, "BASE + ROLLED AFFIXES", 23, 205, 244, 18, 9, Gold);
+            Text(inspect, "기본 및 무작위 옵션", 23, 205, 244, 18, 9, Gold);
             affix = Text(inspect, "", 23, 227, 244, 142, 9, Purple); affix.style.whiteSpace = WhiteSpace.Normal;
 
             var sockets = Box(inspect, "socket-workbench", 22, 375, 246, 103, new Color32(24, 15, 21, 250));
             Border(sockets, new Color32(113, 72, 50, 255), 1);
-            socketHeading = Text(sockets, "SOCKETS", 10, 5, 156, 18, 9, Gold);
+            socketHeading = Text(sockets, "소켓", 10, 5, 156, 18, 9, Gold);
             socketHint = Text(sockets, "", 166, 5, 70, 18, 8, Muted); socketHint.style.unityTextAlign = TextAnchor.MiddleRight;
             for (int i = 0; i < socketCells.Length; i++)
             {
@@ -220,7 +220,7 @@ namespace AffixZero.Presentation
                 socketCells[i].RegisterCallback<ClickEvent>(_ => this.selectSocket(socketIndex));
                 socketCells[i].RegisterCallback<NavigationSubmitEvent>(evt => { this.selectSocket(socketIndex); evt.StopPropagation(); });
             }
-            Text(sockets, "OPEN SLOTS ACCEPT COMPATIBLE RUNES", 10, 75, 226, 18, 7, Muted).style.unityTextAlign = TextAnchor.MiddleCenter;
+            Text(sockets, "열린 소켓에는 호환 룬을 장착할 수 있습니다", 10, 75, 226, 18, 7, Muted).style.unityTextAlign = TextAnchor.MiddleCenter;
 
             var runeShelf = Box(inspect, "rune-inventory", 22, 484, 246, 58, new Color32(15, 18, 23, 250));
             Border(runeShelf, new Color32(75, 78, 91, 255), 1);
@@ -232,10 +232,10 @@ namespace AffixZero.Presentation
 
             status = Text(inspect, "", 23, 546, 244, 25, 8, Muted); status.style.whiteSpace = WhiteSpace.Normal;
             status.style.overflow = Overflow.Hidden; status.style.textOverflow = TextOverflow.Ellipsis;
-            runeInsert = Button(inspect, "socket-insert", "INSERT RUNE", 22, 576, 120, 28, insertRune, new Color32(62, 40, 92, 255));
-            runeRemove = Button(inspect, "socket-remove", "RETURN RUNE", 148, 576, 120, 28, removeRune, Surface);
-            equipButton = Button(inspect, "equip-button", "EQUIP", 22, 610, 120, 28, equip, new Color32(93, 22, 35, 255));
-            salvageButton = Button(inspect, "salvage-button", "SALVAGE", 148, 610, 120, 28, RequestDiscard, Surface);
+            runeInsert = Button(inspect, "socket-insert", "룬 장착", 22, 576, 120, 28, insertRune, new Color32(62, 40, 92, 255));
+            runeRemove = Button(inspect, "socket-remove", "룬 회수", 148, 576, 120, 28, removeRune, Surface);
+            equipButton = Button(inspect, "equip-button", "장착", 22, 610, 120, 28, equip, new Color32(93, 22, 35, 255));
+            salvageButton = Button(inspect, "salvage-button", "분해", 148, 610, 120, 28, RequestDiscard, Surface);
 
             Root.style.display = DisplayStyle.None;
         }
@@ -248,40 +248,40 @@ namespace AffixZero.Presentation
             if (v == null) return;
             string nextId = v.Selected == null ? null : v.Selected.Id;
             if (selectedId != nextId) { discardConfirm = false; selectedId = nextId; }
-            string returnText=v.SalvageRuneReturnCount>0?" · R"+v.SalvageRuneReturnCount:"";
-            salvageButton.Q<Label>().text = discardConfirm ? "CONFIRM +" + v.SalvageValue + "G"+returnText : "SALVAGE +" + v.SalvageValue + "G"+returnText;
-            string[] captions = { "WEAPON", "HELMET", "ARMOR", "GLOVES", "BOOTS", "RING", "AMULET", "RELIC" };
+            string returnText=v.SalvageRuneReturnCount>0?" · 룬 "+v.SalvageRuneReturnCount:"";
+            salvageButton.Q<Label>().text = discardConfirm ? "확인 +" + v.SalvageValue + "골드"+returnText : "분해 +" + v.SalvageValue + "골드"+returnText;
+            string[] captions = { "무기", "투구", "방어구", "장갑", "장화", "반지", "목걸이", "유물" };
             for (int i = 0; i < equippedNames.Length; i++)
             {
                 ItemView equipped=i < v.EquippedSlots.Length ? v.EquippedSlots[i] : null;
                 RefreshEquipped(i,equipped,captions[i],v.SelectedEquipped&&equipped!=null&&v.Selected!=null&&equipped.Id==v.Selected.Id);
             }
             health.text = v.Health; damage.text = v.Damage; defense.text = v.Defense; duration.text = v.Duration;
-            bagCount.text = "BAG  " + v.Items.Length + " / 24";
+            bagCount.text = "가방  " + v.Items.Length + " / 24";
             for (int i = 0; i < 24; i++)
             {
                 ItemView item = i < v.Items.Length ? v.Items[i] : null;
                 slotImages[i].image = Texture(item == null ? null : item.Icon);
                 slotImages[i].style.opacity = item == null ? 0 : 1;
                 slotNames[i].text = item == null ? "" : ShortName(item.Name);
-                slotBadges[i].text = item == null ? "" : item.Equipped ? "ON" : (item.SlotText ?? "");
+                slotBadges[i].text = item == null ? "" : item.Equipped ? "장착" : (item.SlotText ?? "");
                 slotRarity[i].style.backgroundColor = item == null ? Color.clear : RarityColor(item.Rarity);
                 bool selected = !v.SelectedEquipped && item != null && v.Selected != null && item.Id == v.Selected.Id;
                 Border(slots[i], selected ? Rose : item != null ? RarityColor(item.Rarity) : Edge, selected ? 2 : 1);
-                slots[i].tooltip = item == null ? "Empty inventory slot" : item.Name + "\n" + item.Affix + "\n" + SocketSummary(item);
+                slots[i].tooltip = item == null ? "빈 가방 칸" : item.Name + "\n" + item.Affix + "\n" + SocketSummary(item);
                 slots[i].SetEnabled(item != null);
             }
             inspect.style.display = v.Selected == null ? DisplayStyle.None : DisplayStyle.Flex;
             selectedName.text = v.Selected == null ? "" : v.Selected.Name;
             selectedDamage.text = v.Selected == null ? "" : v.Selected.PrimaryValue ?? v.Selected.Damage.ToString();
-            selectedPrimaryLabel.text = v.Selected == null ? "POWER" : v.Selected.PrimaryLabel ?? "POWER";
+            selectedPrimaryLabel.text = v.Selected == null ? "주 능력" : v.Selected.PrimaryLabel ?? "주 능력";
             selectedIcon.image = Texture(v.Selected == null ? null : v.Selected.Icon);
             selectedName.style.color = v.Selected == null ? Muted : RarityColor(v.Selected.Rarity);
             comparison.text = v.Comparison ?? ""; delta.text = v.Delta ?? ""; affix.text = v.Affix ?? ""; status.text = v.Status ?? "";
             status.tooltip = v.Status ?? "";
             RefreshSockets(v);
-            points.text = "POINTS  " + v.Points;
-            furyCaption.text = "FURY " + v.Fury; precisionCaption.text = "PREC " + v.Precision; keystoneCaption.text = "KEY " + v.Keystone;
+            points.text = "특성 포인트  " + v.Points;
+            furyCaption.text = "분노 " + v.Fury; precisionCaption.text = "정밀 " + v.Precision; keystoneCaption.text = "숙련 " + v.Keystone;
             SetAction(equipButton, v.CanEquip); SetAction(salvageButton, v.CanSalvage);
             SetAction(runeInsert,v.CanInsertRune); SetAction(runeRemove,v.CanRemoveRune);
             SetAction(runePrevious,v.CompatibleRunes.Length>1); SetAction(runeNext,v.CompatibleRunes.Length>1);
@@ -295,7 +295,7 @@ namespace AffixZero.Presentation
             int opened=item==null?0:item.OpenedSocketCount;
             int filled=0;
             if(item!=null)foreach(string runeId in item.SocketRuneIds)if(!string.IsNullOrEmpty(runeId))filled++;
-            socketHeading.text=capacity==0?"NO SOCKET PROFILE":"SOCKETS  "+filled+" / "+opened+"   ·   CAP "+capacity;
+            socketHeading.text=capacity==0?"소켓 없음":"소켓  "+filled+" / "+opened+"   ·   최대 "+capacity;
             for(int i=0;i<socketCells.Length;i++)
             {
                 bool exists=i<capacity,open=i<opened;
@@ -307,22 +307,22 @@ namespace AffixZero.Presentation
                 socketMarks[i].text=!open?"×":rune==null?"◇":rune.Mark;
                 socketMarks[i].style.color=rune==null?Muted:Cream;
                 Border(socketCells[i],i==v.SelectedSocketIndex?Gold:open?new Color32(104,91,82,255):Edge,i==v.SelectedSocketIndex?2:1);
-                socketCells[i].tooltip=!open?"SEALED SOCKET":rune==null?"OPEN · EMPTY":rune.Name+" · "+SocketCatalog.DescribeValue(rune);
+                socketCells[i].tooltip=!open?"봉인된 소켓":rune==null?"열림 · 비어 있음":KoreanDisplay.RuneName(rune.Id)+" · "+KoreanDisplay.RuneEffect(rune);
             }
             bool selectedOpen=item!=null&&v.SelectedSocketIndex>=0&&v.SelectedSocketIndex<opened;
             string selectedRuneId=selectedOpen&&v.SelectedSocketIndex<item.SocketRuneIds.Length?item.SocketRuneIds[v.SelectedSocketIndex]:null;
             RuneDefinition selectedSocketRune=SocketCatalog.GetRune(selectedRuneId);
-            socketHint.text=!selectedOpen?(capacity==0?"INERT":"SEALED"):selectedSocketRune==null?"EMPTY":"FILLED";
-            runeName.text=v.SelectedRune==null?"NO COMPATIBLE RUNES":v.SelectedRune.Mark+"  "+v.SelectedRune.Name;
-            runeEffect.text=v.SelectedRune==null?"Defeat route bosses to recover runes":v.SelectedRune.Effect;
+            socketHint.text=!selectedOpen?(capacity==0?"없음":"봉인"):selectedSocketRune==null?"비어 있음":"장착됨";
+            runeName.text=v.SelectedRune==null?"호환 룬 없음":v.SelectedRune.Mark+"  "+v.SelectedRune.Name;
+            runeEffect.text=v.SelectedRune==null?"구역 우두머리를 처치해 룬을 획득하세요":v.SelectedRune.Effect;
             runeCount.text=v.SelectedRune==null?"":"x"+v.SelectedRune.Count;
         }
 
         private static string SocketSummary(ItemView item)
         {
-            if(item==null||item.SocketCapacity==0)return "SOCKETS 0 / 0";
+            if(item==null||item.SocketCapacity==0)return "소켓 0 / 0";
             int filled=0;foreach(string runeId in item.SocketRuneIds)if(!string.IsNullOrEmpty(runeId))filled++;
-            return "SOCKETS "+filled+" / "+item.OpenedSocketCount+" · CAP "+item.SocketCapacity;
+            return "소켓 "+filled+" / "+item.OpenedSocketCount+" · 최대 "+item.SocketCapacity;
         }
 
         private static string ShortName(string value)
@@ -410,7 +410,7 @@ namespace AffixZero.Presentation
             equippedNames[index].text = item == null ? slot : ShortName(item.Name);
             equippedNames[index].style.color = item == null ? Muted : RarityColor(item.Rarity);
             equippedSummaries[index].text = item == null ? "" : item.Summary ?? item.Affix ?? "";
-            string description = item == null ? slot + " — EMPTY" : slot + " — " + item.Name + "\n" + (item.Summary ?? item.Affix ?? "");
+            string description = item == null ? slot + " — 비어 있음" : slot + " — " + item.Name + "\n" + (item.Summary ?? item.Affix ?? "");
             equippedNames[index].tooltip = equippedSummaries[index].tooltip = description;
             equippedFrames[index].tooltip=item==null?description:description+"\n"+SocketSummary(item);
             Border(equippedFrames[index],selected?Rose:item==null?Edge:RarityColor(item.Rarity),selected?2:1);
