@@ -25,7 +25,8 @@ visual approval remain pending. Town, five-tier expansion, gacha and pets stay
 deferred; boss sprite art remains on the road map rather than this slice.
 
 Library evidence: 720p `libfile_a9f819f9b3288191a8daef26790ce77f`
-and 1080p `libfile_6b050e0af9e88191923894dfa7070ee9`.
+and 1080p `libfile_6b050e0af9e88191923894dfa7070ee9`; contact sheet
+`libfile_49c8126798188191a24863fe8b4285c7`.
 
 # 2026-10-03 - genuine route-end boss loop completed
 
