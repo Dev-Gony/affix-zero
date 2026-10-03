@@ -34,13 +34,30 @@ used 128 x 128 artwork.
 
 | Node | Runtime meaning | Current resource | Current file |
 | --- | --- | --- | --- |
-| 격노 / Fury (`TalentId.Fury`) | +3 attack per rank, maximum rank 20; ranks 5 and 15 evolve automatic area damage and select ARC, QUAKE, or LANCE from the equipped weapon style | `AffixGenerated/PowerRune` | `Assets/Art/Lucifer/Resources/AffixGenerated/PowerRune.png` |
+| 분노 / Fury (`TalentId.Fury`) | +3 attack per rank, maximum rank 20; ranks 5 and 15 evolve automatic area damage and select ARC, QUAKE, or LANCE from the equipped weapon style | `AffixGenerated/PowerRune` | `Assets/Art/Lucifer/Resources/AffixGenerated/PowerRune.png` |
 | 정밀 / Precision (`TalentId.Precision`) | +4 attack per rank, maximum rank 10; requires Fury rank 2; ranks 3 and 8 add +5 and +10 total critical chance | `AffixGenerated/PrecisionRune` | `Assets/Art/Lucifer/Resources/AffixGenerated/PrecisionRune.png` |
 | 숙련 / Keystone (`TalentId.Keystone`) | +6 attack per rank, maximum rank 5; requires Precision rank 1; ranks 2 and 5 add 5 and 12 total armor penetration | `AffixGenerated/VeteranRune` | `Assets/Art/Lucifer/Resources/AffixGenerated/VeteranRune.png` |
 
 The replaced images were respectively a tiny red flame/power mark, green
 target, and pale shield. Their semantics were usable, but the pixel treatment
 and flat symbolic shapes did not match the painted equipment set.
+
+## Remaining three-icon matching batch
+
+These are the only remaining TalentPanel icons outside the completed painted
+set. They are all 128 x 128, but none is a dedicated matching passive symbol.
+This table fixes the exact current runtime source, reuse, role and recommended
+one-batch target without expanding beyond the existing six talents.
+
+| Node | Runtime role | Current resource and file | Current reuse | Recommended dedicated target |
+| --- | --- | --- | --- | --- |
+| 생명력 / Vitality (`TalentId.Vitality`) | +10 maximum health per rank; ranks 5 and 15 evolve automatic low-health recovery | `AffixUIVisual/SkillHeal` — `Assets/Art/Interface/Resources/AffixUIVisual/SkillHeal.png` | Also used by the bottom-left recovery skill slot in `EncounterHud` | `AffixGenerated/VitalityRune` — a painted crimson heart/core protected by dark steel, with a restrained cyan recovery pulse |
+| 휩쓸기 / Cleave (`TalentId.Cleave`) | +0.08 melee splash radius and +2.5% surrounding damage per rank; ranks 3 and 8 evolve area behavior | `AffixUIVisual/SkillArea` — `Assets/Art/Interface/Resources/AffixUIVisual/SkillArea.png` | Also used by the bottom-left area skill slot in `EncounterHud` | `AffixGenerated/CleaveRune` — a painted crescent steel sweep cutting through a compact ember shockwave |
+| 가속 / Haste (`TalentId.Haste`) | -2% attack wait per rank; ranks 3 and 8 improve auto-skill arming behavior | `AffixUIVisual/Items/gale_boots` — `Assets/Art/Interface/Resources/AffixUIVisual/Items/gale_boots.png` | Reuses the actual `gale_boots` equipment painting and appears in bag/equipment contexts | `AffixGenerated/HasteRune` — a painted split clockwork vane or winged steel impulse with a crisp forward motion silhouette |
+
+When these three masters arrive together, add the three dedicated resources
+and switch only `TalentPanel.icons[3..5]`. Do not overwrite the shared HUD
+skill icons or the `gale_boots` equipment art, and preserve all talent rules.
 
 ## Shared generation contract
 
@@ -63,7 +80,7 @@ and flat symbolic shapes did not match the painted equipment set.
 
 ## Per-icon art direction
 
-### 격노 / Fury — `PowerRune.png`
+### 분노 / Fury — `PowerRune.png`
 
 Paint a compact crimson battle-energy core wrapped by three asymmetric,
 blade-like flame strokes and small aged-brass fragments. It should read as
@@ -123,3 +140,5 @@ supported ordered direct-create fallback stored all three files. Windows lacks
 | 첫 최종 OS 입력 시도가 시작 단계에 머묾 | 기존 드라이버가 Start 버튼의 우측 경계 x=274를 클릭해 실제 히트 영역을 놓침 | 실패 보고서를 보존하고 D 로컬 드라이버의 클릭을 중앙 x=251로 이동 | 자동 입력 좌표는 시각적으로 보이는 경계가 아니라 안정적인 내부 지점을 사용해야 함 |
 | 두 번째 OS 입력 시도가 입력 전에 중단 | Windows가 정확한 플레이어 창의 foreground 전환을 일시적으로 거부함 | 정확한 D 빌드 PID만 종료하고 새 세이브/보고 폴더에서 재실행하여 세 번째 시도 PASS | 포커스 획득 실패는 게임 회귀와 분리하고 새 격리 실행으로 판정해야 함 |
 | Library 준비 업로드 helper가 시작 전 중단 | helper 실행 환경에 `prepare_uploads`가 노출되지 않음 | 중복 업로드 없이 신규 파일 전용 ordered direct-create fallback 사용 | 준비 단계가 시작되지 않은 실패만 명시된 대체 경로로 전환할 수 있음 |
+| Fury의 UI 노드와 코어 상세 한글명이 다름 | `TalentPanel`은 `분노`, `TalentDefinition`은 `격노`를 사용해 선택 전후 명칭이 달라짐 | 기존 사용자-facing UI와 주요 문서에서 우세한 `분노`로 코어 정의와 아트 문서를 통일 | 동일한 enum이라도 노드 배열과 권위 있는 정의 이름을 함께 대조해야 함 |
+| 표기 수정 후 정적 컴파일 명령이 두 번 시작 전 중단 | 첫 명령은 스크립트 위치를 `Tests/CoreSmoke`로 오인했고, 두 번째는 필수 `UnityEditorPath`를 생략함 | 실제 `Tools/Local/Test-UnitySources.ps1`를 승인된 D Unity 절대 경로 매개변수와 함께 실행해 0경고/0오류 확인 | 검증 실패와 호출 오류를 분리하고 스크립트의 실제 위치·필수 매개변수를 먼저 확인해야 함 |

@@ -1,5 +1,18 @@
 # 2026-10-03 - painted passive icons completed
 
+Follow-up: Fury's Korean user-facing name is now consistently `분노` in both
+the node and authoritative `TalentDefinition`; stats and behavior are
+unchanged. The only remaining three TalentPanel art targets are documented as
+one bounded batch in `PASSIVE_ICON_ART_BRIEF.md`: Vitality currently reuses
+`SkillHeal`, Cleave reuses `SkillArea`, and Haste reuses the actual
+`gale_boots` equipment icon. Their future dedicated targets are
+`VitalityRune`, `CleaveRune` and `HasteRune`; no seventh talent or new system is
+in scope. Post-label verification is CoreSmoke 321 PASS and installed Unity API
+static compilation with 0 warnings / 0 errors. Unity import/build and OS input
+were deliberately not rerun for this text-only follow-up while another D-drive
+project was active; the art integration evidence below predates only this
+display-name correction.
+
 `PowerRune`, `PrecisionRune` and `VeteranRune` now use the three approved
 painted transparent originals from source-only commit
 `386485529268e2a964a5f168e56e69fe524ad607` (tree
@@ -20,12 +33,14 @@ Library evidence: locked 1080p `libfile_32fb720532b48191abf17fb5d2658dd4`,
 selected 1080p `libfile_6aed0536f5888191a33444950e73daeb`, and scale sheet
 `libfile_95a67962ff5081918154adfb7390b788`. Final user visual acceptance is still
 pending. Socket design remains documentation only; its obsolete universal
-three-socket proposal was replaced by a reference-grounded per-base proposal.
+three-socket proposal was replaced by a coherent reference-grounded 29-base
+design recommendation. The delegated design does not require a separate
+approval loop for every number, and no socket code exists yet.
 
 # 2026-10-03 - passive icon art readiness and socket proposal
 
 The exact remaining pixel-style TalentPanel assets are `PowerRune.png` for
-Fury/격노, `PrecisionRune.png` for Precision/정밀, and `VeteranRune.png` for
+Fury/분노, `PrecisionRune.png` for Precision/정밀, and `VeteranRune.png` for
 Keystone/숙련. All three are 16 x 16 and are displayed at 48 x 48; their exact
 runtime semantics, paths and separate painted transparent-art prompts are in
 `PASSIVE_ICON_ART_BRIEF.md`. No PNG or runtime code was changed in this

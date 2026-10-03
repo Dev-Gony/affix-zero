@@ -125,7 +125,7 @@ namespace AffixZero.Core
         public const int TotalTalentCapacity = 75;
         private static readonly ReadOnlyCollection<TalentDefinition> talentDefinitions = Array.AsReadOnly(new[]
         {
-            new TalentDefinition(TalentId.Fury, "격노", "랭크마다 공격력 +3", 20),
+            new TalentDefinition(TalentId.Fury, "분노", "랭크마다 공격력 +3", 20),
             new TalentDefinition(TalentId.Precision, "정밀", "랭크마다 공격력 +4", 10, TalentId.Fury, 2),
             new TalentDefinition(TalentId.Keystone, "숙련", "랭크마다 공격력 +6", 5, TalentId.Precision, 1),
             new TalentDefinition(TalentId.Vitality, "강인함", "랭크마다 최대 체력 +10", 20),

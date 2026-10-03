@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User visual acceptance of the painted passive set; approve or revise proposed per-base socket capacities before any socket implementation; broader systems remain deferred",
+  "next": "Complete the one-batch painted replacement for Vitality, Cleave and Haste when masters are supplied; socket capacity baseline is designed and implementation remains separate; broader systems remain deferred",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
@@ -92,12 +92,12 @@
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "socket_requirement": {
-    "status": "PER_BASE_DIRECTION_APPROVED_EXACT_CAPACITIES_PROPOSED_NOT_APPROVED",
+    "status": "PER_BASE_29_CAPACITY_DESIGN_RECOMMENDATION_COMPLETE_NOT_IMPLEMENTED",
     "recorded_date": "2026-10-03",
     "spec": "docs/ITEM_SOCKET_REQUIREMENT.md",
     "current_implementation": "NONE",
     "art_rule": "Do not bake sockets/counts/runes into base paintings; reserve composition for a future runtime overlay",
-    "blocked_decisions": "exact 29 capacities, initial opened-count weights, add-socket path, removal cost, rune catalog/acquisition and v5 migration",
+    "blocked_decisions": "initial opened-count weights, add-socket path, removal cost, rune catalog/acquisition and v5 migration; do not ask for 29 individual capacity confirmations",
     "salvage": "Return-all is the user-preferred proposed default with an atomic recovery-policy seam; no implementation",
     "monetization": "No cash item, shop, paid restriction, paid gacha or new currency implemented or approved"
   },
@@ -293,7 +293,9 @@
       "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
       "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
     },
-    "socket_scope": "Design documentation only; per-base capacities remain proposed and no socket fields, UI, drops, runes or gameplay were implemented"
+    "remaining_talent_art": "Vitality reuses SkillHeal, Cleave reuses SkillArea, Haste reuses gale_boots; dedicated VitalityRune/CleaveRune/HasteRune are the final bounded three-icon batch",
+    "post_naming_validation": "Fury Korean display name normalized to 분노; CoreSmoke 321 PASS and installed Unity API static compile 0 warnings 0 errors; Unity import/build and OS input not rerun for this text-only follow-up",
+    "socket_scope": "Design documentation only; the 29-base capacity table is a coherent recommended baseline and no socket fields, UI, drops, runes or gameplay were implemented"
   },
   "physical_input": {
     "status": "PASS",

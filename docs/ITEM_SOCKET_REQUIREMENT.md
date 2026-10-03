@@ -56,11 +56,13 @@ not socket.
 This community wiki may be outdated and is not treated as a complete statement
 of current maxima. No positive glove example was verified in this source set.
 
-## Recommended AFFIX contract — proposal only
+## Recommended AFFIX contract — design recommendation only
 
-Everything below is **PROPOSED, NOT USER-AGREED**, including every capacity
-number. It is an original AFFIX balance proposal informed by the reference
-patterns above, not a copy of either game and not authority to implement yet.
+Everything below is a coherent **DESIGN RECOMMENDATION, NOT IMPLEMENTATION**.
+The user delegated the per-base/reference approach, so the 29 capacities form
+one recommended baseline rather than 29 separate questions. It is an original
+AFFIX balance design informed by the reference patterns above, not a copy of
+either game and not authority to add socket code yet.
 
 ### Per-base data model and one validator
 
@@ -78,13 +80,14 @@ patterns above, not a copy of either game and not authority to implement yet.
   its slot. `Relic` remains capacity 0 until a real relic source and identity
   contract exist.
 
-### Current 29-base capacity proposal
+### Current 29-base capacity recommendation
 
 The tier column is the existing `LootGenerator` base tier. The capacity column
-is a **proposal only** and deliberately balances innate stats, affix headroom
-and progression instead of assigning every high-rarity item the same maximum.
+is a **design recommendation, not implementation**, and deliberately balances
+innate stats, affix headroom and progression instead of assigning every
+high-rarity item the same maximum.
 
-| Slot | Base ID | Existing tier | Proposed capacity |
+| Slot | Base ID | Existing tier | Recommended capacity |
 | --- | --- | ---: | ---: |
 | Weapon | `dagger` | 1 | 2 |
 | Weapon | `longsword` | 4 | 3 |
@@ -116,6 +119,33 @@ and progression instead of assigning every high-rarity item the same maximum.
 | Amulet | `ruby_necklace` | 11 | 1 |
 | Amulet | `dragon_tear` | 18 | 2 |
 
+### Balancing rationale
+
+- Weapons receive 2-4 because they carry the most build-defining offensive
+  choices. The staff peaks at 4 for its specialist two-handed identity, while
+  the highest innate-damage sword stays at 3 to retain affix headroom.
+- Body armor receives 2-4 and helmets 1-3: both can support defensive builds,
+  but armor is the larger progression canvas and therefore owns the higher
+  ceiling.
+- Gloves and boots range from 0-2 so early utility pieces remain simple and
+  later pieces gain customization without matching primary-slot power.
+- Rings and amulets range from 0-2 because two jewelry slots can otherwise
+  multiply flexible stats too quickly. The progression rises by base tier but
+  is not a universal rarity formula.
+- A named item may override its base profile later. This is the controlled
+  exception path for Hero Siege-like individual ranges without destabilizing
+  every item in a slot.
+
+### Opened-count policy
+
+Capacity is the immutable ceiling resolved from `SocketProfile`; `openedCount`
+is the per-instance number currently available. A drop may open fewer sockets
+than its capacity according to a future progression-source roll. Rarity may
+bias that roll but never rewrites capacity. Forge opening may increase
+`openedCount` only up to the resolved capacity, and equip, enhance, reload,
+difficulty changes and salvage preview must never reroll it. Exact roll weights
+and any opening cost remain implementation inputs, not part of this art task.
+
 ### Rune effects and inventory
 
 - **Proposed:** socket runes are stackable loot objects in a dedicated rune
@@ -134,7 +164,7 @@ and progression instead of assigning every high-rarity item the same maximum.
   base stats and purple rolled affixes. Base item paintings remain socket-free;
   empty/filled state is a runtime overlay/detail row backed by real data.
 
-### Insert, remove, enhance and salvage
+### Insert, remove and enhance
 
 - **Proposed insertion:** from a paused management screen, consume one rune
   stack and fill one chosen empty socket in one atomic profile mutation.
@@ -144,6 +174,9 @@ and progression instead of assigning every high-rarity item the same maximum.
 - **Proposed replacement:** removal must complete first; replacing a filled
   socket cannot silently destroy its rune.
 - Enhancement and equipment swaps preserve capacity and filled sockets.
+
+### Recovery and salvage policy
+
 - **Proposed default salvage policy:** return all inserted runes to the rune
   inventory before applying the existing Gold salvage result. This is the
   user's preferred AFFIX rule. A pre-confirmation quote must list every rune
@@ -178,13 +211,16 @@ and progression instead of assigning every high-rarity item the same maximum.
   return, corrupt/unknown-rune rejection and separate-process restore. Every
   save-writing probe must continue using an explicit D-only test directory.
 
-### Approval gates before implementation
+### Implementation gates
 
 The user has approved the per-slot/per-base direction and rejected a universal
-maximum of three. The exact 29 capacity values above remain proposals requiring
-balance approval, as do initial opened-count weights, the legacy-zero-socket
-policy, removal cost, rune effect catalog and acquisition source. Until those
-contracts are approved, the existing no-fake-socket rule remains authoritative.
+maximum of three. Treat the complete table above as the recommended v1 design
+baseline; do not ask for 29 individual confirmations. It may be revised later
+through one explicit balance pass. Initial `openedCount` weights, the legacy
+zero-socket migration policy, add-socket source, removal cost, rune effect
+catalog and acquisition source remain implementation inputs. Until those are
+designed and socket code is authorized, the existing no-fake-socket rule
+remains authoritative.
 
 ## Extensibility rule for current art/UI
 
@@ -196,14 +232,18 @@ contracts are approved, the existing no-fake-socket rule remains authoritative.
 - Do not show fake socket pips until the data model supplies authoritative
   values.
 
-## Decisions required before implementation
+## Inputs required before implementation
 
-1. Approval or revision of the proposed 29-base capacity table.
-2. Initial `openedCount` weights by progression source; rarity is not capacity.
-3. Drop-time open sockets versus a separately contracted forge add-socket path.
-4. Rune inventory, effects, insertion, removal and destruction rules.
-5. Comparison, salvage, enhancement and identity behavior.
-6. Save-schema migration and validation bounds.
+1. Version the recommended 29-base table as the initial `SocketProfile`
+   baseline; any later numerical change is one balance revision.
+2. Define initial `openedCount` weights by progression source; rarity is not
+   capacity.
+3. Choose drop-time open sockets and/or a separately contracted forge
+   add-socket path.
+4. Define the rune catalog, effects, acquisition, insertion and removal cost.
+5. Preserve the recommended atomic `ReturnAll` salvage default and versioned
+   recovery-policy seam.
+6. Implement and verify the fail-closed v5 migration and validation bounds.
 
 No paid gacha or new currency is implied by the socket requirement.
 
@@ -214,3 +254,4 @@ No paid gacha or new currency is implied by the socket requirement.
 | 아이템 소켓 UI/아트 확장 범위를 정할 수 없음 | 현행 아이템 모델, 드롭 규칙, 저장 스키마와 대장간에 소켓 상태의 권위 있는 값이 없고 과거 시안은 배치 참고뿐임 | 먼저 결정이 필요한 6개 계약을 명시하고, 현재 아이콘은 소켓을 굽지 않은 독립 원화와 향후 런타임 오버레이 영역으로 분리 | 데이터 계약 없이 소켓 구멍이나 개수를 그리면 허위 기능이 되므로 시각 표현보다 상태 모델이 선행되어야 함 |
 | 안전한 소켓 초안과 현행 구조의 접점을 정리해야 함 | `WeaponItem`이 모든 장비를 표현하고 강화 시 새 인스턴스를 만들며, v4 스냅샷은 소켓/룬 인벤토리 필드가 없음 | 기존 `AffixStat`, 아이템 ID 검증, 원자적 프로필 저장을 재사용하는 v5 제안과 레거시 0소켓 마이그레이션을 비권위 초안으로 분리 | 수치와 획득 규칙을 승인값처럼 고정하지 않으면서도 복사·검증·롤백 지점을 먼저 명시할 수 있음 |
 | 범용 최대 3소켓 제안이 사용자 방향과 불일치 | Diablo II와 Hero Siege 참고 모두 부위·베이스·개별 아이템에 따라 용량이 달라지며 사용자가 범용 상한을 명시적으로 거절함 | 범용 상한과 희귀도 표를 제거하고 29개 베이스별 `SocketProfile`·열린 수·명시적 named override와 단일 validator 제안으로 교체 | 참고작의 숫자를 평평하게 복사하지 말고 부위·기본 성능·확장 예외를 데이터로 분리해야 함 |
+| 29개 권장 수치를 다시 개별 승인 질문으로 남김 | 사용자는 이미 참고작 기반의 부위·베이스별 설계를 위임했으며 개별 숫자 질의는 설계 책임을 되돌림 | 표 전체를 하나의 v1 권장 기준으로 확정하고 향후 변경은 단일 밸런스 개정으로 분리; 구현 입력만 별도 명시 | 위임된 설계 수치는 권장안으로 완결하되 런타임 구현 승인과 혼동하지 않아야 함 |

@@ -347,7 +347,9 @@
       "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
       "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
     },
-    "visual_limit": "Agent-inspected only; final user visual acceptance pending. The remaining three talent icons keep their pre-existing mixed visual treatment.",
-    "socket_scope": "Documentation only. Per-base capacity direction replaces the rejected universal maximum; exact values remain proposals and nothing was implemented."
+    "visual_limit": "Agent-inspected only; final user visual acceptance pending. The final bounded art batch is Vitality/SkillHeal shared HUD art, Cleave/SkillArea shared HUD art and Haste/gale_boots equipment reuse; dedicated replacements are not yet supplied.",
+    "naming": "Fury Korean label normalized to 분노 in the UI node, core TalentDefinition and current art documentation; gameplay meaning unchanged.",
+    "post_naming_validation": "CoreSmoke 321 PASS; installed Unity 6000.3.24f1 API static compile PASS with 0 warnings and 0 errors. Unity import/build and OS input were not rerun for this display-name-only follow-up.",
+    "socket_scope": "Documentation only. The rejected universal maximum is replaced by one coherent recommended 29-base capacity baseline; opened-count and recovery policies remain separate and nothing was implemented."
   }
 }
