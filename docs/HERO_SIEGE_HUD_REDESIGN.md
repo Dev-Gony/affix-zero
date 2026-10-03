@@ -53,7 +53,7 @@ Final verification for this pass:
 - Physical OS input: NOT RERUN for this pass. User visual approval remains
   pending.
 
-Final local evidence is under `Build/Reports/hero-siege-ui-720-final-20261003/`
+Final local evidence is under `Build/Reports/hero-siege-ui-720-release-20261003/`
 and `Build/Reports/hero-siege-ui-1080-release-20261003/`; it is intentionally
 excluded from Git.
 
