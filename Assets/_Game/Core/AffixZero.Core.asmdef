@@ -1,7 +1,0 @@
-{
-  "name": "AffixZero.Core",
-  "rootNamespace": "AffixZero.Core",
-  "references": [],
-  "autoReferenced": true,
-  "noEngineReferences": true
-}
