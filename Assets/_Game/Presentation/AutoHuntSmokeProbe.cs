@@ -30,7 +30,7 @@ namespace AffixZero.Presentation
         private float maximumEnemyRoam;
         private int frozenKills, frozenLoot, frozenRuns;
         private float frozenTravel;
-        private static readonly string[] RequiredCaptures={"exploration","combat","loot","run-complete","management","paused"};
+        private static readonly string[] RequiredCaptures={"exploration","combat","loot","boss-telegraph","boss-loot","run-complete","next-segment","management","paused"};
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -100,7 +100,10 @@ namespace AffixZero.Presentation
             if(hunt.TravelDistance>0.5f&&hero.CurrentClip==ActorClip.Walk)Capture("exploration");
             if(report.acceptedHits>0)Capture("combat");
             if(hunt.CollectedItems>0)Capture("loot");
+            if(hunt.BossTelegraphing)Capture("boss-telegraph");
+            if(hunt.BossKills>0&&owner.Progression.PendingLoot!=null)Capture("boss-loot");
             if(hunt.CompletedRuns>0)Capture("run-complete");
+            if(hunt.CompletedRuns>0&&hunt.LayoutTransitions>0&&hunt.AliveEnemies==24)Capture("next-segment");
 
             if(phase=="hunting"&&!report.managementKeepsHunting&&report.acceptedHits>0&&completed.Contains("combat")&&!hero.IsDead)
             {
@@ -155,7 +158,7 @@ namespace AffixZero.Presentation
                 report.manualResumeVerified=true;Phase("observe-cycles");
             }
 
-            if(hunt.CompletedRuns>=1&&phase=="observe-cycles"&&pendingCaptures==0)
+            if(hunt.CompletedRuns>=1&&hunt.LayoutTransitions>=1&&hunt.AliveEnemies==24&&phase=="observe-cycles"&&pendingCaptures==0)
             {
                 Require(hunt.FailedRuns==0&&hunt.DeathRetries==0,"Baseline farming died or retried; this is not a stable idle loop.");
                 Require(hunt.MaxAliveEnemies==24&&hunt.TotalKills>=24&&deadLives.Count>=24,"The full 24-monster population was not present and cleared.");
@@ -164,6 +167,12 @@ namespace AffixZero.Presentation
                 Require(maximumEnemyRoam>=1,"No pre-existing monster visibly roamed from its spawn before combat.");
                 Require(hunt.World.DetourQueries>0,"No real obstacle detour was requested during the connected clear.");
                 Require(hunt.AreaCasts>0,"The automatic area skill never fired during a full population clear.");
+                Require(hunt.BossKills>=1&&hunt.BossLootDrops>=1,"The route boss did not die with a guaranteed existing-system loot offer.");
+                Require(hunt.BossKillOrdinal==24,"The route boss was not the final enemy in its 24-enemy segment.");
+                Require(hunt.BossPatternCasts>0&&hunt.BossAvoidances>0,
+                    "The readable boss telegraph did not resolve with an automatic avoidance decision.");
+                Require(owner.Progression.DungeonClears>=1&&hunt.LayoutTransitions>=1,
+                    "The boss clear did not enter the next connected segment after the short transition.");
                 Require(report.startCallbacks==1,"Hunt needed more than one start callback.");
                 Require(report.enemyHitObserved&&report.impactPoseChecks>0&&report.lineOfSightChecks>0,
                     "Actual combat/impact/LOS evidence is incomplete.");
@@ -224,7 +233,14 @@ namespace AffixZero.Presentation
                 Require(attacker!=null,"Accepted damage has no identifiable attacker.");
                 Require(hunt.World.LineOfSight(attacker.transform.position,defender.transform.position),"A hit crossed a blocking dungeon wall.");
                 report.lineOfSightChecks++;
-                if(defender.LastHitIsArea)
+                bool encounterPattern=attacker!=hero&&defender==hero&&
+                    (attacker.GetComponent<EliteAttackPattern>()?.Active==true||attacker.GetComponent<BossAttackPattern>()?.Active==true);
+                if(encounterPattern)
+                {
+                    Require(defender.LastHitRadius>0,"Encounter-pattern hit did not retain readable hazard geometry.");
+                    report.patternHitChecks++;
+                }
+                else if(defender.LastHitIsArea)
                 {
                     Require(attacker==hero&&Mathf.Abs(defender.LastHitRadius-hunt.AreaSkillRadius)<.001f,
                         "Area hit metadata did not match the evolved automatic area skill.");
@@ -289,7 +305,7 @@ namespace AffixZero.Presentation
             {
                 var document=owner.GetComponent<UIDocument>();var root=document==null?null:document.rootVisualElement;
                 Require(root!=null&&root.name=="stitch-hud"&&root.panel!=null&&root.worldBound.width>0,"HUD absent from actual frame.");
-                Require(root.Q<Label>("hero-hp-value")?.text==hero.Hp+"\n/ "+hero.MaxHp,"HUD health binding is stale.");
+                Require(root.Q<Label>("hero-hp-value")?.text==hero.Hp+" / "+hero.MaxHp+" HP","HUD health binding is stale.");
                 Require(Screen.width>0&&Screen.height>0,"Player framebuffer has no size.");
                 pixels=new Texture2D(Screen.width,Screen.height,TextureFormat.RGB24,false);
                 pixels.ReadPixels(new Rect(0,0,Screen.width,Screen.height),0,0);pixels.Apply();
@@ -333,7 +349,10 @@ namespace AffixZero.Presentation
             if(hunt!=null){report.completedRuns=hunt.CompletedRuns;report.totalKills=hunt.TotalKills;report.collectedItems=hunt.CollectedItems;
                 report.deathRetries=hunt.DeathRetries;report.travelDistance=hunt.TravelDistance;report.directorFault=hunt.LastFault??"";
                 report.detourQueries=hunt.World==null?0:hunt.World.DetourQueries;report.targetSelections=hunt.TargetSelections;
-                report.areaCasts=hunt.AreaCasts;report.recoveryCasts=hunt.RecoveryCasts;}
+                report.layoutTransitions=hunt.LayoutTransitions;
+                report.areaCasts=hunt.AreaCasts;report.recoveryCasts=hunt.RecoveryCasts;
+                report.bossKills=hunt.BossKills;report.bossKillOrdinal=hunt.BossKillOrdinal;report.bossLootDrops=hunt.BossLootDrops;report.bossPatternCasts=hunt.BossPatternCasts;
+                report.bossPatternHits=hunt.BossPatternHits;report.bossAvoidances=hunt.BossAvoidances;}
             report.maximumEnemyRoam=maximumEnemyRoam;
             try{Directory.CreateDirectory(outputDirectory);WriteReport();}
             catch(Exception error){success=false;Debug.LogError("Cannot write auto hunt report: "+error);}
@@ -350,7 +369,8 @@ namespace AffixZero.Presentation
             public string interactionMethod="One native UI Toolkit start ClickEvent plus management/pause callbacks. No physical mouse/keyboard, no stat modification or time acceleration.";
             public string actualUiClickVerification="NOT_RUN",userVisualApproval="NOT_APPROVED",screenshotScope="24-bit BMP from actual end-of-frame ReadPixels with native runtime HUD.";
             public bool initialized,heroHitObserved,enemyHitObserved,managementKeepsHunting,managementSwitchesVerified,manualPauseVerified,manualResumeVerified;
-            public int startCallbacks,uiCallbacksDispatched,acceptedHits,lineOfSightChecks,impactPoseChecks,areaHitChecks,areaCasts,recoveryCasts,walkabilityChecks,completedRuns,totalKills,collectedItems,deathRetries,sectionsVisited,uniqueDeaths,detourQueries,targetSelections;
+            public int startCallbacks,uiCallbacksDispatched,acceptedHits,lineOfSightChecks,impactPoseChecks,areaHitChecks,patternHitChecks,areaCasts,recoveryCasts,walkabilityChecks,completedRuns,totalKills,collectedItems,deathRetries,sectionsVisited,uniqueDeaths,detourQueries,targetSelections,layoutTransitions;
+            public int bossKills,bossKillOrdinal,bossLootDrops,bossPatternCasts,bossPatternHits,bossAvoidances;
             public float elapsedSeconds,travelDistance,maximumEnemyRoam;
             public int experience,gold,totalDamage,enhancementRank,spentTalentPoints,inventoryCount;
             public int fixtureMaxHp,fixtureDefense,fixtureVampirism;

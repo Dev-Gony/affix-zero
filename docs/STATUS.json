@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "ALL_SIX_PAINTED_PASSIVE_ICONS_INTEGRATED_ART_UI_SCOPE_COMPLETE",
+  "stage": "GENUINE_ROUTE_END_BOSS_AUTONOMOUS_LOOP_VERIFIED",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -18,10 +18,10 @@
   },
   "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS_PLUS_6_DEDICATED_PAINTED_PASSIVE_ICONS",
   "unity_editor_import": "PASS",
-  "unity_play": "PASS_720_AND_1080_CONNECTED_DUNGEON_FULL_CLEAR_WITH_EPHEMERAL_SURVIVAL_FIXTURE",
-  "visual_approval": "29 EQUIPMENT AND ALL 6 PASSIVE ICONS AGENT-INSPECTED AT ACTUAL SIZES AND NATIVE 720_1080; FINAL USER ACCEPTANCE PENDING",
+  "unity_play": "PASS_FINAL_720_BOSS_KILL24_LOOT_NEXT_SEGMENT_AND_1080_BOSS_ONLY_HP_UI",
+  "visual_approval": "29 EQUIPMENT_ALL_6_PASSIVE_ICONS_AND_BOSS_TELEGRAPH_HUD_AGENT_INSPECTED_AT_NATIVE_720_1080; FINAL_USER_ACCEPTANCE_PENDING",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_04032b1b12884ed8a78a349fda6c50d3",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_c40ab46dad6c4ec28f777356d0c545f8",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,17 +30,17 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Stop cosmetic micro-passes; next gameplay step is a real end-of-route boss with boss-only HP integrated into autonomous loot, recovery, segment transition and repeat; socket numbers remain proposal-only",
+  "next": "Human play and user visual approval remain pending; keep sockets proposal-only and do not expand town, five tiers, gacha, pets or classes without a new user request",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
   "windows_player": "PASS_FINAL_BUILD_SPEED_UI_RESTORE_720_1080_FRAMEBUFFER_AND_OS_INPUT_REGRESSION",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/ui-refresh/",
+  "actual_game_capture": "docs/media/boss-loop/ (latest boss evidence); docs/media/ui-refresh/ (earlier UI evidence)",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
-  "new_direction_validation": "ONE_CONNECTED_24_MONSTER_FULL_CLEAR_PER_RESOLUTION_WITH_EPHEMERAL_EPIC_SURVIVAL_FIXTURE; FULL_MVP_INCOMPLETE",
-  "previous_technical_checks_scope": "Earlier reports remain historical; newest integration runtime evidence is docs/validation/ui-refresh/.",
+  "new_direction_validation": "FINAL_720_ROUTE_BOSS_KILL24_TELEGRAPH_AVOID_LOOT_NEXT_SEGMENT_PLUS_1080_BOSS_ONLY_HP_AND_29_ICONS; USER_VISUAL_APPROVAL_PENDING",
+  "previous_technical_checks_scope": "Earlier reports remain historical; newest integration contract and runtime report paths are in docs/BOSS_AUTO_HUNT_LOOP.md.",
   "stitch": {
     "assessment": "docs/STITCH_UNITY_ASSESSMENT.md",
     "ui_system": "UI Toolkit (native C# VisualElement/UIDocument)",
@@ -91,6 +91,23 @@
     "pet_scope": "Reference intake only, no pet runtime"
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
+  "boss_loop": {
+    "status": "IMPLEMENTED_AND_AUTOMATED_RUNTIME_VERIFIED_USER_VISUAL_APPROVAL_PENDING",
+    "spec": "docs/BOSS_AUTO_HUNT_LOOP.md",
+    "build_guid": "c40ab46dad6c4ec28f777356d0c545f8",
+    "bosses": ["ASHEN TYRANT", "DROWNED ARCHON", "ECLIPSE SOVEREIGN"],
+    "activation": "SEALED_FROM_TARGETING_AGGRO_AND_DAMAGE_UNTIL_23_NON_BOSS_DEATHS",
+    "health_ui": "PLAYER_AND_GENUINE_BOSS_ONLY_NORMAL_ELITE_GUARDIAN_ABSENT",
+    "pattern": "RUIN_PULSE_0_95S_SHARED_TELEGRAPH_DAMAGE_RADIUS_AUTO_EVADE",
+    "loot": "ONE_GUARANTEED_EXISTING_29_BASE_RARITY_AFFIX_ITEM",
+    "loop_720": "PASS_24_KILLS_BOSS_ORDINAL24_PATTERNS2_AVOIDANCES1_PATTERN_HITS0_BOSS_LOOT1_TRANSITIONS1_DEATH_RETRIES0",
+    "ui_1080": "PASS_5_FRAMES_19_CALLBACKS_29_ICONS_PLAYER_HP_BOSS_HP_NON_BOSS_HP_ABSENT",
+    "physical_input": "PASS_FINAL_BUILD_EXACT_PID_10_ACTIONS_17_386S",
+    "library_telegraph_720": "libfile_bfaf54d538508191964cf2c8b7e5a212",
+    "library_boss_hud_1080": "libfile_0f4a836dae5c8191b719e203208bef39",
+    "library_next_segment_720": "libfile_ee46e3c48bf08191ae2b45d216b1c50a",
+    "human_play": "NOT_RUN"
+  },
   "socket_requirement": {
     "status": "PER_BASE_DIRECTION_DELEGATED_NUMERICAL_TABLE_PROPOSAL_NOT_USER_APPROVED_OR_IMPLEMENTED",
     "recorded_date": "2026-10-03",
@@ -118,13 +135,13 @@
   },
   "mvp": {
     "status": "NOT_READY",
-    "current": "Playable automatic hunt, disk persistence, 29 illustrated base icons, Hero Siege-inspired equipment dock, framed six-node talents, 20-minute production-drop progression, and physical input are verified; user visual acceptance remains open",
+    "current": "Playable automatic hunt, genuine route-end boss/avoidance/loot/repeat, disk persistence, 29 illustrated base icons, Hero Siege-inspired equipment dock, framed six-node talents, 20-minute production-drop progression, and physical input are verified; user visual acceptance remains open",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
       "separate default-build safety-stop replay after player intervention",
-      "user visual approval and real boss/boss-only HP treatment"
+      "human play and user visual approval"
     ],
-    "release_date": "NOT_RELEASED; remaining safety/input/visual acceptance is still pending",
+    "release_date": "NOT_RELEASED; separate post-intervention safety replay, human play and user visual acceptance remain pending",
     "priority_override": "Automatic dungeon play precedes hero-selection/town/pet/additional UI expansion"
   },
   "autohunt": {
@@ -336,6 +353,9 @@
     "ui_polish_equipment_1080_library_file_id": "libfile_6cc8898baf2c81919fd9948431b11072",
     "ui_polish_battle_1080_library_file_id": "libfile_e8fd083cb2548191bd61a7a1c2af35c8",
     "ui_polish_icon_sheet_library_file_id": "libfile_4e87e4c25b38819190fc19016347e4ea",
+    "boss_telegraph_720_library_file_id": "libfile_bfaf54d538508191964cf2c8b7e5a212",
+    "boss_hud_1080_library_file_id": "libfile_0f4a836dae5c8191b719e203208bef39",
+    "boss_next_segment_720_library_file_id": "libfile_ee46e3c48bf08191ae2b45d216b1c50a",
     "ui_polish_local_identity_writeback": "FAILED only on optional local Windows metadata because Python os.setxattr is unavailable; all four Library creates succeeded",
     "local_identity_writeback": "FAILED only on local Windows metadata because Python os.setxattr is unavailable; all five earlier Library creates succeeded"
   }

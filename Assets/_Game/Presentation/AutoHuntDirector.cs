@@ -22,11 +22,13 @@ namespace AffixZero.Presentation
         private AutoAreaSkill areaSkill;
         private AutoRecoverySkill recoverySkill;
         private CombatFeedback feedback;
+        private MeleeActor boss;
+        private BossAttackPattern bossPattern;
         private float delay, stalledTime, decisionTime, enemyDecisionTime, recoveryUntil;
         private float lastKillAt = -100;
         private Vector2 lastPosition, progressPosition;
-        private int identity = 10, stallAttempts;
-        private bool runStarted;
+        private int identity = 10, stallAttempts, lastAvoidedBossTelegraph;
+        private bool runStarted, bossEngaged;
         private HuntPhase phaseBeforeLoot;
         public DungeonWorld World { get; private set; }
         public IReadOnlyList<MeleeActor> Enemies => enemies.AsReadOnly();
@@ -49,6 +51,12 @@ namespace AffixZero.Presentation
         public int LayoutsVisitedMask { get; private set; }
         public int EliteKills { get; private set; }
         public int GuardianKills { get; private set; }
+        public int BossKills { get; private set; }
+        public int BossKillOrdinal { get; private set; }
+        public int BossLootDrops { get; private set; }
+        public int BossPatternCasts { get; private set; }
+        public int BossPatternHits { get; private set; }
+        public int BossAvoidances { get; private set; }
         public int DefeatedElitePatternMask { get; private set; }
         public int ObservedEliteAttackPatternMask { get; private set; }
         public int EmberPatternCasts { get; private set; }
@@ -114,6 +122,23 @@ namespace AffixZero.Presentation
         public int AliveEnemies
         {
             get { int count = 0; foreach (MeleeActor actor in enemies) if (actor.isActiveAndEnabled && !actor.IsDead) count++; return count; }
+        }
+        public MeleeActor Boss => boss;
+        public bool BossAlive => boss != null && boss.isActiveAndEnabled && !boss.IsDead &&
+            boss.GetComponent<BossEncounterMarker>()?.Active == true;
+        public string BossName
+        {
+            get
+            {
+                BossEncounterMarker marker = boss == null ? null : boss.GetComponent<BossEncounterMarker>();
+                return marker == null ? string.Empty : marker.DisplayName;
+            }
+        }
+        public bool BossTelegraphing => bossPattern != null && bossPattern.IsTelegraphing;
+        public bool BossEngaged => BossAlive && bossEngaged;
+        public int AliveNonBossEnemies
+        {
+            get { int count=0; foreach(MeleeActor actor in enemies) if(actor!=boss&&actor.isActiveAndEnabled&&!actor.IsDead) count++; return count; }
         }
         public string StateCaption
         {
@@ -214,6 +239,11 @@ namespace AffixZero.Presentation
                 ConsecutiveFailures = 0; Phase = HuntPhase.Resting; delay = ClearTransitionSeconds;
                 hero.SetTarget(null); hero.SetDestination(null); return;
             }
+            if (!bossEngaged && BossAlive && AliveNonBossEnemies == 0)
+            {
+                bossEngaged = true; boss.SetDamageAllowed(true); decisionTime = 0;
+            }
+            if (TryAvoidBossPattern(position)) return;
             // A stall escape destination needs a short exclusive movement window. Without this,
             // the null target immediately triggered ChooseTarget and erased the recovery step.
             if(Time.time<recoveryUntil){Phase=HuntPhase.Exploring;return;}
@@ -262,19 +292,35 @@ namespace AffixZero.Presentation
                 if (World == null || World.LayoutId != next) { RebuildWorld(next); LayoutTransitions++; }
             }
             owner.BeginAutoRun();
+            bossEngaged = false;
             Vector2 heroPosition = atEntrance ? DungeonWorld.Entrance : World.SafePoint(hero.transform.position);
             hero.ResetForEncounter(heroPosition, ++identity, owner.Progression.TotalMaxHp, owner.Progression.TotalDamage);
             owner.RefreshCombatBuild();
             for (int i = 0; i < enemies.Count; i++)
             {
                 MeleeActor actor = enemies[i]; actor.gameObject.SetActive(true);
-                bool elite = (i + 1) % Difficulty.EliteStride == 0;
-                bool guardian = elite && i == Population - 1;
+                bool bossEnemy = i == Population - 1;
+                bool guardian = !bossEnemy && i == Population - 2;
+                bool elite = !bossEnemy && (guardian || (i + 1) % Difficulty.EliteStride == 0);
                 EliteEncounterMarker marker = actor.GetComponent<EliteEncounterMarker>();
+                BossEncounterMarker bossMarker = actor.GetComponent<BossEncounterMarker>();
                 EliteEncounterProfile profile = default;
                 int baseHp = 46, baseDamage = 4, defense = 0;
                 float moveSpeed = 1.55f + (i % 4) * .08f, attackSpeed = 1, reach = 1;
-                if (elite)
+                if (bossEnemy)
+                {
+                    BossEncounterProfile bossProfile = BossEncounterTuning.Get(World.LayoutId);
+                    actor.name = bossProfile.Name;
+                    baseHp = bossProfile.BaseHp; baseDamage = bossProfile.BaseDamage; defense = bossProfile.Defense;
+                    moveSpeed = bossProfile.MoveSpeed; attackSpeed = bossProfile.AttackSpeed; reach = bossProfile.Reach;
+                    if (marker != null) marker.Clear();
+                    EliteAttackPattern priorElitePattern = actor.GetComponent<EliteAttackPattern>();
+                    if (priorElitePattern != null) priorElitePattern.Clear();
+                    if (bossMarker == null) bossMarker = actor.gameObject.AddComponent<BossEncounterMarker>();
+                    bossMarker.Configure(actor, bossProfile);
+                    boss = actor;
+                }
+                else if (elite)
                 {
                     profile = EliteEncounterTuning.Get(World.LayoutId, guardian);
                     actor.name = profile.Name + " " + (i + 1);
@@ -282,6 +328,7 @@ namespace AffixZero.Presentation
                     moveSpeed = profile.MoveSpeed; attackSpeed = profile.AttackSpeed; reach = profile.Reach;
                     if (marker == null) marker = actor.gameObject.AddComponent<EliteEncounterMarker>();
                     marker.Configure(actor, profile, guardian);
+                    if (bossMarker != null) bossMarker.Clear();
                 }
                 else
                 {
@@ -289,17 +336,28 @@ namespace AffixZero.Presentation
                     if (marker != null) marker.Clear();
                     EliteAttackPattern priorPattern=actor.GetComponent<EliteAttackPattern>();
                     if(priorPattern!=null)priorPattern.Clear();
+                    if (bossMarker != null) bossMarker.Clear();
+                    BossAttackPattern priorBossPattern = actor.GetComponent<BossAttackPattern>();
+                    if (priorBossPattern != null) priorBossPattern.Clear();
                 }
                 int scaledHp = DifficultyTuning.ScaleEnemyHealth(baseHp, CurrentDifficulty);
                 int scaledDamage = DifficultyTuning.ScaleEnemyDamage(baseDamage, CurrentDifficulty);
                 actor.ResetForEncounter(World.SafePoint(World.SpawnPoints[i]), ++identity,
                     scaledHp, scaledDamage);
                 actor.ApplyCombatBuild(scaledHp, defense, scaledDamage, attackSpeed, reach, 0, 1, false);
+                actor.SetDamageAllowed(!bossEnemy);
                 if(elite)
                 {
                     EliteAttackPattern pattern=actor.GetComponent<EliteAttackPattern>();
                     if(pattern==null){pattern=actor.gameObject.AddComponent<EliteAttackPattern>();pattern.Resolved+=OnElitePatternResolved;}
                     pattern.Configure(actor,hero,profile.Style,guardian);
+                }
+                else if (bossEnemy)
+                {
+                    BossEncounterProfile bossProfile = BossEncounterTuning.Get(World.LayoutId);
+                    BossAttackPattern pattern = actor.GetComponent<BossAttackPattern>();
+                    if (pattern == null) { pattern = actor.gameObject.AddComponent<BossAttackPattern>(); pattern.Resolved += OnBossPatternResolved; }
+                    pattern.Configure(actor, hero, bossProfile); bossPattern = pattern;
                 }
                 actor.ConfigureMoveSpeed(moveSpeed);
                 actor.SetTarget(null); actor.SetDestination(World.PatrolPoint(i, ++roamSteps[i])); roamAt[i] = Time.time + 1 + (i % 5) * .3f;
@@ -307,6 +365,7 @@ namespace AffixZero.Presentation
             MaxAliveEnemies = Math.Max(MaxAliveEnemies, AliveEnemies);
             areaSkill.ResetForRun(); recoverySkill.ResetForRun(); Phase = Running ? HuntPhase.Exploring : HuntPhase.Waiting;
             lastPosition = progressPosition = heroPosition; stalledTime = decisionTime = enemyDecisionTime = recoveryUntil = 0; stallAttempts = 0;
+            lastAvoidedBossTelegraph = 0;
         }
 
         private void RebuildWorld(DungeonLayoutId layout)
@@ -327,6 +386,10 @@ namespace AffixZero.Presentation
             for (int i = 0; i < enemies.Count; i++)
             {
                 MeleeActor actor = enemies[i]; if (!actor.isActiveAndEnabled || actor.IsDead) continue;
+                if (actor == boss && !bossEngaged)
+                {
+                    actor.SetTarget(null);actor.SetDestination(null);actor.SetAttacksAllowed(false);continue;
+                }
                 float distance = Vector2.Distance(actor.transform.position, heroPosition);
                 if (distance <= AggroRadius && World.LineOfSight(actor.transform.position, heroPosition))
                     threatening.Add(actor);
@@ -356,7 +419,10 @@ namespace AffixZero.Presentation
             var candidates = new List<GridCell>(); var actors = new List<MeleeActor>();
             foreach (MeleeActor actor in enemies)
                 if (actor.isActiveAndEnabled && !actor.IsDead)
-                { actors.Add(actor); candidates.Add(World.Cell(actor.transform.position)); }
+                {
+                    if (actor == boss && !bossEngaged) continue;
+                    actors.Add(actor); candidates.Add(World.Cell(actor.transform.position));
+                }
             if (World.Navigation.TryNearestReachable(World.Cell(hero.transform.position), candidates, out int index, out _))
             {
                 MeleeActor selected = actors[index]; if (hero.CurrentTarget != selected) TargetSelections++;
@@ -376,6 +442,23 @@ namespace AffixZero.Presentation
             hero.SetDestination(World.SafePoint(position + new Vector2(stallAttempts % 2 == 0 ? 2 : -2, stallAttempts % 3 - 1)));
             decisionTime = 1.5f;recoveryUntil=Time.time+1.5f;
             if (stallAttempts >= 3) Block("세 차례 경로 복구에 실패해 안전 중지했습니다.");
+        }
+        private bool TryAvoidBossPattern(Vector2 position)
+        {
+            if (bossPattern == null || !bossPattern.IsTelegraphing || boss == null || boss.IsDead) return false;
+            hero.SetTarget(null); Phase = HuntPhase.Exploring;
+            float distance = Vector2.Distance(position, bossPattern.DangerOrigin);
+            if (distance <= bossPattern.DangerRadius + .25f)
+            {
+                Vector2 away = position - bossPattern.DangerOrigin;
+                if (away.sqrMagnitude < .01f) away = Vector2.left;
+                hero.SetDestination(World.SafePoint(bossPattern.DangerOrigin + away.normalized * (bossPattern.DangerRadius + 1.15f)));
+                if (lastAvoidedBossTelegraph != bossPattern.TelegraphCount)
+                { lastAvoidedBossTelegraph = bossPattern.TelegraphCount; BossAvoidances++; }
+                CheckMovement(position);
+            }
+            else hero.SetDestination(null);
+            return true;
         }
         private void Block(string reason)
         {
@@ -403,6 +486,8 @@ namespace AffixZero.Presentation
                     EliteKills++;if(marker.IsGuardian)GuardianKills++;
                     DefeatedElitePatternMask|=marker.StyleMaskBit;
                 }
+                BossEncounterMarker bossMarker=actor.GetComponent<BossEncounterMarker>();
+                if(bossMarker!=null&&bossMarker.Active){BossKills++;BossKillOrdinal=TotalKills;if(owner.LastDefeatOfferedLoot)BossLootDrops++;}
                 KillChain = Time.time - lastKillAt <= 2.4f ? KillChain + 1 : 1;
                 MaxKillChain = Math.Max(MaxKillChain, KillChain); lastKillAt = Time.time;
             }
@@ -415,6 +500,11 @@ namespace AffixZero.Presentation
             else if(style==EliteEncounterStyle.RitualReaver)RitualPatternCasts++;
             if(hit)ElitePatternHits++;
         }
+        private void OnBossPatternResolved(bool hit)
+        {
+            BossPatternCasts++;
+            if (hit) BossPatternHits++;
+        }
         private void OnDestroy()
         {
             if (hero != null) hero.StrikeResolved -= OnStrike;
@@ -423,6 +513,8 @@ namespace AffixZero.Presentation
                 actor.Damaged -= OnEnemyDamaged;
                 EliteAttackPattern pattern=actor.GetComponent<EliteAttackPattern>();
                 if(pattern!=null)pattern.Resolved-=OnElitePatternResolved;
+                BossAttackPattern bossAttack=actor.GetComponent<BossAttackPattern>();
+                if(bossAttack!=null)bossAttack.Resolved-=OnBossPatternResolved;
             }
             World?.Dispose();
         }

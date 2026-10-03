@@ -26,8 +26,10 @@ namespace AffixZero.Presentation
         private UIDocument document;
         private PanelSettings panelSettings;
         private VisualElement root, healthFill, xpFill, dockXpFill, attackFill, mapArea, mapHero, mapEnemy, result, pickupLoot, nextEncounter;
+        private VisualElement bossFrame, bossHealthFill;
         private Label healthValue, levelValue, areaCooldown, recoveryCooldown, difficultyStatus, currency, clock, attackState, xpValue, resultText, paused, lootText;
         private Label areaSkillLabel, recoverySkillLabel;
+        private Label bossName, bossHealthValue, bossPattern;
         private VisualElement areaSkillSlot, recoverySkillSlot;
         private VisualElement pauseButton;
         private Label pauseCaption;
@@ -82,7 +84,7 @@ namespace AffixZero.Presentation
             room = Resources.Load<Texture2D>("AffixOriginal/TempleRoom-v2");
             attackIcon = Resources.Load<Texture2D>("AffixGenerated/AttackIcon");
             if (room == null || attackIcon == null) Debug.LogError("HUD art missing: TempleRoom-v2 or AttackIcon", this);
-            BuildTop(); BuildEnemy(); BuildMap(); BuildBottom(); BuildCharacter(); BuildResult();
+            BuildTop(); BuildBoss(); BuildEnemy(); BuildMap(); BuildBottom(); BuildCharacter(); BuildResult();
             if (encounter == null) return;
             ObserveActor(encounter.Hero);ObserveActor(encounter.Enemy);
             Refresh();
@@ -122,6 +124,20 @@ namespace AffixZero.Presentation
             var recoveryPlate=Box(body,"recovery-status",134,57,68,15,Surface);Border(recoveryPlate,Edge,1);
             Text(recoveryPlate,"H",2,0,8,16,7,Muted);
             recoveryCooldown=Text(recoveryPlate,"",10,0,56,15,7,Sky);recoveryCooldown.style.unityTextAlign=TextAnchor.MiddleCenter;
+        }
+        private void BuildBoss()
+        {
+            bossFrame=Box(root,"boss-frame",0,11,382,58,FrameDark);
+            bossFrame.style.left=Length.Percent(50);bossFrame.style.marginLeft=-191;bossFrame.style.display=DisplayStyle.None;
+            Skin(bossFrame,"AffixUIVisual/FrameBar");Border(bossFrame,new Color32(116,64,55,255),2);
+            Box(bossFrame,"boss-corner-left",7,7,5,34,Crimson);
+            var right=Box(bossFrame,"boss-corner-right",370,7,5,34,Crimson);
+            right.style.opacity=.85f;
+            bossName=Text(bossFrame,"",18,4,346,17,10,Gold);bossName.name="boss-name";bossName.style.unityTextAlign=TextAnchor.MiddleCenter;
+            var track=Box(bossFrame,"boss-health-track",22,23,338,13,Ink);Border(track,new Color32(126,48,54,255),1);
+            bossHealthFill=Box(track,"boss-health-fill",1,1,336,11,new Color32(174,24,46,255));
+            bossHealthValue=Text(track,"",2,-1,334,13,8,Color.white);bossHealthValue.name="boss-hp-value";bossHealthValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            bossPattern=Text(bossFrame,"ROUTE BOSS",18,39,346,13,7,Muted);bossPattern.name="boss-pattern-state";bossPattern.style.unityTextAlign=TextAnchor.MiddleCenter;
         }
         private void BuildEnemy()
         {
@@ -393,6 +409,20 @@ namespace AffixZero.Presentation
                 }
                 effectsButton.Q<Label>().text=hunt.ReducedEffects?"FX LOW":"FX FULL";
                 RefreshObstacleMarkers(hunt.World);
+                bool showBoss=hunt.BossAlive;
+                bossFrame.style.display=showBoss?DisplayStyle.Flex:DisplayStyle.None;
+                if(showBoss)
+                {
+                    MeleeActor boss=hunt.Boss;
+                    bossName.text=hunt.BossName;
+                    bossHealthFill.style.width=Length.Percent(100f*boss.Hp/Mathf.Max(1,boss.MaxHp));
+                    bossHealthValue.text=boss.Hp+" / "+boss.MaxHp+" HP";
+                    bossPattern.text=hunt.BossTelegraphing?"RUIN PULSE  ·  EVADE":hunt.BossEngaged?"ROUTE BOSS  ·  AUTO ENGAGE":"SEALED  ·  CLEAR 23 GUARDS";
+                    bossPattern.style.color=hunt.BossTelegraphing?Color.white:Muted;
+                    Color bossEdge=hunt.BossTelegraphing?Crimson:new Color32(116,64,55,255);
+                    bossFrame.style.borderTopColor=bossEdge;bossFrame.style.borderRightColor=bossEdge;
+                    bossFrame.style.borderBottomColor=bossEdge;bossFrame.style.borderLeftColor=bossEdge;
+                }
             }
             healthFill.style.width=Length.Percent(100f*hero.Hp/Mathf.Max(1,hero.MaxHp));
             healthValue.text=hero.Hp+" / "+hero.MaxHp+" HP";

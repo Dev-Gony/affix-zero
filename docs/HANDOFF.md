@@ -1,3 +1,34 @@
+# 2026-10-03 - genuine route-end boss loop completed
+
+Each connected layout now contains a named genuine boss in slot 24. It remains
+sealed against targeting and damage until the other 23 enemies are dead, then
+uses a large double-ring/crown silhouette, boss-only top health frame and a
+0.95-second `RUIN PULSE` telegraph. Automatic hunting moves outside the same
+hazard radius used for damage. The former guardian remains slot 23 and no
+normal, elite or guardian HP UI was restored.
+
+Boss death guarantees one item through the existing 29-base rarity/affix
+generator. After pickup, the existing 0.65-second transition rebuilds the next
+layout and repeats with 24 enemies. No item/stat/save schema/socket/class/cash
+system was added. Read `BOSS_AUTO_HUNT_LOOP.md`.
+
+Final build `c40ab46dad6c4ec28f777356d0c545f8` passes CoreSmoke 321, static
+compile 0/0, Unity build/import 0/0, a D-isolated 720p loop with the boss exactly
+kill 24, two boss patterns, one zero-hit avoidance, guaranteed boss loot and a
+fresh next segment, a 1080p UI run with 29 icons and only player/boss HP, and
+all ten exact-window OS input actions. Human play and final user visual approval
+remain pending. Tracked frames are under `docs/media/boss-loop/`.
+
+The same inspected frames are available in Library: telegraph
+`libfile_bfaf54d538508191964cf2c8b7e5a212`, 1080p boss HUD
+`libfile_0f4a836dae5c8191b719e203208bef39`, and next segment
+`libfile_ee46e3c48bf08191ae2b45d216b1c50a`.
+
+Library delivery for the six painted passive-icon evidence completed before
+this slice: full panel `libfile_ebc730158b508191b079d258f9eb75c4` and scale
+sheet `libfile_4f726479751081919dfcfa4a3a82e1a5`. Windows xattr writeback was
+unavailable but does not affect the Library files.
+
 # 2026-10-03 - all six painted passive icons completed
 
 The final `VitalityRune`, `CleaveRune` and `HasteRune` originals came from the

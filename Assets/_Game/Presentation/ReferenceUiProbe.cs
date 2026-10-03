@@ -210,6 +210,8 @@ namespace AffixZero.Presentation
         {
             Require(Root != null && Element("hero-hp-value") is Label && Visible(Element("hero-hp-value")),
                 "The retained player HP readout is missing or hidden.");
+            Require(owner.Hunt.BossAlive && Element("boss-hp-value") is Label && Visible(Element("boss-frame")),
+                "The genuine route boss does not have its reserved health presentation.");
             int activeEnemies = 0;
             foreach (MeleeActor enemy in owner.Hunt.Enemies)
             {
@@ -232,11 +234,12 @@ namespace AffixZero.Presentation
                 string value = (element.name ?? "").ToLowerInvariant();
                 bool healthLike = value.Contains("health") || value.Contains("hp-") || value.Contains("hpbar") || value.Contains("healthbar");
                 if (healthLike)
-                    Require(value.StartsWith("hero-", StringComparison.Ordinal),
-                        "A non-player health element remains in the HUD: " + element.name);
+                    Require(value.StartsWith("hero-", StringComparison.Ordinal) || value.StartsWith("boss-", StringComparison.Ordinal),
+                        "A normal, elite, or guardian health element remains in the HUD: " + element.name);
             });
             report.playerHpVisible = true;
-            report.nonPlayerHpAbsent = true;
+            report.bossHpVisible = true;
+            report.nonBossHpAbsent = true;
             report.activeEnemiesDuringHpAudit = Math.Max(report.activeEnemiesDuringHpAudit, activeEnemies);
         }
         private void Phase(string value) { phase = value; phaseFrame = Time.frameCount; }
@@ -449,7 +452,7 @@ namespace AffixZero.Presentation
             public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight deterministic authored items exercise distinct base-icon and rarity presentation through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
             public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified,
-                playerHpVisible, nonPlayerHpAbsent;
+                playerHpVisible, bossHpVisible, nonBossHpAbsent;
             public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit, baseIconsLoaded;
             public float elapsedSeconds;
             public string[] fixtureItemIds, nativeCallbacks;

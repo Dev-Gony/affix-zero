@@ -34,7 +34,7 @@ namespace AffixZero.Presentation
         private float cleaveRadius=1.85f;
         private long damageSequence;
         private Vector2 swingDirection;
-        private bool attacksAllowed=true,patternLocked;
+        private bool attacksAllowed=true,patternLocked,damageAllowed=true;
         private float attackSpeedMultiplier=1,cleaveFraction=1;
         private bool ranged;
         private int criticalChance,vampirismPercent,penetration;
@@ -78,6 +78,7 @@ namespace AffixZero.Presentation
         public void ConfigureCleave(IReadOnlyList<MeleeActor> victims,float radius)
         {if(!FinitePositive(radius))throw new ArgumentOutOfRangeException(nameof(radius));cleaveTargets=victims;cleaveRadius=Mathf.Max(cleaveRadius,radius);}
         public void SetAttacksAllowed(bool value){attacksAllowed=value;}
+        public void SetDamageAllowed(bool value){damageAllowed=value;}
         public void SetPatternLocked(bool value){patternLocked=value;}
         public bool HasLineOfSight(Vector2 point)=>CanSee(point);
         public bool TryPatternMove(Vector2 point)
@@ -135,7 +136,7 @@ namespace AffixZero.Presentation
             actorId = id; maximumHp = hp; damage = attackDamage;
             health = new CombatHealth(maximumHp, defense);
             LastAttackerId=0;
-            LastAttackId=0;LastHitCritical=false;LastHitKilled=false;attacksAllowed=true;patternLocked=false;
+            LastAttackId=0;LastHitCritical=false;LastHitKilled=false;attacksAllowed=true;patternLocked=false;damageAllowed=true;
             // Preserve the attack sequence across reuse so surviving recipients cannot reject new hits as duplicates.
             if (timeline == null) timeline = animationSet.CreateTimeline();
             else timeline.Cancel();
@@ -371,7 +372,7 @@ namespace AffixZero.Presentation
 
         private HitReceipt Receive(int attacker, long attack, int power,Vector2 origin,float radius,bool area,bool critical)
         {
-            if (health == null) return default;
+            if (health == null || !damageAllowed) return default;
             int before=health.Current;
             HitReceipt receipt = health.Receive(attacker, attack, power);
             if (!receipt.Accepted) return receipt;

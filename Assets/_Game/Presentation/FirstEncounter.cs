@@ -28,6 +28,7 @@ namespace AffixZero.Presentation
         public int Experience => rewards == null ? 0 : rewards.Experience;
         public int Gold => rewards == null ? 0 : rewards.Gold;
         public int RewardCollectionCount => rewards == null ? 0 : rewards.CollectionCount;
+        public bool LastDefeatOfferedLoot { get; private set; }
         public MeleeActor Hero => hero;
         public MeleeActor Enemy => enemy;
         public bool IsPaused => manuallyPaused || !CanProgress || (Hunt!=null && !Hunt.Running);
@@ -228,6 +229,7 @@ namespace AffixZero.Presentation
 
         public bool RegisterDefeat(MeleeActor actor)
         {
+            LastDefeatOfferedLoot = false;
             if(!CanProgress)return false;
             if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
@@ -235,17 +237,21 @@ namespace AffixZero.Presentation
                 int talentPoints=Progression.UnspentPoints+Progression.SpentPoints;
                 string token=rewards.EncounterId + "/" + actor.ActorId + "/" + actor.DeathCount;
                 if(!Progression.TryRegisterKill(token))return false;
-                bool elite=actor.name.IndexOf("Elite",StringComparison.OrdinalIgnoreCase)>=0;
+                bool boss=actor.GetComponent<BossEncounterMarker>()?.Active==true;
+                bool elite=!boss&&actor.name.IndexOf("Elite",StringComparison.OrdinalIgnoreCase)>=0;
                 int floor=Math.Max(1,Progression.Level+Progression.DungeonClears);
                 int seed=StableSeed(token);
                 bool fixture=Array.IndexOf(Environment.GetCommandLineArgs(),"-affixAutoHuntTest")>=0;
-                WeaponItem drop=fixture && rewards.CollectionCount%4==0
+                WeaponItem drop=boss
+                    ?LootGenerator.GenerateGuaranteed("boss-loot:"+token,floor,seed,Progression.SelectedDifficulty)
+                    :fixture && rewards.CollectionCount%4==0
                     ?LootGenerator.GenerateGuaranteed("loot:"+token,floor,seed,Progression.SelectedDifficulty)
                     :LootGenerator.TryGenerate("loot:"+token,floor,elite,seed,Progression.SelectedDifficulty);
                 bool offered=drop!=null&&Progression.TryCreatePendingLoot(drop);
+                LastDefeatOfferedLoot=offered;
                 ProgressionNotice=Progression.UnspentPoints+Progression.SpentPoints>talentPoints?"특성 포인트 +1":
                     "처치 보상 +"+Progression.LastExperienceReward+" XP · +"+Progression.LastGoldReward+" GOLD";
-                if(offered){LootPosition=actor.transform.position;ProgressionNotice="["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
+                if(offered){LootPosition=actor.transform.position;ProgressionNotice=(boss?"BOSS LOOT  ":"")+"["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
                 SaveProgress();
                 return true;
             }
