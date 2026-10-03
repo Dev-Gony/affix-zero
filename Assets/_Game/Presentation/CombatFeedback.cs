@@ -24,6 +24,7 @@ namespace AffixZero.Presentation
         private Camera cameraView;
         private Vector3 previousShake;
         private float shake;
+        private float lastSoundAt=-1;
         private int cursor;
         private float effectsScale=1f;
         public bool ReducedEffects=>effectsScale<1f;
@@ -35,7 +36,7 @@ namespace AffixZero.Presentation
             if(shader==null){Debug.LogError("Built-in sprite shader missing for combat feedback.",this);return;}
             material=new Material(shader);
             audioSource=gameObject.AddComponent<AudioSource>();audioSource.playOnAwake=false;audioSource.spatialBlend=0;
-            audioSource.volume=.1f;hitClip=CreateTone("AFFIX hit",120,.055f,.32f);criticalClip=CreateTone("AFFIX critical",190,.085f,.48f);killClip=CreateTone("AFFIX kill",82,.13f,.58f);
+            audioSource.volume=.16f;hitClip=CreateTone("AFFIX hit",132,.06f,.42f);criticalClip=CreateTone("AFFIX critical",205,.09f,.58f);killClip=CreateTone("AFFIX kill",76,.14f,.68f);
             for(int i=0;i<pulses.Length;i++)
             {
                 var host=new GameObject("Combat Slash "+i,typeof(LineRenderer));host.transform.SetParent(transform,false);
@@ -45,7 +46,7 @@ namespace AffixZero.Presentation
             }
             foreach(MeleeActor combatant in combatants)if(combatant!=null){combatant.AttackStarted+=OnAttackStarted;combatant.Damaged+=OnDamaged;}
         }
-        public void SetReducedEffects(bool reduced){effectsScale=reduced?.35f:1f;if(audioSource!=null)audioSource.volume=reduced?.045f:.1f;}
+        public void SetReducedEffects(bool reduced){effectsScale=reduced?.35f:1f;if(audioSource!=null)audioSource.volume=reduced?.065f:.16f;}
         private void OnAttackStarted(MeleeActor attacker,MeleeActor target)
         {
             if(attacker==null||target!=hero||material==null)return;
@@ -60,7 +61,9 @@ namespace AffixZero.Presentation
         private void OnDamaged(MeleeActor defender,AffixZero.Core.HitReceipt receipt)
         {
             if(!receipt.Accepted||audioSource==null)return;
-            AudioClip clip=receipt.Killed?killClip:defender.LastHitCritical?criticalClip:hitClip;
+            float now=Time.unscaledTime;
+            if(!receipt.Killed&&!defender.LastHitCritical&&now-lastSoundAt<.035f)return;
+            lastSoundAt=now;AudioClip clip=receipt.Killed?killClip:defender.LastHitCritical?criticalClip:hitClip;
             audioSource.pitch=receipt.Killed?.88f:defender.LastHitCritical?1.12f:1f+(defender.ActorId%3-.5f)*.025f;
             audioSource.PlayOneShot(clip);
         }
@@ -88,7 +91,7 @@ namespace AffixZero.Presentation
                 Emit(origin,Vector2.zero,hero.CleaveRadius,angle,false,false,axe?new Color(1,.55f,.18f):new Color(1,.9f,.65f),axe?.26f:.2f);
                 Emit(origin,Vector2.zero,hero.CleaveRadius*(axe?.88f:.82f),angle,false,false,axe?new Color(1,.2f,.08f):new Color(1,.45f,.2f),axe?.21f:.16f);
             }
-            shake=Mathf.Max(shake,(area?.22f:kills>1?.14f:.07f)*effectsScale);
+            shake=Mathf.Max(shake,(area?.30f:kills>1?.22f:.13f)*effectsScale);
         }
         private void Emit(Vector2 origin,Vector2 end,float radius,float angle,bool ring,bool beam,Color color,float duration)
         {
@@ -101,14 +104,15 @@ namespace AffixZero.Presentation
             foreach(Pulse pulse in pulses)
             {
                 if(pulse==null||!pulse.active)continue;
-                pulse.age+=Time.deltaTime;
+                pulse.age+=Time.unscaledDeltaTime;
                 float t=Mathf.Clamp01(pulse.age/pulse.duration);
                 if(t>=1){pulse.line.enabled=false;pulse.active=false;continue;}
                 Color color=pulse.color;color.a=1-t;pulse.line.startColor=pulse.line.endColor=color;
                 pulse.line.startWidth=(pulse.ring?.12f:.2f)*(1-t)+.015f;pulse.line.endWidth=pulse.line.startWidth*.4f;
                 if(pulse.beam)
                 {pulse.line.positionCount=2;pulse.line.SetPosition(0,pulse.origin);pulse.line.SetPosition(1,pulse.end);continue;}
-                int count=pulse.ring?(ReducedEffects?25:49):(ReducedEffects?17:29);pulse.line.positionCount=count;
+                bool economical=ReducedEffects||Time.timeScale>=4f;
+                int count=pulse.ring?(economical?25:49):(economical?17:29);pulse.line.positionCount=count;
                 float extent=pulse.ring?Mathf.PI*2:Mathf.PI*1.1f;
                 float radius=pulse.radius*Mathf.Lerp(pulse.ring?.45f:.7f,1,t);
                 for(int i=0;i<count;i++)
@@ -120,9 +124,9 @@ namespace AffixZero.Presentation
             if(cameraView!=null)
             {
                 cameraView.transform.position-=previousShake;
-                shake=Mathf.Max(0,shake-Time.deltaTime);
-                float magnitude=Mathf.Min(.075f,shake*.34f);
-                previousShake=Time.timeScale>0?new Vector3(Mathf.Sin(Time.time*83),Mathf.Cos(Time.time*67),0)*magnitude:Vector3.zero;
+                shake=Mathf.Max(0,shake-Time.unscaledDeltaTime*1.35f);
+                float magnitude=Mathf.Min(.11f,shake*.42f);
+                previousShake=Time.timeScale>0?new Vector3(Mathf.Sin(Time.unscaledTime*83),Mathf.Cos(Time.unscaledTime*67),0)*magnitude:Vector3.zero;
                 cameraView.transform.position+=previousShake;
             }
         }

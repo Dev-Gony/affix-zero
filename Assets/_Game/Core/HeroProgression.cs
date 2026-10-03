@@ -155,6 +155,8 @@ namespace AffixZero.Core
         public int TotalExperience { get; private set; }
         // Available run gold after purchases, not lifetime gross earnings.
         public int TotalGold { get; private set; }
+        public int TotalSalvageGold { get; private set; }
+        public int LastSalvageGold { get; private set; }
         public int FuryRank { get; private set; }
         public int PrecisionRank { get; private set; }
         public int KeystoneRank { get; private set; }
@@ -279,6 +281,16 @@ namespace AffixZero.Core
             return 75 + (experience - 48500) / 1500;
         }
 
+        // XP and the historical level display continue after the tree is complete, but a new
+        // profile never accumulates points that have no legal destination. Compatibility credit
+        // is included before clamping so migrated players retain every usable rank.
+        public static int SpendableTalentPointsForExperience(int experience, int compatibilityCredit = 0)
+        {
+            if (compatibilityCredit < 0) throw new ArgumentOutOfRangeException(nameof(compatibilityCredit));
+            long points = (long)EarnedTalentPointsForExperience(experience) + compatibilityCredit;
+            return (int)Math.Min(TotalTalentCapacity, points);
+        }
+
         public bool TrySetDifficulty(DungeonDifficulty difficulty)
         {
             if (!Enum.IsDefined(typeof(DungeonDifficulty), difficulty)) return false;
@@ -298,11 +310,11 @@ namespace AffixZero.Core
                 (long)UnspentPoints + SpentPoints >= int.MaxValue ||
                 TotalExperience > int.MaxValue - 45 || TotalGold > int.MaxValue - 17) return false;
             killTokens.Add(uniqueToken);
-            int previousTalentPoints = EarnedTalentPointsForExperience(TotalExperience);
+            int previousTalentPoints = SpendableTalentPointsForExperience(TotalExperience, legacyPointCredit);
             LastExperienceReward = DifficultyTuning.ScaleReward(25 + 25 * ExperienceBonusPercent / 100, SelectedDifficulty);
             LastGoldReward = DifficultyTuning.ScaleReward(8 + 8 * GoldBonusPercent / 100, SelectedDifficulty);
             TotalExperience += LastExperienceReward;
-            UnspentPoints += EarnedTalentPointsForExperience(TotalExperience) - previousTalentPoints;
+            UnspentPoints += SpendableTalentPointsForExperience(TotalExperience, legacyPointCredit) - previousTalentPoints;
             TotalGold += LastGoldReward;
             return true;
         }
@@ -408,6 +420,29 @@ namespace AffixZero.Core
             return true;
         }
 
+        public static int SalvageValue(WeaponItem item)
+        {
+            if (item == null) return 0;
+            string rarity = (item.Rarity ?? string.Empty).Trim().ToLowerInvariant();
+            int tier = rarity == "epic" ? 5 : rarity == "legend" ? 4 : rarity == "unique" ? 3 :
+                rarity == "rare" ? 2 : rarity == "magic" ? 1 : 0;
+            return 4 + tier * 4 + item.Options.Count * 2 + item.EnhancementRank * 2;
+        }
+
+        public int GetSalvageValue(int index) => ValidIndex(index) ? SalvageValue(inventory[index]) : 0;
+
+        public bool Salvage(int index)
+        {
+            if (!ValidIndex(index)) return false;
+            int value = SalvageValue(inventory[index]);
+            if (value <= 0 || TotalGold > int.MaxValue - value || TotalSalvageGold > int.MaxValue - value) return false;
+            inventory.RemoveAt(index);
+            TotalGold += value;
+            TotalSalvageGold += value;
+            LastSalvageGold = value;
+            return true;
+        }
+
         public int? CompareDamage(int index) => ValidIndex(index)
             ? (int?)(inventory[index].DamageBonus - (GetEquipped(inventory[index].EquipmentSlot)?.DamageBonus ?? 0)) : null;
 
@@ -443,7 +478,7 @@ namespace AffixZero.Core
             ids.Sort(StringComparer.Ordinal);
             return new ProgressionSnapshot
             {
-                totalExperience = TotalExperience, totalGold = TotalGold, unspentPoints = UnspentPoints,
+                totalExperience = TotalExperience, totalGold = TotalGold, totalSalvageGold = TotalSalvageGold, unspentPoints = UnspentPoints,
                 furyRank = FuryRank, precisionRank = PrecisionRank, keystoneRank = KeystoneRank,
                 vitalityRank = VitalityRank, cleaveRank = CleaveRank, hasteRank = HasteRank, legacyPointCredit = legacyPointCredit,
                 selectedDifficulty = (int)SelectedDifficulty, dungeonClears = DungeonClears,
@@ -463,14 +498,16 @@ namespace AffixZero.Core
         public static HeroProgression RestoreSnapshot(ProgressionSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
-            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2 && snapshot.schemaVersion != 3)
+            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2 && snapshot.schemaVersion != 3 && snapshot.schemaVersion != 4)
                 throw new NotSupportedException("Unsupported progression snapshot version.");
             bool legacy = snapshot.schemaVersion == 1;
-            bool current = snapshot.schemaVersion == 3;
+            bool current = snapshot.schemaVersion >= 3;
+            bool salvageCurrent = snapshot.schemaVersion >= 4;
             int[] ranks = { snapshot.furyRank, snapshot.precisionRank, snapshot.keystoneRank,
                 snapshot.vitalityRank, snapshot.cleaveRank, snapshot.hasteRank };
             int[] legacyCaps = { 2, 1, 1, 0, 0, 0 };
-            if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.unspentPoints < 0 || snapshot.dungeonClears < 0 ||
+            if (snapshot.totalExperience < 0 || snapshot.totalGold < 0 || snapshot.totalSalvageGold < 0 ||
+                (!salvageCurrent && snapshot.totalSalvageGold != 0) || snapshot.unspentPoints < 0 || snapshot.dungeonClears < 0 ||
                 (current && !Enum.IsDefined(typeof(DungeonDifficulty), snapshot.selectedDifficulty)) ||
                 (!current && (snapshot.selectedDifficulty != 0 || snapshot.dungeonClears != 0)) ||
                 snapshot.legacyPointCredit < 0 || (legacy && (snapshot.hasArmor || snapshot.hasRelic || snapshot.hasHelmet ||
@@ -493,13 +530,16 @@ namespace AffixZero.Core
             long earnedPoints = snapshot.unspentPoints + spent;
             long normalPoints = EarnedTalentPointsForExperience(snapshot.totalExperience);
             long credit = current ? snapshot.legacyPointCredit : earnedPoints - normalPoints;
+            long historicalPointBalance = normalPoints + credit;
+            long cappedPointBalance = Math.Min(TotalTalentCapacity, historicalPointBalance);
             long minimumExperience = (long)tokens.Count * 25;
             long maximumExperience = (long)tokens.Count * (current ? 45 : legacy ? 25 : 30);
             long maximumGold = (long)tokens.Count * (current ? 17 : legacy ? 8 : 11);
             if (credit < 0 || credit > tokens.Count - normalPoints ||
-                earnedPoints != normalPoints + credit || snapshot.dungeonClears > tokens.Count ||
+                (earnedPoints != historicalPointBalance && earnedPoints != cappedPointBalance) || snapshot.dungeonClears > tokens.Count ||
                 (legacy ? snapshot.totalExperience != minimumExperience : snapshot.totalExperience < minimumExperience || snapshot.totalExperience > maximumExperience) ||
-                snapshot.totalGold > maximumGold || (legacy && snapshot.totalGold % 8 != 0))
+                snapshot.totalSalvageGold > (long)ids.Count * 80 || snapshot.totalGold > maximumGold + snapshot.totalSalvageGold ||
+                (legacy && snapshot.totalGold % 8 != 0))
                 throw new ArgumentException("Reward balances disagree with the kill ledger.", nameof(snapshot));
             bool invalidLegacyFirstDrop = legacy && ((tokens.Count == 0 && (snapshot.firstDropWaiting || ids.Contains(FirstDropId))) ||
                 (tokens.Count > 0 && snapshot.firstDropWaiting == ids.Contains(FirstDropId)) ||
@@ -532,7 +572,7 @@ namespace AffixZero.Core
 
             var restored = new HeroProgression
             {
-                TotalExperience = snapshot.totalExperience, TotalGold = snapshot.totalGold,
+                TotalExperience = snapshot.totalExperience, TotalGold = snapshot.totalGold, TotalSalvageGold = snapshot.totalSalvageGold,
                 UnspentPoints = snapshot.unspentPoints, FuryRank = snapshot.furyRank,
                 PrecisionRank = snapshot.precisionRank, KeystoneRank = snapshot.keystoneRank,
                 VitalityRank = snapshot.vitalityRank, CleaveRank = snapshot.cleaveRank, HasteRank = snapshot.hasteRank,

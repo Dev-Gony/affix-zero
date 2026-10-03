@@ -82,15 +82,23 @@ namespace AffixZero.Presentation
                 foreach (var actor in owner.Hunt.Enemies)
                     if (observed.Add(actor)) actor.Damaged += OnEnemyDamaged;
                 Dispatch("autohunt-toggle"); Require(owner.Hunt.Running && !owner.IsPaused, "Native start callback failed.");
-                Phase("battle"); return;
+                Dispatch("speed-4x");Require(owner.SimulationSpeed==4&&Time.timeScale==4,"Native 4x speed selection failed.");
+                Phase("speed-4x"); return;
             }
             AssertIsolation();
             Require(string.IsNullOrEmpty(owner.Hunt.LastFault), "Director fault during reference capture: " + owner.Hunt.LastFault);
-            Require(owner.IsPaused ? Time.timeScale == 0 : Time.timeScale == 1, "Unexpected time scaling.");
+            Require(owner.IsPaused ? Time.timeScale == 0 : Mathf.Approximately(Time.timeScale,owner.SimulationSpeed), "Unexpected time scaling.");
             if (Time.frameCount - phaseFrame < 2) return;
             HeroProgression p = owner.Progression;
             switch (phase)
             {
+                case "speed-4x":
+                    Require(Text("simulation-speed-value")=="4x"&&Time.timeScale==4,"4x HUD state did not remain active.");
+                    Dispatch("speed-2x");Require(owner.SimulationSpeed==2&&Time.timeScale==2,"Native 2x speed selection failed.");Phase("speed-2x");break;
+                case "speed-2x":
+                    Require(Text("simulation-speed-value")=="2x"&&Time.timeScale==2,"2x HUD state did not remain active.");
+                    Dispatch("speed-1x");Require(owner.SimulationSpeed==1&&Time.timeScale==1,"Native 1x speed restore failed.");
+                    report.speedVerified=true;Phase("battle");break;
                 case "battle":
                     if (report.actualHeroHits == 0) return;
                     Capture("battle"); Phase("battle-capture"); break;
@@ -155,7 +163,7 @@ namespace AffixZero.Presentation
                     Capture("forge"); Phase("forge-capture"); break;
                 case "forge-capture":
                     if (!captures.Contains("forge")) return;
-                    Require(captures.Count == 4 && report.equipVerified && report.talentVerified && report.forgeVerified,
+                    Require(captures.Count == 4 && report.speedVerified && report.equipVerified && report.talentVerified && report.forgeVerified,
                         "Required native screens or mutations are incomplete.");
                     Finish(true, null); break;
             }
@@ -261,7 +269,7 @@ namespace AffixZero.Presentation
             var top = Element("hero-unit-frame"); var bottom = Element("bottom-hud");
             Record(top, panel, bounds); Record(bottom, panel, bounds); NoOverlap(top, bottom);
             Record(Element("hero-portrait-medallion"), panel, bounds);
-            string[] nav = { "dungeon-tab", "character-tab", "talents-tab", "forge-tab", "autohunt-toggle", "pause-button", "gold-value" };
+            string[] nav = { "dungeon-tab", "character-tab", "talents-tab", "forge-tab", "autohunt-toggle", "pause-button", "speed-1x", "speed-2x", "speed-4x", "gold-value" };
             CheckGroup(nav, bottom.worldBound, bounds, true);
             CheckGroup(new[] { "hero-hp-value", "xp-value" }, top.worldBound, bounds, true);
             CheckGroup(new[] { "attack-slot" }, bottom.worldBound, bounds, true);
@@ -365,7 +373,7 @@ namespace AffixZero.Presentation
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
             public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
-            public bool ephemeralVerified, fixtureApplied, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified;
+            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified;
             public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture;
             public float elapsedSeconds;
             public string[] fixtureItemIds, nativeCallbacks;

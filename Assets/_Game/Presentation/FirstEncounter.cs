@@ -14,6 +14,7 @@ namespace AffixZero.Presentation
         private EncounterRewards rewards;
         private bool manuallyPaused;
         private float previousTimeScale;
+        private float simulationSpeed = 1f;
         private float endedAt = -1;
         private static ProfilePersistence persistence;
         private GameObject lootView;
@@ -34,6 +35,8 @@ namespace AffixZero.Presentation
         public bool EquipmentVisible => Screen == ManagementScreen.Equipment;
         public bool ManagementVisible => Screen != ManagementScreen.None;
         public float ElapsedSeconds { get; private set; }
+        public float WallClockSeconds { get; private set; }
+        public float SimulationSpeed => simulationSpeed;
         public bool HasEnded => hero != null && hero.IsDead;
         public float SecondsSinceEnd => endedAt < 0 ? 0 : Time.unscaledTime - endedAt;
 
@@ -115,6 +118,16 @@ namespace AffixZero.Presentation
             return true;
         }
 
+        public bool SalvageItem(int index)
+        {
+            if(!CanProgress)return false;
+            int value=Progression.GetSalvageValue(index);
+            if (!Progression.Salvage(index)) { ProgressionNotice = "Select an item to salvage."; return false; }
+            ProgressionNotice = "SALVAGED  +"+value+" GOLD";
+            SaveProgress();
+            return true;
+        }
+
         public bool SpendTalent(TalentId talent)
         {
             if(!CanProgress)return false;
@@ -161,8 +174,20 @@ namespace AffixZero.Presentation
         private void Update()
         {
             if (Hunt!=null && Hunt.Running && !HasEnded && hero != null && hero.IsReady)
+            {
                 ElapsedSeconds += Time.deltaTime;
+                WallClockSeconds += Time.unscaledDeltaTime;
+            }
             if (HasEnded && endedAt < 0) endedAt = Time.unscaledTime;
+        }
+
+        public bool SetSimulationSpeed(float speed)
+        {
+            if (!Mathf.Approximately(speed,1f) && !Mathf.Approximately(speed,2f) && !Mathf.Approximately(speed,4f))
+                return false;
+            simulationSpeed=speed;
+            ApplyPause();
+            return true;
         }
 
         public void SetPaused(bool paused)
@@ -183,7 +208,7 @@ namespace AffixZero.Presentation
             ApplyPause();
         }
 
-        private void ApplyPause() => Time.timeScale = IsPaused ? 0 : previousTimeScale;
+        private void ApplyPause() => Time.timeScale = IsPaused ? 0 : simulationSpeed;
 
         private void OnDestroy()
         {

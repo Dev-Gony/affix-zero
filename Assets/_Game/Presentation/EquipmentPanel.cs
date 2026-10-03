@@ -21,7 +21,7 @@ namespace AffixZero.Presentation
             public ItemView[] EquippedSlots = Array.Empty<ItemView>();
             public ItemView Selected;
             public string Health, Damage, Defense, Duration, Comparison, Delta, Affix, Status;
-            public int Points, Fury, Precision, Keystone;
+            public int Points, Fury, Precision, Keystone, SalvageValue;
             public bool CanEquip, CanSalvage, CanFury, CanPrecision, CanKeystone, CanReset;
         }
         public readonly VisualElement Root;
@@ -52,28 +52,28 @@ namespace AffixZero.Presentation
             var ribbon=Box(Root,"management-header",0,0,1246,42,Surface);
             Box(ribbon,"management-accent",14,14,9,14,Crimson);
             Text(ribbon,"영웅 관리",34,7,172,28,20,Cream);
-            Text(ribbon,"EQUIPMENT  /  TALENT RUNES",207,12,400,23,12,Rose);
+            Text(ribbon,"EQUIPMENT  /  INVENTORY  /  COMPARE",207,12,400,23,12,Rose);
             Button(ribbon,"close-character","던전으로  [TAB]",1098,6,136,30,close,Edge);
-            var equipment=Box(Root,"equipment-section",12,52,706,220,Surface);
+            var equipment=Box(Root,"equipment-section",12,52,430,452,new Color32(52,19,27,255));Border(equipment,new Color32(111,67,54,255),1);
             Header(equipment,"equipment-heading","장착 장비  /  WEAPON · ARMOR · RELIC",14,8,678);
-            var weaponCard=Box(equipment,"equipped-item-card",14,44,226,162,Ink);
+            var weaponCard=Box(equipment,"equipped-item-card",14,44,402,252,new Color32(24,18,20,255));
             string[] equippedIds={"equipped-weapon","equipped-helmet","equipped-armor","equipped-gloves","equipped-boots","equipped-ring","equipped-amulet","equipped-relic"};
+            float[] equippedX={8,8,8,8,334,334,334,334};
+            float[] equippedY={8,68,128,188,8,68,128,188};
             for(int i=0;i<8;i++)
             {
-                float rowX=(i%2)*113,rowY=(i/2)*40;
-                var row=Box(weaponCard,equippedIds[i],rowX,rowY,111,37,Edge);
-                Box(row,"equipped-accent-"+i,0,0,3,37,i==0?Gold:i==2?Sky:Rose);
-                equippedImages[i]=Icon(row,6,5,27,27);
-                equippedNames[i]=Text(row,"",37,2,70,18,10,Cream);
+                var row=Box(weaponCard,equippedIds[i],equippedX[i],equippedY[i],60,54,Edge);Border(row,new Color32(126,82,59,255),1);
+                Box(row,"equipped-accent-"+i,0,0,3,54,i==0?Gold:i==2?Sky:Rose);
+                equippedImages[i]=Icon(row,13,3,34,34);
+                equippedNames[i]=Text(row,"",3,38,54,14,8,Cream);equippedNames[i].style.unityTextAlign=TextAnchor.MiddleCenter;
                 equippedNames[i].style.overflow=Overflow.Hidden;equippedNames[i].style.textOverflow=TextOverflow.Ellipsis;
-                equippedSummaries[i]=Text(row,"",37,19,70,15,9,Muted);
-                equippedSummaries[i].style.overflow=Overflow.Hidden;equippedSummaries[i].style.textOverflow=TextOverflow.Ellipsis;
+                equippedSummaries[i]=Text(row,"",0,0,1,1,1,Muted);equippedSummaries[i].style.display=DisplayStyle.None;
             }
-            var portraitBox=Box(equipment,"hero-portrait",250,44,214,162,Ink);
-            Box(portraitBox,"hero-plinth",36,140,142,2,Edge);
+            var portraitBox=Box(weaponCard,"hero-portrait",94,8,214,234,Ink);Border(portraitBox,new Color32(91,64,64,255),1);
+            Box(portraitBox,"hero-plinth",36,207,142,2,Edge);
             if(heroPortrait!=null)
             {
-                var image=new Image {image=heroPortrait.texture,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(image,27,0,160,151);portraitBox.Add(image);
+                var image=new Image {image=heroPortrait.texture,scaleMode=ScaleMode.ScaleToFit,pickingMode=PickingMode.Ignore};Place(image,17,3,180,204);portraitBox.Add(image);
                 // Image.sourceRect requires a Texture, with a top-left origin; Sprite.rect uses bottom-left.
                 Rect source=heroPortrait.textureRect;
                 image.sourceRect=new Rect(source.x,heroPortrait.texture.height-source.yMax,source.width,source.height);
@@ -83,25 +83,27 @@ namespace AffixZero.Presentation
                     image.sourceRect=new Rect(cell.x+30,heroPortrait.texture.height-cell.yMax+30,40,40);
                 }
             }
-            Text(portraitBox,"HERO",65,143,84,18,10,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
-            var stats=Box(equipment,"hero-stat-table",476,44,216,162,Ink);
+            Text(portraitBox,"AFFIX HUNTER",55,211,104,18,9,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
+            var stats=Box(equipment,"hero-stat-table",14,296,402,142,Ink);equipment.style.overflow=Overflow.Hidden;
             Text(stats,"능력치 세부 정보",10,6,196,23,14,Gold);
             health=Stat(stats,10,37,"생명력");damage=Stat(stats,10,67,"공격력");defense=Stat(stats,10,97,"방어력");duration=Stat(stats,10,127,"공격 주기");
             damage.name="equipment-damage-value";damage.style.color=Rose;damage.style.unityFontStyleAndWeight=FontStyle.Bold;
-            var bag=Box(Root,"inventory-grid",12,284,706,220,Surface);
+            equipment.Q("equipment-heading").style.width=402;
+            var bag=Box(Root,"inventory-grid",454,52,430,452,Surface);Border(bag,new Color32(91,64,64,255),1);bag.style.overflow=Overflow.Hidden;
             Box(bag,"bag-heading",14,8,678,28,Ink);
             bagCount=Text(bag,"소지품",24,10,340,25,15,Cream);
             Text(bag,"선택 → 비교 → 장착",436,14,242,19,11,Muted).style.unityTextAlign=TextAnchor.MiddleRight;
             for(int i=0;i<24;i++)
             {
-                int index=i;float x=14+(i%8)*85,y=43+(i/8)*55;
-                var slot=Box(bag,"inventory-slot-"+i,x,y,80,50,Ink);Border(slot,Edge,1);slot.pickingMode=PickingMode.Position;slot.focusable=true;
-                slotImages[i]=Icon(slot,24,2,30,30);slotNames[i]=Text(slot,"",4,32,72,16,10,Cream);slotNames[i].style.unityTextAlign=TextAnchor.MiddleCenter;
+                int index=i;float x=14+(i%6)*66,y=43+(i/6)*96;
+                var slot=Box(bag,"inventory-slot-"+i,x,y,62,88,Ink);Border(slot,Edge,1);slot.pickingMode=PickingMode.Position;slot.focusable=true;
+                slotImages[i]=Icon(slot,11,6,40,40);slotNames[i]=Text(slot,"",4,48,54,21,9,Cream);slotNames[i].style.unityTextAlign=TextAnchor.MiddleCenter;
                 slotNames[i].style.overflow=Overflow.Hidden;slotNames[i].style.textOverflow=TextOverflow.Ellipsis;
-                slotBadges[i]=Text(slot,"",4,2,72,13,9,Gold);slots[i]=slot;
+                slotBadges[i]=Text(slot,"",4,70,54,14,8,Gold);slotBadges[i].style.unityTextAlign=TextAnchor.MiddleCenter;slots[i]=slot;
                 slot.RegisterCallback<ClickEvent>(_=>{discardConfirm=false;this.select(index);});slot.RegisterCallback<NavigationSubmitEvent>(evt=>{discardConfirm=false;this.select(index);evt.StopPropagation();});
             }
-            var talents=Box(Root,"talent-section",730,52,506,180,Surface);
+            bag.Q("bag-heading").style.width=402;
+            var talents=Box(Root,"talent-section",730,52,506,180,Surface);talents.style.display=DisplayStyle.None;
             Header(talents,"talent-heading","특성 룬  /  MASTERY",12,8,482);
             points=Text(talents,"",287,12,100,22,12,Gold);points.name="talent-points";
             resetButton=Button(talents,"talent-reset","초기화",401,10,81,23,reset,Edge);
@@ -118,21 +120,25 @@ namespace AffixZero.Presentation
             Text(talents,"정밀 1 필요 · +6",343,123,151,19,11,Gold).style.unityTextAlign=TextAnchor.MiddleCenter;
             Text(talents,"초반 250 XP / PT · 심화 구간 점진 증가",20,151,338,20,11,Muted);
             if(openTalents!=null)Button(talents,"open-full-talents","전체 특성 →",369,150,117,23,openTalents,Edge);
-            var inspect=Box(Root,"item-comparison",730,244,506,260,Surface);
+            var inspect=Box(Root,"item-comparison",896,52,340,452,new Color32(20,18,20,255));Border(inspect,new Color32(111,67,54,255),1);inspect.style.overflow=Overflow.Hidden;
             Header(inspect,"comparison-heading","아이템 비교  /  EQUIPPED → LOOT",12,8,482);
-            var selectedSlot=Box(inspect,"selected-weapon-icon",14,47,50,50,Ink);Border(selectedSlot,Crimson,1);
-            selectedIcon=Icon(selectedSlot,5,5,40,40);
-            selectedName=Text(inspect,"",76,47,410,27,19,Rose);selectedName.name="selected-item-name";
-            delta=Text(inspect,"",76,77,410,22,13,Sky);delta.name="comparison-delta";
-            var damageStrip=Box(inspect,"selected-damage-strip",14,106,478,51,Ink);
+            inspect.Q("comparison-heading").style.width=316;
+            var selectedSlot=Box(inspect,"selected-weapon-icon",14,48,58,58,Ink);Border(selectedSlot,Crimson,1);
+            selectedIcon=Icon(selectedSlot,7,7,44,44);
+            selectedName=Text(inspect,"",82,48,244,29,18,Rose);selectedName.name="selected-item-name";
+            delta=Text(inspect,"",82,78,244,28,11,Sky);delta.name="comparison-delta";delta.style.whiteSpace=WhiteSpace.Normal;
+            var damageStrip=Box(inspect,"selected-damage-strip",14,118,312,78,Ink);
             selectedDamage=Text(damageStrip,"",10,0,106,33,28,Cream);
             selectedPrimaryLabel=Text(damageStrip,"능력치",12,33,114,16,10,Muted);
-            comparison=Text(damageStrip,"",139,5,323,42,12,Rose);comparison.style.whiteSpace=WhiteSpace.Normal;
-            affix=Text(inspect,"",15,165,476,34,12,Gold);affix.style.whiteSpace=WhiteSpace.Normal;
-            status=Text(inspect,"",15,199,476,18,11,Muted);status.style.overflow=Overflow.Hidden;status.style.textOverflow=TextOverflow.Ellipsis;
+            comparison=Text(damageStrip,"",124,7,176,64,11,Rose);comparison.style.whiteSpace=WhiteSpace.Normal;
+            Text(inspect,"BASE + ROLLED OPTIONS",15,211,310,18,10,Gold);
+            affix=Text(inspect,"",15,234,310,104,11,Cream);affix.style.whiteSpace=WhiteSpace.Normal;
+            status=Text(inspect,"",15,350,310,42,10,Muted);status.style.whiteSpace=WhiteSpace.Normal;status.style.overflow=Overflow.Hidden;status.style.textOverflow=TextOverflow.Ellipsis;
             equipButton=Button(inspect,"equip-button","장비 교체  /  EQUIP",14,223,288,26,equip,Rose);
             equipButton.Q<Label>().style.color=Ink;
             salvageButton=Button(inspect,"salvage-button","버리기",314,223,178,26,RequestDiscard,Edge);
+            Place(equipButton,14,408,182,30);equipButton.Q<Label>().text="EQUIP";
+            Place(salvageButton,202,408,124,30);salvageButton.Q<Label>().text="SALVAGE";
             Root.style.display=DisplayStyle.None;
         }
         public void Refresh(bool visible)
@@ -142,6 +148,7 @@ namespace AffixZero.Presentation
             string nextId=v.Selected==null?null:v.Selected.Id;
             if(selectedId!=nextId){discardConfirm=false;selectedId=nextId;}
             salvageButton.Q<Label>().text=discardConfirm?"버리기 확인":"버리기";
+            salvageButton.Q<Label>().text=discardConfirm?"CONFIRM +"+v.SalvageValue+" G":"SALVAGE +"+v.SalvageValue+" G";
             string[] equippedCaptions={"WEAPON","HELMET","ARMOR","GLOVES","BOOTS","RING","AMULET","RELIC"};
             for(int i=0;i<equippedNames.Length;i++)RefreshEquipped(i,i<v.EquippedSlots.Length?v.EquippedSlots[i]:null,equippedCaptions[i]);
             health.text=v.Health;damage.text=v.Damage;defense.text=v.Defense;duration.text=v.Duration;
@@ -152,7 +159,7 @@ namespace AffixZero.Presentation
                 slotImages[i].image=Texture(item==null?null:item.Icon);slotNames[i].text=item==null?"":item.Name;
                 slotBadges[i].text=item==null?"":item.Equipped?"장착 중":item.SlotText??"";
                 bool selected=item!=null&&v.Selected!=null&&item.Id==v.Selected.Id;
-                Border(slots[i],selected?Rose:Edge,selected?2:1);
+                Border(slots[i],selected?Rose:item!=null?RarityColor(item.Rarity):Edge,selected?2:1);
                 slots[i].style.backgroundColor=selected?(Color)new Color32(61,30,38,255):item!=null?Edge:Ink;
                 slots[i].tooltip=item==null?"":item.Name+"\n"+item.Affix;
                 slots[i].SetEnabled(item!=null);
@@ -161,6 +168,7 @@ namespace AffixZero.Presentation
             selectedDamage.text=v.Selected==null?"—":v.Selected.PrimaryValue??v.Selected.Damage.ToString();
             selectedPrimaryLabel.text=v.Selected==null?"능력치":v.Selected.PrimaryLabel??"무기 피해";
             selectedIcon.image=Texture(v.Selected==null?null:v.Selected.Icon);
+            selectedName.style.color=v.Selected==null?Muted:RarityColor(v.Selected.Rarity);
             comparison.text=v.Comparison??"";delta.text=v.Delta??"";affix.text=v.Affix??"";status.text=v.Status??"";
             status.tooltip=v.Status??"";
             points.text="잔여 "+v.Points+" PT";
@@ -178,6 +186,12 @@ namespace AffixZero.Presentation
             discardConfirm=false;discardItemId=null;discard();
         }
         private static void SetAction(VisualElement element,bool available){element.SetEnabled(available);element.style.opacity=available?1:0.45f;}
+        private static Color RarityColor(string rarity)
+        {
+            string value=(rarity??"").ToLowerInvariant();
+            return value=="epic"?new Color32(255,86,108,255):value=="legend"?new Color32(255,143,63,255):
+                value=="unique"?new Color32(184,116,255,255):value=="rare"?Gold:value=="magic"?Sky:Cream;
+        }
         private Texture2D Texture(string key)
         {
             if(string.IsNullOrEmpty(key))return null;

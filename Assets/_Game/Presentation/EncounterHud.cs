@@ -31,6 +31,8 @@ namespace AffixZero.Presentation
         private VisualElement areaSkillSlot, recoverySkillSlot;
         private VisualElement pauseButton;
         private Label pauseCaption;
+        private readonly VisualElement[] speedButtons=new VisualElement[3];
+        private Label speedValue;
         private Texture2D room, attackIcon;
         private EquipmentPanel equipmentPanel;
         private TalentPanel talentPanel;
@@ -173,9 +175,9 @@ namespace AffixZero.Presentation
         }
         private void BuildBottom()
         {
-            var bottom=Box(root,"bottom-hud",10,0,360,122,FrameDark);
+            var bottom=Box(root,"bottom-hud",10,0,438,122,FrameDark);
             bottom.style.top=StyleKeyword.Auto;bottom.style.bottom=10;Border(bottom,FrameEdge,2);
-            Box(bottom,"dock-toplight",4,3,352,2,new Color(1f,.78f,.38f,.18f));
+            Box(bottom,"dock-toplight",4,3,430,2,new Color(1f,.78f,.38f,.18f));
             Box(bottom,"dock-red-corner",4,8,5,22,Burgundy);
             var slot=Box(bottom,"attack-slot",8,8,34,52,Surface);
             Border(slot,Crimson,2);
@@ -219,7 +221,12 @@ namespace AffixZero.Presentation
             huntCaption=huntButton.Q<Label>();
             pauseButton=Click(bottom,"pause-button","PAUSE",300,83,52,28,TogglePause,Surface);
             pauseCaption=pauseButton.Q<Label>();
-            foreach(var button in new[]{dungeonTab,equipmentTab,talentTab,forgeTab,effectsButton,huntButton,pauseButton})
+            Text(bottom,"SPEED",360,7,68,16,7,Muted).style.unityTextAlign=TextAnchor.MiddleCenter;
+            speedValue=Text(bottom,"1x",360,29,68,24,15,Gold);speedValue.name="simulation-speed-value";speedValue.style.unityTextAlign=TextAnchor.MiddleCenter;
+            speedButtons[0]=Click(bottom,"speed-1x","1x",356,83,24,28,()=>encounter.SetSimulationSpeed(1),Surface);
+            speedButtons[1]=Click(bottom,"speed-2x","2x",382,83,24,28,()=>encounter.SetSimulationSpeed(2),Surface);
+            speedButtons[2]=Click(bottom,"speed-4x","4x",408,83,24,28,()=>encounter.SetSimulationSpeed(4),Surface);
+            foreach(var button in new[]{dungeonTab,equipmentTab,talentTab,forgeTab,effectsButton,huntButton,pauseButton,speedButtons[0],speedButtons[1],speedButtons[2]})
                 button.Q<Label>().style.fontSize=8;
         }
         private VisualElement Orb(VisualElement parent,string name,float x,float y,float size,Color color,out Label value)
@@ -241,7 +248,7 @@ namespace AffixZero.Presentation
         {
             Sprite portrait=encounter.Hero==null||encounter.Hero.AnimationSet==null?null:encounter.Hero.AnimationSet.Frame(ActorClip.Idle,0);
             equipmentPanel=new EquipmentPanel(root,ReadEquipment,SelectItem,
-                ()=>encounter.EquipItem(selectedItemIndex),()=>encounter.DiscardItem(selectedItemIndex),
+                ()=>encounter.EquipItem(selectedItemIndex),()=>encounter.SalvageItem(selectedItemIndex),
                 ()=>encounter.SpendTalent(TalentId.Fury),()=>encounter.SpendTalent(TalentId.Precision),()=>encounter.SpendTalent(TalentId.Keystone),
                 ()=>encounter.ResetTalents(),()=>encounter.SetEquipmentVisible(false),portrait);
             talentPanel=new TalentPanel(root,()=> {
@@ -287,8 +294,9 @@ namespace AffixZero.Presentation
                 Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+" s",
                 Comparison=item==null?"가방에서 장비를 선택하세요.":"현재 슬롯 비교 · 피해 "+Signed(damageDelta)+"  방어 "+Signed(defenseDelta)+"  체력 "+Signed(healthDelta),
                 Delta=item==null?"":"이동속도 "+(speedDelta>=0?"+":"")+(speedDelta*100f).ToString("0")+"% · "+item.EquipmentSlot,
-                Affix=item==null?"":DescribeItem(item),
+                Affix=item==null?"":DescribeItemDetailed(item),
                 Status=encounter.ProgressionNotice,Points=p.UnspentPoints,Fury=p.FuryRank,Precision=p.PrecisionRank,Keystone=p.KeystoneRank,
+                SalvageValue=p.GetSalvageValue(selectedItemIndex),
                 CanEquip=item!=null,CanSalvage=item!=null,CanReset=p.SpentPoints>0,
                 CanFury=p.UnspentPoints>0&&p.FuryRank<2,
                 CanPrecision=p.UnspentPoints>0&&p.FuryRank>=2&&p.PrecisionRank<1,
@@ -300,7 +308,7 @@ namespace AffixZero.Presentation
             return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=item.Name,Icon=item.IconResource,
                 SlotText=item.EquipmentSlot.ToString().ToUpperInvariant(),Summary=item.Rarity+" · "+PrimarySummary(item),
                 PrimaryValue=PrimaryValue(item),PrimaryLabel=PrimaryLabel(item),Rarity=item.Rarity,
-                Affix=DescribeItem(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus};
+                Affix=DescribeItemDetailed(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus};
         }
         private static string Signed(int value)=>value>=0?"+"+value:value.ToString();
         private static string PrimaryValue(WeaponItem item)=>item.DamageBonus>0?item.DamageBonus.ToString():item.DefenseBonus>0?item.DefenseBonus.ToString():item.HealthBonus.ToString();
@@ -315,6 +323,18 @@ namespace AffixZero.Presentation
             foreach(ItemOption option in item.Options)lines.Add(option.Name+" +"+(option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#")));
             if(item.EnhancementRank>0)lines.Add("강화 +"+item.EnhancementRank);
             return string.Join("  ·  ",lines);
+        }
+        private static string DescribeItemDetailed(WeaponItem item)
+        {
+            var lines=new List<string>{item.Rarity.ToUpperInvariant()+"  /  "+item.EquipmentSlot};
+            if(item.FlatDamage!=0)lines.Add("BASE ATTACK  +"+item.FlatDamage);
+            if(item.AffixDamage!=0)lines.Add("ROLLED ATTACK  +"+item.AffixDamage);
+            if(item.FlatDefense!=0)lines.Add("BASE DEFENSE  +"+item.FlatDefense);
+            if(item.FlatHealth!=0)lines.Add("BASE HEALTH  +"+item.FlatHealth);
+            foreach(ItemOption option in item.Options)lines.Add("ROLLED "+option.Name+"  +"+
+                (option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#"))+"  ["+LootGenerator.ConfiguredRollRange(option.Stat)+"]");
+            if(item.EnhancementRank>0)lines.Add("ENHANCEMENT  +"+item.EnhancementRank);
+            return string.Join("\n",lines);
         }
         private void BuildResult()
         {
@@ -419,7 +439,13 @@ namespace AffixZero.Presentation
             combatStats.text="ATK "+encounter.Progression.TotalDamage+"   DEF "+hero.Defense+
                 "\nBAG "+encounter.Progression.Inventory.Count+"/24   PT "+encounter.Progression.UnspentPoints;
             int seconds=Mathf.FloorToInt(encounter.ElapsedSeconds);
-            clock.text="TEMPLE  "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
+            clock.text="GAME "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00");
+            int wallSeconds=Mathf.FloorToInt(encounter.WallClockSeconds);
+            clock.tooltip="Simulated "+(seconds/60).ToString("00")+":"+(seconds%60).ToString("00")+
+                " / real "+(wallSeconds/60).ToString("00")+":"+(wallSeconds%60).ToString("00");
+            speedValue.text=encounter.SimulationSpeed.ToString("0")+"x";
+            for(int i=0;i<speedButtons.Length;i++)
+                speedButtons[i].style.backgroundColor=Mathf.Approximately(encounter.SimulationSpeed,1<<i)?Crimson:Surface;
             pauseCaption.text=encounter.IsPaused?"RESUME":"PAUSE";
             paused.style.display=encounter.IsPaused&&!encounter.ManagementVisible&&!encounter.HasEnded?DisplayStyle.Flex:DisplayStyle.None;
             attackState.text=encounter.HasEnded?"END":encounter.IsPaused?"PAUSE":hero.IsAttacking?"STRIKE":hero.CurrentClip==ActorClip.Hit?"HIT":hero.CurrentClip==ActorClip.Walk?"MOVE":"AUTO";

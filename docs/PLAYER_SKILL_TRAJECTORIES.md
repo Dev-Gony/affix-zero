@@ -9,7 +9,7 @@ profiles need no migration or new save field.
 
 | Weapon | HUD name | Actual behavior | Tradeoff |
 | --- | --- | --- | --- |
-| Sword | `ARC` / `ARC II` | Starts on the current or nearest visible target, then jumps through the nearest still-unhit target with LOS from the previous victim. | Focused and reliable, but capped at 3 / 4 targets and damage decays to 72% / 82% per jump. |
+| Sword | `ARC` / `ARC II` | Starts on the current or nearest visible target, then jumps through the nearest still-unhit target with LOS from the previous victim. Jump range is 2.5m / 2.85m. | Focused and reliable, but capped at 3 / 4 targets and damage decays to 72% / 82% per jump. |
 | Axe | `QUAKE` / `QUAKE II` | Hits the inner 55% radius immediately, then resolves a second outer annulus 0.18s later. Targets hit by the inner impact are explicitly excluded from the outer wave. | Broadest potential target count, but the outer wave deals 65% damage and cannot travel outside the 3.2-4.1m centered radius. |
 | Staff | `LANCE` / `LANCE II` | Commits a 5.5m / 6.2m line through the aimed target and hits only enemies inside a 0.45m / 0.54m lane. | Longest reach, but alignment matters, damage is 86%, and targets are capped at 4 / 5. |
 
@@ -58,3 +58,13 @@ resolved targets. Earlier ARC evidence remains at
 `libfile_c449ce9ae33481919fcb8f9aaf963c55`. Both exact Library titles and IDs
 were verified. Windows does not expose the requested local xattr API, so only
 the Library upload succeeded; this does not affect either retained file.
+
+## 2026-10-03 long-horizon route coverage
+
+The production pool now supplies the original Arcane Staff route as well as
+Sword and Axe without adding a thirtieth base entry. Deterministic
+domain-equivalent one-hour checks finish on ARC II (four targets, 2.85m jumps),
+QUAKE II (55% immediate inner radius, 65% delayed outer annulus), and LANCE II
+(five targets, 6.2m reach, 0.54m half-width, 86% power). These checks validate
+progression/economy/restore rules in zero real-time combat seconds; they do not
+replace the real Windows runtime evidence in `SPEED_EQUIPMENT_SKILLS_UI.md`.

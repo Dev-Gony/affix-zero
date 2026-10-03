@@ -98,6 +98,13 @@ internal static class ProgressionChecks
         check(full.Discard(1) && full.PickUp() && full.Inventory.Count == 24 && ReferenceEquals(full.Inventory[23], pending),
             "discard frees exactly one slot for preserved pending loot");
         check(!full.TryCreatePendingLoot(Item("bag:1")), "discarded identity remains issued");
+        var salvage = new HeroProgression();
+        salvage.TryCreatePendingLoot(new WeaponItem("salvage:rare", "Rare salvage", 3, 0, "", "AffixGenerated/AttackIcon", "rare"));
+        salvage.PickUp(); int salvageValue=salvage.GetSalvageValue(0);
+        check(salvageValue==12&&salvage.Salvage(0)&&salvage.Inventory.Count==0&&salvage.TotalGold==12&&
+            salvage.TotalSalvageGold==12&&salvage.LastSalvageGold==12,
+            "salvage turns an inferior item into bounded existing gold with provenance");
+        check(!salvage.Salvage(0)&&salvage.TotalGold==12,"salvage cannot pay twice for one issued item");
         var queued = new HeroProgression(); queued.TryCreatePendingLoot(Item("prior"));
         check(queued.TryRegisterKill("first") && queued.PendingLoot.Id == "prior" && queued.PickUp() && queued.PendingLoot == null,
             "combat rewards never overwrite or secretly queue behind existing loot");
@@ -135,6 +142,10 @@ internal static class ProgressionChecks
             HeroProgression.EarnedTalentPointsForExperience(25570)==52&&
             HeroProgression.EarnedTalentPointsForExperience(48500)==75,
             "talent curve keeps early choices quick and stretches late specialization across sessions");
+        check(HeroProgression.EarnedTalentPointsForExperience(50000)==76&&
+            HeroProgression.SpendableTalentPointsForExperience(50000)==75&&
+            HeroProgression.SpendableTalentPointsForExperience(0,57)==57,
+            "spendable talent awards stop at the real tree capacity while XP and migration credit remain valid");
         var talents = new HeroProgression(); Kills(talents, 2000, "talent:");
         int capSum = 0;
         foreach (var definition in HeroProgression.TalentDefinitions)
@@ -146,8 +157,8 @@ internal static class ProgressionChecks
             check(talents.GetTalentRank(definition.Id) == definition.MaxRank && !talents.TrySpendPoint(definition.Id) &&
                 talents.UnspentPoints == before, "talent cap rejects spending without consuming points: " + definition.Id);
         }
-        check(capSum == 75 && capSum == HeroProgression.TotalTalentCapacity && talents.SpentPoints == 75 && talents.UnspentPoints == 1,
-            "six-node build has 75 allocated ranks and preserves surplus level points");
+        check(capSum == 75 && capSum == HeroProgression.TotalTalentCapacity && talents.SpentPoints == 75 && talents.UnspentPoints == 0,
+            "six-node build has 75 allocated ranks without minting an unusable surplus point");
         check(talents.TotalDamage == 160 && talents.TotalMaxHp == 320 && Math.Abs(talents.SplashRadius - .8f) < .0001f &&
             talents.SplashDamageFraction == .25f && talents.AttackSpeedMultiplier == 1.25f,
             "full tree modifies damage, survivability, area and timing independently");
@@ -175,7 +186,7 @@ internal static class ProgressionChecks
             EquipmentSlot.Relic, cooldownReductionPercent: 50));
         check(talents.CooldownReductionPercent == 50 && talents.AttackSpeedMultiplier == 2f, "combined cooldown reduction is capped safely at fifty percent");
         talents.ResetTalents(); talents.ResetTalents();
-        check(talents.UnspentPoints == 76 && talents.TotalMaxHp == 120 && talents.SplashRadius == 0 && talents.TotalDamage == 30 &&
+        check(talents.UnspentPoints == 75 && talents.TotalMaxHp == 120 && talents.SplashRadius == 0 && talents.TotalDamage == 30 &&
             talents.ActiveEvolutionCount == 0 && talents.CriticalChance == 5 && talents.Penetration == 0 &&
             talents.AreaSkillName == "AREA" && talents.AreaTrajectory==AreaSkillTrajectory.Radial && talents.RecoverySkillName == "HEAL",
             "reset clears all six rank effects while retaining equipped relic stats");

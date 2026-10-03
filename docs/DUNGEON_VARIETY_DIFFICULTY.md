@@ -68,6 +68,13 @@ Player level retains the historical 250-XP display cadence. Talent points now us
 
 This preserves immediate early decisions but moves a complete 75-rank build from 18,750 XP to 48,500 XP. The prior 20-minute natural run's 25,570 XP maps to 52 points rather than exhausting the entire tree. Existing v1/v2 saves migrate to v3 with an explicit compatibility credit so already-earned ranks are not removed.
 
+Schema v4 adds only cumulative salvage-Gold provenance. Spendable talent awards
+now stop at the actual 75-rank tree capacity while raw XP and the familiar level
+display continue. Existing over-cap and migrated ranks remain accepted; the
+change prevents new profiles from accumulating unusable points. Inferior drops
+can be salvaged from the equipment panel, and every added Gold unit is checked
+against recorded cumulative salvage value during restore.
+
 ## Combat readability and effect budget
 
 - Enemy attacks emit a short red anticipation arc before their existing impact frame.
@@ -114,3 +121,14 @@ Required evidence is separated into CoreSmoke distribution/save checks, Unity im
   9EA8FF3618904EA3F78791CB1EE27D4EF1FFCFB8AA19DD523333C98FCFB49906.
 - Physical mouse/keyboard input remains NOT RUN. The production probes exercise
   native UI Toolkit callbacks and explicitly do not claim OS input coverage.
+
+## 2026-10-03 accelerated observation addendum
+
+The later speed/equipment slice adds visible session-only `1x` / `2x` / `4x`
+controls without changing the difficulty table or loot probabilities above.
+The final `4x` Windows run advanced 595.759 simulated gameplay seconds in
+149.123 wall-clock gameplay seconds, visited all layouts and difficulty states,
+completed 17 clears, saw all three weapon styles, and recorded zero deaths,
+failed runs, or safety restarts. See `SPEED_EQUIPMENT_SKILLS_UI.md` for the
+complete metrics, UI evidence, and the explicit boundary between deterministic
+hour-equivalent modeling and real runtime observation.

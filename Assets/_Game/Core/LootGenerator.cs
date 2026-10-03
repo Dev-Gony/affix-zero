@@ -39,6 +39,23 @@ namespace AffixZero.Core
             new RarityRule("legend","전설",4,5,3f,1f),
             new RarityRule("epic","에픽",5,6,4.5f,.2f)
         });
+        public static string ConfiguredRollRange(AffixStat stat)
+        {
+            switch (stat)
+            {
+                case AffixStat.Attack: return "1-15 x floor";
+                case AffixStat.Defense: return "1-10 x floor";
+                case AffixStat.Health: return "5-60 x floor";
+                case AffixStat.Mana: return "5-40 x floor";
+                case AffixStat.Speed: return "5-30% x floor";
+                case AffixStat.Critical: return "1-15 x floor";
+                case AffixStat.Vampirism: return "1-8 x floor";
+                case AffixStat.Experience: return "3-20 x floor";
+                case AffixStat.Gold: return "5-30 x floor";
+                case AffixStat.Penetration: return "1-10 x floor";
+                default: return "configured roll";
+            }
+        }
         private static readonly ItemBase[] Bases =
         {
             Base("dagger","단검",EquipmentSlot.Weapon,1,attack:4), Base("longsword","장검",EquipmentSlot.Weapon,4,attack:8),
@@ -163,15 +180,16 @@ namespace AffixZero.Core
         private static string IconFor(ItemBase item)
         {
             if (item.Slot == EquipmentSlot.Weapon)
-                return item.Style == WeaponStyle.Axe ? "AffixGenerated/GearAxe" : "AffixGenerated/EmberSword";
+                return item.Style == WeaponStyle.Axe ? "AffixGenerated/GearAxe" :
+                    item.Style == WeaponStyle.Staff ? "AffixGenerated/GearStaff" : "AffixGenerated/EmberSword";
             if (item.Slot == EquipmentSlot.Ring || item.Slot == EquipmentSlot.Amulet || item.Slot == EquipmentSlot.Relic)
                 return "AffixGenerated/GearRelic";
             return "AffixGenerated/GearArmor";
         }
         private static ItemBase Base(string id, string name, EquipmentSlot slot, int tier, int attack = 0,
             int defense = 0, int health = 0, int mana = 0, float speed = 0, WeaponStyle style = WeaponStyle.Sword) =>
-            new ItemBase { Id = id, Name = name, Slot = slot, Tier = tier, Attack = attack, Defense = defense,
-                Health = health, Mana = mana, Speed = speed, Style = style };
+            new ItemBase { Id = id, Name = id == "magic_sword" ? "Arcane Staff" : name, Slot = slot, Tier = tier, Attack = attack, Defense = defense,
+                Health = health, Mana = mana, Speed = speed, Style = id == "magic_sword" ? WeaponStyle.Staff : style };
         private static AffixRule Affix(AffixStat stat, string name, float minimum, float maximum, bool decimalValue = false) =>
             new AffixRule { Stat = stat, Name = name, Minimum = minimum, Maximum = maximum, Decimal = decimalValue };
         private static int Round(float value) => (int)Math.Round(value, MidpointRounding.AwayFromZero);

@@ -1,3 +1,30 @@
+# 2026-10-03 - speed controls and equipment/skill UX
+
+The current `feature/open-dungeon-loot-skills` branch adds visible session-only
+`1x` / `2x` / `4x` controls, honest game/wall timing, a 0.65-second post-clear
+transition, stronger speed-safe hit feedback, a three-column paper-doll / 24-slot
+inventory / comparison equipment screen, and clearer six-branch talent effects.
+Tooltips separate BASE from ROLLED values and derive roll bands from production
+loot rules. Natural Staff drops, salvage with schema-v4 Gold provenance, and a
+75-useful-rank point cap complete the sustained-progression loop. See
+`SPEED_EQUIPMENT_SKILLS_UI.md`.
+
+Final build GUID `2495dc6d61c74d0f96b45bea3c79cde9`: CoreSmoke 302 PASS,
+static Unity source compile 0/0, Windows build/import 0/0, real 149.123s wall /
+595.759s simulated `4x` production run PASS (431 kills, 17 clears, 44 natural
+drops seen, 19 salvages, all three weapon styles, zero deaths/failures), exact
+separate-process restore +2 kills, and 720/1080 UI probes with 19 callbacks each.
+Final-build OS-level automated input passed all ten Start/equipment/talent/forge/
+pause/resume checks in 14.069s against the exact native window. Human play and
+user visual approval remain NOT RUN/pending. Town/hub, further named difficulty
+tiers, gacha, and fully authored separate biome sets remain deferred.
+
+Final 1080p Library evidence: battle/speed
+`libfile_fd8257c232ec8191829d32d50b5ac219`, equipment comparison
+`libfile_3e36a8f174188191bc235e3cc22728ec`, and talent evolution
+`libfile_ff43eb54b5f4819196b263e1b4fc897b`. All creates succeeded; Windows
+`os.setxattr` remains unavailable for the optional local metadata marker only.
+
 # 2026-10-02 - procedural dungeon visual identities
 
 The current `feature/open-dungeon-loot-skills` branch now gives each connected

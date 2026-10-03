@@ -14,6 +14,7 @@ namespace AffixZero.Presentation
     public sealed class NaturalProgressionProbe : MonoBehaviour
     {
         private float observationSeconds = 1200f;
+        private float simulationSpeed = 1f;
         private FirstEncounter owner;
         private AutoHuntDirector hunt;
         private Report report;
@@ -29,6 +30,7 @@ namespace AffixZero.Presentation
         private readonly int[] patternCaptureCounts = new int[3];
         private int skillEvolutionCaptureCount;
         private int visualIdentityMask,minimumIdentityDecorations=int.MaxValue,maximumIdentityColliders;
+        private int maximumInventoryCount,weaponStylesSeenMask;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -54,6 +56,11 @@ namespace AffixZero.Presentation
                 if(!string.IsNullOrEmpty(seconds))
                     Require(float.TryParse(seconds,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out observationSeconds)&&observationSeconds>=120,
                         "Observation seconds must be at least 120.");
+                string speed=OptionalArgument(args,"-affixSimulationSpeed");
+                if(!string.IsNullOrEmpty(speed))
+                    Require(float.TryParse(speed,System.Globalization.NumberStyles.Float,System.Globalization.CultureInfo.InvariantCulture,out simulationSpeed)&&
+                        (Mathf.Approximately(simulationSpeed,1)||Mathf.Approximately(simulationSpeed,2)||Mathf.Approximately(simulationSpeed,4)),
+                        "Simulation speed must be 1, 2, or 4.");
                 string capture=OptionalArgument(args,"-affixCaptureDir");
                 if(!string.IsNullOrEmpty(capture))
                 {Require(Path.IsPathRooted(capture),"-affixCaptureDir requires an absolute path.");captureDirectory=Path.GetFullPath(capture);Directory.CreateDirectory(captureDirectory);}
@@ -87,6 +94,8 @@ namespace AffixZero.Presentation
                 owner = FindFirstObjectByType<FirstEncounter>();
                 if (owner == null || owner.Hunt == null || !owner.Hunt.Initialized || owner.Hero == null || !owner.Hero.IsReady || !Ready("autohunt-toggle")) return;
                 hunt = owner.Hunt;
+                Require(owner.SetSimulationSpeed(simulationSpeed),"Natural probe could not select the requested simulation speed.");
+                report.requestedSimulationSpeed=simulationSpeed;
                 Require(owner.Persistence.CanPlay && !owner.Persistence.Ephemeral,
                     "Natural profile is not writable: " + owner.Persistence.Problem);
                 Require(string.Equals(Path.GetFullPath(owner.Persistence.FilePath), Path.Combine(saveDirectory, "profile-v1.json"), StringComparison.OrdinalIgnoreCase),
@@ -98,7 +107,7 @@ namespace AffixZero.Presentation
                         "Observe mode requires a fresh profile.");
                     report.initialDamage = owner.Progression.TotalDamage; report.initialHealth = owner.Progression.TotalMaxHp;
                     Dispatch("autohunt-toggle"); report.startClicks++;
-                    Require(hunt.Running && Time.timeScale == 1, "Native start callback did not begin 1x play.");
+                    Require(hunt.Running && Mathf.Approximately(Time.timeScale,simulationSpeed), "Native start callback did not begin at the requested speed.");
                     phase = "observing";
                 }
                 else
@@ -115,7 +124,7 @@ namespace AffixZero.Presentation
             }
 
             Require(owner != null && hunt != null && owner.Persistence.CanPlay, "Runtime progression owner disappeared or became unavailable.");
-            Require(owner.IsPaused ? Time.timeScale == 0 : Time.timeScale == 1, "Natural run changed simulation speed.");
+            Require(owner.IsPaused ? Time.timeScale == 0 : Mathf.Approximately(Time.timeScale,simulationSpeed), "Natural run changed simulation speed.");
             ObserveVisualIdentity();
             DiscoverDrops();
             CaptureVarietyFrame();
@@ -166,8 +175,8 @@ namespace AffixZero.Presentation
                     "Natural run did not observe all three mechanically distinct elite attacks.");
                 Require(owner.Progression.SelectedDifficulty == DungeonDifficulty.Torment && report.difficultyTransitions == 2,
                     "Natural run did not safely select and retain all three difficulties.");
-                Require(owner.Progression.SpentPoints < HeroProgression.TotalTalentCapacity,
-                    "Twenty-minute progression still exhausted the complete talent tree.");
+                Require(owner.Progression.SpentPoints <= HeroProgression.TotalTalentCapacity && owner.Progression.UnspentPoints == 0,
+                    "Natural progression left unusable talent points or exceeded the complete tree.");
                 Require(owner.Progression.TotalDamage > report.initialDamage || owner.Progression.TotalMaxHp > report.initialHealth || owner.Progression.TotalDefense > 2,
                     "Natural progression did not improve any combat stat.");
                 Finish(true, null);
@@ -272,18 +281,24 @@ namespace AffixZero.Presentation
             Require(owner.Progression.SelectedDifficulty==next&&!hunt.Running,
                 "Native difficulty callback did not apply a stopped-state selection.");
             report.difficultyTransitions++;Dispatch("autohunt-toggle");report.startClicks++;
-            Require(hunt.Running&&Time.timeScale==1,"Difficulty re-entry did not resume 1x automatic hunting.");
+            Require(hunt.Running&&Mathf.Approximately(Time.timeScale,simulationSpeed),"Difficulty re-entry did not resume the requested simulation speed.");
             busy=false;
         }
 
         private void DiscoverDrops()
         {
+            maximumInventoryCount=Math.Max(maximumInventoryCount,owner.Progression.Inventory.Count);
             foreach (WeaponItem item in owner.Progression.Inventory)
             {
                 if (processedItems.Contains(item.Id)) continue;
                 processedItems.Add(item.Id);
                 dropRecords.Add(item.Id + "|" + item.Rarity + "|" + item.EquipmentSlot + "|score=" + Score(item));
                 report.naturalItemsSeen++;
+                if(item.EquipmentSlot==EquipmentSlot.Weapon)
+                {
+                    weaponStylesSeenMask|=1<<(int)item.WeaponStyle;
+                    if(item.WeaponStyle==WeaponStyle.Staff)report.staffItemsSeen++;
+                }
             }
         }
 
@@ -301,7 +316,7 @@ namespace AffixZero.Presentation
                 int worst = 0;
                 for (int i = 1; i < p.Inventory.Count; i++)
                     if (Score(p.Inventory[i]) < Score(p.Inventory[worst])) worst = i;
-                StartCoroutine(DiscardFlow(p.Inventory[worst].Id)); return true;
+                StartCoroutine(SalvageFlow(p.Inventory[worst].Id)); return true;
             }
             if (p.UnspentPoints > 0 && p.SpentPoints < HeroProgression.TotalTalentCapacity)
             {
@@ -341,16 +356,19 @@ namespace AffixZero.Presentation
             report.talentInvestments++; Dispatch("dungeon-tab"); busy = false;
         }
 
-        private IEnumerator DiscardFlow(string id)
+        private IEnumerator SalvageFlow(string id)
         {
-            busy = true; int before = owner.Progression.Inventory.Count;
+            busy = true; int before = owner.Progression.Inventory.Count, goldBefore=owner.Progression.TotalGold,
+                salvageBefore=owner.Progression.TotalSalvageGold;
             Dispatch("character-tab"); yield return WaitUntilReady("inventory-slot-0");
-            int index = IndexOf(id); Require(index >= 0, "Discard candidate disappeared before comparison.");
+            int index = IndexOf(id); Require(index >= 0, "Salvage candidate disappeared before comparison.");
+            int value=owner.Progression.GetSalvageValue(index);Require(value>0,"Salvage candidate has no value.");
             Dispatch("inventory-slot-" + index); yield return WaitUntilReady("salvage-button");
             Dispatch("salvage-button"); yield return null; Dispatch("salvage-button"); yield return null;
-            Require(owner.Progression.Inventory.Count == before - 1 && IndexOf(id) < 0,
-                "Native two-step discard did not free one bag slot.");
-            report.discardedItems++; Dispatch("dungeon-tab"); busy = false;
+            Require(owner.Progression.Inventory.Count == before - 1 && IndexOf(id) < 0 &&
+                owner.Progression.TotalGold>=goldBefore+value && owner.Progression.TotalSalvageGold==salvageBefore+value,
+                "Native two-step salvage did not free one bag slot and record its displayed gold provenance.");
+            report.discardedItems++;report.salvagedItems++;report.salvageGold+=value;Dispatch("dungeon-tab"); busy = false;
         }
 
         private IEnumerator ForgeFlow()
@@ -392,10 +410,13 @@ namespace AffixZero.Presentation
             if (owner == null || hunt == null) return;
             HeroProgression p = owner.Progression;
             report.elapsedSeconds = Time.realtimeSinceStartup - started; report.kills = hunt.TotalKills;
+            report.simulatedGameplaySeconds=owner.ElapsedSeconds;report.wallClockGameplaySeconds=owner.WallClockSeconds;
             report.completedRuns = hunt.CompletedRuns; report.failedRuns = hunt.FailedRuns; report.deathRetries = hunt.DeathRetries;
             report.collectedItems = hunt.CollectedItems; report.experience = p.TotalExperience; report.gold = p.TotalGold;
             report.damage = p.TotalDamage; report.health = p.TotalMaxHp; report.defense = p.TotalDefense;
             report.inventoryCount = p.Inventory.Count; report.spentPoints = p.SpentPoints; report.unspentPoints = p.UnspentPoints;
+            maximumInventoryCount=Math.Max(maximumInventoryCount,p.Inventory.Count);report.maximumInventoryCount=maximumInventoryCount;
+            report.weaponStylesSeenMask=weaponStylesSeenMask;report.totalSalvageGold=p.TotalSalvageGold;
             report.fury = p.FuryRank; report.precision = p.PrecisionRank; report.keystone = p.KeystoneRank;
             report.vitality = p.VitalityRank; report.cleave = p.CleaveRank; report.haste = p.HasteRank;
             report.activeEvolutions=p.ActiveEvolutionCount;report.areaSkillName=p.AreaSkillName;report.recoverySkillName=p.RecoverySkillName;
@@ -445,13 +466,14 @@ namespace AffixZero.Presentation
             public string schema = "affix-natural-progression-v1", runId = Guid.NewGuid().ToString("N"), mode = "", result = "RUNNING", status = "RUNNING",
                 problem = "", phase = "initializing", startedUtc = DateTime.UtcNow.ToString("O"), finishedUtc = "", unityVersion = Application.unityVersion,
                 buildGuid = Application.buildGUID, profileSha256 = "";
-            public string scope = "Fresh isolated profile, normal production drop rolls, 1x twenty-minute observation, native UI Toolkit equipment/talent/forge actions, safety-stop review/restart, disk save and separate-process continuation.";
+            public string scope = "Fresh isolated profile, normal production drop rolls, explicit wall-clock and simulated-gameplay timing, native UI Toolkit equipment/talent/forge/salvage actions, safety-stop review/restart, disk save and separate-process continuation.";
             public string actualPhysicalInput = "NOT_RUN; this probe uses native UI Toolkit callbacks, not OS mouse or keyboard input.";
             public bool normalDropRolls, restoreMatched, diskRoundtripMatched, continuedAfterRestart;
-            public float elapsedSeconds; public int initialDamage, initialHealth, kills, completedRuns, failedRuns, deathRetries, collectedItems,
+            public float elapsedSeconds,requestedSimulationSpeed,simulatedGameplaySeconds,wallClockGameplaySeconds; public int initialDamage, initialHealth, kills, completedRuns, failedRuns, deathRetries, collectedItems,
                 naturalItemsSeen, experience, gold, damage, health, defense, inventoryCount, spentPoints, unspentPoints,
                 fury, precision, keystone, vitality, cleave, haste, areaCasts, recoveryCasts, equipmentComparisons, equipmentUpgrades,
-                talentInvestments, enhancements, discardedItems, safetyRestarts, startClicks, uiCallbacks, saveCount,
+                talentInvestments, enhancements, discardedItems, salvagedItems, salvageGold, totalSalvageGold, maximumInventoryCount,
+                weaponStylesSeenMask, staffItemsSeen, safetyRestarts, startClicks, uiCallbacks, saveCount,
                 chainAreaCasts,pierceAreaCasts,quakeAreaCasts,quakeOuterHits,behavioralAreaHits,areaDuplicateCandidates,areaLastUniqueTargets;
             public int difficultyTransitions,layoutTransitions,layoutsVisitedMask,eliteKills,guardianKills,defeatedElitePatternMask,
                 maxKillChain,selectedDifficulty,dungeonClears,activeEvolutions,areaSkillTargets,recoveryThreshold,recoveryHeal,

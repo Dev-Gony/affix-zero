@@ -77,8 +77,9 @@ internal static class ProgressionSaveChecks
             loadedWaiting.PendingLoot == null && loadedWaiting.TotalExperience == 25,
             "current saves retain explicit pending loot without inventing a deferred drop");
 
-        Reject(check, source, s => s.schemaVersion = 4, "unknown snapshot schema rejected", true);
+        Reject(check, source, s => s.schemaVersion = 5, "unknown snapshot schema rejected", true);
         Reject(check, source, s => s.totalGold = -1, "negative save balance rejected");
+        Reject(check, source, s => s.totalSalvageGold = -1, "negative salvage provenance rejected");
         Reject(check, source, s => s.unspentPoints = int.MaxValue, "overflowing or unearned point balance rejected");
         Reject(check, source, s => s.selectedDifficulty = 99, "unknown saved difficulty rejected");
         Reject(check, source, s => s.dungeonClears = -1, "negative saved dungeon clears rejected");
@@ -109,6 +110,18 @@ internal static class ProgressionSaveChecks
         Reject(check, source, s => s.equippedWeapon.weaponStyle = 99, "unknown saved weapon style rejected");
         Reject(check, source, s => { s.hasArmor = true; s.equippedArmor = s.equippedWeapon; }, "duplicate armor identity rejected");
         Reject(check, source, s => { s.hasRelic = true; s.equippedRelic = null; }, "tagged missing relic rejected");
+        var salvageSource = new HeroProgression();
+        salvageSource.TryRegisterKill("salvage-save:kill");
+        salvageSource.TryCreatePendingLoot(new WeaponItem("salvage-save:item", "Saved salvage", 2, 0, "",
+            "AffixGenerated/AttackIcon", "rare"));
+        salvageSource.PickUp(); int salvageValue = salvageSource.GetSalvageValue(0); salvageSource.Salvage(0);
+        var salvageLoaded = HeroProgression.RestoreSnapshot(salvageSource.CaptureSnapshot());
+        check(salvageLoaded.TotalSalvageGold == salvageValue && salvageLoaded.TotalGold == 8 + salvageValue &&
+            salvageLoaded.Inventory.Count == 0, "v4 roundtrip preserves bounded salvage gold provenance");
+        Reject(check, salvageSource, s => s.totalGold = s.killTokens.Length * 17 + s.totalSalvageGold + 1,
+            "gold beyond kill rewards and salvage provenance rejected");
+        Reject(check, salvageSource, s => s.totalSalvageGold = s.issuedItemIds.Length * 80 + 1,
+            "implausible salvage provenance rejected");
         var emptyInline = new HeroProgression().CaptureSnapshot();
         emptyInline.equippedArmor = new WeaponSnapshot(); emptyInline.equippedRelic = new WeaponSnapshot();
         emptyInline.pendingLoot = new WeaponSnapshot();
@@ -146,8 +159,8 @@ internal static class ProgressionSaveChecks
             migrated.TotalGold == 408 && migrated.TotalExperience == 1425 && migrated.TotalDamage == 62 &&
             migrated.EquippedWeapon.EnhancementRank == 3 && migrated.EquippedArmor == null && migrated.EquippedRelic == null,
             "actual v1 wire fields migrate all 57 earned points, spent ranks, enhanced gear and balances without invented secondary equipment");
-        check(migrated.CaptureSnapshot().schemaVersion == 3 && !migrated.TryRegisterKill("legacy:0"),
-            "migration normalizes payload to v3 and retains reward idempotency");
+        check(migrated.CaptureSnapshot().schemaVersion == 4 && !migrated.TryRegisterKill("legacy:0"),
+            "migration normalizes payload to v4 and retains reward idempotency");
         var pendingLegacy = new HeroProgression(); pendingLegacy.TryRegisterKill("legacy-pending:first");
         var pendingWire = AsLegacy(pendingLegacy.CaptureSnapshot()); pendingWire.unspentPoints = 1;
         var migratedPending = HeroProgression.RestoreSnapshot(pendingWire);
@@ -178,11 +191,11 @@ internal static class ProgressionSaveChecks
         check(loaded.EquippedArmor.Id == armor.Id && loaded.EquippedArmor.EnhancementRank == 4 && loaded.TotalDefense == 9 &&
             loaded.TotalMaxHp == 180 && loaded.EquippedRelic.Id == relic.Id && loaded.EquippedRelic.EnhancementRank == 5 &&
             loaded.EquippedWeapon.WeaponStyle == WeaponStyle.Staff && loaded.IsRanged && loaded.AttackReach == 4.5f,
-            "v3 roundtrip preserves all slots, armor enhancement and ranged style parameters");
+            "current roundtrip preserves all slots, armor enhancement and ranged style parameters");
         check(loaded.VitalityRank == 1 && loaded.CleaveRank == 1 && loaded.HasteRank == 1 && loaded.LegacyPointCredit == 52 &&
             loaded.TotalDamage == migrated.TotalDamage && loaded.CooldownReductionPercent == 14 &&
             loaded.SplashRadius == migrated.SplashRadius && loaded.AttackSpeedMultiplier == migrated.AttackSpeedMultiplier,
-            "v3 roundtrip preserves new build stats and legacy point credit exactly");
+            "current roundtrip preserves new build stats and legacy point credit exactly");
         loaded.ResetTalents(); loaded.ResetTalents();
         check(loaded.UnspentPoints == 58 && loaded.SpentPoints == 0 && loaded.TotalGold == migrated.TotalGold,
             "reset after migration refunds all old and new ranks without minting or deleting points");

@@ -10,6 +10,9 @@ internal static class LootGeneratorChecks
         check(rules.Count==6&&rules[0].Id=="normal"&&rules[5].Id=="epic","loot exposes the documented six rarity tiers");
         check(rules[0].BaseWeight==60f&&rules[1].BaseWeight==25f&&rules[2].BaseWeight==10f&&rules[3].BaseWeight==4f&&rules[4].BaseWeight==1f&&rules[5].BaseWeight==.2f,"rarity base weights match the recovered production model");
         check(rules[0].MaxAffixes==0&&rules[5].MaxAffixes==6&&rules[5].StatMultiplier==4.5f,"rarity affix caps and top multiplier are explicit");
+        check(LootGenerator.ConfiguredRollRange(AffixStat.Attack)=="1-15 x floor"&&
+            LootGenerator.ConfiguredRollRange(AffixStat.Speed)=="5-30% x floor",
+            "equipment tooltip roll bands come from the configured loot affix rules");
         check(LootGenerator.FieldDropChancePercent(1)==.8f&&LootGenerator.FieldDropChancePercent(999)==2f&&LootGenerator.EliteDropChancePercent(1)==18f&&LootGenerator.EliteDropChancePercent(999)==30f,"field and elite drop rates clamp to documented bounds");
         check(Math.Abs(LootGenerator.FieldDropChancePercent(20,DungeonDifficulty.Scout)-1.028f)<.0001f&&
             Math.Abs(LootGenerator.FieldDropChancePercent(20,DungeonDifficulty.Veteran)-1.285f)<.0001f&&
@@ -24,13 +27,16 @@ internal static class LootGeneratorChecks
         float[] low=LootGenerator.RarityProbabilities(1),high=LootGenerator.RarityProbabilities(100);
         float lowSum=0,highSum=0;foreach(float p in low)lowSum+=p;foreach(float p in high)highSum+=p;
         check(Math.Abs(lowSum-1)<.0001f&&Math.Abs(highSum-1)<.0001f&&high[5]>low[5]&&high[0]<low[0],"rarity weights normalize and progression shifts odds upward");
-        var slots=new HashSet<EquipmentSlot>();bool bounded=true,hasOptions=false;
+        var slots=new HashSet<EquipmentSlot>();var weaponStyles=new HashSet<WeaponStyle>();bool bounded=true,hasOptions=false,staffIconCorrect=false;
         for(int seed=0;seed<1000;seed++)
         {
             WeaponItem item=LootGenerator.GenerateGuaranteed("generated:"+seed,20,seed);slots.Add(item.EquipmentSlot);
+            if(item.EquipmentSlot==EquipmentSlot.Weapon){weaponStyles.Add(item.WeaponStyle);staffIconCorrect|=item.WeaponStyle==WeaponStyle.Staff&&item.IconResource=="AffixGenerated/GearStaff";}
             bounded&=item.Options.Count<=8;hasOptions|=item.Options.Count>0;
         }
         check(slots.SetEquals(new[]{EquipmentSlot.Weapon,EquipmentSlot.Helmet,EquipmentSlot.Armor,EquipmentSlot.Gloves,EquipmentSlot.Boots,EquipmentSlot.Ring,EquipmentSlot.Amulet}),"generated pool reaches all seven historical equipment slots");
+        check(weaponStyles.SetEquals(new[]{WeaponStyle.Sword,WeaponStyle.Axe,WeaponStyle.Staff})&&staffIconCorrect,
+            "the unchanged natural weapon pool now reaches ARC, QUAKE and LANCE with matching icons");
         check(bounded&&hasOptions,"generated items keep base stats plus affixes within the serialized option ceiling");
         WeaponItem a=LootGenerator.GenerateGuaranteed("same",18,4242),b=LootGenerator.GenerateGuaranteed("same",18,4242);
         check(a.Name==b.Name&&a.Rarity==b.Rarity&&a.EquipmentSlot==b.EquipmentSlot&&a.DamageBonus==b.DamageBonus&&a.Options.Count==b.Options.Count,"seeded loot generation is deterministic for save and QA replay");

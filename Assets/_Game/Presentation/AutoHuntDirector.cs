@@ -11,6 +11,7 @@ namespace AffixZero.Presentation
     [DefaultExecutionOrder(-100)]
     public sealed class AutoHuntDirector : MonoBehaviour
     {
+        private const float ClearTransitionSeconds=.65f;
         private const int Population = 24;
         private const float AggroRadius = 6.5f;
         private FirstEncounter owner;
@@ -207,7 +208,7 @@ namespace AffixZero.Presentation
             if (AliveEnemies == 0)
             {
                 CompletedRuns++; owner.Progression.RegisterDungeonClear(); owner.SaveProgress();
-                ConsecutiveFailures = 0; Phase = HuntPhase.Resting; delay = 3;
+                ConsecutiveFailures = 0; Phase = HuntPhase.Resting; delay = ClearTransitionSeconds;
                 hero.SetTarget(null); hero.SetDestination(null); return;
             }
             // A stall escape destination needs a short exclusive movement window. Without this,

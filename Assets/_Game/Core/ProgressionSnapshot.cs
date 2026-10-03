@@ -3,12 +3,13 @@ using System;
 namespace AffixZero.Core
 {
     // Payload v2 expands equipment and talents; v1 migrates with an explicit legacy point credit.
+    // Payload v4 records same-currency salvage provenance without invalidating v1-v3 profiles.
     // Optional inline items require tags because Unity JsonUtility may produce empty objects.
     [Serializable]
     public sealed class ProgressionSnapshot
     {
-        public int schemaVersion = 3;
-        public int totalExperience, totalGold, unspentPoints, furyRank, precisionRank, keystoneRank;
+        public int schemaVersion = 4;
+        public int totalExperience, totalGold, totalSalvageGold, unspentPoints, furyRank, precisionRank, keystoneRank;
         public int vitalityRank, cleaveRank, hasteRank, legacyPointCredit;
         public int selectedDifficulty, dungeonClears;
         public bool hasArmor, hasRelic, hasHelmet, hasGloves, hasBoots, hasRing, hasAmulet;
