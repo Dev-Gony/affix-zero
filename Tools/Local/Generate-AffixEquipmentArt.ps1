@@ -75,9 +75,10 @@ function Save-ItemIcon([string]$id) {
     try{$large.Save((Join-Path $output ($id+'.png')),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$large.Dispose()}
 }
 
-function Save-IllustratedItemIcon([string]$sourceName,[string]$id) {
+function Save-IllustratedItemIcon([string]$sourceName,[string]$id,[int]$padding=0) {
     $sourcePath=Join-Path $RepoRoot ('docs\art-source\illustrated-equipment-v2\'+$sourceName)
     if(-not (Test-Path -LiteralPath $sourcePath -PathType Leaf)){throw "Missing illustrated source: $sourcePath"}
+    if($padding -lt 0 -or $padding -gt 32){throw "Invalid icon padding for ${id}: $padding"}
     $source=[System.Drawing.Bitmap]::new($sourcePath)
     $icon=[System.Drawing.Bitmap]::new(128,128,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
     $g=[System.Drawing.Graphics]::FromImage($icon)
@@ -88,7 +89,12 @@ function Save-IllustratedItemIcon([string]$sourceName,[string]$id) {
         $g.SmoothingMode=[System.Drawing.Drawing2D.SmoothingMode]::HighQuality
         $g.InterpolationMode=[System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
         $g.PixelOffsetMode=[System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-        $g.DrawImage($source,[System.Drawing.Rectangle]::new(0,0,128,128),0,0,$source.Width,$source.Height,[System.Drawing.GraphicsUnit]::Pixel)
+        $available=128-($padding*2)
+        $scale=[Math]::Min($available/[double]$source.Width,$available/[double]$source.Height)
+        $width=[Math]::Max(1,[int][Math]::Round($source.Width*$scale))
+        $height=[Math]::Max(1,[int][Math]::Round($source.Height*$scale))
+        $x=[int][Math]::Floor((128-$width)/2.0);$y=[int][Math]::Floor((128-$height)/2.0)
+        $g.DrawImage($source,[System.Drawing.Rectangle]::new($x,$y,$width,$height),0,0,$source.Width,$source.Height,[System.Drawing.GraphicsUnit]::Pixel)
     }finally{$g.Dispose();$source.Dispose()}
     try{$icon.Save((Join-Path $output ($id+'.png')),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$icon.Dispose()}
 }
@@ -118,22 +124,65 @@ function Save-BagCellWide {
 }
 
 $ids=@('dagger','longsword','axe','magic_sword','divine_sword','leather_hat','iron_helm','mithril_helm','dragon_helm','cloth','leather_armor','plate_armor','dragonscale','cloth_gloves','leather_gloves','battle_gloves','dragon_gloves','sandals','leather_boots','swift_boots','gale_boots','copper_ring','silver_ring','gold_ring','diamond_ring','bone_necklace','crystal_necklace','ruby_necklace','dragon_tear')
-$illustrated=@{longsword='sword.png';plate_armor='armor.png';battle_gloves='gloves.png'}
-foreach($id in $ids){if($illustrated.ContainsKey($id)){Save-IllustratedItemIcon $illustrated[$id] $id}else{Save-ItemIcon $id}}
+$illustrated=@{
+    dagger='dagger.png';longsword='sword.png';axe='axe.png';magic_sword='magic_sword.png';divine_sword='divine_sword.png'
+    leather_hat='leather_hat.png';iron_helm='iron_helm.png';mithril_helm='mithril_helm.png';dragon_helm='dragon_helm.png'
+    cloth='cloth.png';leather_armor='leather_armor.png';plate_armor='armor.png';dragonscale='dragonscale.png'
+    cloth_gloves='cloth_gloves.png';leather_gloves='leather_gloves.png';battle_gloves='gloves.png';dragon_gloves='dragon_gloves.png'
+    sandals='sandals.png';leather_boots='leather_boots.png';swift_boots='swift_boots.png';gale_boots='gale_boots.png'
+    copper_ring='copper_ring.png';silver_ring='silver_ring.png';gold_ring='gold_ring.png';diamond_ring='diamond_ring.png'
+    bone_necklace='bone_necklace.png';crystal_necklace='crystal_necklace.png';ruby_necklace='ruby_necklace.png';dragon_tear='dragon_tear.png'
+}
+if($illustrated.Count -ne $ids.Count){throw "Expected 29 illustrated mappings, found $($illustrated.Count)."}
+$approvedRepresentatives=@('longsword','plate_armor','battle_gloves')
+foreach($id in $ids){
+    if(-not $illustrated.ContainsKey($id)){throw "Missing illustrated mapping for $id"}
+    $padding=if($approvedRepresentatives -contains $id){0}else{4}
+    Save-IllustratedItemIcon $illustrated[$id] $id $padding
+}
 Save-WeatheredFrame 'FramePanelTall.png' 500 712 $true
 Save-WeatheredFrame 'FrameTooltip.png' 300 424 $false
 Save-BagCellWide
 $created=Get-ChildItem -LiteralPath $output -Filter '*.png' | Sort-Object Name
 if($created.Count -ne 29){throw "Expected 29 item icons, found $($created.Count)."}
 if(($created|ForEach-Object Length|Measure-Object -Minimum).Minimum -lt 700){throw 'One or more item icons appear empty.'}
+$seenHashes=@{}
+foreach($file in $created){
+    $bitmap=[System.Drawing.Bitmap]::new($file.FullName)
+    try{
+        if($bitmap.Width -ne 128 -or $bitmap.Height -ne 128){throw "Unexpected icon dimensions: $($file.Name)"}
+        for($i=0;$i -lt 128;$i++){
+            if($bitmap.GetPixel($i,0).A -gt 0 -or $bitmap.GetPixel($i,127).A -gt 0 -or
+               $bitmap.GetPixel(0,$i).A -gt 0 -or $bitmap.GetPixel(127,$i).A -gt 0){throw "Icon alpha touches the canvas border: $($file.Name)"}
+        }
+    }finally{$bitmap.Dispose()}
+    $hash=(Get-FileHash -LiteralPath $file.FullName -Algorithm SHA256).Hash
+    if($seenHashes.ContainsKey($hash)){throw "Duplicate icon pixels: $($file.Name) and $($seenHashes[$hash])"}
+    $seenHashes[$hash]=$file.Name
+}
 $reportDir=Join-Path $RepoRoot 'Build\Reports\ui-icon-polish';New-Item -ItemType Directory -Force -Path $reportDir | Out-Null
 $sheet=[System.Drawing.Bitmap]::new(900,1020,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb);$sg=[System.Drawing.Graphics]::FromImage($sheet)
 try{
     $sg.Clear([System.Drawing.Color]::FromArgb(255,12,10,13));$titleFont=[System.Drawing.Font]::new('Segoe UI',18,[System.Drawing.FontStyle]::Bold);$labelFont=[System.Drawing.Font]::new('Consolas',10);$creamBrush=[System.Drawing.SolidBrush]::new($highlight);$goldBrush=[System.Drawing.SolidBrush]::new($gold);$cellBrush=[System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255,24,20,23));$edgePen=[System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255,105,68,45),2)
     try{
-        $sg.DrawString('AFFIX: ZERO — 29 DISTINCT BASE ITEM ICONS',$titleFont,$goldBrush,22,14)
+        $sg.DrawString('AFFIX: ZERO — 29 ILLUSTRATED BASE ITEM ICONS',$titleFont,$goldBrush,22,14)
         for($i=0;$i -lt $ids.Count;$i++){$col=$i%5;$row=[Math]::Floor($i/5);$x=20+$col*176;$y=58+$row*158;$sg.FillRectangle($cellBrush,$x,$y,156,142);$sg.DrawRectangle($edgePen,$x,$y,156,142);$icon=[System.Drawing.Image]::FromFile((Join-Path $output ($ids[$i]+'.png')));try{$sg.DrawImage($icon,$x+14,$y+6,112,112)}finally{$icon.Dispose()};$sg.DrawString($ids[$i],$labelFont,$creamBrush,$x+8,$y+120)}
     }finally{$titleFont.Dispose();$labelFont.Dispose();$creamBrush.Dispose();$goldBrush.Dispose();$cellBrush.Dispose();$edgePen.Dispose()}
 }finally{$sg.Dispose()}
 try{$sheet.Save((Join-Path $reportDir 'AFFIX-ZERO-29-base-icons-contact-sheet.png'),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$sheet.Dispose()}
+$scaleSheet=[System.Drawing.Bitmap]::new(1260,1580,[System.Drawing.Imaging.PixelFormat]::Format32bppArgb);$gg=[System.Drawing.Graphics]::FromImage($scaleSheet)
+try{
+    $gg.Clear([System.Drawing.Color]::FromArgb(255,12,10,13));$titleFont=[System.Drawing.Font]::new('Segoe UI',18,[System.Drawing.FontStyle]::Bold);$labelFont=[System.Drawing.Font]::new('Consolas',11);$smallFont=[System.Drawing.Font]::new('Segoe UI',9);$creamBrush=[System.Drawing.SolidBrush]::new($highlight);$goldBrush=[System.Drawing.SolidBrush]::new($gold);$cellBrush=[System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255,24,20,23));$edgePen=[System.Drawing.Pen]::new([System.Drawing.Color]::FromArgb(255,105,68,45),2)
+    try{
+        $gg.DrawString('AFFIX: ZERO — ACTUAL 128 / 64 / 37 PX READABILITY',$titleFont,$goldBrush,22,14)
+        for($i=0;$i -lt $ids.Count;$i++){
+            $col=$i%3;$row=[Math]::Floor($i/3);$x=18+$col*414;$y=54+$row*151
+            $gg.FillRectangle($cellBrush,$x,$y,396,137);$gg.DrawRectangle($edgePen,$x,$y,396,137)
+            $icon=[System.Drawing.Image]::FromFile((Join-Path $output ($ids[$i]+'.png')))
+            try{$gg.DrawImage($icon,$x+5,$y+5,128,128);$gg.DrawImage($icon,$x+152,$y+54,64,64);$gg.DrawImage($icon,$x+244,$y+81,37,37)}finally{$icon.Dispose()}
+            $gg.DrawString($ids[$i],$labelFont,$creamBrush,$x+148,$y+10);$gg.DrawString('128 px',$smallFont,$goldBrush,$x+46,$y+110);$gg.DrawString('64 px',$smallFont,$goldBrush,$x+163,$y+119);$gg.DrawString('37 px',$smallFont,$goldBrush,$x+243,$y+119)
+        }
+    }finally{$titleFont.Dispose();$labelFont.Dispose();$smallFont.Dispose();$creamBrush.Dispose();$goldBrush.Dispose();$cellBrush.Dispose();$edgePen.Dispose()}
+}finally{$gg.Dispose()}
+try{$scaleSheet.Save((Join-Path $reportDir 'AFFIX-ZERO-29-icons-128-64-37.png'),[System.Drawing.Imaging.ImageFormat]::Png)}finally{$scaleSheet.Dispose()}
 $created | Select-Object Name,Length

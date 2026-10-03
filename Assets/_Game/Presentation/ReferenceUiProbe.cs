@@ -336,8 +336,19 @@ namespace AffixZero.Presentation
                 }
                 else if (screen == "talents")
                 {
+                    string[] talentNodes={ "talent-node-fury", "talent-node-precision", "talent-node-keystone", "talent-node-vitality", "talent-node-cleave", "talent-node-haste" };
                     CheckGroup(new[] { "talent-node-fury", "talent-node-precision", "talent-node-keystone", "talent-invest", "talent-screen-reset", "talent-screen-close" }, management.worldBound, bounds, true);
                     CheckGroup(new[] { "talent-detail-name", "talent-detail-effect", "talent-screen-points" }, management.worldBound, bounds, false);
+                    var talentIcons=new HashSet<Texture>();
+                    foreach(string nodeName in talentNodes)
+                    {
+                        Image nodeIcon=Element(nodeName).Q<Image>();
+                        Require(nodeIcon!=null&&nodeIcon.image!=null&&talentIcons.Add(nodeIcon.image),
+                            "Talent branches do not have six distinct illustrated icons: "+nodeName);
+                    }
+                    Require(Element("talent-tree").resolvedStyle.backgroundImage.texture!=null&&
+                        Element("talent-detail").resolvedStyle.backgroundImage.texture!=null,
+                        "Talent screen is missing its authored frame treatment.");
                     frame.selectedTalent = Text("talent-detail-name");
                 }
                 else

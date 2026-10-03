@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "THREE_ILLUSTRATED_EQUIPMENT_PROTOTYPES_VALIDATED_REMAINING_26_PENDING",
+  "stage": "FULL_29_ILLUSTRATED_EQUIPMENT_SET_INTEGRATED_AND_VALIDATED",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -16,12 +16,12 @@
     "latest_user_report": "INSTALLATION_COMPLETE",
     "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "THREE_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_PROTOTYPES; 26 EARLIER FLAT ICONS REJECTED_PLACEHOLDERS",
+  "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS; ALL_EARLIER_FLAT_PLACEHOLDERS_REPLACED",
   "unity_editor_import": "PASS",
   "unity_play": "PASS_720_AND_1080_CONNECTED_DUNGEON_FULL_CLEAR_WITH_EPHEMERAL_SURVIVAL_FIXTURE",
-  "visual_approval": "NOT_APPROVED; USER_REJECTED_V1_29_ICON_CONTACT_SHEET; THREE_V2_PROTOTYPES_INSPECTED_LOCALLY_AND_AWAIT_USER_REVIEW",
+  "visual_approval": "REPRESENTATIVE_V2_DIRECTION_USER_APPROVED; ALL_29_AGENT_INSPECTED_AT_128_64_37_AND_NATIVE_720_1080; FINAL_USER_ACCEPTANCE_PENDING",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_642c56a9fd5e477e90d819f25a98c8ac",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_66363a4ba5fa4fd1a991d9617ccaf2d4",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User decision on the three illustrated-v2 prototypes, then replace the remaining 26 rejected placeholders; broader systems remain deferred",
+  "next": "User visual acceptance of the complete illustrated set; socket contract decisions remain required before implementation; broader systems remain deferred",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
@@ -100,9 +100,23 @@
     "blocked_decisions": "eligible slots, count bounds, tier/rarity relationship, acquisition, rune effects/removal, forge/salvage interaction, save migration",
     "monetization": "No paid gacha or new currency implied"
   },
+  "illustrated_equipment_v2": {
+    "status": "FULL_SET_TECHNICAL_AND_AGENT_VISUAL_PASS_USER_ACCEPTANCE_PENDING",
+    "source_commit": "98ac9a3614f44bd0c3104e945dd091792285785a",
+    "source_tree": "326a3705993045185dd691e8e65e69b6a7f5c444",
+    "runtime_icons": 29,
+    "build_guid": "66363a4ba5fa4fd1a991d9617ccaf2d4",
+    "ui_720": "Build/Reports/illustrated-v2-full-ui-720/ui-reference-probe.json",
+    "ui_1080": "Build/Reports/illustrated-v2-full-ui-1080/ui-reference-probe.json",
+    "physical_input": "PASS_10_ACTIONS_17.189S_D_ISOLATED",
+    "library_contact_sheet": "libfile_af59bff5da448191ba99186f6b65708a",
+    "library_equipment_1080": "libfile_8b7dc6abc6808191b2de6ec8b5c31f8e",
+    "library_skills_1080": "libfile_5b3ab34c48a88191a5c2d0be2a238908",
+    "sockets": "REQUIRED_BUT_NOT_IMPLEMENTED_OR_BAKED_INTO_ART"
+  },
   "mvp": {
     "status": "NOT_READY",
-    "current": "Playable automatic hunt, disk persistence, 29 distinct base icons, Hero Siege-inspired equipment dock, 20-minute production-drop progression, and physical input are verified; user visual acceptance remains open",
+    "current": "Playable automatic hunt, disk persistence, 29 illustrated base icons, Hero Siege-inspired equipment dock, framed six-node talents, 20-minute production-drop progression, and physical input are verified; user visual acceptance remains open",
     "plan": "docs/AUTO_HUNT_MVP.md",
     "missing": [
       "separate default-build safety-stop replay after player intervention",

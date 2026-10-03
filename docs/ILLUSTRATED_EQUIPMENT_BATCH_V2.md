@@ -2,6 +2,20 @@
 
 Date: 2026-10-03
 
+## Integration status
+
+All 26 masters in this brief were integrated on 2026-10-03 from the verified
+asset-only source commit `98ac9a3614f44bd0c3104e945dd091792285785a`
+(tree `326a3705993045185dd691e8e65e69b6a7f5c444`) without merging,
+cherry-picking or checking out that branch. Together with the three approved
+representatives, all 29 runtime base icons now use illustrated sources.
+
+The final `magic_sword` source is the Arcane Staff. Final regenerated
+`dagger`, `leather_gloves` and `sandals` are clean transparent cutouts; the
+latter two intentionally use a single readable item. `copper_ring` uses an
+engraved copper signet without a gemstone. These are presentation choices only.
+No socket, gem, rarity or gameplay state is baked into any source image.
+
 The user approved the painted material-rendered direction represented by
 `longsword`, `plate_armor`, and `battle_gloves`. Preserve those three.
 This document is the exact cloud-art brief for the remaining 26 base IDs.
@@ -56,5 +70,6 @@ This document is the exact cloud-art brief for the remaining 26 base IDs.
 | Amulet / 11 | `ruby_necklace` | Ornate gold filigree collar pendant with a deep red ruby drop and small linked settings. | `Assets/Art/Interface/Resources/AffixUIVisual/Items/ruby_necklace.png` |
 | Amulet / 18 | `dragon_tear` | Unique violet/cyan tear gem cradled by a dragon-claw or wing setting on an obsidian/gold chain; not a simple polygon pendant. | `Assets/Art/Interface/Resources/AffixUIVisual/Items/dragon_tear.png` |
 
-The 26 masters must be reviewed at actual slot size before replacing runtime
-files. Do not infer approval from uniqueness, file size or successful loading.
+The 26 masters were reviewed in a generated 128/64/37 px sheet and in actual
+720p/1080p Unity inventory frames. Technical and agent visual inspection pass;
+final user visual acceptance remains pending.

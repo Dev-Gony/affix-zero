@@ -1,3 +1,34 @@
+# 2026-10-03 - complete illustrated equipment set and verified talent framing
+
+All 26 remaining flat placeholders were replaced with original illustrated
+masters from asset-only commit `98ac9a3614f44bd0c3104e945dd091792285785a`
+(tree `326a3705993045185dd691e8e65e69b6a7f5c444`). Only the exact 26 PNG blobs
+were extracted; the source branch was not merged, cherry-picked or checked out.
+The prior `longsword`, `plate_armor` and `battle_gloves` runtime hashes remain
+unchanged. All 29 current base IDs now resolve to illustrated 128 x 128 icons.
+
+The generator aspect-fits the new 26 masters with four pixels of outer padding,
+keeps alpha off every canvas border, rejects duplicate output hashes and emits
+both a 29-icon contact sheet and a 128/64/37 px readability sheet. The final
+Arcane Staff, clean dagger, single leather glove, single sandal and gemless
+engraved copper signet are intentional. No sockets, rarity state or gameplay
+rules are painted into the art.
+
+Build `66363a4ba5fa4fd1a991d9617ccaf2d4` passes CoreSmoke 321, static compile
+0/0, Unity build/import 0/0, 720p/1080p native UI probes with 19 callbacks and
+all 29 resources, player HP present/non-player HP absent, and exact-window OS
+input for ten actions in 17.189 seconds. The pre-existing TalentPanel WIP is now
+included: it has authored frames and six distinct icons and was inspected at
+both resolutions. The first empty-profile OS-input attempt failed closed before
+input and remains preserved; pass2 used only a hash-verified copied D profile.
+
+Current Library evidence: contact sheet
+`libfile_af59bff5da448191ba99186f6b65708a`, 1080p equipment
+`libfile_8b7dc6abc6808191b2de6ec8b5c31f8e`, and 1080p skills
+`libfile_5b3ab34c48a88191a5c2d0be2a238908`. Final user visual acceptance remains
+pending. Item sockets remain a documented product requirement with no approved
+data/save/drop/forge contract, so no fake socket UI or rules were added.
+
 # 2026-10-03 - remaining illustrated-item brief and socket requirement
 
 The user approved the painted material-rendered direction of `longsword`,

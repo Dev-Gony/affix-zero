@@ -284,5 +284,25 @@
     "tests_isolated": true,
     "autosave": "Each committed progression mutation, application pause and normal quit; no save for ephemeral test profiles",
     "limits": "No offline rewards or in-combat position resume; 2MiB payload limit and growing deduplication history; editor uses ephemeral profile"
+  },
+  "illustrated_equipment_v2_20261003": {
+    "result": "PASS_TECHNICAL_AND_AGENT_VISUAL_USER_ACCEPTANCE_PENDING",
+    "source_commit": "98ac9a3614f44bd0c3104e945dd091792285785a",
+    "source_tree": "326a3705993045185dd691e8e65e69b6a7f5c444",
+    "runtime_icons": "29 unique 128x128 PNGs; zero border-alpha pixels; 29 unique SHA-256 values",
+    "core_checks": 321,
+    "static_compile": "PASS 0 errors 0 warnings",
+    "unity_build": "PASS 0 errors 0 warnings",
+    "build_guid": "66363a4ba5fa4fd1a991d9617ccaf2d4",
+    "ui_720": "PASS 19 callbacks 29 resources player HP present non-player HP absent",
+    "ui_1080": "PASS 19 callbacks 29 resources player HP present non-player HP absent",
+    "physical_input": "PASS exact 1280x720 window, ten actions, 17.189 seconds",
+    "production_save_hashes_unchanged": true,
+    "library": {
+      "contact_sheet": "libfile_af59bff5da448191ba99186f6b65708a",
+      "equipment_1080": "libfile_8b7dc6abc6808191b2de6ec8b5c31f8e",
+      "skills_1080": "libfile_5b3ab34c48a88191a5c2d0be2a238908"
+    },
+    "socket_scope": "Required but not implemented; no counts, gems, effects or rules invented"
   }
 }
