@@ -16,5 +16,6 @@
     <Compile Include="../../Assets/_Game/Core/ProgressionSnapshot.cs" Link="ProgressionSnapshot.cs" />
     <Compile Include="../../Assets/_Game/Core/LootGenerator.cs" Link="LootGenerator.cs" />
     <Compile Include="../../Assets/_Game/Core/DungeonDifficulty.cs" Link="DungeonDifficulty.cs" />
+    <Compile Include="../../Assets/_Game/Core/ProbePathPolicy.cs" Link="ProbePathPolicy.cs" />
   </ItemGroup>
 </Project>

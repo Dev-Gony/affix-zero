@@ -41,10 +41,8 @@ namespace AffixZero.Presentation
             Application.logMessageReceived += OnLog;
             try
             {
-                int index = Array.IndexOf(args, "-affixReportDir");
-                Require(index >= 0 && index + 1 < args.Length && Path.IsPathRooted(args[index + 1]),
-                    "UI reference verification requires an absolute -affixReportDir.");
-                outputDirectory = Path.GetFullPath(args[index + 1]);
+                outputDirectory = ProbePathPolicy.RequireDDriveDirectory(args, "-affixReportDir");
+                ProbePathPolicy.RequireSaveDirectory(args, Application.persistentDataPath);
                 foreach (string other in new[] { "-affixSaveTest", "-affixSmokeTest", "-affixAutoHuntTest", "-affixAutoHuntSafetyTest" })
                     Require(Array.IndexOf(args, other) < 0, "UI reference fixture cannot run with another probe: " + other);
                 Directory.CreateDirectory(outputDirectory); WriteReport();
@@ -78,6 +76,7 @@ namespace AffixZero.Presentation
                     "UI reference fixture requires a fresh temporary profile.");
                 Require(owner.Hunt.World.VisualIdentityName=="FORGE CITADEL"&&owner.Hunt.World.IdentityDecorationCount>=20&&
                     owner.Hunt.World.IdentityColliderCount==0,"Reference world visual identity is missing or changed collision.");
+                AssertPlayerOnlyHealthUi();
                 Require(!owner.Hunt.Running && owner.IsPaused, "Reference startup must be stopped.");
                 foreach (var actor in owner.Hunt.Enemies)
                     if (observed.Add(actor)) actor.Damaged += OnEnemyDamaged;
@@ -202,6 +201,39 @@ namespace AffixZero.Presentation
                 owner.Persistence.SaveCount == 0, "Reference fixture must never open or modify a real profile store.");
             report.ephemeralVerified = true;
         }
+        private void AssertPlayerOnlyHealthUi()
+        {
+            Require(Root != null && Element("hero-hp-value") is Label && Visible(Element("hero-hp-value")),
+                "The retained player HP readout is missing or hidden.");
+            int activeEnemies = 0;
+            foreach (MeleeActor enemy in owner.Hunt.Enemies)
+            {
+                if (enemy == null || !enemy.gameObject.activeInHierarchy || enemy.IsDead) continue;
+                activeEnemies++;
+                Require(enemy.GetComponentsInChildren<Canvas>(true).Length == 0,
+                    "A non-player actor has a world-space Canvas that could render HP: " + enemy.name);
+                Require(enemy.GetComponentsInChildren<TextMesh>(true).Length == 0,
+                    "A non-player actor has world-space text that could render HP: " + enemy.name);
+                foreach (Transform node in enemy.GetComponentsInChildren<Transform>(true))
+                {
+                    string value = (node.name ?? "").ToLowerInvariant();
+                    Require(!value.Contains("health") && !value.Contains("hp-bar") && !value.Contains("hpbar"),
+                        "A non-player actor contains a health-display object: " + node.name);
+                }
+            }
+            Require(activeEnemies > 0, "Enemy-health UI verification requires active enemies in the captured world.");
+            Root.Query<VisualElement>().ForEach(element =>
+            {
+                string value = (element.name ?? "").ToLowerInvariant();
+                bool healthLike = value.Contains("health") || value.Contains("hp-") || value.Contains("hpbar") || value.Contains("healthbar");
+                if (healthLike)
+                    Require(value.StartsWith("hero-", StringComparison.Ordinal),
+                        "A non-player health element remains in the HUD: " + element.name);
+            });
+            report.playerHpVisible = true;
+            report.nonPlayerHpAbsent = true;
+            report.activeEnemiesDuringHpAudit = Math.Max(report.activeEnemiesDuringHpAudit, activeEnemies);
+        }
         private void Phase(string value) { phase = value; phaseFrame = Time.frameCount; }
         private VisualElement Root => owner.GetComponent<UIDocument>()?.rootVisualElement;
         private VisualElement Element(string name)
@@ -244,6 +276,7 @@ namespace AffixZero.Presentation
                 Require(Root != null && Root.name == "stitch-hud" && Root.panel != null, "Native HUD is missing.");
                 Require(Text("hero-hp-value").Contains(owner.Hero.Hp.ToString()) && Text("gold-value").Contains(owner.Progression.TotalGold.ToString()),
                     "HUD values differ from runtime state.");
+                AssertPlayerOnlyHealthUi();
                 FrameReport frame = CheckLayout(label);
                 texture = new Texture2D(Screen.width, Screen.height, TextureFormat.RGB24, false);
                 texture.ReadPixels(new Rect(0, 0, Screen.width, Screen.height), 0, 0); texture.Apply();
@@ -374,8 +407,9 @@ namespace AffixZero.Presentation
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
             public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight authored test weapons enter the temporary inventory through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
-            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified;
-            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture;
+            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified,
+                playerHpVisible, nonPlayerHpAbsent;
+            public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit;
             public float elapsedSeconds;
             public string[] fixtureItemIds, nativeCallbacks;
             public FrameReport[] frames;

@@ -68,6 +68,7 @@ internal static class Program
             NavigationChecks.Run(Check, Throws);
             ProgressionSaveChecks.Run(Check);
             ProfileStoreChecks.Run(Check);
+            ProbePathPolicyChecks.Run(Check);
             LongHorizonBalanceChecks.Run(Check);
             Console.WriteLine("CORE_SMOKE_PASSED checks=" + passed + " scope=pure-CSharp-not-Unity-editor");
             return 0;

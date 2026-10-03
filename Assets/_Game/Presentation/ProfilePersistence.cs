@@ -27,10 +27,8 @@ namespace AffixZero.Presentation
             try
             {
                 string[] args=Environment.GetCommandLineArgs();
-                bool naturalTest=Array.IndexOf(args,"-affixNaturalProgressionTest")>=0;
-                bool physicalInputTest=Array.IndexOf(args,"-affixPhysicalInputTest")>=0;
-                bool speedUiStressTest=Array.IndexOf(args,"-affixSpeedUiStressTest")>=0;
-                bool saveTest=Array.IndexOf(args,"-affixSaveTest")>=0 || naturalTest || physicalInputTest || speedUiStressTest;
+                bool saveTest=ProbePathPolicy.UsesWritableProfile(args);
+                string probeDirectory=ProbePathPolicy.RequireSaveDirectory(args,Application.persistentDataPath);
                 // UI fixtures never open a save, even when incompatible test flags are supplied.
                 Ephemeral=Array.IndexOf(args,"-affixCombatExperienceTest")>=0 || Array.IndexOf(args,"-affixUiReferenceTest")>=0 || (!saveTest &&
                     (Array.IndexOf(args,"-affixAutoHuntTest")>=0 || Array.IndexOf(args,"-affixAutoHuntSafetyTest")>=0 ||
@@ -41,16 +39,7 @@ namespace AffixZero.Presentation
 #endif
                 if(Ephemeral){Status="검증용 임시 프로필";return;}
                 string directory=Application.persistentDataPath;
-                if(saveTest)
-                {
-                    int index=Array.IndexOf(args,"-affixSaveDir");
-                    if(index<0 || index+1>=args.Length || !Path.IsPathRooted(args[index+1]))
-                        throw new ArgumentException("Save verification requires an absolute -affixSaveDir.");
-                    directory=Path.GetFullPath(args[index+1]);
-                    string production=Path.GetFullPath(Application.persistentDataPath).TrimEnd(Path.DirectorySeparatorChar);
-                    if(directory.TrimEnd(Path.DirectorySeparatorChar).Equals(production,StringComparison.OrdinalIgnoreCase))
-                        throw new ArgumentException("Save verification cannot use the player's save directory.");
-                }
+                if(saveTest)directory=probeDirectory;
                 FilePath=Path.Combine(directory,"profile-v1.json");
                 store=new AtomicProfileStore(FilePath,Validate);
                 string json=store.Load(out string notice);LoadNotice=notice??"";

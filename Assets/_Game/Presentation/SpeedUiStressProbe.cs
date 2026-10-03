@@ -34,8 +34,9 @@ namespace AffixZero.Presentation
             try
             {
                 mode=Argument(args,"-affixSpeedUiStressMode");Require(mode=="observe"||mode=="read","Stress mode must be observe or read.");
-                reportDirectory=AbsoluteArgument(args,"-affixReportDir");saveDirectory=AbsoluteArgument(args,"-affixSaveDir");
-                captureDirectory=AbsoluteArgument(args,"-affixCaptureDir");expectedPath=Path.Combine(saveDirectory,"expected-speed-ui-profile.json");
+                reportDirectory=ProbePathPolicy.RequireDDriveDirectory(args,"-affixReportDir");
+                saveDirectory=ProbePathPolicy.RequireSaveDirectory(args,Application.persistentDataPath);
+                captureDirectory=ProbePathPolicy.RequireDDriveDirectory(args,"-affixCaptureDir");expectedPath=Path.Combine(saveDirectory,"expected-speed-ui-profile.json");
                 Directory.CreateDirectory(reportDirectory);Directory.CreateDirectory(captureDirectory);report.mode=mode;WriteReport();
             }
             catch(Exception error){Finish(false,error.ToString());}
@@ -50,6 +51,10 @@ namespace AffixZero.Presentation
                 if(running)return;
                 owner=FindFirstObjectByType<FirstEncounter>();
                 if(owner==null||owner.Hunt==null||!owner.Hunt.Initialized||owner.Hero==null||!owner.Hero.IsReady||!Ready("autohunt-toggle"))return;
+                string expectedProfile=Path.Combine(saveDirectory,"profile-v1.json");
+                Require(owner.Persistence.CanPlay&&!owner.Persistence.Ephemeral&&
+                    string.Equals(Path.GetFullPath(owner.Persistence.FilePath),expectedProfile,StringComparison.OrdinalIgnoreCase),
+                    "Speed/UI stress persistence escaped its explicit D: save sandbox.");
                 hunt=owner.Hunt;running=true;
                 if(mode=="observe")StartCoroutine(RunObserve());else StartCoroutine(RunRead());
             }
@@ -97,34 +102,43 @@ namespace AffixZero.Presentation
                 owner.Progression.CaptureSnapshot().killTokens.Length==tokensBefore,"Live equipment swap lost inventory or reward state.");
             report.equipmentSwap=true;
 
-            phase="salvage-live";int salvageIndex=WorstSalvageIndex();Require(salvageIndex>=0,"Stress profile has no salvage candidate.");
-            string salvageId=owner.Progression.Inventory[salvageIndex].Id;int salvageValue=owner.Progression.GetSalvageValue(salvageIndex);
-            Dispatch("inventory-slot-"+salvageIndex);yield return null;Dispatch("salvage-button");yield return null;
+            phase="salvage-live";Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Transaction pause stopped the hunt or simulation kept advancing.");
+            int salvageIndex=WorstSalvageIndex();Require(salvageIndex>=0,"Stress profile has no salvage candidate.");
+            string salvageId=owner.Progression.Inventory[salvageIndex].Id,salvageName=owner.Progression.Inventory[salvageIndex].Name;
+            int salvageValue=owner.Progression.GetSalvageValue(salvageIndex);
+            Dispatch("inventory-slot-"+salvageIndex);yield return WaitFor(()=>Text("selected-item-name").Contains(salvageName),2,"stable salvage selection");
+            Dispatch("salvage-button");yield return WaitFor(()=>Text("salvage-button").Contains("CONFIRM"),2,"salvage confirmation state");
             int goldBefore=owner.Progression.TotalGold,salvageBefore=owner.Progression.TotalSalvageGold;
             inventoryBefore=owner.Progression.Inventory.Count;tokensBefore=owner.Progression.CaptureSnapshot().killTokens.Length;
             Dispatch("salvage-button");
             Require(IndexOf(salvageId)<0&&owner.Progression.Inventory.Count==inventoryBefore-1&&owner.Progression.TotalGold==goldBefore+salvageValue&&
                 owner.Progression.TotalSalvageGold==salvageBefore+salvageValue&&owner.Progression.CaptureSnapshot().killTokens.Length==tokensBefore,
                 "Live salvage did not remove exactly one item and credit exact provenance.");
+            Dispatch("pause-button");Require(hunt.Running&&!owner.IsPaused&&Time.timeScale==1,"Transaction resume did not restore the active 1x hunt.");
             report.salvageWhileRunning=true;report.salvageValue=salvageValue;
 
             phase="forge-live";Dispatch("forge-tab");yield return null;Require(owner.Progression.CanEnhanceEquipped,"Stress weapon cannot be enhanced.");
+            Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Forge transaction pause stopped the hunt or simulation kept advancing.");
             int rankBefore=owner.Progression.EquippedWeapon.EnhancementRank,cost=owner.Progression.EquippedEnhancementCost;
             goldBefore=owner.Progression.TotalGold;tokensBefore=owner.Progression.CaptureSnapshot().killTokens.Length;Dispatch("forge-enhance");
             Require(hunt.Running&&owner.Progression.EquippedWeapon.EnhancementRank==rankBefore+1&&owner.Progression.TotalGold==goldBefore-cost&&
                 owner.Progression.CaptureSnapshot().killTokens.Length==tokensBefore,"Live forge action charged or mutated reward state incorrectly.");
+            Dispatch("pause-button");Require(hunt.Running&&!owner.IsPaused&&Time.timeScale==1,"Forge transaction resume did not restore the active 1x hunt.");
             report.forgeWhileRunning=true;Dispatch("character-tab");yield return null;
 
             phase="natural-drop-with-panel";int collectedBefore=hunt.CollectedItems;Dispatch("speed-4x");report.speedSwitches++;
             yield return WaitFor(()=>hunt.CollectedItems>collectedBefore,22,"a normal production drop collected while equipment stayed open");
             Require(owner.Screen==ManagementScreen.Equipment&&hunt.Running,"Natural drop collection closed the equipment panel or stopped the hunt.");
             report.dropCollectedWithPanel=true;report.collectedDuringPanel=hunt.CollectedItems-collectedBefore;
-            Require(Text("bag-count").Contains(owner.Progression.Inventory.Count.ToString()),"Inventory count label became stale after the live drop.");
+            Dispatch("pause-button");Require(hunt.Running&&owner.IsPaused&&Time.timeScale==0,"Post-drop UI audit did not pause the active hunt.");
+            int postDropInventory=owner.Progression.Inventory.Count;
+            yield return WaitFor(()=>Text("bag-count").Contains(postDropInventory.ToString()),2,"post-drop inventory label refresh");
             if(owner.Progression.Inventory.Count>=HeroProgression.InventoryCapacity)
             {
                 salvageIndex=WorstSalvageIndex();string id=owner.Progression.Inventory[salvageIndex].Id;Dispatch("inventory-slot-"+salvageIndex);yield return null;
                 Dispatch("salvage-button");yield return null;Dispatch("salvage-button");yield return null;Require(IndexOf(id)<0,"Post-drop salvage did not reopen bag space.");
             }
+            Dispatch("pause-button");Require(hunt.Running&&!owner.IsPaused,"Post-drop UI audit did not resume the active hunt.");
             Dispatch("dungeon-tab");Dispatch("speed-1x");report.speedSwitches++;
 
             phase="clear-transition-speed";int clearBefore=hunt.CompletedRuns;
@@ -253,7 +267,6 @@ namespace AffixZero.Presentation
         }
         private void WriteReport()=>File.WriteAllText(Path.Combine(reportDirectory,"speed-ui-stress-"+mode+".json"),JsonUtility.ToJson(report,true));
         private static string Argument(string[] args,string key){int i=Array.IndexOf(args,key);if(i<0||i+1>=args.Length)throw new ArgumentException("Missing "+key);return args[i+1];}
-        private static string AbsoluteArgument(string[] args,string key){string value=Argument(args,key);if(!Path.IsPathRooted(value))throw new ArgumentException(key+" requires an absolute path.");return Path.GetFullPath(value);}
         private static void Require(bool value,string problem){if(!value)throw new InvalidOperationException(problem);}
 
         [Serializable] private sealed class Envelope{public string format,payload;}

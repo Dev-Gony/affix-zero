@@ -10,7 +10,7 @@ namespace AffixZero.Presentation
     // Observes real Windows mouse/key input. It never dispatches synthetic UI Toolkit events.
     public sealed class PhysicalInputProbe : MonoBehaviour
     {
-        private FirstEncounter owner; private Report report; private string reportDirectory, phase="initializing", equippedBefore;
+        private FirstEncounter owner; private Report report; private string reportDirectory, saveDirectory, phase="initializing", equippedBefore;
         private float started; private int forgeRankBefore; private bool finishing;
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Bootstrap()
@@ -21,7 +21,12 @@ namespace AffixZero.Presentation
         private void Begin(string[] args)
         {
             started=Time.realtimeSinceStartup;report=new Report();Application.logMessageReceived+=OnLog;
-            try{reportDirectory=AbsoluteArgument(args,"-affixReportDir");Directory.CreateDirectory(reportDirectory);WriteReport();}
+            try
+            {
+                reportDirectory=ProbePathPolicy.RequireDDriveDirectory(args,"-affixReportDir");
+                saveDirectory=ProbePathPolicy.RequireSaveDirectory(args,Application.persistentDataPath);
+                Directory.CreateDirectory(reportDirectory);WriteReport();
+            }
             catch(Exception error){Finish(false,error.ToString());}
         }
         private void LateUpdate()
@@ -41,6 +46,8 @@ namespace AffixZero.Presentation
                 owner=FindFirstObjectByType<FirstEncounter>();
                 if(owner==null||owner.Hunt==null||!owner.Hunt.Initialized||owner.Hero==null||!owner.Hero.IsReady||Root?.panel==null)return;
                 Require(owner.Persistence.CanPlay&&!owner.Persistence.Ephemeral,"Physical test profile is not isolated writable state.");
+                Require(string.Equals(Path.GetFullPath(owner.Persistence.FilePath),Path.Combine(saveDirectory,"profile-v1.json"),StringComparison.OrdinalIgnoreCase),
+                    "Physical input persistence escaped its explicit D: save sandbox.");
                 Require(owner.Progression.Inventory.Count>0&&owner.Progression.SpentPoints>0&&owner.Progression.TotalGold>=owner.Progression.EquippedEnhancementCost,
                     "Physical test requires the copied natural-progression profile with bag, talents and forge gold.");
                 equippedBefore=EquippedIds();forgeRankBefore=owner.Progression.EquippedWeapon.EnhancementRank;
@@ -90,8 +97,6 @@ namespace AffixZero.Presentation
             Debug.Log("AFFIX_PHYSICAL_INPUT_"+(success?"PASS":"FAIL")+" run="+report.runId);Application.Quit(success?0:1);
         }
         private void WriteReport()=>File.WriteAllText(Path.Combine(reportDirectory,"physical-input.json"),JsonUtility.ToJson(report,true));
-        private static string AbsoluteArgument(string[] args,string key)
-        {int i=Array.IndexOf(args,key);if(i<0||i+1>=args.Length||!Path.IsPathRooted(args[i+1]))throw new ArgumentException(key+" requires an absolute path.");return Path.GetFullPath(args[i+1]);}
         private static void Require(bool value,string problem){if(!value)throw new InvalidOperationException(problem);}
         [Serializable] private sealed class Report
         {

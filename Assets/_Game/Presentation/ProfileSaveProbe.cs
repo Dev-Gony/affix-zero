@@ -81,7 +81,7 @@ namespace AffixZero.Presentation
                 if (owner.Hunt == null || !owner.Hunt.Initialized || !owner.Hero.IsReady || !ControlReady("autohunt-toggle")) return;
                 Require(!owner.Hunt.Running && owner.IsPaused && Time.timeScale == 0 && !owner.ManagementVisible,
                     "Loaded profile must start stopped at the dungeon screen.");
-                Require(Vector2.Distance(owner.Hero.transform.position, new Vector2(-10, -4)) < .01f,
+                Require(Vector2.Distance(owner.Hero.transform.position, DungeonWorld.Entrance) < .01f,
                     "Loaded hero is not at the entry point.");
                 ObserveActors();
                 if (mode == "write")

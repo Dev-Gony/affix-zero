@@ -277,3 +277,23 @@ HeroSiegeEncounter에서 무료 Soldier/Orc와 생성 사원 방·석재 장애�
 
 
 안전 검사의 빌드 GUID는 `0a94c21a725b4d3a9a01e269067fa423`다. 이후 변경은 관리 창 위 피해 숫자 숨김과 검사 보고의 최종 성장 수치 추가이며 전투·안전 중단 코드는 동일하다. [연속 사망 안전 검사](validation/autohunt/safety-deaths.json)는 run `f508cbfae00844128c310426a8abbbc3`, 약 29.4초에 실제 적 공격으로 두 번 사망·한 번 재시도 후 자동 중단, 4.01초 중단 유지 PASS다. 이 격리 검사만 영웅 공격력을 1로 주입했으며 정상 밸런스 증거가 아니다. [가방 포화 안전 검사](validation/autohunt/safety-bag-full.json)는 run `a8fd4677ac5741bb90de2caeccef30fa`, 시험용 무기 24개로 가방을 채운 뒤 실제 첫 처치의 전리품을 보류 상태로 보존하고 중단했다. 약 7.65초, 골드 8·XP 25·기존 아이템 24개 유지, 중단 4.01초 PASS다. 두 검사는 중단 후 재개나 20분 안정성을 증명하지 않는다.
+# 2026-10-03 probe-isolation and enemy-HP follow-up
+
+The current follow-up is documented in `PROBE_SAVE_ISOLATION.md`. All nine
+standalone probes now fail closed without an explicit isolated D: save path;
+the speed/UI stress observe+read and final exact-PID physical-input regressions
+PASS while the user's production profile directory remains byte-identical.
+CoreSmoke is 320 PASS, static compile is 0/0, and final Windows player GUID is
+`3360c8b3dafa484d9a1afed8985cc4ec`.
+
+The first unsafe stress diagnostic had already rewritten the production
+primary envelope before this fix. The exact path, post-incident hash, preserved
+backup hash, and limits of the earlier partial comparison are recorded without
+claiming full semantic identity. Do not restore or delete either generation
+without user approval.
+
+Ordinary, elite, and guardian HP UI is absent; only player HP remains. Final
+720p/1080p player captures each verified 24 active enemies, no enemy-attached
+Canvas/TextMesh/health child, no non-hero health-like UI Toolkit element, four
+actual framebuffers, and 19 native callbacks. The current game has no genuine
+boss class, so no boss bar is shown.
