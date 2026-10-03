@@ -30,7 +30,7 @@ namespace AffixZero.Presentation
             this.read=read??throw new ArgumentNullException(nameof(read));this.invest=invest??throw new ArgumentNullException(nameof(invest));this.reset=reset??throw new ArgumentNullException(nameof(reset));
             if(parent==null||close==null)throw new ArgumentNullException();
             icons[0]=Resources.Load<Texture2D>("AffixGenerated/PowerRune");icons[1]=Resources.Load<Texture2D>("AffixGenerated/PrecisionRune");icons[2]=Resources.Load<Texture2D>("AffixGenerated/VeteranRune");
-            icons[3]=Resources.Load<Texture2D>("AffixUIVisual/SkillHeal");icons[4]=Resources.Load<Texture2D>("AffixUIVisual/SkillArea");icons[5]=Resources.Load<Texture2D>("AffixUIVisual/Items/gale_boots");
+            icons[3]=Resources.Load<Texture2D>("AffixGenerated/VitalityRune");icons[4]=Resources.Load<Texture2D>("AffixGenerated/CleaveRune");icons[5]=Resources.Load<Texture2D>("AffixGenerated/HasteRune");
             Root=Box(parent,"talent-screen",16,64,1248,516,new Color32(10,10,13,250));Root.pickingMode=PickingMode.Position;Border(Root,new Color32(116,68,53,255),2);
             var header=Box(Root,"talent-header",8,8,1232,56,Surface);Skin(header,"AffixUIVisual/LeatherBurgundy");Border(header,new Color32(116,68,53,255),1);Box(header,"talent-header-accent",0,0,4,56,Crimson);
             Text(header,"특성 스킬트리",18,5,355,29,23,Cream);Text(header,"OFFENSE · SURVIVAL · AUTO SKILL",19,35,355,15,10,Muted);

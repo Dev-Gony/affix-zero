@@ -12,6 +12,9 @@ $expectedSources = [ordered]@{
     'PowerRune.png' = '6E45B098AD2918196375A973BEAFF668A046DCBA71F21997777365F883FF13EF'
     'PrecisionRune.png' = '58F65C43ED07BAB6456262263A5B399DFE79F841FAB9388C0E183705DF260F08'
     'VeteranRune.png' = 'CBEEF4F0D2960CEAD8973693B89ED81734098040579E009300F9AEFDD5C17F0D'
+    'VitalityRune.png' = 'DDC698C627F9A4EDA7768341185E48F8CFFDBF554BD319A588FA7AE885B8CC78'
+    'CleaveRune.png' = '8E3F285A22A4D7540F5CBFFF2155F8BE06873B6C8C3F9E67A0F2BA652F620F81'
+    'HasteRune.png' = '079D97C8C467217F046D77E728A24FFFB0BF2E741DEA39CF7321EC1C601CFA34'
 }
 
 function Save-PassiveIcon([string] $name) {
@@ -75,7 +78,8 @@ foreach ($name in $expectedSources.Keys) {
     Write-Output "$name|128x128|nonTransparent=$nonTransparent|sha256=$hash"
 }
 
-$sheet = [System.Drawing.Bitmap]::new(900, 480, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
+$sheetHeight = 68 + $expectedSources.Count * 138
+$sheet = [System.Drawing.Bitmap]::new(900, $sheetHeight, [System.Drawing.Imaging.PixelFormat]::Format32bppArgb)
 $graphics = [System.Drawing.Graphics]::FromImage($sheet)
 $background = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255, 12, 10, 13))
 $cell = [System.Drawing.SolidBrush]::new([System.Drawing.Color]::FromArgb(255, 31, 19, 24))
@@ -87,7 +91,7 @@ $labelFont = [System.Drawing.Font]::new('Segoe UI', 13, [System.Drawing.FontStyl
 $smallFont = [System.Drawing.Font]::new('Consolas', 10)
 try {
     $graphics.FillRectangle($background, 0, 0, $sheet.Width, $sheet.Height)
-    $graphics.DrawString('AFFIX: ZERO - PAINTED PASSIVES AT 128 / 64 / 48 / 37 PX', $titleFont, $gold, 20, 12)
+    $graphics.DrawString('AFFIX: ZERO - ALL SIX PAINTED PASSIVES AT 128 / 64 / 48 / 37 PX', $titleFont, $gold, 20, 12)
     $row = 0
     foreach ($name in $expectedSources.Keys) {
         $y = 52 + $row * 138

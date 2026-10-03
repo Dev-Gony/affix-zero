@@ -151,8 +151,9 @@ as a final PASS.
   compatibility; all current 29 base definitions use illustrated one-to-one
   paths. The actual native fixture shows seven representative bag icons while
   the generated contact/scale sheets cover the complete set.
-- The framed six-node talent screen is verified and its first three passive
-  symbols now use distinct painted 128 px art, inspected in locked and selected
-  states at 720p/1080p. Final user visual acceptance still remains pending.
+- The framed six-node talent screen is verified and all six passive symbols now
+  use distinct dedicated painted 128 px art, inspected together at 37/48 px and
+  in locked/selected states at native 720p/1080p. This closes the bounded
+  art/UI scope; final user visual acceptance remains pending.
 - Town/hub, five difficulty tiers, gacha, pets, and new gameplay systems remain
   deferred by scope.

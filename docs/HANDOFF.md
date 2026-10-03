@@ -1,4 +1,29 @@
-# 2026-10-03 - painted passive icons completed
+# 2026-10-03 - all six painted passive icons completed
+
+The final `VitalityRune`, `CleaveRune` and `HasteRune` originals came from the
+asset-only commit `2c35377ae79cfceea4fa7fae8134e95427d9014e` (tree
+`f8fa817956ac1529f6b799319ff534ffa7cb2109`). Only those three blobs were
+extracted; the branch was not merged, cherry-picked or checked out. Together
+with the prior trio, every existing TalentPanel node now has a dedicated
+painted 128 x 128 icon. HUD `SkillHeal`/`SkillArea` and equipment `gale_boots`
+remain separate and unchanged.
+
+Final build `04032b1b12884ed8a78a349fda6c50d3` passes CoreSmoke 321, static
+compile 0/0, Unity import/build 0/0, and D-isolated native 720p/1080p probes
+with five frames, 19 callbacks, locked/selected states, player HP present and
+non-player HP absent. Final evidence is
+`docs/media/passive-icons-v2/talent-panel-six-painted-1080p.png` and
+`docs/media/passive-icons-v2/passive-icons-six-scale-sheet.png`. The existing
+art/UI scope is complete; do not start another cosmetic micro-pass. Final user
+visual acceptance remains pending.
+
+The next concrete gameplay step is a real end-of-route boss encounter integrated
+into the autonomous dungeon loop, with HP presentation reserved for that boss
+only, followed by loot/recovery/segment-transition/repeat verification. Socket
+capacity numbers remain a documented per-base design proposal, not implemented
+or individually user-approved values.
+
+# 2026-10-03 - first painted passive trio completed
 
 Follow-up: Fury's Korean user-facing name is now consistently `분노` in both
 the node and authoritative `TalentDefinition`; stats and behavior are

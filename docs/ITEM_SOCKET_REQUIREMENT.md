@@ -58,11 +58,12 @@ of current maxima. No positive glove example was verified in this source set.
 
 ## Recommended AFFIX contract — design recommendation only
 
-Everything below is a coherent **DESIGN RECOMMENDATION, NOT IMPLEMENTATION**.
-The user delegated the per-base/reference approach, so the 29 capacities form
-one recommended baseline rather than 29 separate questions. It is an original
-AFFIX balance design informed by the reference patterns above, not a copy of
-either game and not authority to add socket code yet.
+Everything below is a coherent **DESIGN PROPOSAL, NOT IMPLEMENTATION OR A
+USER-APPROVED NUMERICAL TABLE**. The user delegated the per-base/reference
+approach, so the 29 capacities are one internally consistent recommendation
+rather than 29 separate questions. It is an original AFFIX balance design
+informed by the reference patterns above, not a copy of either game and not
+authority to add socket code yet.
 
 ### Per-base data model and one validator
 
@@ -214,9 +215,10 @@ and any opening cost remain implementation inputs, not part of this art task.
 ### Implementation gates
 
 The user has approved the per-slot/per-base direction and rejected a universal
-maximum of three. Treat the complete table above as the recommended v1 design
-baseline; do not ask for 29 individual confirmations. It may be revised later
-through one explicit balance pass. Initial `openedCount` weights, the legacy
+maximum of three. Keep the complete table above as the coherent v1 proposal;
+do not ask for 29 individual confirmations or treat the numbers as user-approved
+runtime values. It may be revised later through one explicit balance pass.
+Initial `openedCount` weights, the legacy
 zero-socket migration policy, add-socket source, removal cost, rune effect
 catalog and acquisition source remain implementation inputs. Until those are
 designed and socket code is authorized, the existing no-fake-socket rule

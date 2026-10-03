@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "PAINTED_PASSIVE_ICONS_INTEGRATED_AND_VALIDATED",
+  "stage": "ALL_SIX_PAINTED_PASSIVE_ICONS_INTEGRATED_ART_UI_SCOPE_COMPLETE",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -16,12 +16,12 @@
     "latest_user_report": "INSTALLATION_COMPLETE",
     "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS_PLUS_3_PAINTED_PASSIVE_ICONS",
+  "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS_PLUS_6_DEDICATED_PAINTED_PASSIVE_ICONS",
   "unity_editor_import": "PASS",
   "unity_play": "PASS_720_AND_1080_CONNECTED_DUNGEON_FULL_CLEAR_WITH_EPHEMERAL_SURVIVAL_FIXTURE",
-  "visual_approval": "29 EQUIPMENT AND 3 NEW PASSIVE ICONS AGENT-INSPECTED AT ACTUAL SIZES AND NATIVE 720_1080; FINAL USER ACCEPTANCE PENDING",
+  "visual_approval": "29 EQUIPMENT AND ALL 6 PASSIVE ICONS AGENT-INSPECTED AT ACTUAL SIZES AND NATIVE 720_1080; FINAL USER ACCEPTANCE PENDING",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_3d4402e94aa84488a4a83d6d93e70aa9",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_04032b1b12884ed8a78a349fda6c50d3",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Complete the one-batch painted replacement for Vitality, Cleave and Haste when masters are supplied; socket capacity baseline is designed and implementation remains separate; broader systems remain deferred",
+  "next": "Stop cosmetic micro-passes; next gameplay step is a real end-of-route boss with boss-only HP integrated into autonomous loot, recovery, segment transition and repeat; socket numbers remain proposal-only",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
@@ -92,7 +92,7 @@
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "socket_requirement": {
-    "status": "PER_BASE_29_CAPACITY_DESIGN_RECOMMENDATION_COMPLETE_NOT_IMPLEMENTED",
+    "status": "PER_BASE_DIRECTION_DELEGATED_NUMERICAL_TABLE_PROPOSAL_NOT_USER_APPROVED_OR_IMPLEMENTED",
     "recorded_date": "2026-10-03",
     "spec": "docs/ITEM_SOCKET_REQUIREMENT.md",
     "current_implementation": "NONE",
@@ -293,9 +293,27 @@
       "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
       "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
     },
-    "remaining_talent_art": "Vitality reuses SkillHeal, Cleave reuses SkillArea, Haste reuses gale_boots; dedicated VitalityRune/CleaveRune/HasteRune are the final bounded three-icon batch",
-    "post_naming_validation": "Fury Korean display name normalized to 분노; CoreSmoke 321 PASS and installed Unity API static compile 0 warnings 0 errors; Unity import/build and OS input not rerun for this text-only follow-up",
-    "socket_scope": "Design documentation only; the 29-base capacity table is a coherent recommended baseline and no socket fields, UI, drops, runes or gameplay were implemented"
+    "remaining_talent_art": "NONE; all six existing nodes use dedicated painted art and the bounded art/UI scope is complete",
+    "post_naming_validation": "Fury Korean display name remains 분노; gameplay meaning and values unchanged",
+    "socket_scope": "Design documentation only; the 29-base capacity table is a coherent proposal but is not user-approved or implemented"
+  },
+  "six_painted_passives_20261003": {
+    "status": "PASS_TECHNICAL_AND_AGENT_VISUAL_ART_UI_SCOPE_COMPLETE_USER_ACCEPTANCE_PENDING",
+    "final_source_commit": "2c35377ae79cfceea4fa7fae8134e95427d9014e",
+    "final_source_tree": "f8fa817956ac1529f6b799319ff534ffa7cb2109",
+    "runtime_icons": "6 unique 128x128 transparent PNGs with four-pixel padding and zero border alpha; all six distinct at 48 and 37 pixels",
+    "shared_assets_preserved": "AffixUIVisual/SkillHeal, AffixUIVisual/SkillArea and AffixUIVisual/Items/gale_boots hashes unchanged",
+    "core_smoke": "321 PASS",
+    "static_compile": "PASS 0 warnings 0 errors",
+    "unity_build": "PASS 0 warnings 0 errors",
+    "build_guid": "04032b1b12884ed8a78a349fda6c50d3",
+    "ui_720": "PASS run aaa422f4174e459ba3440b704e376368; 5 frames; 19 callbacks; locked and selected states; player HP present; non-player HP absent",
+    "ui_1080": "PASS run fc7c1558bcfb48d49d4a38096af0b561; 5 frames; 19 callbacks; locked and selected states; player HP present; non-player HP absent",
+    "physical_input": "NOT_RERUN_FOR_VISUAL_ONLY_MAPPING; prior evidence remains historical",
+    "final_screenshot": "docs/media/passive-icons-v2/talent-panel-six-painted-1080p.png",
+    "six_icon_sheet": "docs/media/passive-icons-v2/passive-icons-six-scale-sheet.png",
+    "production_save_hashes_unchanged": true,
+    "next_gameplay": "Real end-of-route boss with boss-only HP inside the autonomous hunt/loot/recovery/transition/repeat loop"
   },
   "physical_input": {
     "status": "PASS",

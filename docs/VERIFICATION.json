@@ -347,9 +347,34 @@
       "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
       "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
     },
-    "visual_limit": "Agent-inspected only; final user visual acceptance pending. The final bounded art batch is Vitality/SkillHeal shared HUD art, Cleave/SkillArea shared HUD art and Haste/gale_boots equipment reuse; dedicated replacements are not yet supplied.",
+    "visual_limit": "Agent-inspected only; final user visual acceptance pending. All six existing talent nodes now have dedicated painted art; no further cosmetic scope is planned.",
     "naming": "Fury Korean label normalized to 분노 in the UI node, core TalentDefinition and current art documentation; gameplay meaning unchanged.",
     "post_naming_validation": "CoreSmoke 321 PASS; installed Unity 6000.3.24f1 API static compile PASS with 0 warnings and 0 errors. Unity import/build and OS input were not rerun for this display-name-only follow-up.",
-    "socket_scope": "Documentation only. The rejected universal maximum is replaced by one coherent recommended 29-base capacity baseline; opened-count and recovery policies remain separate and nothing was implemented."
+    "socket_scope": "Documentation only. The rejected universal maximum is replaced by one coherent 29-base numerical proposal; it is not user-approved or implemented, while opened-count and recovery policies remain separate."
+  },
+  "six_painted_passives_20261003": {
+    "result": "PASS_TECHNICAL_AND_AGENT_VISUAL_ART_UI_SCOPE_COMPLETE_USER_ACCEPTANCE_PENDING",
+    "source_commit": "2c35377ae79cfceea4fa7fae8134e95427d9014e",
+    "source_tree": "f8fa817956ac1529f6b799319ff534ffa7cb2109",
+    "source_import": "Only VitalityRune, CleaveRune and HasteRune blobs extracted; source commit is not an ancestor and was not merged, cherry-picked or checked out",
+    "runtime_icons": "All six unique 128x128 transparent outputs have four-pixel padding and zero border alpha",
+    "runtime_sha256": {
+      "VitalityRune": "016B6DC1CA2B960D0694676624DFDA775B31CC64315403FECA70B096E3A78DEE",
+      "CleaveRune": "9AB99DB8673E4B1C6F22C85374822ACFF608DCC86085B5F7735210702E110FE4",
+      "HasteRune": "E74D69A4354CA9DF197FA94E1460871D115EA2BD0872FD415635C03865CBAB66"
+    },
+    "core_checks": 321,
+    "static_compile": "PASS 0 warnings 0 errors",
+    "unity_build": "PASS 0 warnings 0 errors",
+    "build_guid": "04032b1b12884ed8a78a349fda6c50d3",
+    "ui_720": "PASS Build/Reports/six-passives-ui-720/ui-reference-probe.json; run aaa422f4174e459ba3440b704e376368; 5 frames; 19 callbacks",
+    "ui_1080": "PASS Build/Reports/six-passives-ui-1080/ui-reference-probe.json; run fc7c1558bcfb48d49d4a38096af0b561; 5 frames; 19 callbacks",
+    "hp_policy": "Player HP visible; ordinary, elite and guardian HP absent",
+    "shared_assets_unchanged": true,
+    "production_save_hashes_unchanged": true,
+    "physical_input": "Not rerun for this visual-only resource mapping; no gameplay or input code changed",
+    "final_screenshot": "docs/media/passive-icons-v2/talent-panel-six-painted-1080p.png SHA256 A1321F4054DB4C72B892F1893097D0341234CF23043AD87B86B2438323764A22; decoded RGB equals native BMP",
+    "scale_sheet": "docs/media/passive-icons-v2/passive-icons-six-scale-sheet.png SHA256 4755CD2DFB39C4D6A0CF82097EF1D90911DB946157B5FAF1E45C231CD3F42BF5",
+    "next_gameplay": "Real boss encounter with boss-only HP in the autonomous route, loot, recovery, segment-transition and repeat loop"
   }
 }
