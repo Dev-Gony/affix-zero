@@ -173,7 +173,7 @@ namespace AffixZero.Presentation
             report.finalInventory=owner.Progression.Inventory.Count;report.finalIssuedItems=final.issuedItemIds.Length;
             Dispatch("speed-4x");report.speedSwitches++;Require(owner.SimulationSpeed==4,"Final session speed selection failed.");
             hunt.StopHunt();Require(owner.SaveProgress(),"Final stress save failed: "+owner.Persistence.Problem);
-            report.savedSchema=DiskSchema();Require(report.savedSchema==4,"Schema-v3 profile did not save as schema v4.");report.migrationVerified=true;
+            report.savedSchema=DiskSchema();Require(report.savedSchema==5,"Schema-v3 profile did not save as schema v5.");report.migrationVerified=true;
             string canonical=ProfilePersistence.Encode(owner.Progression);File.WriteAllText(expectedPath,canonical);
             Require(File.ReadAllText(owner.Persistence.FilePath)==canonical,"Saved stress profile differs from canonical encoding.");
             report.diskRoundtrip=true;Finish(true,null);

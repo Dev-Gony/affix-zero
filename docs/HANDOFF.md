@@ -1,3 +1,29 @@
+# 2026-10-03 - playable per-base sockets and runes completed
+
+The documented 29-base socket table is now the implemented v1 runtime contract.
+Capacity is base/slot-specific, generated items keep immutable capacity and a
+separate seeded opened count, and ten original runes map only to existing stats
+with explicit compatible slots. Insert/remove, enhancement/equip preservation,
+dedicated stacks, atomic ReturnAll discard/salvage, boss rune acquisition and
+fail-closed schema-v5 persistence are implemented. No paid system, gacha, cash
+item, new currency or new gameplay stat was added. Read
+`docs/SOCKET_RUNE_VERTICAL.md`.
+
+The right-docked burgundy equipment screen now exposes a real socket workbench
+inside its floating left comparison card. Final inspected 720p/1080p frames
+show one filled Ember cell, one open cell, the rune effect, intact return action
+and salvage rune-return preview. Tracked evidence is under
+`docs/media/socket-runes/`. The compact geometric rune marks are functional and
+readable; dedicated painted rune icons remain an honest optional visual gap.
+
+Release build `adf711bf0a8a40b386fb012cdc944ffb` passes CoreSmoke 348,
+static compile 0/0, Unity build/import 0/0, D-isolated separate-process exact
+save restore, 720p/1080p native UI with six frames and 23 callbacks, 29 icons,
+player/boss-only HP, a 24-kill autonomous boss loop that issues one rune, and
+all ten exact-PID OS input actions in 17.223 seconds. Human play and final user
+visual approval remain pending. Town, five-tier expansion, gacha and pets stay
+deferred; boss sprite art remains on the road map rather than this slice.
+
 # 2026-10-03 - genuine route-end boss loop completed
 
 Each connected layout now contains a named genuine boss in slot 24. It remains

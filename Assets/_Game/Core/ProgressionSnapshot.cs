@@ -4,11 +4,12 @@ namespace AffixZero.Core
 {
     // Payload v2 expands equipment and talents; v1 migrates with an explicit legacy point credit.
     // Payload v4 records same-currency salvage provenance without invalidating v1-v3 profiles.
+    // Payload v5 adds per-base sockets and a conserved stackable rune inventory.
     // Optional inline items require tags because Unity JsonUtility may produce empty objects.
     [Serializable]
     public sealed class ProgressionSnapshot
     {
-        public int schemaVersion = 4;
+        public int schemaVersion = 5;
         public int totalExperience, totalGold, totalSalvageGold, unspentPoints, furyRank, precisionRank, keystoneRank;
         public int vitalityRank, cleaveRank, hasteRank, legacyPointCredit;
         public int selectedDifficulty, dungeonClears;
@@ -20,6 +21,8 @@ namespace AffixZero.Core
         public WeaponSnapshot[] inventory;
         public WeaponSnapshot pendingLoot;
         public string[] killTokens, issuedItemIds;
+        public int totalRunesIssued;
+        public RuneStackSnapshot[] runeStacks;
     }
 
     [Serializable]
@@ -29,6 +32,8 @@ namespace AffixZero.Core
         public int flatDamage, affixDamage, enhancementRank;
         public int equipmentSlot, weaponStyle, flatDefense, flatHealth, cooldownReductionPercent;
         public ItemOptionSnapshot[] options;
+        public int socketCapacity, openedSocketCount;
+        public SocketSnapshot[] sockets;
     }
 
     [Serializable]
@@ -37,5 +42,19 @@ namespace AffixZero.Core
         public int stat;
         public string name;
         public float value;
+    }
+
+    [Serializable]
+    public sealed class SocketSnapshot
+    {
+        public int index;
+        public string runeId;
+    }
+
+    [Serializable]
+    public sealed class RuneStackSnapshot
+    {
+        public string runeId;
+        public int count;
     }
 }

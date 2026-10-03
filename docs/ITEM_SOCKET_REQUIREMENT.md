@@ -4,6 +4,16 @@ Date recorded: 2026-10-03
 
 The user explicitly requires item sockets in the product direction.
 
+## 2026-10-03 implementation update
+
+The delegated vertical slice is now implemented. The 29-base table below is
+the v1 runtime table, not merely a proposal. Schema v5, ten original runes,
+seeded opened counts, atomic insert/remove, enhancement/equip preservation,
+boss acquisition and `ReturnAll` discard/salvage are verified. The earlier
+audit/proposal wording below is retained as design history and is superseded
+where it says socket code does not exist. The authoritative shipped behavior,
+reports and remaining visual gap are in `SOCKET_RUNE_VERTICAL.md`.
+
 ## Current contract audit
 
 There is no coherent implementation contract yet:

@@ -29,6 +29,7 @@ namespace AffixZero.Presentation
         public int Gold => rewards == null ? 0 : rewards.Gold;
         public int RewardCollectionCount => rewards == null ? 0 : rewards.CollectionCount;
         public bool LastDefeatOfferedLoot { get; private set; }
+        public string LastBossRuneId { get; private set; } = "";
         public MeleeActor Hero => hero;
         public MeleeActor Enemy => enemy;
         public bool IsPaused => manuallyPaused || !CanProgress || (Hunt!=null && !Hunt.Running);
@@ -124,7 +125,35 @@ namespace AffixZero.Presentation
             if(!CanProgress)return false;
             int value=Progression.GetSalvageValue(index);
             if (!Progression.Salvage(index)) { ProgressionNotice = "Select an item to salvage."; return false; }
-            ProgressionNotice = "SALVAGED  +"+value+" GOLD";
+            ProgressionNotice = "SALVAGED  +"+value+" GOLD"+
+                (Progression.LastReturnedRuneCount>0?"  ·  RETURNED "+Progression.LastReturnedRuneCount+" RUNES":"");
+            SaveProgress();
+            return true;
+        }
+
+        public bool SocketRune(int inventoryIndex, EquipmentSlot? equippedSlot, int socketIndex, string runeId)
+        {
+            if(!CanProgress)return false;
+            bool changed=equippedSlot.HasValue
+                ?Progression.SocketEquippedItem(equippedSlot.Value,socketIndex,runeId)
+                :Progression.SocketInventoryItem(inventoryIndex,socketIndex,runeId);
+            if(!changed){ProgressionNotice="RUNE INSERT BLOCKED · CHECK SLOT AND COMPATIBILITY";return false;}
+            ApplyBuild();
+            RuneDefinition rune=SocketCatalog.GetRune(runeId);
+            ProgressionNotice="SOCKETED  "+(rune==null?runeId:rune.Name)+"  ·  "+SocketCatalog.DescribeValue(rune);
+            SaveProgress();
+            return true;
+        }
+
+        public bool UnsocketRune(int inventoryIndex, EquipmentSlot? equippedSlot, int socketIndex)
+        {
+            if(!CanProgress)return false;
+            bool changed=equippedSlot.HasValue
+                ?Progression.UnsocketEquippedItem(equippedSlot.Value,socketIndex)
+                :Progression.UnsocketInventoryItem(inventoryIndex,socketIndex);
+            if(!changed){ProgressionNotice="RUNE REMOVAL BLOCKED · CHECK SOCKET AND STACK SPACE";return false;}
+            ApplyBuild();
+            ProgressionNotice="RUNE RETURNED INTACT";
             SaveProgress();
             return true;
         }
@@ -230,6 +259,7 @@ namespace AffixZero.Presentation
         public bool RegisterDefeat(MeleeActor actor)
         {
             LastDefeatOfferedLoot = false;
+            LastBossRuneId = "";
             if(!CanProgress)return false;
             if (actor.IsDead && hero != null && !hero.IsDead &&
                 rewards.TryCollect(rewards.EncounterId, actor.ActorId, actor.DeathCount, 25, 8))
@@ -241,6 +271,9 @@ namespace AffixZero.Presentation
                 bool elite=!boss&&actor.name.IndexOf("Elite",StringComparison.OrdinalIgnoreCase)>=0;
                 int floor=Math.Max(1,Progression.Level+Progression.DungeonClears);
                 int seed=StableSeed(token);
+                RuneDefinition bossRune=boss?SocketCatalog.RuneForSeed(seed):null;
+                bool runeGranted=bossRune!=null&&Progression.TryGrantRune(bossRune.Id);
+                if(runeGranted)LastBossRuneId=bossRune.Id;
                 bool fixture=Array.IndexOf(Environment.GetCommandLineArgs(),"-affixAutoHuntTest")>=0;
                 WeaponItem drop=boss
                     ?LootGenerator.GenerateGuaranteed("boss-loot:"+token,floor,seed,Progression.SelectedDifficulty)
@@ -252,6 +285,7 @@ namespace AffixZero.Presentation
                 ProgressionNotice=Progression.UnspentPoints+Progression.SpentPoints>talentPoints?"특성 포인트 +1":
                     "처치 보상 +"+Progression.LastExperienceReward+" XP · +"+Progression.LastGoldReward+" GOLD";
                 if(offered){LootPosition=actor.transform.position;ProgressionNotice=(boss?"BOSS LOOT  ":"")+"["+drop.Rarity+"] "+drop.Name+" 발견 · 회수 중";ShowLoot();}
+                if(runeGranted)ProgressionNotice+="  ·  RUNE "+bossRune.Name;
                 SaveProgress();
                 return true;
             }

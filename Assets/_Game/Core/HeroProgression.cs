@@ -55,9 +55,31 @@ namespace AffixZero.Core
         public int FlatHealth { get; }
         public int BaseCooldownReductionPercent { get; }
         public IReadOnlyList<ItemOption> Options { get; }
+        public int SocketCapacity { get; }
+        public int OpenedSocketCount { get; }
+        public IReadOnlyList<string> SocketedRunes { get; }
+        public int FilledSocketCount
+        {
+            get
+            {
+                int count = 0;
+                foreach (string runeId in SocketedRunes) if (!string.IsNullOrEmpty(runeId)) count++;
+                return count;
+            }
+        }
         private bool DefensiveSlot => EquipmentSlot == EquipmentSlot.Armor || EquipmentSlot == EquipmentSlot.Helmet ||
             EquipmentSlot == EquipmentSlot.Gloves || EquipmentSlot == EquipmentSlot.Boots;
-        private float Option(AffixStat stat) { float total = 0; foreach (ItemOption option in Options) if (option.Stat == stat) total += option.Value; return total; }
+        private float Option(AffixStat stat)
+        {
+            float total = 0;
+            foreach (ItemOption option in Options) if (option.Stat == stat) total += option.Value;
+            foreach (string runeId in SocketedRunes)
+            {
+                RuneDefinition rune = SocketCatalog.GetRune(runeId);
+                if (rune != null && rune.Stat == stat) total += rune.Value;
+            }
+            return total;
+        }
         public int EnhancementDamage => DefensiveSlot ? 0 : EnhancementRank * 2;
         public int DamageBonus => FlatDamage + AffixDamage + MathfRound(Option(AffixStat.Attack)) + EnhancementDamage;
         public int DefenseBonus => FlatDefense + MathfRound(Option(AffixStat.Defense)) + (DefensiveSlot ? EnhancementRank : 0);
@@ -81,7 +103,8 @@ namespace AffixZero.Core
             string affixName, string iconResource, string rarity, int enhancementRank = 0,
             EquipmentSlot equipmentSlot = EquipmentSlot.Weapon, WeaponStyle weaponStyle = WeaponStyle.Sword,
             int flatDefense = 0, int flatHealth = 0, int cooldownReductionPercent = 0,
-            IEnumerable<ItemOption> options = null)
+            IEnumerable<ItemOption> options = null, int socketCapacity = -1, int openedSocketCount = -1,
+            IEnumerable<string> socketedRunes = null)
         {
             if (string.IsNullOrWhiteSpace(id) || string.IsNullOrWhiteSpace(name) ||
                 string.IsNullOrWhiteSpace(iconResource) || string.IsNullOrWhiteSpace(rarity))
@@ -105,6 +128,26 @@ namespace AffixZero.Core
             // Six random affixes may sit beside authored base stats on the same item.
             if (optionList.Count > 8 || optionList.Contains(null)) throw new ArgumentException("An item supports at most eight non-null options.", nameof(options));
             Options = optionList.AsReadOnly();
+            int resolvedCapacity = SocketCatalog.CapacityFor(iconResource, equipmentSlot);
+            SocketCapacity = socketCapacity < 0 ? resolvedCapacity : socketCapacity;
+            if (SocketCapacity != resolvedCapacity)
+                throw new ArgumentException("Socket capacity disagrees with the registered item base.", nameof(socketCapacity));
+            OpenedSocketCount = openedSocketCount < 0 ? 0 : openedSocketCount;
+            if (OpenedSocketCount < 0 || OpenedSocketCount > SocketCapacity)
+                throw new ArgumentOutOfRangeException(nameof(openedSocketCount));
+            var socketList = socketedRunes == null ? new List<string>() : new List<string>(socketedRunes);
+            if (socketList.Count == 0 && OpenedSocketCount > 0)
+                for (int i = 0; i < OpenedSocketCount; i++) socketList.Add(null);
+            if (socketList.Count != OpenedSocketCount)
+                throw new ArgumentException("Socket contents must match the opened socket count.", nameof(socketedRunes));
+            foreach (string runeId in socketList)
+            {
+                if (string.IsNullOrEmpty(runeId)) continue;
+                RuneDefinition rune = SocketCatalog.GetRune(runeId);
+                if (rune == null || !rune.Supports(equipmentSlot))
+                    throw new ArgumentException("Socket contains an unknown or incompatible rune.", nameof(socketedRunes));
+            }
+            SocketedRunes = socketList.AsReadOnly();
             Id = id;
             Name = name;
             FlatDamage = flatDamage;
@@ -138,6 +181,7 @@ namespace AffixZero.Core
         private readonly List<WeaponItem> inventory = new List<WeaponItem>();
         private readonly HashSet<string> killTokens = new HashSet<string>(StringComparer.Ordinal);
         private readonly HashSet<string> issuedItemIds = new HashSet<string>(StringComparer.Ordinal);
+        private readonly Dictionary<string, int> runeCounts = new Dictionary<string, int>(StringComparer.Ordinal);
         private readonly ReadOnlyCollection<WeaponItem> inventoryView;
         private bool firstDropWaiting;
 
@@ -157,6 +201,8 @@ namespace AffixZero.Core
         public int TotalGold { get; private set; }
         public int TotalSalvageGold { get; private set; }
         public int LastSalvageGold { get; private set; }
+        public int LastReturnedRuneCount { get; private set; }
+        public int TotalRunesIssued { get; private set; }
         public int FuryRank { get; private set; }
         public int PrecisionRank { get; private set; }
         public int KeystoneRank { get; private set; }
@@ -166,6 +212,17 @@ namespace AffixZero.Core
         public DungeonDifficulty SelectedDifficulty { get; private set; }
         public int DungeonClears { get; private set; }
         public int LegacyPointCredit => legacyPointCredit;
+        public IReadOnlyList<RuneStack> RuneInventory
+        {
+            get
+            {
+                var result = new List<RuneStack>();
+                foreach (RuneDefinition rune in SocketCatalog.Runes)
+                    if (runeCounts.TryGetValue(rune.Id, out int count) && count > 0)
+                        result.Add(new RuneStack(rune, count));
+                return result.AsReadOnly();
+            }
+        }
         public int Level => 1 + TotalExperience / ExperiencePerLevel;
         public int SpentPoints => FuryRank + PrecisionRank + KeystoneRank + VitalityRank + CleaveRank + HasteRank;
         public int TalentDamage => FuryRank * 3 + PrecisionRank * 4 + KeystoneRank * 6;
@@ -348,6 +405,94 @@ namespace AffixZero.Core
             firstDropWaiting = false;
         }
 
+        public int RuneCount(string runeId) =>
+            !string.IsNullOrEmpty(runeId) && runeCounts.TryGetValue(runeId, out int count) ? count : 0;
+
+        public IReadOnlyList<RuneDefinition> CompatibleOwnedRunes(EquipmentSlot slot)
+        {
+            var result = new List<RuneDefinition>();
+            foreach (RuneDefinition rune in SocketCatalog.Runes)
+                if (rune.Supports(slot) && RuneCount(rune.Id) > 0) result.Add(rune);
+            return result.AsReadOnly();
+        }
+
+        public bool TryGrantRune(string runeId, int count = 1)
+        {
+            RuneDefinition rune = SocketCatalog.GetRune(runeId);
+            int existing = RuneCount(runeId);
+            if (rune == null || count <= 0 || count > SocketCatalog.MaxRuneStack ||
+                existing > SocketCatalog.MaxRuneStack - count || TotalRunesIssued > int.MaxValue - count) return false;
+            runeCounts[rune.Id] = existing + count;
+            TotalRunesIssued += count;
+            return true;
+        }
+
+        public bool SocketInventoryItem(int index, int socketIndex, string runeId)
+        {
+            if (!ValidIndex(index) || !TryBuildSocketed(inventory[index], socketIndex, runeId, out WeaponItem updated)) return false;
+            ConsumeRune(runeId);
+            inventory[index] = updated;
+            return true;
+        }
+
+        public bool SocketEquippedItem(EquipmentSlot slot, int socketIndex, string runeId)
+        {
+            WeaponItem current = GetEquipped(slot);
+            if (current == null || !TryBuildSocketed(current, socketIndex, runeId, out WeaponItem updated)) return false;
+            ConsumeRune(runeId);
+            SetEquipped(slot, updated);
+            return true;
+        }
+
+        public bool UnsocketInventoryItem(int index, int socketIndex)
+        {
+            if (!ValidIndex(index) || !TryBuildUnsocketed(inventory[index], socketIndex, out WeaponItem updated, out string runeId)) return false;
+            AddReturnedRune(runeId);
+            inventory[index] = updated;
+            return true;
+        }
+
+        public bool UnsocketEquippedItem(EquipmentSlot slot, int socketIndex)
+        {
+            WeaponItem current = GetEquipped(slot);
+            if (current == null || !TryBuildUnsocketed(current, socketIndex, out WeaponItem updated, out string runeId)) return false;
+            AddReturnedRune(runeId);
+            SetEquipped(slot, updated);
+            return true;
+        }
+
+        private bool TryBuildSocketed(WeaponItem item, int socketIndex, string runeId, out WeaponItem updated)
+        {
+            updated = null;
+            RuneDefinition rune = SocketCatalog.GetRune(runeId);
+            if (item == null || socketIndex < 0 || socketIndex >= item.OpenedSocketCount ||
+                !string.IsNullOrEmpty(item.SocketedRunes[socketIndex]) || rune == null ||
+                !rune.Supports(item.EquipmentSlot) || RuneCount(runeId) <= 0) return false;
+            var sockets = new List<string>(item.SocketedRunes);
+            sockets[socketIndex] = runeId;
+            updated = CopyItem(item, item.EnhancementRank, sockets);
+            return true;
+        }
+
+        private bool TryBuildUnsocketed(WeaponItem item, int socketIndex, out WeaponItem updated, out string runeId)
+        {
+            updated = null; runeId = null;
+            if (item == null || socketIndex < 0 || socketIndex >= item.OpenedSocketCount) return false;
+            runeId = item.SocketedRunes[socketIndex];
+            if (string.IsNullOrEmpty(runeId) || RuneCount(runeId) >= SocketCatalog.MaxRuneStack) return false;
+            var sockets = new List<string>(item.SocketedRunes);
+            sockets[socketIndex] = null;
+            updated = CopyItem(item, item.EnhancementRank, sockets);
+            return true;
+        }
+
+        private void ConsumeRune(string runeId)
+        {
+            int next = RuneCount(runeId) - 1;
+            if (next == 0) runeCounts.Remove(runeId); else runeCounts[runeId] = next;
+        }
+        private void AddReturnedRune(string runeId) { runeCounts[runeId] = RuneCount(runeId) + 1; }
+
         public WeaponItem GetEquipped(EquipmentSlot slot)
         {
             switch (slot)
@@ -399,14 +544,17 @@ namespace AffixZero.Core
         }
         public bool CanEnhance(EquipmentSlot slot) => GetEnhancementCost(slot) > 0 && TotalGold >= GetEnhancementCost(slot);
         public bool TryEnhanceEquipped() => TryEnhance(EquipmentSlot.Weapon);
+        private static WeaponItem CopyItem(WeaponItem current, int enhancementRank, IEnumerable<string> sockets = null) =>
+            new WeaponItem(current.Id, current.Name, current.FlatDamage, current.AffixDamage,
+                current.AffixName, current.IconResource, current.Rarity, enhancementRank,
+                current.EquipmentSlot, current.WeaponStyle, current.FlatDefense, current.FlatHealth,
+                current.BaseCooldownReductionPercent, current.Options, current.SocketCapacity,
+                current.OpenedSocketCount, sockets ?? current.SocketedRunes);
         public bool TryEnhance(EquipmentSlot slot)
         {
             if (!CanEnhance(slot)) return false;
             WeaponItem current = GetEquipped(slot);
-            var enhanced = new WeaponItem(current.Id, current.Name, current.FlatDamage, current.AffixDamage,
-                current.AffixName, current.IconResource, current.Rarity, current.EnhancementRank + 1,
-                current.EquipmentSlot, current.WeaponStyle, current.FlatDefense, current.FlatHealth,
-                current.BaseCooldownReductionPercent, current.Options);
+            WeaponItem enhanced = CopyItem(current, current.EnhancementRank + 1);
             TotalGold -= GetEnhancementCost(slot);
             SetEquipped(slot, enhanced);
             return true;
@@ -416,6 +564,9 @@ namespace AffixZero.Core
         public bool Discard(int index)
         {
             if (!ValidIndex(index)) return false;
+            Dictionary<string, int> returns = SocketReturns(inventory[index]);
+            if (!CanAcceptReturns(returns)) return false;
+            ApplyReturns(returns);
             inventory.RemoveAt(index);
             return true;
         }
@@ -434,13 +585,45 @@ namespace AffixZero.Core
         public bool Salvage(int index)
         {
             if (!ValidIndex(index)) return false;
-            int value = SalvageValue(inventory[index]);
-            if (value <= 0 || TotalGold > int.MaxValue - value || TotalSalvageGold > int.MaxValue - value) return false;
+            WeaponItem item = inventory[index];
+            int value = SalvageValue(item);
+            Dictionary<string, int> returns = SocketReturns(item);
+            if (value <= 0 || TotalGold > int.MaxValue - value || TotalSalvageGold > int.MaxValue - value ||
+                !CanAcceptReturns(returns)) return false;
+            ApplyReturns(returns);
             inventory.RemoveAt(index);
             TotalGold += value;
             TotalSalvageGold += value;
             LastSalvageGold = value;
             return true;
+        }
+
+        private static Dictionary<string, int> SocketReturns(WeaponItem item)
+        {
+            var result = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (item == null) return result;
+            foreach (string runeId in item.SocketedRunes)
+            {
+                if (string.IsNullOrEmpty(runeId)) continue;
+                result[runeId] = result.TryGetValue(runeId, out int count) ? count + 1 : 1;
+            }
+            return result;
+        }
+        private bool CanAcceptReturns(Dictionary<string, int> returns)
+        {
+            foreach (KeyValuePair<string, int> pair in returns)
+                if (SocketCatalog.GetRune(pair.Key) == null || RuneCount(pair.Key) > SocketCatalog.MaxRuneStack - pair.Value)
+                    return false;
+            return true;
+        }
+        private void ApplyReturns(Dictionary<string, int> returns)
+        {
+            LastReturnedRuneCount = 0;
+            foreach (KeyValuePair<string, int> pair in returns)
+            {
+                runeCounts[pair.Key] = RuneCount(pair.Key) + pair.Value;
+                LastReturnedRuneCount += pair.Value;
+            }
         }
 
         public int? CompareDamage(int index) => ValidIndex(index)
@@ -491,18 +674,20 @@ namespace AffixZero.Core
                 equippedAmulet = CaptureWeapon(EquippedAmulet),
                 firstDropWaiting = firstDropWaiting, hasPendingLoot = PendingLoot != null, equippedWeapon = CaptureWeapon(EquippedWeapon),
                 inventory = items, pendingLoot = CaptureWeapon(PendingLoot),
-                killTokens = tokens.ToArray(), issuedItemIds = ids.ToArray()
+                killTokens = tokens.ToArray(), issuedItemIds = ids.ToArray(),
+                totalRunesIssued = TotalRunesIssued, runeStacks = CaptureRuneStacks()
             };
         }
 
         public static HeroProgression RestoreSnapshot(ProgressionSnapshot snapshot)
         {
             if (snapshot == null) throw new ArgumentNullException(nameof(snapshot));
-            if (snapshot.schemaVersion != 1 && snapshot.schemaVersion != 2 && snapshot.schemaVersion != 3 && snapshot.schemaVersion != 4)
+            if (snapshot.schemaVersion < 1 || snapshot.schemaVersion > 5)
                 throw new NotSupportedException("Unsupported progression snapshot version.");
             bool legacy = snapshot.schemaVersion == 1;
             bool current = snapshot.schemaVersion >= 3;
             bool salvageCurrent = snapshot.schemaVersion >= 4;
+            bool socketCurrent = snapshot.schemaVersion >= 5;
             int[] ranks = { snapshot.furyRank, snapshot.precisionRank, snapshot.keystoneRank,
                 snapshot.vitalityRank, snapshot.cleaveRank, snapshot.hasteRank };
             int[] legacyCaps = { 2, 1, 1, 0, 0, 0 };
@@ -511,7 +696,9 @@ namespace AffixZero.Core
                 (current && !Enum.IsDefined(typeof(DungeonDifficulty), snapshot.selectedDifficulty)) ||
                 (!current && (snapshot.selectedDifficulty != 0 || snapshot.dungeonClears != 0)) ||
                 snapshot.legacyPointCredit < 0 || (legacy && (snapshot.hasArmor || snapshot.hasRelic || snapshot.hasHelmet ||
-                snapshot.hasGloves || snapshot.hasBoots || snapshot.hasRing || snapshot.hasAmulet || snapshot.legacyPointCredit != 0)))
+                snapshot.hasGloves || snapshot.hasBoots || snapshot.hasRing || snapshot.hasAmulet || snapshot.legacyPointCredit != 0)) ||
+                snapshot.totalRunesIssued < 0 || (!socketCurrent && (snapshot.totalRunesIssued != 0 ||
+                (snapshot.runeStacks != null && snapshot.runeStacks.Length != 0))))
                 throw new ArgumentException("Invalid balances or legacy fields.", nameof(snapshot));
             long spent = 0;
             for (int i = 0; i < ranks.Length; i++)
@@ -527,6 +714,7 @@ namespace AffixZero.Core
 
             HashSet<string> tokens = RestoreIdentifiers(snapshot.killTokens);
             HashSet<string> ids = RestoreIdentifiers(snapshot.issuedItemIds);
+            Dictionary<string, int> restoredRunes = RestoreRuneStacks(snapshot.runeStacks, socketCurrent);
             long earnedPoints = snapshot.unspentPoints + spent;
             long normalPoints = EarnedTalentPointsForExperience(snapshot.totalExperience);
             long credit = current ? snapshot.legacyPointCredit : earnedPoints - normalPoints;
@@ -548,14 +736,14 @@ namespace AffixZero.Core
                 throw new ArgumentException("Invalid first-drop or issued-item history.", nameof(snapshot));
 
             var ownedIds = new HashSet<string>(StringComparer.Ordinal);
-            WeaponItem equipped = RestoreWeapon(snapshot.equippedWeapon, ids, ownedIds, legacy);
-            WeaponItem armor = snapshot.hasArmor ? RestoreWeapon(snapshot.equippedArmor, ids, ownedIds, legacy) : null;
-            WeaponItem relic = snapshot.hasRelic ? RestoreWeapon(snapshot.equippedRelic, ids, ownedIds, legacy) : null;
-            WeaponItem helmet = snapshot.hasHelmet ? RestoreWeapon(snapshot.equippedHelmet, ids, ownedIds, legacy) : null;
-            WeaponItem gloves = snapshot.hasGloves ? RestoreWeapon(snapshot.equippedGloves, ids, ownedIds, legacy) : null;
-            WeaponItem boots = snapshot.hasBoots ? RestoreWeapon(snapshot.equippedBoots, ids, ownedIds, legacy) : null;
-            WeaponItem ring = snapshot.hasRing ? RestoreWeapon(snapshot.equippedRing, ids, ownedIds, legacy) : null;
-            WeaponItem amulet = snapshot.hasAmulet ? RestoreWeapon(snapshot.equippedAmulet, ids, ownedIds, legacy) : null;
+            WeaponItem equipped = RestoreWeapon(snapshot.equippedWeapon, ids, ownedIds, legacy, socketCurrent);
+            WeaponItem armor = snapshot.hasArmor ? RestoreWeapon(snapshot.equippedArmor, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem relic = snapshot.hasRelic ? RestoreWeapon(snapshot.equippedRelic, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem helmet = snapshot.hasHelmet ? RestoreWeapon(snapshot.equippedHelmet, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem gloves = snapshot.hasGloves ? RestoreWeapon(snapshot.equippedGloves, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem boots = snapshot.hasBoots ? RestoreWeapon(snapshot.equippedBoots, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem ring = snapshot.hasRing ? RestoreWeapon(snapshot.equippedRing, ids, ownedIds, legacy, socketCurrent) : null;
+            WeaponItem amulet = snapshot.hasAmulet ? RestoreWeapon(snapshot.equippedAmulet, ids, ownedIds, legacy, socketCurrent) : null;
             if (equipped.EquipmentSlot != EquipmentSlot.Weapon ||
                 (armor != null && armor.EquipmentSlot != EquipmentSlot.Armor) ||
                 (relic != null && relic.EquipmentSlot != EquipmentSlot.Relic) ||
@@ -566,9 +754,17 @@ namespace AffixZero.Core
                 (amulet != null && amulet.EquipmentSlot != EquipmentSlot.Amulet))
                 throw new ArgumentException("Item is in the wrong equipment slot.");
             var items = new List<WeaponItem>();
-            foreach (WeaponSnapshot item in snapshot.inventory) items.Add(RestoreWeapon(item, ids, ownedIds, legacy));
+            foreach (WeaponSnapshot item in snapshot.inventory) items.Add(RestoreWeapon(item, ids, ownedIds, legacy, socketCurrent));
             // Unity serializes inline null classes as empty objects; the explicit tag owns optionality.
-            WeaponItem pending = snapshot.hasPendingLoot ? RestoreWeapon(snapshot.pendingLoot, ids, ownedIds, legacy) : null;
+            WeaponItem pending = snapshot.hasPendingLoot ? RestoreWeapon(snapshot.pendingLoot, ids, ownedIds, legacy, socketCurrent) : null;
+            long conservedRunes = 0;
+            foreach (int count in restoredRunes.Values) conservedRunes += count;
+            conservedRunes += CountSocketedRunes(equipped) + CountSocketedRunes(armor) + CountSocketedRunes(relic) +
+                CountSocketedRunes(helmet) + CountSocketedRunes(gloves) + CountSocketedRunes(boots) +
+                CountSocketedRunes(ring) + CountSocketedRunes(amulet) + CountSocketedRunes(pending);
+            foreach (WeaponItem item in items) conservedRunes += CountSocketedRunes(item);
+            if (conservedRunes != snapshot.totalRunesIssued)
+                throw new ArgumentException("Rune inventory and socket contents disagree with the issued total.", nameof(snapshot));
 
             var restored = new HeroProgression
             {
@@ -581,12 +777,14 @@ namespace AffixZero.Core
                 DungeonClears = current ? snapshot.dungeonClears : 0,
                 EquippedHelmet = helmet, EquippedGloves = gloves, EquippedBoots = boots,
                 EquippedRing = ring, EquippedAmulet = amulet,
-                firstDropWaiting = snapshot.firstDropWaiting, EquippedWeapon = equipped, PendingLoot = pending
+                firstDropWaiting = snapshot.firstDropWaiting, EquippedWeapon = equipped, PendingLoot = pending,
+                TotalRunesIssued = socketCurrent ? snapshot.totalRunesIssued : 0
             };
             restored.inventory.AddRange(items);
             restored.killTokens.UnionWith(tokens);
             restored.issuedItemIds.Clear();
             restored.issuedItemIds.UnionWith(ids);
+            foreach (KeyValuePair<string, int> pair in restoredRunes) restored.runeCounts.Add(pair.Key, pair.Value);
             return restored;
         }
 
@@ -600,7 +798,25 @@ namespace AffixZero.Core
             return result;
         }
 
-        private static WeaponItem RestoreWeapon(WeaponSnapshot item, HashSet<string> issued, HashSet<string> owned, bool legacy)
+        private static Dictionary<string, int> RestoreRuneStacks(RuneStackSnapshot[] values, bool socketCurrent)
+        {
+            var result = new Dictionary<string, int>(StringComparer.Ordinal);
+            if (!socketCurrent) return result;
+            if (values == null) throw new ArgumentException("Rune stack array is required.");
+            foreach (RuneStackSnapshot stack in values)
+            {
+                if (stack == null || SocketCatalog.GetRune(stack.runeId) == null || stack.count <= 0 ||
+                    stack.count > SocketCatalog.MaxRuneStack || result.ContainsKey(stack.runeId))
+                    throw new ArgumentException("Rune stack is unknown, duplicated or outside its bounds.");
+                result.Add(stack.runeId, stack.count);
+            }
+            return result;
+        }
+
+        private static int CountSocketedRunes(WeaponItem item) => item == null ? 0 : item.FilledSocketCount;
+
+        private static WeaponItem RestoreWeapon(WeaponSnapshot item, HashSet<string> issued, HashSet<string> owned,
+            bool legacy, bool socketCurrent)
         {
             if (item == null) throw new ArgumentException("Inventory cannot contain a null weapon.");
             if (legacy && (item.enhancementRank > 3 || item.equipmentSlot != 0 || item.weaponStyle != 0 ||
@@ -628,10 +844,28 @@ namespace AffixZero.Core
                         throw new ArgumentException("Saved item option is invalid.");
                     options.Add(new ItemOption((AffixStat)option.stat, option.name, option.value));
                 }
+            if (!socketCurrent && (item.socketCapacity != 0 || item.openedSocketCount != 0 ||
+                (item.sockets != null && item.sockets.Length != 0)))
+                throw new ArgumentException("Legacy item contains socket fields.");
+            int resolvedCapacity = SocketCatalog.CapacityFor(item.iconResource, (EquipmentSlot)item.equipmentSlot);
+            int capacity = socketCurrent ? item.socketCapacity : resolvedCapacity;
+            int opened = socketCurrent ? item.openedSocketCount : 0;
+            if (capacity != resolvedCapacity || opened < 0 || opened > capacity)
+                throw new ArgumentException("Saved socket capacity or opened count is invalid.");
+            if (socketCurrent && item.sockets == null) throw new ArgumentException("Socket array is required.");
+            var sockets = new string[opened];
+            if (socketCurrent)
+                foreach (SocketSnapshot socket in item.sockets)
+                {
+                    if (socket == null || socket.index < 0 || socket.index >= opened ||
+                        sockets[socket.index] != null || SocketCatalog.GetRune(socket.runeId) == null)
+                        throw new ArgumentException("Saved socket index or rune is invalid.");
+                    sockets[socket.index] = socket.runeId;
+                }
             var weapon = new WeaponItem(item.id, item.name, item.flatDamage, item.affixDamage,
                 item.affixName, item.iconResource, item.rarity, item.enhancementRank,
                 (EquipmentSlot)item.equipmentSlot, (WeaponStyle)item.weaponStyle, item.flatDefense, item.flatHealth,
-                item.cooldownReductionPercent, options);
+                item.cooldownReductionPercent, options, capacity, opened, sockets);
             if (!issued.Contains(weapon.Id) || !owned.Add(weapon.Id))
                 throw new ArgumentException("Owned weapon identity is unissued or duplicated.");
             return weapon;
@@ -643,8 +877,27 @@ namespace AffixZero.Core
             affixName = item.AffixName, iconResource = item.IconResource, rarity = item.Rarity,
             enhancementRank = item.EnhancementRank, equipmentSlot = (int)item.EquipmentSlot, weaponStyle = (int)item.WeaponStyle,
             flatDefense = item.FlatDefense, flatHealth = item.FlatHealth, cooldownReductionPercent = item.BaseCooldownReductionPercent,
-            options = CaptureOptions(item.Options)
+            options = CaptureOptions(item.Options), socketCapacity = item.SocketCapacity,
+            openedSocketCount = item.OpenedSocketCount, sockets = CaptureSockets(item)
         };
+
+        private RuneStackSnapshot[] CaptureRuneStacks()
+        {
+            IReadOnlyList<RuneStack> stacks = RuneInventory;
+            var result = new RuneStackSnapshot[stacks.Count];
+            for (int i = 0; i < result.Length; i++)
+                result[i] = new RuneStackSnapshot { runeId = stacks[i].Rune.Id, count = stacks[i].Count };
+            return result;
+        }
+
+        private static SocketSnapshot[] CaptureSockets(WeaponItem item)
+        {
+            var result = new List<SocketSnapshot>();
+            for (int i = 0; i < item.SocketedRunes.Count; i++)
+                if (!string.IsNullOrEmpty(item.SocketedRunes[i]))
+                    result.Add(new SocketSnapshot { index = i, runeId = item.SocketedRunes[i] });
+            return result.ToArray();
+        }
 
         private static ItemOptionSnapshot[] CaptureOptions(IReadOnlyList<ItemOption> options)
         {

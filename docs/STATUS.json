@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "GENUINE_ROUTE_END_BOSS_AUTONOMOUS_LOOP_VERIFIED",
+  "stage": "PLAYABLE_PER_BASE_SOCKET_RUNE_VERTICAL_VERIFIED",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -18,10 +18,10 @@
   },
   "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS_PLUS_6_DEDICATED_PAINTED_PASSIVE_ICONS",
   "unity_editor_import": "PASS",
-  "unity_play": "PASS_FINAL_720_BOSS_KILL24_LOOT_NEXT_SEGMENT_AND_1080_BOSS_ONLY_HP_UI",
-  "visual_approval": "29 EQUIPMENT_ALL_6_PASSIVE_ICONS_AND_BOSS_TELEGRAPH_HUD_AGENT_INSPECTED_AT_NATIVE_720_1080; FINAL_USER_ACCEPTANCE_PENDING",
+  "unity_play": "PASS_FINAL_720_1080_SOCKET_INSERT_REMOVE_REINSERT_EQUIP_AND_BOSS_KILL24_RUNE_LOOT_NEXT_SEGMENT",
+  "visual_approval": "SOCKET_WORKBENCH_AND_29_EQUIPMENT_ICONS_AGENT_INSPECTED_AT_NATIVE_720_1080; FINAL_USER_ACCEPTANCE_PENDING",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_c40ab46dad6c4ec28f777356d0c545f8",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_adf711bf0a8a40b386fb012cdc944ffb",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,14 +30,14 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "Human play and user visual approval remain pending; keep sockets proposal-only and do not expand town, five tiers, gacha, pets or classes without a new user request",
+  "next": "Human play and user visual approval remain pending; optional dedicated painted rune icons and boss sprite art remain visual road-map gaps; do not expand town, five tiers, gacha, pets or classes without a new user request",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
-  "core_checks": 321,
+  "core_checks": 348,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
   "art_preview": "Build/Reports/art-preview.html; source animation preview, not Unity gameplay",
-  "windows_player": "PASS_FINAL_BUILD_SPEED_UI_RESTORE_720_1080_FRAMEBUFFER_AND_OS_INPUT_REGRESSION",
+  "windows_player": "PASS_FINAL_BUILD_SOCKET_SAVE_RESTORE_720_1080_FRAMEBUFFER_AUTO_HUNT_AND_OS_INPUT_REGRESSION",
   "executable": "Build/Windows/AffixZero.exe",
-  "actual_game_capture": "docs/media/boss-loop/ (latest boss evidence); docs/media/ui-refresh/ (earlier UI evidence)",
+  "actual_game_capture": "docs/media/socket-runes/ (latest socket evidence); docs/media/boss-loop/ (boss evidence)",
   "engine_change": "NOT_REQUESTED_OR_APPLIED; explain need before any renderer/package change",
   "new_direction_validation": "FINAL_720_ROUTE_BOSS_KILL24_TELEGRAPH_AVOID_LOOT_NEXT_SEGMENT_PLUS_1080_BOSS_ONLY_HP_AND_29_ICONS; USER_VISUAL_APPROVAL_PENDING",
   "previous_technical_checks_scope": "Earlier reports remain historical; newest integration contract and runtime report paths are in docs/BOSS_AUTO_HUNT_LOOP.md.",
@@ -49,7 +49,7 @@
     "build_guid": "e8115fc90b424d58a3fc868b8e140204",
     "reports": "docs/validation/ui-refresh/",
     "actual_mouse_keyboard_input": "PASS_FINAL_BUILD_EXACT_WINDOW_10_MOUSE_KEYBOARD_ACTIONS",
-    "other_screens": "Hero selection/town/pets/mana/active skill loadout/socket/reforge not implemented."
+    "other_screens": "Hero selection/town/pets/mana/active skill loadout/reforge not implemented; socket workbench implemented in equipment comparison."
   },
   "progression": {
     "weapon_slots": 1,
@@ -109,13 +109,20 @@
     "human_play": "NOT_RUN"
   },
   "socket_requirement": {
-    "status": "PER_BASE_DIRECTION_DELEGATED_NUMERICAL_TABLE_PROPOSAL_NOT_USER_APPROVED_OR_IMPLEMENTED",
+    "status": "IMPLEMENTED_AND_AUTOMATED_RUNTIME_VERIFIED_USER_VISUAL_APPROVAL_PENDING",
     "recorded_date": "2026-10-03",
     "spec": "docs/ITEM_SOCKET_REQUIREMENT.md",
-    "current_implementation": "NONE",
+    "current_implementation": "29_BASE_CAPACITIES_SEEDED_OPENED_COUNTS_10_RUNES_ATOMIC_INSERT_REMOVE_RETURNALL_SCHEMA5",
     "art_rule": "Do not bake sockets/counts/runes into base paintings; reserve composition for a future runtime overlay",
-    "blocked_decisions": "initial opened-count weights, add-socket path, removal cost, rune catalog/acquisition and v5 migration; do not ask for 29 individual capacity confirmations",
-    "salvage": "Return-all is the user-preferred proposed default with an atomic recovery-policy seam; no implementation",
+    "blocked_decisions": "No add-socket forge path or dedicated painted rune-icon batch; do not ask for 29 individual capacity confirmations",
+    "salvage": "ReturnAll implemented atomically for discard and salvage with full-stack rollback",
+    "build_guid": "adf711bf0a8a40b386fb012cdc944ffb",
+    "core_smoke": "348_PASS",
+    "save_restore": "PASS_SEPARATE_PROCESS_CANONICAL_SCHEMA5_ORDERED_SOCKET_AND_RUNE_CONSERVATION",
+    "ui_720_1080": "PASS_6_FRAMES_23_CALLBACKS_INSERT_REMOVE_REINSERT_29_ICONS_NON_BOSS_HP_ABSENT",
+    "boss_acquisition": "PASS_BOSS_ORDINAL24_ISSUED_ONE_RUNE",
+    "physical_input": "PASS_EXACT_PID_10_ACTIONS_17_223S",
+    "evidence": "docs/media/socket-runes/",
     "monetization": "No cash item, shop, paid restriction, paid gacha or new currency implemented or approved"
   },
   "illustrated_equipment_v2": {
@@ -131,7 +138,7 @@
     "library_contact_sheet": "libfile_af59bff5da448191ba99186f6b65708a",
     "library_equipment_1080": "libfile_8b7dc6abc6808191b2de6ec8b5c31f8e",
     "library_skills_1080": "libfile_5b3ab34c48a88191a5c2d0be2a238908",
-    "sockets": "REQUIRED_BUT_NOT_IMPLEMENTED_OR_BAKED_INTO_ART"
+    "sockets": "IMPLEMENTED_AS_RUNTIME_DATA_AND_UI_OVERLAY_NOT_BAKED_INTO_BASE_ART"
   },
   "mvp": {
     "status": "NOT_READY",

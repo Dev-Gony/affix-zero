@@ -14,17 +14,28 @@ namespace AffixZero.Presentation
             public string Id, Name, Affix, Icon, SlotText, Summary, PrimaryValue, PrimaryLabel, Rarity;
             public int Damage, Defense, Health;
             public float Speed;
+            public int SocketCapacity, OpenedSocketCount;
+            public string[] SocketRuneIds = Array.Empty<string>();
             public bool Equipped;
+        }
+
+        public sealed class RuneView
+        {
+            public string Id, Name, Mark, Effect;
+            public int Count;
         }
 
         public sealed class View
         {
             public ItemView[] Items = Array.Empty<ItemView>();
             public ItemView[] EquippedSlots = Array.Empty<ItemView>();
+            public RuneView[] CompatibleRunes = Array.Empty<RuneView>();
             public ItemView Selected;
+            public RuneView SelectedRune;
             public string Health, Damage, Defense, Duration, Comparison, Delta, Affix, Status;
-            public int Points, Fury, Precision, Keystone, SalvageValue;
-            public bool CanEquip, CanSalvage, CanFury, CanPrecision, CanKeystone, CanReset;
+            public int Points, Fury, Precision, Keystone, SalvageValue, SalvageRuneReturnCount, SelectedSocketIndex;
+            public bool SelectedEquipped, CanEquip, CanSalvage, CanInsertRune, CanRemoveRune;
+            public bool CanFury, CanPrecision, CanKeystone, CanReset;
         }
 
         public readonly VisualElement Root;
@@ -36,11 +47,18 @@ namespace AffixZero.Presentation
         private readonly Label health, damage, defense, duration, bagCount, selectedName, comparison, delta, affix, points, status, selectedDamage, selectedPrimaryLabel;
         private readonly Label[] equippedNames = new Label[8], equippedSummaries = new Label[8];
         private readonly Image[] equippedImages = new Image[8];
+        private readonly VisualElement[] equippedFrames = new VisualElement[8];
+        private readonly VisualElement[] socketCells = new VisualElement[4];
+        private readonly Label[] socketMarks = new Label[4];
+        private readonly Label socketHeading, socketHint, runeName, runeEffect, runeCount;
         private readonly Label furyCaption, precisionCaption, keystoneCaption;
-        private readonly VisualElement equipButton, salvageButton, furyButton, precisionButton, keystoneButton, resetButton, inspect;
+        private readonly VisualElement equipButton, salvageButton, runePrevious, runeNext, runeInsert, runeRemove;
+        private readonly VisualElement furyButton, precisionButton, keystoneButton, resetButton, inspect;
         private readonly Image selectedIcon;
         private readonly Func<View> read;
         private readonly Action<int> select;
+        private readonly Action<EquipmentSlot> selectEquipped;
+        private readonly Action<int> selectSocket, cycleRune;
         private readonly Action discard;
         private bool discardConfirm;
         private string selectedId, discardItemId;
@@ -52,11 +70,22 @@ namespace AffixZero.Presentation
             "AffixGenerated/EmberSword", "AffixUIVisual/GearHelmet", "AffixGenerated/GearArmor", "AffixUIVisual/GearGloves",
             "AffixUIVisual/GearBoots", "AffixUIVisual/GearRing", "AffixUIVisual/GearAmulet", "AffixGenerated/GearRelic"
         };
+        private static readonly EquipmentSlot[] EquippedSlotOrder =
+        {
+            EquipmentSlot.Weapon, EquipmentSlot.Helmet, EquipmentSlot.Armor, EquipmentSlot.Gloves,
+            EquipmentSlot.Boots, EquipmentSlot.Ring, EquipmentSlot.Amulet, EquipmentSlot.Relic
+        };
 
-        public EquipmentPanel(VisualElement parent, Func<View> read, Action<int> select, Action equip, Action salvage, Action fury, Action precision, Action keystone, Action reset, Action close, Sprite heroPortrait, Action openTalents = null)
+        public EquipmentPanel(VisualElement parent, Func<View> read, Action<int> select, Action<EquipmentSlot> selectEquipped,
+            Action<int> selectSocket, Action<int> cycleRune, Action insertRune, Action removeRune,
+            Action equip, Action salvage, Action fury, Action precision, Action keystone, Action reset,
+            Action close, Sprite heroPortrait, Action openTalents = null)
         {
             this.read = read;
             this.select = select;
+            this.selectEquipped = selectEquipped;
+            this.selectSocket = selectSocket;
+            this.cycleRune = cycleRune;
             discard = salvage;
 
             Root = Box(parent, "character-panel", 772, 4, 500, 712, Color.clear);
@@ -95,8 +124,14 @@ namespace AffixZero.Presentation
             {
                 float size = equippedSize[i];
                 var slot = Box(equipment, equippedIds[i], equippedX[i], equippedY[i], size, size, Ink);
+                equippedFrames[i] = slot;
                 Skin(slot, i == 0 || i == 2 || i == 7 ? "AffixUIVisual/FrameSlotGold" : "AffixUIVisual/FrameSlotSilver");
                 slot.pickingMode = PickingMode.Position;
+                int equippedIndex = i;
+                slot.RegisterCallback<ClickEvent>(_ => { discardConfirm = false; this.selectEquipped(EquippedSlotOrder[equippedIndex]); });
+                slot.RegisterCallback<NavigationSubmitEvent>(evt => {
+                    discardConfirm = false; this.selectEquipped(EquippedSlotOrder[equippedIndex]); evt.StopPropagation();
+                });
                 equippedImages[i] = Icon(slot, 9, 8, size - 18, size - 18);
                 equippedNames[i] = Text(slot, "", 3, size - 17, size - 6, 13, 7, Cream);
                 equippedNames[i].style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -152,7 +187,7 @@ namespace AffixZero.Presentation
             keystoneButton = HiddenButton(talents, "talent-keystone", keystone, out keystoneCaption);
             resetButton = HiddenButton(talents, "talent-reset", reset, out _);
 
-            inspect = Box(Root, "item-comparison", -306, 60, 300, 424, new Color32(10, 10, 13, 252));
+            inspect = Box(Root, "item-comparison", -306, 60, 300, 650, new Color32(10, 10, 13, 252));
             Skin(inspect, "AffixUIVisual/FrameTooltip");
             inspect.style.overflow = Overflow.Hidden;
             Text(inspect, "LOOT INSPECTION", 24, 18, 244, 24, 13, Gold).style.unityTextAlign = TextAnchor.MiddleCenter;
@@ -167,11 +202,40 @@ namespace AffixZero.Presentation
             selectedPrimaryLabel = Text(primary, "POWER", 10, 35, 68, 16, 8, Muted);
             comparison = Text(primary, "", 84, 7, 152, 48, 9, Rose); comparison.style.whiteSpace = WhiteSpace.Normal;
             Text(inspect, "BASE + ROLLED AFFIXES", 23, 205, 244, 18, 9, Gold);
-            affix = Text(inspect, "", 23, 227, 244, 112, 10, Purple); affix.style.whiteSpace = WhiteSpace.Normal;
-            status = Text(inspect, "", 23, 343, 244, 30, 8, Muted); status.style.whiteSpace = WhiteSpace.Normal;
+            affix = Text(inspect, "", 23, 227, 244, 142, 9, Purple); affix.style.whiteSpace = WhiteSpace.Normal;
+
+            var sockets = Box(inspect, "socket-workbench", 22, 375, 246, 103, new Color32(24, 15, 21, 250));
+            Border(sockets, new Color32(113, 72, 50, 255), 1);
+            socketHeading = Text(sockets, "SOCKETS", 10, 5, 156, 18, 9, Gold);
+            socketHint = Text(sockets, "", 166, 5, 70, 18, 8, Muted); socketHint.style.unityTextAlign = TextAnchor.MiddleRight;
+            for (int i = 0; i < socketCells.Length; i++)
+            {
+                int socketIndex = i;
+                socketCells[i] = Box(sockets, "socket-cell-" + i, 12 + i * 48, 29, 38, 38, new Color32(8, 9, 12, 255));
+                socketCells[i].style.borderTopLeftRadius = socketCells[i].style.borderTopRightRadius =
+                    socketCells[i].style.borderBottomLeftRadius = socketCells[i].style.borderBottomRightRadius = 19;
+                socketCells[i].pickingMode = PickingMode.Position;
+                socketMarks[i] = Text(socketCells[i], "◇", 0, 0, 38, 38, 19, Muted);
+                socketMarks[i].style.unityTextAlign = TextAnchor.MiddleCenter;
+                socketCells[i].RegisterCallback<ClickEvent>(_ => this.selectSocket(socketIndex));
+                socketCells[i].RegisterCallback<NavigationSubmitEvent>(evt => { this.selectSocket(socketIndex); evt.StopPropagation(); });
+            }
+            Text(sockets, "OPEN SLOTS ACCEPT COMPATIBLE RUNES", 10, 75, 226, 18, 7, Muted).style.unityTextAlign = TextAnchor.MiddleCenter;
+
+            var runeShelf = Box(inspect, "rune-inventory", 22, 484, 246, 58, new Color32(15, 18, 23, 250));
+            Border(runeShelf, new Color32(75, 78, 91, 255), 1);
+            runePrevious = Button(runeShelf, "rune-previous", "‹", 5, 10, 25, 38, () => cycleRune(-1), Surface);
+            runeNext = Button(runeShelf, "rune-next", "›", 216, 10, 25, 38, () => cycleRune(1), Surface);
+            runeName = Text(runeShelf, "", 38, 5, 140, 20, 10, Cream);
+            runeEffect = Text(runeShelf, "", 38, 25, 168, 18, 8, Sky);
+            runeCount = Text(runeShelf, "", 178, 5, 28, 20, 9, Gold); runeCount.style.unityTextAlign = TextAnchor.MiddleRight;
+
+            status = Text(inspect, "", 23, 546, 244, 25, 8, Muted); status.style.whiteSpace = WhiteSpace.Normal;
             status.style.overflow = Overflow.Hidden; status.style.textOverflow = TextOverflow.Ellipsis;
-            equipButton = Button(inspect, "equip-button", "EQUIP", 22, 378, 142, 28, equip, new Color32(93, 22, 35, 255));
-            salvageButton = Button(inspect, "salvage-button", "SALVAGE", 170, 378, 98, 28, RequestDiscard, Surface);
+            runeInsert = Button(inspect, "socket-insert", "INSERT RUNE", 22, 576, 120, 28, insertRune, new Color32(62, 40, 92, 255));
+            runeRemove = Button(inspect, "socket-remove", "RETURN RUNE", 148, 576, 120, 28, removeRune, Surface);
+            equipButton = Button(inspect, "equip-button", "EQUIP", 22, 610, 120, 28, equip, new Color32(93, 22, 35, 255));
+            salvageButton = Button(inspect, "salvage-button", "SALVAGE", 148, 610, 120, 28, RequestDiscard, Surface);
 
             Root.style.display = DisplayStyle.None;
         }
@@ -184,9 +248,14 @@ namespace AffixZero.Presentation
             if (v == null) return;
             string nextId = v.Selected == null ? null : v.Selected.Id;
             if (selectedId != nextId) { discardConfirm = false; selectedId = nextId; }
-            salvageButton.Q<Label>().text = discardConfirm ? "CONFIRM +" + v.SalvageValue + " G" : "SALVAGE +" + v.SalvageValue + " G";
+            string returnText=v.SalvageRuneReturnCount>0?" · R"+v.SalvageRuneReturnCount:"";
+            salvageButton.Q<Label>().text = discardConfirm ? "CONFIRM +" + v.SalvageValue + "G"+returnText : "SALVAGE +" + v.SalvageValue + "G"+returnText;
             string[] captions = { "WEAPON", "HELMET", "ARMOR", "GLOVES", "BOOTS", "RING", "AMULET", "RELIC" };
-            for (int i = 0; i < equippedNames.Length; i++) RefreshEquipped(i, i < v.EquippedSlots.Length ? v.EquippedSlots[i] : null, captions[i]);
+            for (int i = 0; i < equippedNames.Length; i++)
+            {
+                ItemView equipped=i < v.EquippedSlots.Length ? v.EquippedSlots[i] : null;
+                RefreshEquipped(i,equipped,captions[i],v.SelectedEquipped&&equipped!=null&&v.Selected!=null&&equipped.Id==v.Selected.Id);
+            }
             health.text = v.Health; damage.text = v.Damage; defense.text = v.Defense; duration.text = v.Duration;
             bagCount.text = "BAG  " + v.Items.Length + " / 24";
             for (int i = 0; i < 24; i++)
@@ -197,9 +266,9 @@ namespace AffixZero.Presentation
                 slotNames[i].text = item == null ? "" : ShortName(item.Name);
                 slotBadges[i].text = item == null ? "" : item.Equipped ? "ON" : (item.SlotText ?? "");
                 slotRarity[i].style.backgroundColor = item == null ? Color.clear : RarityColor(item.Rarity);
-                bool selected = item != null && v.Selected != null && item.Id == v.Selected.Id;
+                bool selected = !v.SelectedEquipped && item != null && v.Selected != null && item.Id == v.Selected.Id;
                 Border(slots[i], selected ? Rose : item != null ? RarityColor(item.Rarity) : Edge, selected ? 2 : 1);
-                slots[i].tooltip = item == null ? "Empty inventory slot" : item.Name + "\n" + item.Affix;
+                slots[i].tooltip = item == null ? "Empty inventory slot" : item.Name + "\n" + item.Affix + "\n" + SocketSummary(item);
                 slots[i].SetEnabled(item != null);
             }
             inspect.style.display = v.Selected == null ? DisplayStyle.None : DisplayStyle.Flex;
@@ -210,9 +279,50 @@ namespace AffixZero.Presentation
             selectedName.style.color = v.Selected == null ? Muted : RarityColor(v.Selected.Rarity);
             comparison.text = v.Comparison ?? ""; delta.text = v.Delta ?? ""; affix.text = v.Affix ?? ""; status.text = v.Status ?? "";
             status.tooltip = v.Status ?? "";
+            RefreshSockets(v);
             points.text = "POINTS  " + v.Points;
             furyCaption.text = "FURY " + v.Fury; precisionCaption.text = "PREC " + v.Precision; keystoneCaption.text = "KEY " + v.Keystone;
-            SetAction(equipButton, v.CanEquip); SetAction(salvageButton, v.CanSalvage); SetAction(furyButton, v.CanFury); SetAction(precisionButton, v.CanPrecision); SetAction(keystoneButton, v.CanKeystone); SetAction(resetButton, v.CanReset);
+            SetAction(equipButton, v.CanEquip); SetAction(salvageButton, v.CanSalvage);
+            SetAction(runeInsert,v.CanInsertRune); SetAction(runeRemove,v.CanRemoveRune);
+            SetAction(runePrevious,v.CompatibleRunes.Length>1); SetAction(runeNext,v.CompatibleRunes.Length>1);
+            SetAction(furyButton, v.CanFury); SetAction(precisionButton, v.CanPrecision); SetAction(keystoneButton, v.CanKeystone); SetAction(resetButton, v.CanReset);
+        }
+
+        private void RefreshSockets(View v)
+        {
+            ItemView item=v.Selected;
+            int capacity=item==null?0:item.SocketCapacity;
+            int opened=item==null?0:item.OpenedSocketCount;
+            int filled=0;
+            if(item!=null)foreach(string runeId in item.SocketRuneIds)if(!string.IsNullOrEmpty(runeId))filled++;
+            socketHeading.text=capacity==0?"NO SOCKET PROFILE":"SOCKETS  "+filled+" / "+opened+"   ·   CAP "+capacity;
+            for(int i=0;i<socketCells.Length;i++)
+            {
+                bool exists=i<capacity,open=i<opened;
+                string runeId=open&&i<item.SocketRuneIds.Length?item.SocketRuneIds[i]:null;
+                RuneDefinition rune=SocketCatalog.GetRune(runeId);
+                socketCells[i].style.display=exists?DisplayStyle.Flex:DisplayStyle.None;
+                socketCells[i].style.opacity=open?1f:.28f;
+                socketCells[i].style.backgroundColor=rune==null?(Color)new Color32(8,9,12,255):RuneColor(rune.Id);
+                socketMarks[i].text=!open?"×":rune==null?"◇":rune.Mark;
+                socketMarks[i].style.color=rune==null?Muted:Cream;
+                Border(socketCells[i],i==v.SelectedSocketIndex?Gold:open?new Color32(104,91,82,255):Edge,i==v.SelectedSocketIndex?2:1);
+                socketCells[i].tooltip=!open?"SEALED SOCKET":rune==null?"OPEN · EMPTY":rune.Name+" · "+SocketCatalog.DescribeValue(rune);
+            }
+            bool selectedOpen=item!=null&&v.SelectedSocketIndex>=0&&v.SelectedSocketIndex<opened;
+            string selectedRuneId=selectedOpen&&v.SelectedSocketIndex<item.SocketRuneIds.Length?item.SocketRuneIds[v.SelectedSocketIndex]:null;
+            RuneDefinition selectedSocketRune=SocketCatalog.GetRune(selectedRuneId);
+            socketHint.text=!selectedOpen?(capacity==0?"INERT":"SEALED"):selectedSocketRune==null?"EMPTY":"FILLED";
+            runeName.text=v.SelectedRune==null?"NO COMPATIBLE RUNES":v.SelectedRune.Mark+"  "+v.SelectedRune.Name;
+            runeEffect.text=v.SelectedRune==null?"Defeat route bosses to recover runes":v.SelectedRune.Effect;
+            runeCount.text=v.SelectedRune==null?"":"x"+v.SelectedRune.Count;
+        }
+
+        private static string SocketSummary(ItemView item)
+        {
+            if(item==null||item.SocketCapacity==0)return "SOCKETS 0 / 0";
+            int filled=0;foreach(string runeId in item.SocketRuneIds)if(!string.IsNullOrEmpty(runeId))filled++;
+            return "SOCKETS "+filled+" / "+item.OpenedSocketCount+" · CAP "+item.SocketCapacity;
         }
 
         private static string ShortName(string value)
@@ -237,6 +347,23 @@ namespace AffixZero.Presentation
             string value = (rarity ?? "").ToLowerInvariant();
             return value == "epic" ? new Color32(255, 86, 108, 255) : value == "legend" ? new Color32(255, 143, 63, 255) :
                 value == "unique" ? Purple : value == "rare" ? Gold : value == "magic" ? Sky : Cream;
+        }
+        private static Color RuneColor(string runeId)
+        {
+            switch(runeId)
+            {
+                case "ember": return new Color32(132,43,34,255);
+                case "bastion": return new Color32(75,88,104,255);
+                case "vital": return new Color32(123,38,62,255);
+                case "aether": return new Color32(45,72,130,255);
+                case "gale": return new Color32(42,111,105,255);
+                case "keen": return new Color32(118,72,142,255);
+                case "blood": return new Color32(114,24,35,255);
+                case "scholar": return new Color32(72,70,138,255);
+                case "fortune": return new Color32(139,99,34,255);
+                case "piercing": return new Color32(82,93,117,255);
+                default: return Surface;
+            }
         }
 
         private Texture2D Texture(string key)
@@ -275,7 +402,7 @@ namespace AffixZero.Presentation
             return Text(parent, "", x, 18, 101, 22, 12, Cream);
         }
 
-        private void RefreshEquipped(int index, ItemView item, string slot)
+        private void RefreshEquipped(int index, ItemView item, string slot, bool selected)
         {
             equippedImages[index].image = Texture(item == null ? EmptyIcons[index] : item.Icon);
             equippedImages[index].style.opacity = item == null ? .13f : 1f;
@@ -285,6 +412,8 @@ namespace AffixZero.Presentation
             equippedSummaries[index].text = item == null ? "" : item.Summary ?? item.Affix ?? "";
             string description = item == null ? slot + " — EMPTY" : slot + " — " + item.Name + "\n" + (item.Summary ?? item.Affix ?? "");
             equippedNames[index].tooltip = equippedSummaries[index].tooltip = description;
+            equippedFrames[index].tooltip=item==null?description:description+"\n"+SocketSummary(item);
+            Border(equippedFrames[index],selected?Rose:item==null?Edge:RarityColor(item.Rarity),selected?2:1);
         }
 
         private static VisualElement Button(VisualElement parent, string name, string caption, float x, float y, float width, float height, Action action, Color color)

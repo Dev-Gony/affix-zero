@@ -78,14 +78,44 @@ internal static class ProgressionSaveChecks
             "current saves retain explicit pending loot without inventing a deferred drop");
 
         var previousV3 = source.CaptureSnapshot(); previousV3.schemaVersion = 3; previousV3.totalSalvageGold = 0;
-        var migratedV3 = HeroProgression.RestoreSnapshot(previousV3); var normalizedV4 = migratedV3.CaptureSnapshot();
-        check(normalizedV4.schemaVersion == 4 && migratedV3.TotalSalvageGold == 0 &&
+        var migratedV3 = HeroProgression.RestoreSnapshot(previousV3); var normalizedV5 = migratedV3.CaptureSnapshot();
+        check(normalizedV5.schemaVersion == 5 && migratedV3.TotalSalvageGold == 0 &&
             migratedV3.TotalGold == source.TotalGold && migratedV3.TotalExperience == source.TotalExperience &&
             migratedV3.EquippedWeapon.Id == source.EquippedWeapon.Id && migratedV3.Inventory.Count == source.Inventory.Count &&
-            normalizedV4.killTokens.Length == previousV3.killTokens.Length && normalizedV4.issuedItemIds.Length == previousV3.issuedItemIds.Length,
-            "schema-v3 save migrates to v4 with zero salvage provenance and unchanged progression ledgers");
+            normalizedV5.killTokens.Length == previousV3.killTokens.Length && normalizedV5.issuedItemIds.Length == previousV3.issuedItemIds.Length &&
+            normalizedV5.totalRunesIssued == 0 && normalizedV5.runeStacks.Length == 0,
+            "schema-v3 save migrates to v5 with zero salvage/rune provenance and unchanged progression ledgers");
 
-        Reject(check, source, s => s.schemaVersion = 5, "unknown snapshot schema rejected", true);
+        var socketSource = new HeroProgression();
+        var socketItem = new WeaponItem("save:socket-staff", "Saved socket staff", 9, 0, "",
+            "AffixUIVisual/Items/magic_sword", "rare", 0, EquipmentSlot.Weapon, WeaponStyle.Staff,
+            socketCapacity: 4, openedSocketCount: 2);
+        socketSource.TryCreatePendingLoot(socketItem); socketSource.PickUp();
+        socketSource.TryGrantRune("ember", 2); socketSource.TryGrantRune("keen"); socketSource.TryGrantRune("bastion");
+        socketSource.SocketInventoryItem(0, 0, "ember"); socketSource.SocketInventoryItem(0, 1, "keen");
+        var socketRoundTrip = HeroProgression.RestoreSnapshot(JsonSerializer.Deserialize<ProgressionSnapshot>(
+            JsonSerializer.Serialize(socketSource.CaptureSnapshot(), options), options));
+        check(socketRoundTrip.CaptureSnapshot().schemaVersion == 5 && socketRoundTrip.Inventory[0].SocketCapacity == 4 &&
+            socketRoundTrip.Inventory[0].OpenedSocketCount == 2 && socketRoundTrip.Inventory[0].SocketedRunes[0] == "ember" &&
+            socketRoundTrip.Inventory[0].SocketedRunes[1] == "keen" && socketRoundTrip.RuneCount("ember") == 1 &&
+            socketRoundTrip.RuneCount("bastion") == 1 && socketRoundTrip.TotalRunesIssued == 4,
+            "v5 JSON roundtrip preserves capacity, indexed sockets, stack counts and issued-rune conservation");
+        Reject(check, socketSource, s => s.inventory[0].socketCapacity = 3, "saved capacity mismatch rejected");
+        Reject(check, socketSource, s => s.inventory[0].openedSocketCount = 5, "opened sockets beyond base capacity rejected");
+        Reject(check, socketSource, s => s.inventory[0].sockets = new[] {
+            new SocketSnapshot { index = 0, runeId = "ember" },
+            new SocketSnapshot { index = 0, runeId = "keen" } }, "duplicate saved socket index rejected");
+        Reject(check, socketSource, s => s.inventory[0].sockets[0].runeId = "unknown", "unknown saved socket rune rejected");
+        Reject(check, socketSource, s => s.inventory[0].sockets[0].runeId = "bastion", "slot-incompatible saved rune rejected");
+        Reject(check, socketSource, s => s.inventory[0].sockets = null, "missing v5 socket array rejected");
+        Reject(check, socketSource, s => s.runeStacks = null, "missing v5 rune stack array rejected");
+        Reject(check, socketSource, s => s.runeStacks = new[] { new RuneStackSnapshot { runeId = "unknown", count = 1 } },
+            "unknown saved rune stack rejected");
+        Reject(check, socketSource, s => s.totalRunesIssued++, "rune creation through a forged issued total rejected");
+        Reject(check, socketSource, s => s.totalRunesIssued = -1, "negative issued rune total rejected");
+        Reject(check, socketSource, s => s.schemaVersion = 4, "pre-v5 snapshot cannot smuggle socket state");
+
+        Reject(check, source, s => s.schemaVersion = 6, "unknown snapshot schema rejected", true);
         Reject(check, source, s => s.totalGold = -1, "negative save balance rejected");
         Reject(check, source, s => s.totalSalvageGold = -1, "negative salvage provenance rejected");
         Reject(check, source, s => s.unspentPoints = int.MaxValue, "overflowing or unearned point balance rejected");
@@ -125,7 +155,7 @@ internal static class ProgressionSaveChecks
         salvageSource.PickUp(); int salvageValue = salvageSource.GetSalvageValue(0); salvageSource.Salvage(0);
         var salvageLoaded = HeroProgression.RestoreSnapshot(salvageSource.CaptureSnapshot());
         check(salvageLoaded.TotalSalvageGold == salvageValue && salvageLoaded.TotalGold == 8 + salvageValue &&
-            salvageLoaded.Inventory.Count == 0, "v4 roundtrip preserves bounded salvage gold provenance");
+            salvageLoaded.Inventory.Count == 0, "v5 roundtrip preserves bounded salvage gold provenance");
         Reject(check, salvageSource, s => s.totalGold = s.killTokens.Length * 17 + s.totalSalvageGold + 1,
             "gold beyond kill rewards and salvage provenance rejected");
         Reject(check, salvageSource, s => s.totalSalvageGold = s.issuedItemIds.Length * 80 + 1,
@@ -167,8 +197,8 @@ internal static class ProgressionSaveChecks
             migrated.TotalGold == 408 && migrated.TotalExperience == 1425 && migrated.TotalDamage == 62 &&
             migrated.EquippedWeapon.EnhancementRank == 3 && migrated.EquippedArmor == null && migrated.EquippedRelic == null,
             "actual v1 wire fields migrate all 57 earned points, spent ranks, enhanced gear and balances without invented secondary equipment");
-        check(migrated.CaptureSnapshot().schemaVersion == 4 && !migrated.TryRegisterKill("legacy:0"),
-            "migration normalizes payload to v4 and retains reward idempotency");
+        check(migrated.CaptureSnapshot().schemaVersion == 5 && !migrated.TryRegisterKill("legacy:0"),
+            "migration normalizes payload to v5 and retains reward idempotency");
         var pendingLegacy = new HeroProgression(); pendingLegacy.TryRegisterKill("legacy-pending:first");
         var pendingWire = AsLegacy(pendingLegacy.CaptureSnapshot()); pendingWire.unspentPoints = 1;
         var migratedPending = HeroProgression.RestoreSnapshot(pendingWire);

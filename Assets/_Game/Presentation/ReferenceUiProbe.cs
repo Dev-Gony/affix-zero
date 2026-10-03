@@ -16,7 +16,8 @@ namespace AffixZero.Presentation
         private Report report;
         private string outputDirectory, phase = "initializing";
         private float started;
-        private int phaseFrame, pointsBeforeSelection, damageBeforeEquip, damageBeforeForge, goldBeforeForge;
+        private int phaseFrame, pointsBeforeSelection, damageBeforeEquip, damageBeforeForge, goldBeforeForge, runeBefore;
+        private string socketItemId;
         private bool finishing;
         private readonly HashSet<MeleeActor> observed = new HashSet<MeleeActor>();
         private readonly HashSet<string> captures = new HashSet<string>();
@@ -113,9 +114,27 @@ namespace AffixZero.Presentation
                 case "equipment-selected":
                     Require(Text("selected-item-name").Contains(p.Inventory[0].Name), "Selected item name is stale.");
                     Require(p.TotalDamage == damageBeforeEquip, "Selecting an inventory slot changed combat damage.");
-                    string selectedId = p.Inventory[0].Id; int delta = p.CompareDamage(0).Value;
+                    socketItemId=p.Inventory[0].Id;runeBefore=p.RuneCount("ember");
+                    Dispatch("socket-cell-0");Dispatch("socket-insert");Phase("socket-inserted");break;
+                case "socket-inserted":
+                    Require(p.Inventory[0].Id==socketItemId&&p.Inventory[0].SocketedRunes[0]=="ember"&&
+                        p.RuneCount("ember")==runeBefore-1&&p.TotalDamage==damageBeforeEquip,
+                        "Native rune insertion did not consume one stack without equipping the item.");
+                    Require(Element("inventory-slot-0").tooltip.Contains("SOCKETS 1 / 2"),
+                        "Inventory tooltip did not expose authoritative socket state.");
+                    report.socketInsertVerified=true;Dispatch("socket-remove");Phase("socket-removed");break;
+                case "socket-removed":
+                    Require(string.IsNullOrEmpty(p.Inventory[0].SocketedRunes[0])&&p.RuneCount("ember")==runeBefore,
+                        "Native rune removal did not return the same rune intact.");
+                    report.socketRemoveVerified=true;Dispatch("socket-insert");Phase("socket-reinserted");break;
+                case "socket-reinserted":
+                    Require(p.Inventory[0].SocketedRunes[0]=="ember","Rune could not be reinserted after intact removal.");
+                    Capture("equipment-socketed");Phase("equipment-socketed-capture");break;
+                case "equipment-socketed-capture":
+                    if(!captures.Contains("equipment-socketed"))return;
+                    int delta = p.CompareDamage(0).Value;
                     Dispatch("equip-button");
-                    Require(p.EquippedWeapon.Id == selectedId && p.TotalDamage == damageBeforeEquip + delta && owner.Hero.Damage == p.TotalDamage,
+                    Require(p.EquippedWeapon.Id == socketItemId && p.TotalDamage == damageBeforeEquip + delta && owner.Hero.Damage == p.TotalDamage,
                         "Native equip callback did not apply the real selected item.");
                     report.equipVerified = true; Dispatch("inventory-slot-1"); Phase("equipment-compare"); break;
                 case "equipment-compare":
@@ -166,7 +185,8 @@ namespace AffixZero.Presentation
                     Capture("forge"); Phase("forge-capture"); break;
                 case "forge-capture":
                     if (!captures.Contains("forge")) return;
-                    Require(captures.Count == 5 && report.speedVerified && report.equipVerified && report.talentVerified && report.forgeVerified,
+                    Require(captures.Count == 6 && report.speedVerified && report.equipVerified && report.socketInsertVerified &&
+                        report.socketRemoveVerified && report.talentVerified && report.forgeVerified,
                         "Required native screens or mutations are incomplete.");
                     Finish(true, null); break;
             }
@@ -187,8 +207,12 @@ namespace AffixZero.Presentation
                     10 + i, 2 + i % 3, new[] { "날카로움", "묵직함", "잿불" }[i % 3],
                     new[] { "AffixUIVisual/Items/dagger", "AffixUIVisual/Items/longsword", "AffixUIVisual/Items/plate_armor", "AffixUIVisual/Items/battle_gloves", "AffixUIVisual/Items/dragon_gloves", "AffixUIVisual/Items/gale_boots", "AffixUIVisual/Items/diamond_ring", "AffixUIVisual/Items/dragon_tear" }[i],
                     new[] { "normal", "magic", "rare", "unique", "legend", "epic", "rare", "unique" }[i]);
+                if(i==0)weapon=new WeaponItem(id,"Socket Dagger",10,2,"QA","AffixUIVisual/Items/dagger","normal",
+                    equipmentSlot:EquipmentSlot.Weapon,socketCapacity:2,openedSocketCount:2);
                 Require(p.TryCreatePendingLoot(weapon) && owner.CollectLoot(), "Fixture weapon intake failed."); fixtureItems.Add(id);
             }
+            Require(p.TryGrantRune("ember",2)&&p.TryGrantRune("keen")&&p.TryGrantRune("bastion"),
+                "Fixture rune stacks were rejected.");
             Require(p.TotalExperience == report.experienceBeforeFixture + 1000 && p.TotalGold == report.goldBeforeFixture + 320 &&
                 p.UnspentPoints == 4 && p.Inventory.Count == 8 &&
                 p.EquippedWeapon.Id == "equipped:starting-sword" && p.TotalDamage == 30,
@@ -314,14 +338,15 @@ namespace AffixZero.Presentation
             CheckGroup(nav, bottom.worldBound, bounds, true);
             CheckGroup(new[] { "hero-hp-value", "xp-value" }, top.worldBound, bounds, true);
             CheckGroup(new[] { "attack-slot" }, bottom.worldBound, bounds, true);
+            bool equipmentScreen = screen == "equipment" || screen.StartsWith("equipment-", StringComparison.Ordinal);
             bool talentScreen = screen == "talents" || screen.StartsWith("talents-", StringComparison.Ordinal);
-            string active = screen == "equipment" ? "character-panel" : talentScreen ? "talent-screen" : screen == "forge" ? "forge-screen" : null;
+            string active = equipmentScreen ? "character-panel" : talentScreen ? "talent-screen" : screen == "forge" ? "forge-screen" : null;
             foreach (string name in new[] { "character-panel", "talent-screen", "forge-screen" })
                 Require(Visible(Element(name)) == (name == active), "Management visibility differs from selected screen: " + name);
             if (active != null)
             {
                 var management = Element(active); Record(management, panel, bounds); NoOverlap(management, bottom);
-                if (screen == "equipment")
+                if (equipmentScreen)
                 {
                     Require(Mathf.Abs(management.worldBound.width / panel.width - .390625f) < .012f,
                         "Equipment dock is not approximately 39 percent of the screen width.");
@@ -329,7 +354,8 @@ namespace AffixZero.Presentation
                     for (int i = 0; i < 24; i++) controls.Add("inventory-slot-" + i);
                     CheckGroup(controls.ToArray(), management.worldBound, bounds, true);
                     // The comparison card intentionally floats to the left of the docked panel.
-                    CheckGroup(new[] { "item-comparison", "selected-item-name", "comparison-delta", "equip-button", "salvage-button" }, panel, bounds, false);
+                    CheckGroup(new[] { "item-comparison", "selected-item-name", "comparison-delta", "socket-workbench",
+                        "socket-cell-0", "rune-inventory", "socket-insert", "socket-remove", "equip-button", "salvage-button" }, panel, bounds, false);
                     Require(Element("item-comparison").worldBound.xMax <= management.worldBound.xMin - 1,
                         "Comparison card is not floating to the left of the equipment dock.");
                     for (int i = 0; i < p.Inventory.Count; i++)
@@ -451,7 +477,8 @@ namespace AffixZero.Presentation
             public string scope = "Actual Windows framebuffer and native UI Toolkit callbacks. Geometry checks cover named important controls only; font glyph clipping and artistic/reference fidelity require visual review.";
             public string fixture = "After a real first attack and native Stop callback: forty unique Scout Core kill tokens grant 1,000 XP, 320 gold and four early-curve points; eight deterministic authored items exercise distinct base-icon and rarity presentation through public APIs. Native equip, three talent investments and one gold-funded enhancement modify real progression. Not a balance, reward-rate or unattended-farming benchmark.";
             public string actualPhysicalInput = "NOT_RUN; external key/mouse-button/scroll input rejects the run", userVisualApproval = "NOT_APPROVED";
-            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, lockedSelectionVerified, talentVerified, forgeVerified,
+            public bool ephemeralVerified, fixtureApplied, speedVerified, equipVerified, socketInsertVerified, socketRemoveVerified,
+                lockedSelectionVerified, talentVerified, forgeVerified,
                 playerHpVisible, bossHpVisible, nonBossHpAbsent;
             public int actualHeroHits, realKillsBeforeFixture, experienceBeforeFixture, goldBeforeFixture, activeEnemiesDuringHpAudit, baseIconsLoaded;
             public float elapsedSeconds;

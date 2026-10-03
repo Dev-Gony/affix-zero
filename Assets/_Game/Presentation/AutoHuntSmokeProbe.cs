@@ -168,6 +168,8 @@ namespace AffixZero.Presentation
                 Require(hunt.World.DetourQueries>0,"No real obstacle detour was requested during the connected clear.");
                 Require(hunt.AreaCasts>0,"The automatic area skill never fired during a full population clear.");
                 Require(hunt.BossKills>=1&&hunt.BossLootDrops>=1,"The route boss did not die with a guaranteed existing-system loot offer.");
+                Require(owner.Progression.TotalRunesIssued>=1&&owner.Progression.RuneInventory.Count>=1,
+                    "The genuine route boss did not add one conserved rune to the dedicated inventory.");
                 Require(hunt.BossKillOrdinal==24,"The route boss was not the final enemy in its 24-enemy segment.");
                 Require(hunt.BossPatternCasts>0&&hunt.BossAvoidances>0,
                     "The readable boss telegraph did not resolve with an automatic avoidance decision.");
@@ -352,6 +354,7 @@ namespace AffixZero.Presentation
                 report.layoutTransitions=hunt.LayoutTransitions;
                 report.areaCasts=hunt.AreaCasts;report.recoveryCasts=hunt.RecoveryCasts;
                 report.bossKills=hunt.BossKills;report.bossKillOrdinal=hunt.BossKillOrdinal;report.bossLootDrops=hunt.BossLootDrops;report.bossPatternCasts=hunt.BossPatternCasts;
+                report.runesIssued=owner.Progression.TotalRunesIssued;report.runeStacks=owner.Progression.RuneInventory.Count;
                 report.bossPatternHits=hunt.BossPatternHits;report.bossAvoidances=hunt.BossAvoidances;}
             report.maximumEnemyRoam=maximumEnemyRoam;
             try{Directory.CreateDirectory(outputDirectory);WriteReport();}
@@ -370,7 +373,7 @@ namespace AffixZero.Presentation
             public string actualUiClickVerification="NOT_RUN",userVisualApproval="NOT_APPROVED",screenshotScope="24-bit BMP from actual end-of-frame ReadPixels with native runtime HUD.";
             public bool initialized,heroHitObserved,enemyHitObserved,managementKeepsHunting,managementSwitchesVerified,manualPauseVerified,manualResumeVerified;
             public int startCallbacks,uiCallbacksDispatched,acceptedHits,lineOfSightChecks,impactPoseChecks,areaHitChecks,patternHitChecks,areaCasts,recoveryCasts,walkabilityChecks,completedRuns,totalKills,collectedItems,deathRetries,sectionsVisited,uniqueDeaths,detourQueries,targetSelections,layoutTransitions;
-            public int bossKills,bossKillOrdinal,bossLootDrops,bossPatternCasts,bossPatternHits,bossAvoidances;
+            public int bossKills,bossKillOrdinal,bossLootDrops,bossPatternCasts,bossPatternHits,bossAvoidances,runesIssued,runeStacks;
             public float elapsedSeconds,travelDistance,maximumEnemyRoam;
             public int experience,gold,totalDamage,enhancementRank,spentTalentPoints,inventoryCount;
             public int fixtureMaxHp,fixtureDefense,fixtureVampirism;

@@ -100,7 +100,7 @@ namespace AffixZero.Presentation
                     Require(ProfilePersistence.Encode(owner.Progression) == expected,
                         "Restored profile differs from the previous process before any mutation.");
                     report.canonicalRestoreMatches = true;
-                    RequireStats(150, 40, 3, 1, true);
+                    RequireStats(600, 184, 0, -1, false);
                     Dispatch("character-tab");
                     Phase("read-hud");
                 }
@@ -117,17 +117,37 @@ namespace AffixZero.Presentation
             if (phase == "write-hunting")
             {
                 Require(owner.Hunt.Running, "Write hunt stopped early.");
-                if (owner.Hunt.TotalKills < 6 || owner.Progression.PendingLoot == null) return;
+                if (owner.Hunt.TotalKills < 24 || owner.Progression.PendingLoot == null) return;
                 owner.Hunt.StopHunt();
-                Require(owner.Hunt.TotalKills == 6 && report.enemyDeaths == 6 && report.acceptedHits > 0,
-                    "Write phase did not observe exactly six real enemy deaths.");
-                Require(owner.Progression.PendingLoot.Id.StartsWith("clear:", StringComparison.Ordinal),
-                    "Pending weapon is not the uncollected clear reward.");
-                Require(owner.EquipItem(0), "Could not equip the first Ember sword.");
-                Require(owner.SpendTalent(TalentId.Fury) && owner.SpendTalent(TalentId.Fury) &&
-                    owner.SpendTalent(TalentId.Precision), "Could not spend the earned talent points.");
+                Require(owner.Hunt.TotalKills >= 24 && report.enemyDeaths == owner.Hunt.TotalKills && report.acceptedHits > 0,
+                    "Write phase did not observe the complete first 24-enemy route.");
+                Require(owner.Progression.PendingLoot.Id.StartsWith("boss-loot:", StringComparison.Ordinal),
+                    "Pending item is not the genuine route-boss reward.");
+                Require(owner.Progression.TotalExperience == owner.Hunt.TotalKills * 25 &&
+                    owner.Progression.TotalGold == owner.Hunt.TotalKills * 8,
+                    "First-route balances do not match the authoritative kill ledger.");
+                Require(owner.Progression.TotalRunesIssued == 1 && owner.Progression.RuneInventory.Count == 1,
+                    "The genuine route boss did not issue exactly one conserved rune.");
+                Require(owner.CollectLoot(), "Could not collect the genuine route-boss reward.");
+                var fixture = new WeaponItem("probe:socket-dagger", "Socket Dagger", 10, 0, "PROBE",
+                    "AffixUIVisual/Items/dagger", "normal", equipmentSlot: EquipmentSlot.Weapon,
+                    socketCapacity: 2, openedSocketCount: 2);
+                Require(owner.Progression.TryCreatePendingLoot(fixture) && owner.CollectLoot(),
+                    "Could not intake the deterministic socket fixture through the bounded loot flow.");
+                int fixtureIndex = -1;
+                for (int i = 0; i < owner.Progression.Inventory.Count; i++)
+                    if (owner.Progression.Inventory[i].Id == fixture.Id) { fixtureIndex = i; break; }
+                Require(fixtureIndex >= 0 && owner.EquipItem(fixtureIndex),
+                    "Could not equip the deterministic socket fixture by identity.");
+                Require(owner.Progression.EquippedWeapon.OpenedSocketCount > 0,
+                    "The equipped first-route weapon did not expose its deterministic open socket.");
+                Require(owner.Progression.TryGrantRune("ember") &&
+                    owner.SocketRune(-1, EquipmentSlot.Weapon, 0, "ember"),
+                    "Could not grant and insert the isolated save fixture rune.");
+                Require(owner.SpendTalent(TalentId.Fury) && owner.SpendTalent(TalentId.Fury),
+                    "Could not spend the two earned first-route talent points.");
                 Require(owner.EnhanceWeapon(), "Could not enhance equipped weapon using earned gold.");
-                RequireStats(150, 40, 3, 1, true);
+                RequireStats(600, 184, 0, -1, false);
                 Dispatch("character-tab");
                 Phase("write-hud");
             }
@@ -156,14 +176,12 @@ namespace AffixZero.Presentation
             else if (phase == "read-hunting")
             {
                 Require(owner.Hunt.Running, "Read hunt stopped before resumed combat.");
-                if (owner.Progression.PendingLoot == null && owner.Progression.Inventory.Count == 2)
-                    report.restoredPendingCollected = true;
                 if (owner.Hunt.TotalKills < 2) return;
                 owner.Hunt.StopHunt();
-                Require(owner.Hunt.TotalKills == 2 && report.enemyDeaths == 2 && report.acceptedHits > 0,
-                    "Read phase did not observe two new real enemy deaths.");
-                Require(report.restoredPendingCollected, "Restored pending reward was not automatically collected.");
-                RequireStats(200, 56, 5, 2, false);
+                Require(owner.Hunt.TotalKills >= 2 && report.enemyDeaths == owner.Hunt.TotalKills && report.acceptedHits > 0,
+                    "Read phase did not observe resumed real enemy deaths.");
+                int expectedXp = 600 + owner.Hunt.TotalKills * 25;
+                RequireStats(expectedXp, 184 + owner.Hunt.TotalKills * 8, expectedXp / 250 - 2, -1, false);
                 string before = ProfilePersistence.Encode(owner.Progression);
                 string oldToken = ProfilePersistence.Decode(File.ReadAllText(report.expectedPath)).CaptureSnapshot().killTokens[0];
                 Require(!owner.Progression.TryRegisterKill(oldToken) && ProfilePersistence.Encode(owner.Progression) == before,
@@ -178,11 +196,16 @@ namespace AffixZero.Presentation
         {
             HeroProgression p = owner.Progression;
             Require(p.TotalExperience == xp && p.TotalGold == gold && p.UnspentPoints == points &&
-                p.Inventory.Count == inventory && (p.PendingLoot != null) == pending,
+                (inventory < 0 ? p.Inventory.Count >= 2 : p.Inventory.Count == inventory) && (p.PendingLoot != null) == pending,
                 "Unexpected profile balances, inventory or pending loot.");
-            Require(p.TotalDamage == 52 && owner.Hero.Damage == 52 && p.FuryRank == 2 && p.PrecisionRank == 1 &&
-                p.KeystoneRank == 0 && p.EquippedWeapon.EnhancementRank == 1 && p.EquippedWeapon.Id == "loot:ember-steel:first",
+            Require(p.TotalDamage == 45 && owner.Hero.Damage == 45 && p.FuryRank == 2 && p.PrecisionRank == 0 &&
+                p.KeystoneRank == 0 && p.EquippedWeapon.EnhancementRank == 1 && p.EquippedWeapon.Id == "probe:socket-dagger",
                 "Equipped build was not preserved exactly.");
+            int availableRunes = 0;
+            foreach (RuneStack stack in p.RuneInventory) availableRunes += stack.Count;
+            Require(p.TotalRunesIssued == 2 && availableRunes == 1 &&
+                p.EquippedWeapon.SocketedRunes.Count > 0 && p.EquippedWeapon.SocketedRunes[0] == "ember",
+                "Inserted rune ownership or socket order was not preserved exactly.");
         }
 
         private void VerifyHudDamage()
@@ -191,8 +214,8 @@ namespace AffixZero.Presentation
             VisualElement section = Root.Q("equipment-section");
             Require(section != null && section.worldBound.width > 0, "Equipment stats layout is absent.");
             bool found = false;
-            section.Query<Label>().ForEach(label => { if (label.text == "52") found = true; });
-            Require(found && owner.Hero.Damage == 52, "Native equipment HUD did not bind attack 52.");
+            section.Query<Label>().ForEach(label => { if (label.text == "45") found = true; });
+            Require(found && owner.Hero.Damage == 45, "Native equipment HUD did not bind socketed attack 45.");
             report.hudDamageMatches = true;
         }
 
@@ -298,7 +321,7 @@ namespace AffixZero.Presentation
                 startedUtc = DateTime.UtcNow.ToString("O"), finishedUtc = "", buildGuid = Application.buildGUID,
                 unityVersion = Application.unityVersion, mode = "", result = "RUNNING", problem = "", phase = "initializing",
                 expectedPath = "", filePath = "", fileSha256 = "", saveStatus = "";
-            public string scope = "Separate-process isolated profile save/load, real 1x combat, retained pending loot, native UI Toolkit callback start and HUD data binding.";
+            public string scope = "Separate-process isolated profile save/load, ordered equipped-item socket/rune restore, real 1x combat, retained pending loot, native UI Toolkit callback start and HUD data binding.";
             public string interactionMethod = "UI Toolkit ClickEvent callbacks plus authorized FirstEncounter gear/talent/forge APIs; no OS click automation. Physical input invalidates the run.";
             public string actualOsInputVerification = "NOT_RUN", userVisualApproval = "NOT_APPROVED";
             public bool canonicalRestoreMatches, diskRoundtripMatches, hudDamageMatches, restoredPendingCollected, oldKillRejected, pendingLoot;

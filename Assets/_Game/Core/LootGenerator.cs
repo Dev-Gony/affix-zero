@@ -167,9 +167,23 @@ namespace AffixZero.Core
             }
             string prefix = count == 0 ? "" : options[options.Count - count].Name + " ";
             string icon = IconFor(basis);
+            int capacity = SocketCatalog.CapacityFor(icon, basis.Slot);
+            int opened = InitialOpenedSockets(capacity, rarity.Index, floor, random);
             string affixText = count == 0 ? "" : count + "개 옵션";
             return new WeaponItem(identity, prefix + basis.Name, attack, 0, affixText, icon,
-                rarity.Id, 0, basis.Slot, basis.Style, defense, health, 0, options);
+                rarity.Id, 0, basis.Slot, basis.Style, defense, health, 0, options, capacity, opened);
+        }
+        private static int InitialOpenedSockets(int capacity, int rarityIndex, int floor, Random random)
+        {
+            if (capacity <= 0) return 0;
+            int opened = 1;
+            for (int index = 1; index < capacity; index++)
+            {
+                double chance = Clamp(.18f + rarityIndex * .08f + Math.Min(30, floor) * .006f - index * .04f, .12f, .72f);
+                if (random.NextDouble() >= chance) break;
+                opened++;
+            }
+            return opened;
         }
         private static RarityRule RollRarity(int floor, int rebirths, DungeonDifficulty difficulty, Random random)
         {

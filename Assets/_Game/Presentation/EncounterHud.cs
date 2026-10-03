@@ -50,6 +50,8 @@ namespace AffixZero.Presentation
         private VisualElement saveRetry;
         private readonly HashSet<MeleeActor> observedActors=new HashSet<MeleeActor>();
         private int selectedItemIndex = -1;
+        private EquipmentSlot? selectedEquippedSlot;
+        private int selectedSocketIndex,selectedRuneIndex;
         private Image actionIcon;
         private string actionIconResource;
         private readonly List<DamageLabel> damageLabels = new List<DamageLabel>();
@@ -246,7 +248,8 @@ namespace AffixZero.Presentation
         private void BuildCharacter()
         {
             Sprite portrait=encounter.Hero==null||encounter.Hero.AnimationSet==null?null:encounter.Hero.AnimationSet.Frame(ActorClip.Idle,0);
-            equipmentPanel=new EquipmentPanel(root,ReadEquipment,SelectItem,
+            equipmentPanel=new EquipmentPanel(root,ReadEquipment,SelectItem,SelectEquippedItem,
+                SelectSocket,CycleRune,InsertRune,RemoveRune,
                 ()=>encounter.EquipItem(selectedItemIndex),()=>encounter.SalvageItem(selectedItemIndex),
                 ()=>encounter.SpendTalent(TalentId.Fury),()=>encounter.SpendTalent(TalentId.Precision),()=>encounter.SpendTalent(TalentId.Keystone),
                 ()=>encounter.ResetTalents(),()=>encounter.SetEquipmentVisible(false),portrait);
@@ -272,22 +275,72 @@ namespace AffixZero.Presentation
                     NextSecondaryValue=(p.TotalDamage+item.NextEnhancementDamage).ToString()};
             },()=>encounter.EnhanceWeapon(),()=>encounter.ShowManagement(ManagementScreen.Equipment),()=>encounter.ShowManagement(ManagementScreen.None));
         }
-        private void SelectItem(int index) { selectedItemIndex=index; }
+        private void SelectItem(int index)
+        {
+            selectedItemIndex=index;selectedEquippedSlot=null;selectedSocketIndex=0;selectedRuneIndex=0;
+        }
+        private void SelectEquippedItem(EquipmentSlot slot)
+        {
+            selectedEquippedSlot=slot;selectedItemIndex=-1;selectedSocketIndex=0;selectedRuneIndex=0;
+        }
+        private void SelectSocket(int index){selectedSocketIndex=index;}
+        private void CycleRune(int direction)
+        {
+            WeaponItem item=SelectedEquipmentItem();
+            if(item==null)return;
+            int count=encounter.Progression.CompatibleOwnedRunes(item.EquipmentSlot).Count;
+            if(count<=0){selectedRuneIndex=0;return;}
+            selectedRuneIndex=(selectedRuneIndex+direction)%count;
+            if(selectedRuneIndex<0)selectedRuneIndex+=count;
+        }
+        private WeaponItem SelectedEquipmentItem()
+        {
+            HeroProgression p=encounter==null?null:encounter.Progression;
+            if(p==null)return null;
+            if(selectedEquippedSlot.HasValue)return p.GetEquipped(selectedEquippedSlot.Value);
+            return selectedItemIndex>=0&&selectedItemIndex<p.Inventory.Count?p.Inventory[selectedItemIndex]:null;
+        }
+        private void InsertRune()
+        {
+            WeaponItem item=SelectedEquipmentItem();if(item==null)return;
+            IReadOnlyList<RuneDefinition> compatible=encounter.Progression.CompatibleOwnedRunes(item.EquipmentSlot);
+            if(compatible.Count==0)return;
+            selectedRuneIndex=Mathf.Clamp(selectedRuneIndex,0,compatible.Count-1);
+            encounter.SocketRune(selectedItemIndex,selectedEquippedSlot,selectedSocketIndex,compatible[selectedRuneIndex].Id);
+        }
+        private void RemoveRune()
+        {
+            if(SelectedEquipmentItem()==null)return;
+            encounter.UnsocketRune(selectedItemIndex,selectedEquippedSlot,selectedSocketIndex);
+        }
         private EquipmentPanel.View ReadEquipment()
         {
             HeroProgression p=encounter.Progression;
             if(p==null || encounter.Hero==null)return null;
             selectedItemIndex=p.Inventory.Count==0?-1:Mathf.Clamp(selectedItemIndex,-1,p.Inventory.Count-1);
-            WeaponItem item=selectedItemIndex>=0?p.Inventory[selectedItemIndex]:null;
+            if(selectedEquippedSlot.HasValue&&p.GetEquipped(selectedEquippedSlot.Value)==null)selectedEquippedSlot=null;
+            WeaponItem item=selectedEquippedSlot.HasValue?p.GetEquipped(selectedEquippedSlot.Value):
+                selectedItemIndex>=0?p.Inventory[selectedItemIndex]:null;
             var items=new EquipmentPanel.ItemView[p.Inventory.Count];
-            for(int i=0;i<items.Length;i++)items[i]=ItemView(p.Inventory[i]);
-            WeaponItem current=item==null?null:p.GetEquipped(item.EquipmentSlot);
+            for(int i=0;i<items.Length;i++)items[i]=ItemView(p.Inventory[i],false);
+            bool equippedSelection=selectedEquippedSlot.HasValue;
+            WeaponItem current=item==null?null:equippedSelection?item:p.GetEquipped(item.EquipmentSlot);
             int damageDelta=item==null?0:item.DamageBonus-(current?.DamageBonus??0);
             int defenseDelta=item==null?0:item.DefenseBonus-(current?.DefenseBonus??0);
             int healthDelta=item==null?0:item.HealthBonus-(current?.HealthBonus??0);
             float speedDelta=item==null?0:item.SpeedBonus-(current?.SpeedBonus??0);
+            IReadOnlyList<RuneDefinition> compatible=item==null?Array.Empty<RuneDefinition>():p.CompatibleOwnedRunes(item.EquipmentSlot);
+            selectedRuneIndex=compatible.Count==0?0:Mathf.Clamp(selectedRuneIndex,0,compatible.Count-1);
+            selectedSocketIndex=item==null||item.SocketCapacity==0?0:Mathf.Clamp(selectedSocketIndex,0,item.SocketCapacity-1);
+            var runeViews=new EquipmentPanel.RuneView[compatible.Count];
+            for(int i=0;i<runeViews.Length;i++)runeViews[i]=RuneView(compatible[i],p.RuneCount(compatible[i].Id));
+            RuneDefinition chosen=compatible.Count==0?null:compatible[selectedRuneIndex];
+            bool socketOpen=item!=null&&selectedSocketIndex<item.OpenedSocketCount;
+            string socketRune=socketOpen?item.SocketedRunes[selectedSocketIndex]:null;
             return new EquipmentPanel.View {
-                Items=items,EquippedSlots=new[]{ItemView(p.EquippedWeapon),ItemView(p.EquippedHelmet),ItemView(p.EquippedArmor),ItemView(p.EquippedGloves),ItemView(p.EquippedBoots),ItemView(p.EquippedRing),ItemView(p.EquippedAmulet),ItemView(p.EquippedRelic)},Selected=ItemView(item),
+                Items=items,EquippedSlots=new[]{ItemView(p.EquippedWeapon,true),ItemView(p.EquippedHelmet,true),ItemView(p.EquippedArmor,true),ItemView(p.EquippedGloves,true),ItemView(p.EquippedBoots,true),ItemView(p.EquippedRing,true),ItemView(p.EquippedAmulet,true),ItemView(p.EquippedRelic,true)},
+                Selected=ItemView(item,equippedSelection),SelectedEquipped=equippedSelection,
+                CompatibleRunes=runeViews,SelectedRune=chosen==null?null:RuneView(chosen,p.RuneCount(chosen.Id)),SelectedSocketIndex=selectedSocketIndex,
                 Health=encounter.Hero.Hp+" / "+encounter.Hero.MaxHp,
                 Damage=p.TotalDamage.ToString(),Defense=encounter.Hero.Defense.ToString(),
                 Duration=encounter.Hero.AnimationSet==null?"—":encounter.Hero.AnimationSet.AttackDuration.ToString("0.00")+" s",
@@ -295,19 +348,27 @@ namespace AffixZero.Presentation
                 Delta=item==null?"":"이동속도 "+(speedDelta>=0?"+":"")+(speedDelta*100f).ToString("0")+"% · "+item.EquipmentSlot,
                 Affix=item==null?"":DescribeItemDetailed(item),
                 Status=encounter.ProgressionNotice,Points=p.UnspentPoints,Fury=p.FuryRank,Precision=p.PrecisionRank,Keystone=p.KeystoneRank,
-                SalvageValue=p.GetSalvageValue(selectedItemIndex),
-                CanEquip=item!=null,CanSalvage=item!=null,CanReset=p.SpentPoints>0,
+                SalvageValue=equippedSelection?0:p.GetSalvageValue(selectedItemIndex),
+                SalvageRuneReturnCount=equippedSelection||item==null?0:item.FilledSocketCount,
+                CanEquip=item!=null&&!equippedSelection,CanSalvage=item!=null&&!equippedSelection,
+                CanInsertRune=socketOpen&&string.IsNullOrEmpty(socketRune)&&chosen!=null,
+                CanRemoveRune=socketOpen&&!string.IsNullOrEmpty(socketRune)&&p.RuneCount(socketRune)<SocketCatalog.MaxRuneStack,
+                CanReset=p.SpentPoints>0,
                 CanFury=p.UnspentPoints>0&&p.FuryRank<2,
                 CanPrecision=p.UnspentPoints>0&&p.FuryRank>=2&&p.PrecisionRank<1,
                 CanKeystone=p.UnspentPoints>0&&p.PrecisionRank>=1&&p.KeystoneRank<1
             };
         }
-        private static EquipmentPanel.ItemView ItemView(WeaponItem item)
+        private static EquipmentPanel.RuneView RuneView(RuneDefinition rune,int count)=>rune==null?null:new EquipmentPanel.RuneView
+        {Id=rune.Id,Name=rune.Name,Mark=rune.Mark,Effect=SocketCatalog.DescribeValue(rune),Count=count};
+        private static EquipmentPanel.ItemView ItemView(WeaponItem item,bool equipped)
         {
             return item==null?null:new EquipmentPanel.ItemView {Id=item.Id,Name=item.Name,Icon=item.IconResource,
                 SlotText=item.EquipmentSlot.ToString().ToUpperInvariant(),Summary=item.Rarity+" · "+PrimarySummary(item),
                 PrimaryValue=PrimaryValue(item),PrimaryLabel=PrimaryLabel(item),Rarity=item.Rarity,
-                Affix=DescribeItemDetailed(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus};
+                Affix=DescribeItemDetailed(item),Damage=item.DamageBonus,Defense=item.DefenseBonus,Health=item.HealthBonus,Speed=item.SpeedBonus,
+                SocketCapacity=item.SocketCapacity,OpenedSocketCount=item.OpenedSocketCount,
+                SocketRuneIds=new List<string>(item.SocketedRunes).ToArray(),Equipped=equipped};
         }
         private static string Signed(int value)=>value>=0?"+"+value:value.ToString();
         private static string PrimaryValue(WeaponItem item)=>item.DamageBonus>0?item.DamageBonus.ToString():item.DefenseBonus>0?item.DefenseBonus.ToString():item.HealthBonus.ToString();
@@ -320,6 +381,7 @@ namespace AffixZero.Presentation
             if(item.DefenseBonus!=0)lines.Add("방어 +"+item.DefenseBonus);
             if(item.HealthBonus!=0)lines.Add("체력 +"+item.HealthBonus);
             foreach(ItemOption option in item.Options)lines.Add(option.Name+" +"+(option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#")));
+            if(item.SocketCapacity>0)lines.Add("SOCKETS "+item.FilledSocketCount+"/"+item.OpenedSocketCount+" · CAP "+item.SocketCapacity);
             if(item.EnhancementRank>0)lines.Add("강화 +"+item.EnhancementRank);
             return string.Join("  ·  ",lines);
         }
@@ -332,6 +394,13 @@ namespace AffixZero.Presentation
             if(item.FlatHealth!=0)lines.Add("BASE HEALTH  +"+item.FlatHealth);
             foreach(ItemOption option in item.Options)lines.Add("ROLLED "+option.Name+"  +"+
                 (option.Stat==AffixStat.Speed?(option.Value*100f).ToString("0")+"%":option.Value.ToString("0.#"))+"  ["+LootGenerator.ConfiguredRollRange(option.Stat)+"]");
+            lines.Add("SOCKETS  "+item.FilledSocketCount+" / "+item.OpenedSocketCount+"  ·  CAPACITY "+item.SocketCapacity);
+            for(int i=0;i<item.OpenedSocketCount;i++)
+            {
+                RuneDefinition rune=SocketCatalog.GetRune(item.SocketedRunes[i]);
+                lines.Add(rune==null?"RUNE "+(i+1)+"  ·  OPEN / EMPTY":
+                    "RUNE "+(i+1)+"  ·  "+rune.Name+"  "+SocketCatalog.DescribeValue(rune));
+            }
             if(item.EnhancementRank>0)lines.Add("ENHANCEMENT  +"+item.EnhancementRank);
             return string.Join("\n",lines);
         }
