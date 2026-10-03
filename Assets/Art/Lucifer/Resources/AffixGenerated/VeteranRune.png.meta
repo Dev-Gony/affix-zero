@@ -6,7 +6,7 @@ TextureImporter:
   mipmaps:
     enableMipMap: 0
   textureSettings:
-    filterMode: 0
+    filterMode: 1
     wrapU: 1
     wrapV: 1
   nPOTScale: 0

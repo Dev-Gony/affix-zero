@@ -4,7 +4,7 @@
   "repository": "Dev-Gony/affix-zero",
   "branch": "feature/open-dungeon-loot-skills",
   "pr": 19,
-  "stage": "FULL_29_ILLUSTRATED_EQUIPMENT_SET_INTEGRATED_AND_VALIDATED",
+  "stage": "PAINTED_PASSIVE_ICONS_INTEGRATED_AND_VALIDATED",
   "implementation_commit": "feature/open-dungeon-loot-skills branch tip",
   "engine_expected": "6000.3.24f1",
   "renderer": "Built-in 2D",
@@ -16,12 +16,12 @@
     "latest_user_report": "INSTALLATION_COMPLETE",
     "further_editor_launches": "AUTHORIZED_AND_VERIFIED"
   },
-  "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS; ALL_EARLIER_FLAT_PLACEHOLDERS_REPLACED",
+  "new_art": "29_ORIGINAL_ILLUSTRATED_V2_EQUIPMENT_ICONS_PLUS_3_PAINTED_PASSIVE_ICONS",
   "unity_editor_import": "PASS",
   "unity_play": "PASS_720_AND_1080_CONNECTED_DUNGEON_FULL_CLEAR_WITH_EPHEMERAL_SURVIVAL_FIXTURE",
-  "visual_approval": "REPRESENTATIVE_V2_DIRECTION_USER_APPROVED; ALL_29_AGENT_INSPECTED_AT_128_64_37_AND_NATIVE_720_1080; FINAL_USER_ACCEPTANCE_PENDING",
+  "visual_approval": "29 EQUIPMENT AND 3 NEW PASSIVE ICONS AGENT-INSPECTED AT ACTUAL SIZES AND NATIVE 720_1080; FINAL USER ACCEPTANCE PENDING",
   "ui_direction": "USER_STITCH_13_ARCHIVES_NATIVE_UNITY_16_BY_9_REFRESH",
-  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_66363a4ba5fa4fd1a991d9617ccaf2d4",
+  "windows_build": "SUCCEEDED_ZERO_ERRORS_WARNINGS_BUILD_3d4402e94aa84488a4a83d6d93e70aa9",
   "first_encounter_scene": "Assets/_Game/Scenes/HeroSiegeEncounter.unity",
   "cleanup": {
     "policy": "CURRENT_CODE_PLUS_TEXT_ONLY_RETROSPECTIVE",
@@ -30,7 +30,7 @@
     "remote_history_rewritten": false,
     "read_only_inspector_available": true
   },
-  "next": "User visual acceptance of the complete illustrated set; socket contract decisions remain required before implementation; broader systems remain deferred",
+  "next": "User visual acceptance of the painted passive set; approve or revise proposed per-base socket capacities before any socket implementation; broader systems remain deferred",
   "rewards": "25_XP_8_GOLD_AUTO_COLLECT_ONCE_VERIFIED_IN_EDITOR_AND_WINDOWS_PLAYER",
   "core_checks": 321,
   "static_unity_api_compile": "PASS_ZERO_ERRORS_WARNINGS_NOT_A_SUBSTITUTE_FOR_UNITY_IMPORT_OR_PLAY",
@@ -92,13 +92,14 @@
   },
   "product_mode": "PRIMARY_IDLE_AUTONOMOUS_DUNGEON_HUNT_WITH_HERO_SIEGE_INSPIRED_RPG_SYSTEMS",
   "socket_requirement": {
-    "status": "USER_REQUIRED_CONTRACT_NOT_DEFINED",
+    "status": "PER_BASE_DIRECTION_APPROVED_EXACT_CAPACITIES_PROPOSED_NOT_APPROVED",
     "recorded_date": "2026-10-03",
     "spec": "docs/ITEM_SOCKET_REQUIREMENT.md",
     "current_implementation": "NONE",
     "art_rule": "Do not bake sockets/counts/runes into base paintings; reserve composition for a future runtime overlay",
-    "blocked_decisions": "eligible slots, count bounds, tier/rarity relationship, acquisition, rune effects/removal, forge/salvage interaction, save migration",
-    "monetization": "No paid gacha or new currency implied"
+    "blocked_decisions": "exact 29 capacities, initial opened-count weights, add-socket path, removal cost, rune catalog/acquisition and v5 migration",
+    "salvage": "Return-all is the user-preferred proposed default with an atomic recovery-policy seam; no implementation",
+    "monetization": "No cash item, shop, paid restriction, paid gacha or new currency implemented or approved"
   },
   "illustrated_equipment_v2": {
     "status": "FULL_SET_TECHNICAL_AND_AGENT_VISUAL_PASS_USER_ACCEPTANCE_PENDING",
@@ -267,6 +268,32 @@
     "ui_720": "PASS on normal-window rerun, 19 callbacks, 29 paths loaded, three illustrated prototypes inspected at actual slot size",
     "ui_1080": "PASS, 19 callbacks, 29 paths loaded, three illustrated prototypes inspected at actual slot size",
     "production_save_isolation": "Primary, backup and lock SHA256 unchanged before/after all probes"
+  },
+  "painted_passives_20261003": {
+    "status": "PASS_TECHNICAL_AND_AGENT_VISUAL_USER_ACCEPTANCE_PENDING",
+    "source_commit": "386485529268e2a964a5f168e56e69fe524ad607",
+    "source_tree": "38a0a5051e277703b6acf72977aa7b639a8d7e29",
+    "runtime_icons": "PowerRune, PrecisionRune and VeteranRune are unique 128x128 transparent PNGs with four-pixel padding and zero border alpha",
+    "runtime_sha256": {
+      "PowerRune": "6B6E3B1FA97F278D0F9B1C5D447ADF18C310646DBD04591976517A61668FB03E",
+      "PrecisionRune": "83D35C386C532AD80EE04884F243F539866D5EE236C5D5F51C85360E0F07A5B0",
+      "VeteranRune": "FA2203FEB45E1D7E31F15E0D1123DD89D6BF4A160D086E18B40F3138F8F66CE5"
+    },
+    "unity_guids_preserved": true,
+    "core_smoke": "321 PASS",
+    "static_compile": "PASS 0 errors 0 warnings",
+    "unity_build": "PASS 0 errors 0 warnings",
+    "build_guid": "3d4402e94aa84488a4a83d6d93e70aa9",
+    "ui_720": "PASS 5 frames 19 callbacks locked Precision and selected Keystone 29 base icons player HP present non-player HP absent",
+    "ui_1080": "PASS 5 frames 19 callbacks locked Precision and selected Keystone 29 base icons player HP present non-player HP absent",
+    "physical_input": "PASS exact 1280x720 final-build window, ten actions, 17.199 seconds",
+    "production_save_hashes_unchanged": true,
+    "library": {
+      "locked_precision_1080": "libfile_32fb720532b48191abf17fb5d2658dd4",
+      "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
+      "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
+    },
+    "socket_scope": "Design documentation only; per-base capacities remain proposed and no socket fields, UI, drops, runes or gameplay were implemented"
   },
   "physical_input": {
     "status": "PASS",

@@ -131,7 +131,10 @@ namespace AffixZero.Presentation
                 case "talents-locked":
                     Require(p.UnspentPoints == pointsBeforeSelection && !Element("talent-invest").enabledInHierarchy && Text("talent-detail-name").Contains("정밀"),
                         "Locked node selection spent points or enabled investment.");
-                    report.lockedSelectionVerified = true; Dispatch("talent-node-fury"); Phase("talents-fury"); break;
+                    report.lockedSelectionVerified = true; Capture("talents-locked"); Phase("talents-locked-capture"); break;
+                case "talents-locked-capture":
+                    if (!captures.Contains("talents-locked")) return;
+                    Dispatch("talent-node-fury"); Phase("talents-fury"); break;
                 case "talents-fury":
                     Dispatch("talent-invest"); Require(p.FuryRank == 1 && p.UnspentPoints == pointsBeforeSelection - 1, "First Fury investment failed.");
                     Phase("talents-fury-two"); break;
@@ -145,9 +148,9 @@ namespace AffixZero.Presentation
                 case "talents-detail":
                     Require(Text("talent-detail-name").Contains("숙련") && Element("talent-invest").enabledInHierarchy,
                         "Unlocked keystone detail is not displayed.");
-                    Capture("talents"); Phase("talents-capture"); break;
+                    Capture("talents-selected"); Phase("talents-capture"); break;
                 case "talents-capture":
-                    if (!captures.Contains("talents")) return;
+                    if (!captures.Contains("talents-selected")) return;
                     Dispatch("forge-tab"); Phase("forge-open"); break;
                 case "forge-open":
                     Require(owner.Screen == ManagementScreen.Forge, "Forge tab did not open.");
@@ -163,7 +166,7 @@ namespace AffixZero.Presentation
                     Capture("forge"); Phase("forge-capture"); break;
                 case "forge-capture":
                     if (!captures.Contains("forge")) return;
-                    Require(captures.Count == 4 && report.speedVerified && report.equipVerified && report.talentVerified && report.forgeVerified,
+                    Require(captures.Count == 5 && report.speedVerified && report.equipVerified && report.talentVerified && report.forgeVerified,
                         "Required native screens or mutations are incomplete.");
                     Finish(true, null); break;
             }
@@ -308,7 +311,8 @@ namespace AffixZero.Presentation
             CheckGroup(nav, bottom.worldBound, bounds, true);
             CheckGroup(new[] { "hero-hp-value", "xp-value" }, top.worldBound, bounds, true);
             CheckGroup(new[] { "attack-slot" }, bottom.worldBound, bounds, true);
-            string active = screen == "equipment" ? "character-panel" : screen == "talents" ? "talent-screen" : screen == "forge" ? "forge-screen" : null;
+            bool talentScreen = screen == "talents" || screen.StartsWith("talents-", StringComparison.Ordinal);
+            string active = screen == "equipment" ? "character-panel" : talentScreen ? "talent-screen" : screen == "forge" ? "forge-screen" : null;
             foreach (string name in new[] { "character-panel", "talent-screen", "forge-screen" })
                 Require(Visible(Element(name)) == (name == active), "Management visibility differs from selected screen: " + name);
             if (active != null)
@@ -334,7 +338,7 @@ namespace AffixZero.Presentation
                     frame.selectedItem = Text("selected-item-name"); frame.comparison = Text("comparison-delta");
                     frame.comparisonDamage = p.CompareDamage(1).Value;
                 }
-                else if (screen == "talents")
+                else if (talentScreen)
                 {
                     string[] talentNodes={ "talent-node-fury", "talent-node-precision", "talent-node-keystone", "talent-node-vitality", "talent-node-cleave", "talent-node-haste" };
                     CheckGroup(new[] { "talent-node-fury", "talent-node-precision", "talent-node-keystone", "talent-invest", "talent-screen-reset", "talent-screen-close" }, management.worldBound, bounds, true);

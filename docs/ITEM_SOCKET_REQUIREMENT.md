@@ -20,28 +20,101 @@ Therefore this record does **not** authorize invented socket counts,
 rarity/tier probabilities, rune effects, drilling costs, removal/destruction
 rules, currencies, drop tables or save migration.
 
-## Recommended v1 contract — proposal only
+## Reference facts — not AFFIX rules
 
-Everything in this section is **PROPOSED, NOT USER-AGREED**. It is a bounded
-design recommendation for a later implementation review, not authority to add
-socket UI, fields, drops, items or balance today.
+### Diablo II official legacy reference
 
-### Eligible gear and capacity
+The official legacy guide makes socket capacity category- and base-dependent,
+not one universal value. Weapons, helms, body armor and shields are eligible;
+their category ceilings are respectively 6, 3, 4 and 4, while the actual result
+is further constrained by the base, item level, quality and socketing method.
+The official sword table alone contains bases with maxima of 2, 3, 4, 5 and 6.
+Larzuk, natural socketed drops and recipes do not all produce the same result.
 
-- **Proposed:** newly generated Weapon, Helmet, Armor, Gloves, Boots, Ring and
-  Amulet items can roll socket capacity. `Relic` remains schema-compatible but
-  does not roll sockets until a real relic source joins the current 29-base
-  loot pool.
-- **Proposed hard cap:** three sockets per item.
-- **Proposed rarity ranges:** Normal 0; Magic 0-1; Rare 0-2; Unique 1-2;
-  Legend 1-3; Epic 2-3. These counts are not approved balance values.
-- **Proposed roll rule:** capacity is rolled once by the existing seeded item
-  generation path and persisted on the item. Enhancement, equip swaps, reloads
-  and difficulty changes never reroll it. Base tier may bias a roll within its
-  rarity range later, but no tier weighting or probability is proposed yet.
-- **Proposed legacy rule:** schema-v1 through schema-v4 items migrate with zero
-  sockets rather than silently gaining a rerolled advantage. A future forge
-  drilling feature would require a separate user-approved contract.
+- [Official socketed-items rules](https://classic.battle.net/diablo2exp/items/socketeditems.shtml)
+- [Official sword base table](https://classic.battle.net/diablo2exp/items/normal/swords.shtml)
+
+The official Cube unsocket recipe destroys inserted runes/gems/jewels. The
+AFFIX proposal to return runes during salvage is therefore a user-preferred
+original rule, not a claimed Diablo II behavior.
+
+### Hero Siege community-wiki examples
+
+The community wiki records item-specific ranges rather than one global cap:
+Bonetti's Rapier 1-3, Glowstick Estoc 3-5, Shishkebab 3-6, Gem King's Raiment
+6, Stoneplate 5, Knight Captain's Helmet 1-2, Eternal Death 4, Pirate Captain's
+Boots 1-2, Eagle's Claw 0-1 and Azazel's Despair 1. These examples support
+explicit per-item exceptions, including boots and jewelry that Diablo II does
+not socket.
+
+- [Heroic item examples](https://herosiege.wiki.gg/wiki/Heroic)
+- [Helmet examples](https://herosiege.wiki.gg/wiki/Helmets)
+- [Pirate Captain's Boots](https://herosiege.wiki.gg/wiki/Pirate_Captain%27s_Boots)
+- [Eagle's Claw](https://herosiege.wiki.gg/wiki/Eagle%27s_Claw)
+- [Azazel's Despair](https://herosiege.wiki.gg/wiki/Azazel%27s_Despair)
+
+This community wiki may be outdated and is not treated as a complete statement
+of current maxima. No positive glove example was verified in this source set.
+
+## Recommended AFFIX contract — proposal only
+
+Everything below is **PROPOSED, NOT USER-AGREED**, including every capacity
+number. It is an original AFFIX balance proposal informed by the reference
+patterns above, not a copy of either game and not authority to implement yet.
+
+### Per-base data model and one validator
+
+- **Proposed `SocketProfile`:** base-item ID, progression band, capacity and an
+  optional named-item override ID. Capacity comes from this registry, never
+  directly from rarity.
+- **Proposed item state:** persist `openedCount` plus ordered socket contents.
+  The invariant is `0 <= openedCount <= resolved profile capacity`.
+- Natural generation and any future add-socket forge action must call the same
+  resolver and validator. Enhancement, equip swaps, reloads and difficulty
+  changes never reroll capacity or opened sockets.
+- Rarity or dungeon progression may later bias the initial `openedCount` roll,
+  but cannot replace the per-base capacity. No roll weights are proposed yet.
+- A named unique may supply an explicit override without changing every item in
+  its slot. `Relic` remains capacity 0 until a real relic source and identity
+  contract exist.
+
+### Current 29-base capacity proposal
+
+The tier column is the existing `LootGenerator` base tier. The capacity column
+is a **proposal only** and deliberately balances innate stats, affix headroom
+and progression instead of assigning every high-rarity item the same maximum.
+
+| Slot | Base ID | Existing tier | Proposed capacity |
+| --- | --- | ---: | ---: |
+| Weapon | `dagger` | 1 | 2 |
+| Weapon | `longsword` | 4 | 3 |
+| Weapon | `axe` | 8 | 3 |
+| Weapon / Staff | `magic_sword` | 13 | 4 |
+| Weapon | `divine_sword` | 20 | 3 |
+| Helmet | `leather_hat` | 1 | 1 |
+| Helmet | `iron_helm` | 5 | 2 |
+| Helmet | `mithril_helm` | 11 | 2 |
+| Helmet | `dragon_helm` | 18 | 3 |
+| Armor | `cloth` | 1 | 2 |
+| Armor | `leather_armor` | 5 | 3 |
+| Armor | `plate_armor` | 11 | 3 |
+| Armor | `dragonscale` | 18 | 4 |
+| Gloves | `cloth_gloves` | 1 | 0 |
+| Gloves | `leather_gloves` | 5 | 1 |
+| Gloves | `battle_gloves` | 11 | 1 |
+| Gloves | `dragon_gloves` | 18 | 2 |
+| Boots | `sandals` | 1 | 0 |
+| Boots | `leather_boots` | 5 | 1 |
+| Boots | `swift_boots` | 11 | 1 |
+| Boots | `gale_boots` | 18 | 2 |
+| Ring | `copper_ring` | 1 | 0 |
+| Ring | `silver_ring` | 5 | 1 |
+| Ring | `gold_ring` | 11 | 1 |
+| Ring | `diamond_ring` | 18 | 2 |
+| Amulet | `bone_necklace` | 1 | 0 |
+| Amulet | `crystal_necklace` | 5 | 1 |
+| Amulet | `ruby_necklace` | 11 | 1 |
+| Amulet | `dragon_tear` | 18 | 2 |
 
 ### Rune effects and inventory
 
@@ -71,9 +144,17 @@ socket UI, fields, drops, items or balance today.
 - **Proposed replacement:** removal must complete first; replacing a filled
   socket cannot silently destroy its rune.
 - Enhancement and equipment swaps preserve capacity and filled sockets.
-- **Proposed salvage:** return all inserted runes to the rune inventory before
-  applying the existing Gold salvage result. If either operation cannot fit or
-  validate, the whole mutation fails without changing the item or balances.
+- **Proposed default salvage policy:** return all inserted runes to the rune
+  inventory before applying the existing Gold salvage result. This is the
+  user's preferred AFFIX rule. A pre-confirmation quote must list every rune
+  returned or lost; if recovery cannot fit or validate, the whole transaction
+  fails without changing the item or balances.
+- **Future-policy seam only:** resolve salvage through a versioned recovery
+  policy instead of hard-coding the outcome inside item deletion. `ReturnAll`
+  is the proposed default. A future extraction service, entitlement or
+  convenience item could request a separately approved policy without changing
+  item identity or socket serialization. No cash item, shop, paid restriction,
+  destructive baseline or monetization rule is implemented or approved now.
 
 ### Save compatibility and validation
 
@@ -87,10 +168,11 @@ socket UI, fields, drops, items or balance today.
 - Capture/restore and the `TryEnhance` reconstruction path must copy socket
   state explicitly. The existing issued-item identity remains authoritative;
   stackable runes need validated non-negative counts rather than fake item IDs.
-- Restore must fail closed before mutating the live profile when capacity is
-  outside the **proposed 0-3 bound**, indexes are duplicate/out of range, a
-  rune ID is unknown, a rune is incompatible with the equipment slot, or a
-  stack count is invalid. Atomic primary/backup behavior remains unchanged.
+- Restore must fail closed before mutating the live profile when capacity does
+  not match the resolved base/named profile, `openedCount` exceeds that
+  capacity, indexes are duplicate/out of range, a rune ID is unknown, a rune
+  is incompatible with the equipment slot, or a stack count is invalid.
+  Atomic primary/backup behavior remains unchanged.
 - Required later tests: v1-v4 to v5 migration, v5 exact round-trip, enhancement
   preservation, equip swap preservation, insert/remove rollback, salvage rune
   return, corrupt/unknown-rune rejection and separate-process restore. Every
@@ -98,10 +180,11 @@ socket UI, fields, drops, items or balance today.
 
 ### Approval gates before implementation
 
-The user still needs to approve or revise the proposed eligibility list,
-rarity capacity table, legacy-zero-socket policy, removal cost/destruction
-policy, rune effect catalog and rune acquisition source. Until then, the
-existing no-fake-socket rule remains authoritative.
+The user has approved the per-slot/per-base direction and rejected a universal
+maximum of three. The exact 29 capacity values above remain proposals requiring
+balance approval, as do initial opened-count weights, the legacy-zero-socket
+policy, removal cost, rune effect catalog and acquisition source. Until those
+contracts are approved, the existing no-fake-socket rule remains authoritative.
 
 ## Extensibility rule for current art/UI
 
@@ -115,9 +198,9 @@ existing no-fake-socket rule remains authoritative.
 
 ## Decisions required before implementation
 
-1. Eligible equipment slots and whether every item can roll sockets.
-2. Minimum/maximum count and its relationship to base tier and rarity.
-3. Drop-time sockets versus forge-added sockets.
+1. Approval or revision of the proposed 29-base capacity table.
+2. Initial `openedCount` weights by progression source; rarity is not capacity.
+3. Drop-time open sockets versus a separately contracted forge add-socket path.
 4. Rune inventory, effects, insertion, removal and destruction rules.
 5. Comparison, salvage, enhancement and identity behavior.
 6. Save-schema migration and validation bounds.
@@ -130,3 +213,4 @@ No paid gacha or new currency is implied by the socket requirement.
 | --- | --- | --- | --- |
 | 아이템 소켓 UI/아트 확장 범위를 정할 수 없음 | 현행 아이템 모델, 드롭 규칙, 저장 스키마와 대장간에 소켓 상태의 권위 있는 값이 없고 과거 시안은 배치 참고뿐임 | 먼저 결정이 필요한 6개 계약을 명시하고, 현재 아이콘은 소켓을 굽지 않은 독립 원화와 향후 런타임 오버레이 영역으로 분리 | 데이터 계약 없이 소켓 구멍이나 개수를 그리면 허위 기능이 되므로 시각 표현보다 상태 모델이 선행되어야 함 |
 | 안전한 소켓 초안과 현행 구조의 접점을 정리해야 함 | `WeaponItem`이 모든 장비를 표현하고 강화 시 새 인스턴스를 만들며, v4 스냅샷은 소켓/룬 인벤토리 필드가 없음 | 기존 `AffixStat`, 아이템 ID 검증, 원자적 프로필 저장을 재사용하는 v5 제안과 레거시 0소켓 마이그레이션을 비권위 초안으로 분리 | 수치와 획득 규칙을 승인값처럼 고정하지 않으면서도 복사·검증·롤백 지점을 먼저 명시할 수 있음 |
+| 범용 최대 3소켓 제안이 사용자 방향과 불일치 | Diablo II와 Hero Siege 참고 모두 부위·베이스·개별 아이템에 따라 용량이 달라지며 사용자가 범용 상한을 명시적으로 거절함 | 범용 상한과 희귀도 표를 제거하고 29개 베이스별 `SocketProfile`·열린 수·명시적 named override와 단일 validator 제안으로 교체 | 참고작의 숫자를 평평하게 복사하지 말고 부위·기본 성능·확장 예외를 데이터로 분리해야 함 |

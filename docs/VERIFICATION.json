@@ -305,5 +305,49 @@
       "skills_1080": "libfile_5b3ab34c48a88191a5c2d0be2a238908"
     },
     "socket_scope": "Required but not implemented; no counts, gems, effects or rules invented"
+  },
+  "painted_passives_20261003": {
+    "result": "PASS_TECHNICAL_AND_AGENT_VISUAL_USER_ACCEPTANCE_PENDING",
+    "source_commit": "386485529268e2a964a5f168e56e69fe524ad607",
+    "source_tree": "38a0a5051e277703b6acf72977aa7b639a8d7e29",
+    "source_import": "Only the exact three PNG blobs were extracted; source branch was not merged, cherry-picked or checked out",
+    "runtime_icons": "3 unique 128x128 transparent PNGs; four-pixel padding; zero border-alpha pixels; original Unity GUIDs preserved",
+    "core_checks": 321,
+    "static_compile": "PASS 0 errors 0 warnings",
+    "unity_build": "PASS 0 errors 0 warnings",
+    "build_guid": "3d4402e94aa84488a4a83d6d93e70aa9",
+    "ui_720": {
+      "report": "Build/Reports/passive-icons-ui-720/ui-reference-probe.json",
+      "run_id": "62d416a652f048c789db78de3af5ff83",
+      "result": "PASS",
+      "frames": 5,
+      "callbacks": 19,
+      "locked_selection": true,
+      "selected_keystone": true,
+      "base_icons_loaded": 29,
+      "player_hp_visible": true,
+      "non_player_hp_absent": true
+    },
+    "ui_1080": {
+      "report": "Build/Reports/passive-icons-ui-1080/ui-reference-probe.json",
+      "run_id": "74eecdd3440c4a3a80c49b81c89d71f5",
+      "result": "PASS",
+      "frames": 5,
+      "callbacks": 19,
+      "locked_selection": true,
+      "selected_keystone": true,
+      "base_icons_loaded": 29,
+      "player_hp_visible": true,
+      "non_player_hp_absent": true
+    },
+    "physical_input": "PASS Build/Reports/passive-icons-final-physical-input-pass3/physical-input.json; exact 1280x720 final-build window; ten actions; 17.199 seconds",
+    "production_save_hashes_unchanged": true,
+    "library": {
+      "locked_precision_1080": "libfile_32fb720532b48191abf17fb5d2658dd4",
+      "selected_keystone_1080": "libfile_6aed0536f5888191a33444950e73daeb",
+      "scale_sheet_128_64_48_37": "libfile_95a67962ff5081918154adfb7390b788"
+    },
+    "visual_limit": "Agent-inspected only; final user visual acceptance pending. The remaining three talent icons keep their pre-existing mixed visual treatment.",
+    "socket_scope": "Documentation only. Per-base capacity direction replaces the rejected universal maximum; exact values remain proposals and nothing was implemented."
   }
 }

@@ -1,3 +1,27 @@
+# 2026-10-03 - painted passive icons completed
+
+`PowerRune`, `PrecisionRune` and `VeteranRune` now use the three approved
+painted transparent originals from source-only commit
+`386485529268e2a964a5f168e56e69fe524ad607` (tree
+`38a0a5051e277703b6acf72977aa7b639a8d7e29`). Only the exact three PNG blobs
+were extracted. The source branch was not merged, cherry-picked or checked
+out. Existing resource paths and Unity GUIDs remain unchanged.
+
+The deterministic generator writes unique 128 x 128 outputs with four pixels
+of outer padding and zero border alpha, plus a 128/64/48/37 readability sheet.
+Native 720p and 1080p probes separately capture locked Precision and selected
+Keystone states and pass with five frames, 19 callbacks, all 29 base icons,
+player HP present and non-player HP absent. CoreSmoke is 321 PASS, static
+compile and Unity build/import are 0/0, and final build GUID is
+`3d4402e94aa84488a4a83d6d93e70aa9`. Final-build OS input passes all ten actions
+in 17.199 seconds. Production save hashes are unchanged.
+
+Library evidence: locked 1080p `libfile_32fb720532b48191abf17fb5d2658dd4`,
+selected 1080p `libfile_6aed0536f5888191a33444950e73daeb`, and scale sheet
+`libfile_95a67962ff5081918154adfb7390b788`. Final user visual acceptance is still
+pending. Socket design remains documentation only; its obsolete universal
+three-socket proposal was replaced by a reference-grounded per-base proposal.
+
 # 2026-10-03 - passive icon art readiness and socket proposal
 
 The exact remaining pixel-style TalentPanel assets are `PowerRune.png` for
